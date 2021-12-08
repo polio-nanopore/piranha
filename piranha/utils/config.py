@@ -1,4 +1,27 @@
 
+# OUTPUT AND DIRECTORIES
+KEY_READDIR = "readdir"
+KEY_OUTDIR = "outdir"
+KEY_TEMPDIR = "tempdir"
+KEY_NO_TEMP = "no_temp"
+KEY_OUTPUT_PREFIX="output_prefix"
+KEY_DATESTAMP="datestamp"
+KEY_OVERWRITE="overwrite"
+
+# ANALYSIS OPTION KEYS
+
+KEY_MIN_READ_LENGTH = "min_read_length"
+KEY_MAX_READ_LENGTH = "max_read_length"
+KEY_MIN_READS = "50"
+KEY_MIN_PCENT = "0.01"
+
+# MISC KEYS
+KEY_VERBOSE="verbose"
+KEY_THREADS="threads"
+KEY_LOG_API="log_api"
+KEY_LOG_STRING="log_string"
+KEY_QUIET="quiet"
+
 # DEPENDENCIES AND RESOURCES TO CHECK
 dependency_list = ["gofasta","minimap2","snakemake","iqtree","jclusterfunk"]
 module_list = ["mako","Bio"]

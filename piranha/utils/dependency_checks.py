@@ -24,34 +24,6 @@ def check_this_dependency(dependency,missing):
     if not check:
         missing.append(dependency)
 
-
-def look_for_guppy_barcoder(demultiplex_arg,path_to_guppy_arg,cwd,config):
-    add_arg_to_config("demultiplex", demultiplex_arg, config)
-    add_arg_to_config("path_to_guppy", path_to_guppy_arg, config)
-    
-    if config["demultiplex"]:
-        if config["path_to_guppy"]:
-            expanded_path = os.path.expanduser(config["path_to_guppy"])
-            if config["path_to_guppy"].endswith("guppy_barcoder"):
-                path_to_guppy = os.path.join(cwd,expanded_path)
-            else:
-                path_to_guppy = os.path.join(cwd,expanded_path,"guppy_barcoder")
-                config["path_to_guppy"] = path_to_guppy
-            os_cmd = os.system(f"{path_to_guppy} -v")
-
-            if os_cmd != 0:
-                sys.stderr.write(cyan(f'Error: guppy_barcoder at {path_to_guppy} fails to run\n'))
-                sys.exit(-1)
-        
-        else:
-            os_cmd = os.system(f"guppy_barcoder -v")
-            if os_cmd != 0:
-                sys.stderr.write(cyan(f'Error: please provide the path to guppy_barcoder (`--path-to-guppy`), add guppy_barcoder to your path, or run demultiplexing in MinKNOW\n'))
-                sys.exit(-1)
-            else:
-                config["path_to_guppy"]
-
-
 def check_dependencies(dependency_list, module_list):
 
     missing = []
