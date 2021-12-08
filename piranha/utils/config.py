@@ -1,7 +1,9 @@
+# I GROUP KEYS
+KEY_BARCODES_CSV = "barcodes_csv"
+KEY_READDIR = "readdir"
 
 # OUTPUT AND DIRECTORIES
 KEY_INPUT_PATH = "input_path"
-KEY_READDIR = "readdir"
 KEY_CWD="cwd"
 KEY_OUTDIR = 'outdir'
 KEY_TEMPDIR = "tempdir"
@@ -9,6 +11,8 @@ KEY_NO_TEMP = "no_temp"
 KEY_OUTPUT_PREFIX="output_prefix"
 KEY_DATESTAMP="datestamp"
 KEY_OVERWRITE="overwrite"
+
+KEY_OUTPUT_REPORT="output_report"
 
 # ANALYSIS OPTION KEYS
 
@@ -26,7 +30,7 @@ KEY_LOG_STRING="log_string"
 KEY_QUIET="quiet"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
-dependency_list = ["gofasta","minimap2","snakemake","iqtree","jclusterfunk"]
+dependency_list = ["gofasta","minimap2","snakemake","medaka","iqtree"]
 module_list = ["mako","Bio"]
 
 resources = [
