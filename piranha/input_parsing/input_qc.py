@@ -13,7 +13,8 @@ def parse_barcodes_csv(barcodes_csv,config):
 
     misc.add_file_to_config(KEY_BARCODES_CSV,barcodes_csv,config)
     
-    barcodes = {}
+    barcodes_to_samples = {}
+    barcodes= []
     with open(config[KEY_BARCODES_CSV],"r") as f:
         reader = csv.DictReader(f)
         for col in ["barcode","sample"]:
@@ -26,10 +27,11 @@ def parse_barcodes_csv(barcodes_csv,config):
                 barcode = row["barcode"]
                 sys.stderr.write(cyan(f"`{barcode}` duplicated in barcode csv file. Note: barcodes must be unique.\n"))
                 sys.exit(-1)
-
-            barcodes[row["barcode"]] = row["sample"]
+            barcodes.append(row["barcode"])
+            barcodes_to_samples[row["barcode"]] = row["sample"]
 
     config[KEY_BARCODES] = barcodes
+    config[KEY_BARCODES_TO_SAMPLE] = barcodes_to_samples
 
 
 def parse_read_dir(readdir,config):
