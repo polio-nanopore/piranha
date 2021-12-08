@@ -33,10 +33,7 @@ def main(sysargs = sys.argv[1:]):
     i_group = parser.add_argument_group('Input options')
     i_group.add_argument('-c',"--config", action="store",help="Input config file in yaml format, all command line arguments can be passed via the config file.", dest="config")
     i_group.add_argument('-i','--readdir',help="Path to the directory containing fastq read files",dest="readdir")
-
-    barcode_group = parser.add_argument_group('Barcode options')
-    barcode_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
-    barcode_group.add_argument('-k','--barcode-kit',help="Indicates which barcode kit was used. Default: native. Options: native, rapid, pcr, all",dest="barcode_kit")
+    i_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help="Minimum read length.")
@@ -84,6 +81,8 @@ def main(sysargs = sys.argv[1:]):
     # Threads and verbosity to config
     init.misc_args_to_config(args.verbose,args.threads,config)
     init.set_up_verbosity(config)
+
+
 
 
     # Sort out where the query info is coming from, csv or id string, optional fasta seqs.
