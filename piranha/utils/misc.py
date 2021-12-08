@@ -57,3 +57,8 @@ def add_path_to_config(key,arg,config):
         path_to_cwd = os.path.abspath(config["cwd"])
         full_path = os.path.join(path_to_cwd,expanded_path)
         config[key]=full_path
+
+def check_path_exists(path):
+    if not os.path.exists(path):
+        sys.stderr.write(cyan(f"Error: path {path} does not exist. Check input.\n"))
+        sys.exit(-1)
