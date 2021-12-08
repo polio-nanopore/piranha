@@ -29,5 +29,4 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
         check_if_int(key,config)
 
     misc.add_file_to_config(KEY_REFERENCE_SEQUENCES,reference_sequences,config)
-
     misc.check_path_exists(config[KEY_REFERENCE_SEQUENCES])
