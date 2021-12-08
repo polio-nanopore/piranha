@@ -22,7 +22,6 @@ def get_snakefile(thisdir):
         sys.exit(-1)
     return snakefile
 
-
 def check_install(config):
     for resource in resources:
         package_data_check(resource[RESOURCE_KEY_FILENAME],resource[RESOURCE_KEY_DIRECTORY],resource[RESOURCE_KEY],config)

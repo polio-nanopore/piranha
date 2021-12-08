@@ -17,6 +17,7 @@ def get_defaults():
                     #input options
                     KEY_READDIR: False,
                     KEY_REFERENCE_SEQUENCES: False,
+                    KEY_BARCODES_CSV: False,
 
                     # Output options
                     KEY_OUTDIR: "",
@@ -42,6 +43,7 @@ def get_defaults():
 def valid_args():
     return [
         KEY_READDIR,
+        KEY_BARCODES_CSV,
         KEY_OUTDIR,
         KEY_OUTPUT_PREFIX,
         KEY_TEMPDIR,
