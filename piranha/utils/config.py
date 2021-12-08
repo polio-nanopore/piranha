@@ -1,6 +1,8 @@
 
 # OUTPUT AND DIRECTORIES
+KEY_INPUT_PATH = "input_path"
 KEY_READDIR = "readdir"
+KEY_CWD="cwd"
 KEY_OUTDIR = "outdir"
 KEY_TEMPDIR = "tempdir"
 KEY_NO_TEMP = "no_temp"
@@ -12,8 +14,8 @@ KEY_OVERWRITE="overwrite"
 
 KEY_MIN_READ_LENGTH = "min_read_length"
 KEY_MAX_READ_LENGTH = "max_read_length"
-KEY_MIN_READS = "50"
-KEY_MIN_PCENT = "0.01"
+KEY_MIN_READS = "min_reads"
+KEY_MIN_PCENT = "min_pcent"
 
 # MISC KEYS
 KEY_VERBOSE="verbose"
