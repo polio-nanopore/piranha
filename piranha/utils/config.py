@@ -2,6 +2,7 @@
 KEY_BARCODES_CSV = "barcodes_csv"
 KEY_READDIR = "readdir"
 KEY_BARCODES = "barcodes"
+KEY_BARCODES_TO_SAMPLE = "barcodes_to_samples"
 
 # OUTPUT AND DIRECTORIES
 KEY_INPUT_PATH = "input_path"
