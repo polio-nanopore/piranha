@@ -1,6 +1,7 @@
 # I GROUP KEYS
 KEY_BARCODES_CSV = "barcodes_csv"
 KEY_READDIR = "readdir"
+KEY_BARCODES = "barcodes"
 
 # OUTPUT AND DIRECTORIES
 KEY_INPUT_PATH = "input_path"

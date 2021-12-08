@@ -8,6 +8,7 @@ from piranha.utils import dependency_checks
 from piranha.utils import data_install_checks
 from piranha.input_parsing import analysis_arg_parsing
 from piranha.input_parsing import directory_setup
+from piranha.input_parsing import input_qc
 
 import piranha.utils.custom_logger as custom_logger
 from piranha.utils.log_colours import green,cyan,red
@@ -82,16 +83,15 @@ def main(sysargs = sys.argv[1:]):
     init.misc_args_to_config(args.verbose,args.threads,config)
     init.set_up_verbosity(config)
 
-
-
-
     # Sort out where the query info is coming from, csv or id string, optional fasta seqs.
     # Checks if they're real files, of the right format and that QC args sensible values.
 
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,config)
 
     snakefile = data_install_checks.get_snakefile(thisdir)
-
+    
+    input_qc.parse_input_group(args.barcodes_csv,args.readdir,config)
+    
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.output_data, args.tempdir, args.no_temp, config)
     # ready to run? either verbose snakemake or quiet mode
