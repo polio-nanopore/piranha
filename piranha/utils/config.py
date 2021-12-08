@@ -3,7 +3,7 @@
 KEY_INPUT_PATH = "input_path"
 KEY_READDIR = "readdir"
 KEY_CWD="cwd"
-KEY_OUTDIR = "outdir"
+KEY_OUTDIR = 'outdir'
 KEY_TEMPDIR = "tempdir"
 KEY_NO_TEMP = "no_temp"
 KEY_OUTPUT_PREFIX="output_prefix"
@@ -14,8 +14,9 @@ KEY_OVERWRITE="overwrite"
 
 KEY_MIN_READ_LENGTH = "min_read_length"
 KEY_MAX_READ_LENGTH = "max_read_length"
-KEY_MIN_READS = "min_reads"
-KEY_MIN_PCENT = "min_pcent"
+KEY_MIN_READS = "min_read_depth"
+KEY_MIN_PCENT = "min_read_pcent"
+KEY_REFERENCE_SEQUENCES = "reference_sequences"
 
 # MISC KEYS
 KEY_VERBOSE="verbose"
