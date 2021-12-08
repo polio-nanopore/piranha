@@ -16,6 +16,7 @@ def get_defaults():
                     
                     #input options
                     KEY_READDIR: False,
+                    KEY_REFERENCE_SEQUENCES: False,
 
                     # Output options
                     KEY_OUTDIR: "",
@@ -51,7 +52,8 @@ def valid_args():
         KEY_MIN_READS,
         KEY_MIN_PCENT,
         KEY_THREADS,
-        KEY_VERBOSE
+        KEY_VERBOSE,
+        KEY_REFERENCE_SEQUENCES
     ]
 
 def check_configfile(cwd,config_arg):
