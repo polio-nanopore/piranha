@@ -4,12 +4,12 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - biopython=1.74
-  - minimap2>=2.16
-  - pip=19.3.1
+  - coreutils=8.31
+  - biopython=1.79
+  - minimap2=2.23
+  - pip=21.3.1
   - python>=3.7
   - snakemake-minimal<=6.8.0
-  - pip:
-    - PyQt5==5.15
-    - pyinstaller==4.7
+  - medaka=1.0.3
+  - racon=1.4.20
     
