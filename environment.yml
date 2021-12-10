@@ -12,4 +12,4 @@ dependencies:
   - snakemake-minimal=6.8.0
   - medaka=1.0.3
   - racon=1.4.20
-    
+  - gofasta=0.0.6
