@@ -56,7 +56,7 @@ def clear_old_files(config):
         print(green("Overwriting previous output in ") + config[KEY_OUTDIR] + ".")
         old_files = glob.glob(f'{config[KEY_OUTDIR]}/*.*', recursive=True)
 
-        for d in [old_files,catchment_files,snipit_files]:
+        for d in [old_files]:
             for f in d:
                 try:
                     os.remove(f)
@@ -102,7 +102,7 @@ def set_up_tempdir(config):
             sys.stderr.write(cyan(f'Error: cannot write to temp directory {tempdir}.\n'))
             sys.exit(-1)
 
-def output_group_parsing(outdir,output_prefix,overwrite,datestamp,output_data,tempdir,no_temp,config):
+def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_temp,config):
     
     misc.add_path_to_config(KEY_OUTDIR,outdir,config)
     misc.add_arg_to_config(KEY_OUTPUT_PREFIX,output_prefix,config)
