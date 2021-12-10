@@ -26,6 +26,11 @@ KEY_MIN_READS = "min_read_depth"
 KEY_MIN_PCENT = "min_read_pcent"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
 
+KEY_BARCODE = "barcode"
+KEY_TAXA_PRESENT = "taxa_present"
+KEY_TAXA_OUTDIR = "taxa_outdir"
+KEY_HITS = "hits"
+
 # MISC KEYS
 KEY_VERBOSE="verbose"
 KEY_THREADS="threads"

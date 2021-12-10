@@ -61,12 +61,15 @@ rule assess_sample_composition:
         fastq = rules.filter_by_length.output.fastq,
         ref = config[KEY_REFERENCE_SEQUENCES]
     params:
-        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample"),
+        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","binned_reads"),
         barcode = "{barcode}"
     output:
         new_config = os.path.join(config[KEY_OUTDIR],"{barcode}","config.yaml"),
         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","refs_present.csv")
     run:
+        if not os.path.exists(params.tax_out):
+            os.mkdir(params.tax_out)
+
         parse_paf_file(input.map_file,
                         input.fastq,
                         output.taxa,
@@ -84,7 +87,7 @@ rule get_consensus_sequences:
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","consensus_sequences")
-    threads: 4
+    threads: workflow.cores*0.5
     output:
         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","consensus_sequences","cns.prompt.txt")
     run:
@@ -93,12 +96,28 @@ rule get_consensus_sequences:
                     "--forceall "
                     "--configfile {input.yaml:q} "
                     "--config barcode={params.barcode} outdir={params.outdir:q} "
+                    "--cores {threads} && touch {output.taxa}")
+
+rule qc_cns_output:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"cns_qc.smk"),
+        taxa = rules.assess_sample_composition.output.taxa,
+        cns = rules.get_consensus_sequences.output.taxa,
+        yaml = rules.assess_sample_composition.output.new_config
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc")
+    threads: workflow.cores*0.5
+    output:
+        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc","snp.prompt.txt")
+    run:
+        print("Running consensus pipeline.")
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                    "--forceall "
+                    "--configfile {input.yaml:q} "
+                    "--config barcode={params.barcode} outdir={params.outdir:q} "
                     "--cores 4 && touch {output.taxa}")
 
-# rule qc_cns_output:
-#     input:
-#     output:
-#     run:
 
 # rule generate_report:
 #     input:

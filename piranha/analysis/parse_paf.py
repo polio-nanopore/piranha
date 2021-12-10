@@ -36,25 +36,29 @@ def write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir
                     if reference.startswith(enterovirus):
                         cns = False
 
+                fw.write(f"{reference},{len(ref_hits)},{cns}\n")
                 if cns == True:
                     refs_present.append(reference)
+                    print(reference)
 
-                fw.write(f"{reference},{len(ref_hits)},{cns}\n")
-
-                with open(os.path.join(tax_outdir,f"{reference}.reference.fasta"),"w") as fref:
-                    ref_record = ref_index[reference]
-                    fref.write(f">{ref_record.id}\n{ref_record.seq}\n")
-                
-                with open(os.path.join(tax_outdir,f"{reference}.reads.fastq"),"w") as freads:
-                    for hit in ref_hits:
-                        SeqIO.write(seq_index[hit],freads,"fastq")
+                    with open(os.path.join(tax_outdir,f"{reference}.fasta"),"w") as fref:
+                        ref_record = ref_index[reference]
+                        fref.write(f">{ref_record.id}\n{ref_record.seq}\n")
+                    
+                    with open(os.path.join(tax_outdir,f"{reference}.fastq"),"w") as freads:
+                        for hit in ref_hits:
+                            SeqIO.write(seq_index[hit],freads,"fastq")
             else:
                 fw.write(f"{reference},{len(ref_hits)},{cns}\n")
+    return refs_present
 
-def write_new_config(hits,config_out,barcode,config):
+def write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config):
     barcode_config = config
-    barcode_config["barcode"] = barcode
-    barcode_config["taxa_present"] = list(hits.keys())
+    barcode_config[KEY_BARCODE] = barcode
+    barcode_config[KEY_TAXA_PRESENT] = refs_present
+    barcode_config[KEY_HITS] = list(hits.keys())
+    barcode_config[KEY_TAXA_OUTDIR] = tax_outdir
+
     with open(config_out, 'w') as fw:
         yaml.dump(barcode_config, fw) 
 
@@ -65,8 +69,8 @@ def parse_paf_file(paf_file,read_file,sample_composition,references_sequences,ta
     seq_index = SeqIO.index(read_file, "fastq")
     ref_index =  SeqIO.index(references_sequences,"fasta")
 
-    write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir,hits,config[KEY_MIN_READS])
+    refs_present = write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir,hits,config[KEY_MIN_READS])
 
-    write_new_config(hits,config_out,barcode,config)
+    write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config)
 
 
