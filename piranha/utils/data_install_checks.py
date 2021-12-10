@@ -3,7 +3,7 @@ import pkg_resources
 from piranha.utils.log_colours import green,cyan
 import sys
 import os
-from civet.utils.config import *
+from piranha.utils.config import *
 
 
 def package_data_check(filename,directory,key,config):
