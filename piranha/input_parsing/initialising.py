@@ -1,11 +1,12 @@
 import os
 import sys
 import yaml
+from datetime import date
 
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
-from pirahna.utils import misc
+from piranha.utils import misc
 import piranha.utils.custom_logger as custom_logger
 import piranha.utils.log_handler_handle as lh
 
@@ -18,14 +19,14 @@ def get_defaults():
                     KEY_READDIR: False,
                     KEY_REFERENCE_SEQUENCES: False,
                     KEY_BARCODES_CSV: False,
+                    KEY_RUNID: False,
 
                     # Output options
-                    KEY_OUTDIR: "",
                     KEY_OUTPUT_PREFIX:"analysis",
                     KEY_DATESTAMP:False,
-                    KEY_TEMPDIR: "",
                     KEY_NO_TEMP:False,
                     KEY_OVERWRITE:False,
+                    KEY_REFERENCES_FOR_CNS:["Sabin1_vacc","Sabin2_vacc","Sabin3_vacc"],
 
                     # input seq options 
                     KEY_MIN_READ_LENGTH:1000,
@@ -35,8 +36,7 @@ def get_defaults():
 
                     # misc defaults
                     KEY_THREADS:1,
-                    KEY_VERBOSE:False,
-                    KEY_DATE: today,# date investigation was opened                    
+                    KEY_VERBOSE:False
                     }
     return default_dict
 
@@ -55,7 +55,8 @@ def valid_args():
         KEY_MIN_PCENT,
         KEY_THREADS,
         KEY_VERBOSE,
-        KEY_REFERENCE_SEQUENCES
+        KEY_REFERENCE_SEQUENCES,
+        KEY_REFERENCES_FOR_CNS
     ]
 
 def check_configfile(cwd,config_arg):
@@ -134,7 +135,6 @@ def setup_config_dict(cwd,config_arg):
     config[KEY_CWD] = cwd
     if config_arg:
         configfile = check_configfile(cwd,config_arg)
-        
         parse_yaml_file(configfile,config)
 
     else:
@@ -153,7 +153,7 @@ def set_up_verbosity(config):
     else:
         config[KEY_QUIET] = True
         logger = custom_logger.Logger()
-        config[KEY_LOG_API] = logger.log_handler
+        config[KEY_LOG_API] = ""
 
         lh_path = os.path.realpath(lh.__file__)
         config[KEY_LOG_STRING] = f"--quiet --log-handler-script {lh_path} "
