@@ -45,7 +45,6 @@ def check_dependencies(dependency_list, module_list):
 
             sys.stderr.write(cyan(f'Error: Missing dependencies.')+f'\n{dependencies}Please update your piranha environment.\n')
             sys.exit(-1)
-    else:
-        print(green("All dependencies satisfied."))
+
 
 # check_dependencies()
