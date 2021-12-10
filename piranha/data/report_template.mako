@@ -7,7 +7,7 @@
 
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="https://raw.githubusercontent.com/cov-ert/civet/master/docs/virus.svg">
+    <link rel="icon" href="https://raw.githubusercontent.com/cov-ert/piranha/master/docs/virus.svg">
 
     <title>${config["report_title"]}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
@@ -330,7 +330,7 @@
         pre {
           display: none;
         }
-        .civet-logo {
+        .piranha-logo {
           width: 2cm;
           height: 2cm;
         }
@@ -340,7 +340,7 @@
         .page-footer {
           display: none;
         }
-        .civet-header {
+        .piranha-header {
           text-align: left;
         }
         .content-block, p {
@@ -726,8 +726,8 @@
     <div class="container">
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
-        <header class="civet-header">
-            civet ${version} | 
+        <header class="piranha-header">
+            piranha ${version} | 
             <small class="text-muted">Cluster Investigation and Virus Epidemiology Tool</small>
             <hr>
         </header>
@@ -1218,7 +1218,7 @@
           "height": 500,
           "style": "cell",
 
-% if config["civet_mode"] == "CLIMB":
+% if config["piranha_mode"] == "CLIMB":
     <%start_scale = 750%>
     <%max_scale = 10000%>
     <%start_x = 4%>
@@ -1767,12 +1767,12 @@ longitude = data_for_report[location]["centroids"][0]%>
         <div class="row">
           <!--<div class="col-sm-1">
             <p>
-            <img class="civet-logo" src="https://raw.githubusercontent.com/COG-UK/civet/master/docs/doc_figures/virus.svg" vertical-align="left" width="50" height="50"></img>
+            <img class="piranha-logo" src="https://raw.githubusercontent.com/COG-UK/piranha/master/docs/doc_figures/virus.svg" vertical-align="left" width="50" height="50"></img>
             <p> -->
         </div>
 
       <div class="col-sm-11" style="text-align: right;">
-        civet ${version} | <small class="text-muted">Cluster Investigation and Virus Epidemiology Tool</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
+        piranha ${version} | <small class="text-muted">Cluster Investigation and Virus Epidemiology Tool</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
 
         <br><br>
         </p>
