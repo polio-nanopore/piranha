@@ -175,20 +175,41 @@ rule align_to_reference:
             > '{output.aln}'\
         """
 
-rule make_snipit_alignment:
-    input:
-        reference=os.path.join(config[KEY_TAXA_OUTDIR],"{taxid}.fasta"),
-        aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","consensus.aln.fasta")
-    output:
-        aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","snipit.aln.fasta")
+# rule call_snps:
+#     input:
+#         reference=os.path.join(config[KEY_TAXA_OUTDIR],"{taxid}.fasta"),
+#         aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","consensus.aln.fasta")
+#     output:
+#         snps = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","snps.csv")
+#     shell:
+#         """
+#         gofasta snps -r -q -o
+#         """
+
+# rule identify_excess_snps:
+#     input:
+#     output:
+#     shell:
+#         """
+#         """
+
+# rule make_snipit_alignment:
+#     input:
+#         reference=os.path.join(config[KEY_TAXA_OUTDIR],"{taxid}.fasta"),
+#         aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","consensus.aln.fasta")
+#     output:
+#         aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","snipit.aln.fasta")
+#     run:
 
 
-rule make_snipit:
-    input:
-        aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","consensus.aln.fasta")
-    output:
-        svg = os.path.join(config[KEY_OUTDIR],"{taxid}","figures","snipit_plot.svg")
-    shell:
-        """
-        snipit {input.aln:q} -r "outgroup" -o {params.out_stem} -f svg
-        """
+
+
+# rule make_snipit:
+#     input:
+#         aln = os.path.join(config[KEY_OUTDIR],"{taxid}","alignment","consensus.aln.fasta")
+#     output:
+#         svg = os.path.join(config[KEY_OUTDIR],"{taxid}","figures","snipit_plot.svg")
+#     shell:
+#         """
+#         snipit {input.aln:q} -r "outgroup" -o {params.out_stem} -f svg
+#         """
