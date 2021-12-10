@@ -3,11 +3,13 @@ KEY_BARCODES_CSV = "barcodes_csv"
 KEY_READDIR = "readdir"
 KEY_BARCODES = "barcodes"
 KEY_BARCODES_TO_SAMPLE = "barcodes_to_samples"
+KEY_RUNID = "runid"
 
 # OUTPUT AND DIRECTORIES
 KEY_INPUT_PATH = "input_path"
 KEY_CWD="cwd"
 KEY_OUTDIR = 'outdir'
+KEY_PUBLISHDIR = "publishdir"
 KEY_TEMPDIR = "tempdir"
 KEY_NO_TEMP = "no_temp"
 KEY_OUTPUT_PREFIX="output_prefix"
@@ -17,7 +19,7 @@ KEY_OVERWRITE="overwrite"
 KEY_OUTPUT_REPORT="output_report"
 
 # ANALYSIS OPTION KEYS
-
+KEY_REFERENCES_FOR_CNS = "references_for_cns"
 KEY_MIN_READ_LENGTH = "min_read_length"
 KEY_MAX_READ_LENGTH = "max_read_length"
 KEY_MIN_READS = "min_read_depth"
@@ -31,15 +33,21 @@ KEY_LOG_API="log_api"
 KEY_LOG_STRING="log_string"
 KEY_QUIET="quiet"
 
+
+RESOURCE_KEY_FILENAME="filename"
+RESOURCE_KEY_DIRECTORY="directory"
+RESOURCE_KEY="KEY"
+
+
 # DEPENDENCIES AND RESOURCES TO CHECK
-dependency_list = ["gofasta","minimap2","snakemake","medaka","iqtree"]
+dependency_list = ["minimap2","snakemake","medaka","racon"]
 module_list = ["mako","Bio"]
 
 resources = [
-        {RESOURCE_KEY:"reference_sequence",
+        {RESOURCE_KEY:"reference_sequences",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"references.fasta"},
+        RESOURCE_KEY_FILENAME:"references.VP1.fasta"},
         {RESOURCE_KEY:"report_template",
-        RESOURCE_KEY_DIRECTORY:"data/report_modules",
+        RESOURCE_KEY_DIRECTORY:"data",
         RESOURCE_KEY_FILENAME:"report_template.mako"}
     ]
