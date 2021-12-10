@@ -35,17 +35,18 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument('-c',"--config", action="store",help="Input config file in yaml format, all command line arguments can be passed via the config file.", dest="config")
     i_group.add_argument('-i','--readdir',help="Path to the directory containing fastq read files",dest="readdir")
     i_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
+    i_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help="Minimum read length.")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help="Maximum read length.")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help="Minimum read depth required for consensus generation.")
     analysis_group.add_argument("-p","--min-read-pcent",action="store",type=int,help="Minimum percentage of sample required for consensus generation.")
-    analysis_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help="Output directory. Default: `analysis-2021-XX-YY`")
-    o_group.add_argument('-p','--output-prefix',action="store",help="Prefix of output directory & report name: Default: `analysis`",dest="output_prefix")
+    o_group.add_argument('-pub','--publishdir', action="store",help="Output publish directory. Default: `analysis-2021-XX-YY`")
+    o_group.add_argument('-pre','--output-prefix',action="store",help="Prefix of output directory & report name: Default: `analysis`",dest="output_prefix")
     o_group.add_argument('--datestamp', action="store",help="Append datestamp to directory name when using <-o/--outdir>. Default: <-o/--outdir> without a datestamp")
     o_group.add_argument('--overwrite', action="store_true",help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
     o_group.add_argument('-temp','--tempdir',action="store",help="Specify where you want the temp stuff to go. Default: `$TMPDIR`")
@@ -74,11 +75,9 @@ def main(sysargs = sys.argv[1:]):
 
     # Initialise config dict
     config = init.setup_config_dict(cwd,args.config)
-
     # Checks access to package data and grabs the snakefile
     data_install_checks.check_install(config)
     snakefile = data_install_checks.get_snakefile(thisdir)
-
     # Threads and verbosity to config
     init.misc_args_to_config(args.verbose,args.threads,config)
     init.set_up_verbosity(config)
@@ -87,13 +86,10 @@ def main(sysargs = sys.argv[1:]):
     # Checks if they're real files, of the right format and that QC args sensible values.
 
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,config)
+    input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
 
-    snakefile = data_install_checks.get_snakefile(thisdir)
-    
-    input_qc.parse_input_group(args.barcodes_csv,args.readdir,config)
-    
     # sets up the output dir, temp dir, and data output desination
-    directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.output_data, args.tempdir, args.no_temp, config)
+    directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
     # ready to run? either verbose snakemake or quiet mode
 
     if config[KEY_VERBOSE]:
@@ -105,7 +101,7 @@ def main(sysargs = sys.argv[1:]):
                                     )
     else:
         status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True,force_incomplete=True,workdir=config[KEY_TEMPDIR],
-                                    config=config, cores=config[KEY_THREADS],lock=False,quiet=True,log_handler=config[KEY_LOG_API]
+                                    config=config, cores=config[KEY_THREADS],lock=False,quiet=True
                                     )
 
     if status: # translate "success" into shell exit code of 0
