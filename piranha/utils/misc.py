@@ -62,3 +62,29 @@ def check_path_exists(path):
     if not os.path.exists(path):
         sys.stderr.write(cyan(f"Error: path {path} does not exist. Check input.\n"))
         sys.exit(-1)
+
+
+
+def header(v):
+    print(green("""\n
+                            __                      __            
+                    ______ |__|_____ _____  |\____ |  |__ _____   
+                    \____ \|  |\  _ \\\__  \ |     \|  |  \\\__  \  
+                    |  |_| |  ||  |\/ / __ \|   |  \   |  \/ __ \ 
+                    |   __/|__||__|  (____ / ___|__/___|___(____/ 
+                    |__|                                          
+
+                     **** Poliovirus Investigation Resource ****
+                   **** Automating Nanopore Haplotype Analysis ****
+                """)+green(f"""
+                                        {v}""")+green("""
+                        ****************************************
+                                                                
+                       Aine O'Toole, Rachel Colquhoun, Corey Ansley, 
+                                    Andrew Rambaut        
+                                 Edinburgh University          
+\n"""))
+
+def preamble(v):
+    header(v)
+    
