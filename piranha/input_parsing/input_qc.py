@@ -4,7 +4,7 @@ import yaml
 import collections
 import csv
 
-from pirahna.utils import misc
+from piranha.utils import misc
 
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
@@ -13,8 +13,12 @@ def parse_barcodes_csv(barcodes_csv,config):
 
     misc.add_file_to_config(KEY_BARCODES_CSV,barcodes_csv,config)
     
-    barcodes_to_samples = {}
+    if not config[KEY_BARCODES_CSV]:
+        sys.stderr.write(cyan(f"Error: No barcode csv file provided.\n"))
+        sys.exit(-1)
+
     barcodes= []
+    samples = []
     with open(config[KEY_BARCODES_CSV],"r") as f:
         reader = csv.DictReader(f)
         for col in ["barcode","sample"]:
@@ -27,15 +31,14 @@ def parse_barcodes_csv(barcodes_csv,config):
                 barcode = row["barcode"]
                 sys.stderr.write(cyan(f"`{barcode}` duplicated in barcode csv file. Note: barcodes must be unique.\n"))
                 sys.exit(-1)
+            if row["sample"] in samples:
+                print(cyan(f"Warning: `{sample}` sample name provided for multiple barcodes."))
             barcodes.append(row["barcode"])
-            barcodes_to_samples[row["barcode"]] = row["sample"]
 
     config[KEY_BARCODES] = barcodes
-    config[KEY_BARCODES_TO_SAMPLE] = barcodes_to_samples
 
 
 def parse_read_dir(readdir,config):
-    misc.add_arg_to_config(KEY_READDIR,readdir,config)
 
     if readdir:
         readdir = os.path.abspath(readdir)
@@ -43,15 +46,28 @@ def parse_read_dir(readdir,config):
     misc.add_arg_to_config(KEY_READDIR,readdir,config)
     misc.check_path_exists(config[KEY_READDIR])
 
-    count_read_files = {}
+    run_id = False
+
+    count_read_files = collections.Counter()
     for r,d,f in os.walk(config[KEY_READDIR]):
         for fn in f:
             if fn.endswith(".fastq"):
-                count_read_files[d]+=1
+                if not run_id:
+                    # read run id from first file name it comes to
+                    run_id = fn.split(".")[0].split("_")[-2]
+                barcode = r.split("/")[-1]
+                count_read_files[barcode]+=1
     
-    print(green("Found read files:"))
+    config[KEY_RUNID] = run_id
+    
+    print(green("Found read files"))
+    print("----------------")
     for d in count_read_files:
-        print(green(f"Barcode {d}:\t") + f"{count_read_files[d]} fastq files")
+        if count_read_files[d] == 1:
+            print(green(f"Barcode {d}:\t") + f"{count_read_files[d]} fastq file")
+        else:
+            print(green(f"Barcode {d}:\t") + f"{count_read_files[d]} fastq files")
+
         if d not in config[KEY_BARCODES]:
             print(cyan(f"Warning: barcode {d} is not included in the input barcodes csv and will not be analysed."))
 
@@ -60,9 +76,15 @@ def parse_read_dir(readdir,config):
             sys.stderr.write(cyan(f"Error: No read files identified for barcode `{barcode}`.\nPlease check barcode csv has correct barcode names."))
             sys.exit(-1)
 
-def parse_input_group(barcodes_csv,readdir,config):
+def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
 
     parse_barcodes_csv(barcodes_csv,config)
+
+    
+
     parse_read_dir(readdir,config)
+
+    misc.add_file_to_config(KEY_REFERENCE_SEQUENCES,reference_sequences,config)
+    misc.check_path_exists(config[KEY_REFERENCE_SEQUENCES])
 
 
