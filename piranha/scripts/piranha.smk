@@ -98,25 +98,25 @@ rule get_consensus_sequences:
                     "--config barcode={params.barcode} outdir={params.outdir:q} "
                     "--cores {threads} && touch {output.taxa}")
 
-rule qc_cns_output:
-    input:
-        snakefile = os.path.join(workflow.current_basedir,"cns_qc.smk"),
-        taxa = rules.assess_sample_composition.output.taxa,
-        cns = rules.get_consensus_sequences.output.taxa,
-        yaml = rules.assess_sample_composition.output.new_config
-    params:
-        barcode = "{barcode}",
-        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc")
-    threads: workflow.cores*0.5
-    output:
-        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc","snp.prompt.txt")
-    run:
-        print("Running consensus pipeline.")
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} "
-                    "--cores 4 && touch {output.taxa}")
+# rule qc_cns_output:
+#     input:
+#         snakefile = os.path.join(workflow.current_basedir,"cns_qc.smk"),
+#         taxa = rules.assess_sample_composition.output.taxa,
+#         cns = rules.get_consensus_sequences.output.taxa,
+#         yaml = rules.assess_sample_composition.output.new_config
+#     params:
+#         barcode = "{barcode}",
+#         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc")
+#     threads: workflow.cores*0.5
+#     output:
+#         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc","snp.prompt.txt")
+#     run:
+#         print("Running consensus pipeline.")
+#         shell("snakemake --nolock --snakefile {input.snakefile:q} "
+#                     "--forceall "
+#                     "--configfile {input.yaml:q} "
+#                     "--config barcode={params.barcode} outdir={params.outdir:q} "
+#                     "--cores 4 && touch {output.taxa}")
 
 
 # rule generate_report:
