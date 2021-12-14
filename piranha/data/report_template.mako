@@ -7,7 +7,7 @@
 
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="https://raw.githubusercontent.com/cov-ert/piranha/master/docs/virus.svg">
+    <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
     <title>${config["report_title"]}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
@@ -728,7 +728,7 @@
       <div>
         <header class="piranha-header">
             piranha ${version} | 
-            <small class="text-muted">Cluster Investigation and Virus Epidemiology Tool</small>
+            <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
             <hr>
         </header>
         
@@ -752,7 +752,7 @@
       </div>
     </div> -->
    %if '1' in config['report_content']:
-          <h3><strong>Table 1</strong> | Summary of queries </h3>
+          <h3><strong>Table 1</strong> | Summary of samples </h3>
           <button class="accordion">Table options</button>
           <div class="panel">
             <div class="row">
