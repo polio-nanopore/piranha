@@ -12,8 +12,8 @@ from piranha.analysis.filter_lengths import filter_reads_by_length
 
 rule all:
     input:
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","refs_present.csv"), barcode=config["barcodes"]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","refs_present.csv"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"])
 
@@ -61,11 +61,11 @@ rule assess_sample_composition:
         fastq = rules.filter_by_length.output.fastq,
         ref = config[KEY_REFERENCE_SEQUENCES]
     params:
-        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","binned_reads"),
+        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","binned_reads"),
         barcode = "{barcode}"
     output:
         new_config = os.path.join(config[KEY_OUTDIR],"{barcode}","config.yaml"),
-        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","refs_present.csv")
+        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","refs_present.csv")
     run:
         if not os.path.exists(params.tax_out):
             os.mkdir(params.tax_out)
@@ -81,15 +81,15 @@ rule assess_sample_composition:
 
 rule get_consensus_sequences:
     input:
-        snakefile = os.path.join(workflow.current_basedir,"cns_runner.smk"),
+        snakefile = os.path.join(workflow.current_basedir,"haplotype_reader.smk"),
         taxa = rules.assess_sample_composition.output.taxa,
         yaml = rules.assess_sample_composition.output.new_config
     params:
         barcode = "{barcode}",
-        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","consensus_sequences")
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
     threads: workflow.cores*0.5
     output:
-        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","consensus_sequences","cns.prompt.txt")
+        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt")
     run:
         print("Running consensus pipeline.")
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
