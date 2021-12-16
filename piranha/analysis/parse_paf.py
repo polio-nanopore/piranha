@@ -8,11 +8,11 @@ import yaml
 
 def group_hits(paf_file):
 
-    hits = collections.defaultdict(list)
+    hits = collections.defaultdict(set)
     with open(paf_file, "r") as f:
         for l in f:
             tokens = l.rstrip("\n").split("\t")
-            hits[tokens[5]].append(tokens[0])
+            hits[tokens[5]].add(tokens[0])
     
     ref_hits = {}
     not_mapped = []
@@ -28,7 +28,7 @@ def write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir
     with open(sample_composition,"w") as fw:
         fw.write("reference,num_reads,cns_build\n")
         for reference in hits:
-            ref_hits = hits[reference]
+            ref_hits = list(set(hits[reference]))
             cns = False
             if len(ref_hits) >= min_reads:
                 cns = True
