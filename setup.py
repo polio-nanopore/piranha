@@ -12,7 +12,8 @@ setup(name='piranha',
       packages=find_packages(),
       scripts=[
             "piranha/scripts/piranha.smk",
-            "piranha/scripts/cns_runner.smk"
+            "piranha/scripts/cns_runner.smk",
+            "piranha/scripts/haplotype_reader.smk"
             ],
       package_data={"piranha":["data/*"]},
       install_requires=[
