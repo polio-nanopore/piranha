@@ -5,7 +5,7 @@ barcode = config["barcode"]
 
 rule all:
     input:
-        expand(os.path.join(config[KEY_OUTDIR],"{taxid}","medaka","consensus.fasta"), taxid=config["taxa_present"])
+        expand(os.path.join(config[KEY_OUTDIR],"{taxid}","medaka","consensus.fasta"), taxid=config["haplotypes"])
         # expand(os.path.join(config[KEY_OUTDIR],"consensus_sequences","{taxid}.fasta"), taxid=config["taxa_present"])
 
 rule files:
