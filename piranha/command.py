@@ -79,8 +79,7 @@ def main(sysargs = sys.argv[1:]):
     data_install_checks.check_install(config)
     snakefile = data_install_checks.get_snakefile(thisdir)
     # Threads and verbosity to config
-    init.misc_args_to_config(args.verbose,args.threads,config)
-    init.set_up_verbosity(config)
+    
 
     # Sort out where the query info is coming from, csv or id string, optional fasta seqs.
     # Checks if they're real files, of the right format and that QC args sensible values.
@@ -91,17 +90,21 @@ def main(sysargs = sys.argv[1:]):
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
     # ready to run? either verbose snakemake or quiet mode
+    init.misc_args_to_config(args.verbose,args.threads,config)
+    init.set_up_verbosity(config)
 
     if config[KEY_VERBOSE]:
         print(red("\n**** CONFIG ****"))
         for k in sorted(config):
             print(green(f" - {k}: ") + f"{config[k]}")
         status = snakemake.snakemake(snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR],config=config, cores=config[KEY_THREADS],lock=False
+                                    workdir=config[KEY_TEMPDIR], config=config, cores=config[KEY_THREADS],lock=False
                                     )
     else:
-        status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True,force_incomplete=True,workdir=config[KEY_TEMPDIR],
-                                    config=config, cores=config[KEY_THREADS],lock=False,quiet=True
+        logger = custom_logger.Logger()
+        status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
+                                    workdir=config[KEY_TEMPDIR], config=config, cores=config[KEY_THREADS],lock=False,
+                                    quiet=True,log_handler=logger.log_handler
                                     )
 
     if status: # translate "success" into shell exit code of 0
