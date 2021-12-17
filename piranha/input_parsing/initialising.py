@@ -31,8 +31,8 @@ def get_defaults():
                     # input seq options 
                     KEY_MIN_READ_LENGTH:1000,
                     KEY_MAX_READ_LENGTH:1300,
-                    KEY_MIN_READS:30,   # where to pad to using datafunk
-                    KEY_MIN_PCENT:0.01,
+                    KEY_MIN_READS:50,   # where to pad to using datafunk
+                    KEY_MIN_PCENT:5,
 
                     # misc defaults
                     KEY_THREADS:1,
@@ -152,8 +152,6 @@ def set_up_verbosity(config):
         config[KEY_LOG_STRING] = ""
     else:
         config[KEY_QUIET] = True
-        logger = custom_logger.Logger()
         config[KEY_LOG_API] = ""
-
         lh_path = os.path.realpath(lh.__file__)
         config[KEY_LOG_STRING] = f"--quiet --log-handler-script {lh_path} "
