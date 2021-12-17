@@ -13,18 +13,18 @@ from piranha.analysis.filter_lengths import filter_reads_by_length
 rule all:
     input:
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","refs_present.csv"), barcode=config["barcodes"]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","haplotypes.csv"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"])
 
 
-rule bin_files:
+rule gather_files:
     input:
         fastq = os.path.join(config[KEY_READDIR], "{barcode}", f"fastq_runid_{config[KEY_RUNID]}_0.fastq")
     params:
         file_path = os.path.join(config[KEY_READDIR], "{barcode}")
     output:
-        binned = os.path.join(config[KEY_OUTDIR],"{barcode}","unfiltered","nanopore_reads.fastq")
+        fastq = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","nanopore_reads.fastq")
     shell:
         """
         cat {params.file_path}/fastq_*.fastq > {output[0]}
@@ -32,10 +32,10 @@ rule bin_files:
 
 rule filter_by_length:
     input:
-        os.path.join(config[KEY_OUTDIR],"{barcode}","unfiltered","nanopore_reads.fastq")
+        rules.gather_files.output.fastq
     output:
-        fastq = os.path.join(config[KEY_OUTDIR],"{barcode}","read_length_filtered","filtered_reads.fastq"),
-        lengths = os.path.join(config[KEY_OUTDIR],"{barcode}","read_length_filtered","lengths.txt")
+        fastq = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","filtered_reads.fastq"),
+        lengths = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","lengths.txt")
     run:
         filter_reads_by_length(input[0],output.fastq,output.lengths,config)
 
@@ -46,26 +46,27 @@ rule map_reads:
     params:
         barcode = "{barcode}"
     threads: workflow.cores
+    log: os.path.join(config[KEY_TEMPDIR],"{barcode}.minimap2_initial.log")
     output:
-        paf = os.path.join(config[KEY_OUTDIR],"{barcode}","read_length_filtered","filtered_reads.paf")
+        paf = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","filtered_reads.paf")
     shell:
         """
         minimap2 -t {threads} -x map-ont --secondary=no --paf-no-hit \
         {input.ref:q} \
-        {input.fastq:q} > {output:q}
+        {input.fastq:q} -o {output:q} &> {log:q}
         """
 
-rule assess_sample_composition:
+rule assess_broad_diversity:
     input:
         map_file = rules.map_reads.output.paf,
         fastq = rules.filter_by_length.output.fastq,
         ref = config[KEY_REFERENCE_SEQUENCES]
     params:
-        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","binned_reads"),
+        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing"),
         barcode = "{barcode}"
     output:
-        new_config = os.path.join(config[KEY_OUTDIR],"{barcode}","config.yaml"),
-        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","refs_present.csv")
+        new_config = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","config.yaml"),
+        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","refs_present.csv")
     run:
         if not os.path.exists(params.tax_out):
             os.mkdir(params.tax_out)
@@ -79,31 +80,56 @@ rule assess_sample_composition:
                         params.barcode,
                         config)
 
-rule get_consensus_sequences:
+rule assess_haplotypes:
     input:
         snakefile = os.path.join(workflow.current_basedir,"haplotype_reader.smk"),
-        taxa = rules.assess_sample_composition.output.taxa,
-        yaml = rules.assess_sample_composition.output.new_config
+        taxa = rules.assess_broad_diversity.output.taxa,
+        yaml = rules.assess_broad_diversity.output.new_config
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
     threads: workflow.cores*0.5
+    log: os.path.join(config[KEY_TEMPDIR],"{barcode}_haplotype.smk.log")
+    output:
+        var_data = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","variation_info.json"),
+        csv = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"),
+        config = os.path.join(config[KEY_OUTDIR],"{barcode}","assess_haplotypes","haplotype_config.yaml")
+    run:
+        print("Running consensus pipeline.")
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                    "--forceall "
+                    "{config[log_string]} "
+                    "--configfile {input.yaml:q} "
+                    "--config barcode={params.barcode} outdir={params.outdir:q} "
+                    "--cores {threads} &> {log:q}")
+
+rule get_consensus_sequences:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"cns_runner.smk"),
+        yaml = rules.assess_haplotypes.output.config
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
+    threads: workflow.cores*0.5
+    log: os.path.join(config[KEY_TEMPDIR],"{barcode}_consensus.smk.log")
     output:
         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt")
     run:
         print("Running consensus pipeline.")
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
+                    "{config[log_string]} "
                     "--configfile {input.yaml:q} "
                     "--config barcode={params.barcode} outdir={params.outdir:q} "
                     "--cores {threads} && touch {output.taxa}")
 
+
 # rule qc_cns_output:
 #     input:
 #         snakefile = os.path.join(workflow.current_basedir,"cns_qc.smk"),
-#         taxa = rules.assess_sample_composition.output.taxa,
+#         taxa = rules.assess_broad_diversity.output.taxa,
 #         cns = rules.get_consensus_sequences.output.taxa,
-#         yaml = rules.assess_sample_composition.output.new_config
+#         yaml = rules.assess_broad_diversity.output.new_config
 #     params:
 #         barcode = "{barcode}",
 #         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc")
