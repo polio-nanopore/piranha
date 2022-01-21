@@ -120,7 +120,7 @@ rule get_haplotype_data:
         vcf = rules.medaka_variant.output.vcf,
         reads = rules.files.params.reads
     params:
-        taxon = "{taxid}"
+        taxon = "{taxid}",
         outdir = os.path.join(config[KEY_OUTDIR],"{taxid}","haplotype_reads")
     output:
         haplotypes = os.path.join(config[KEY_OUTDIR],"{taxid}","haplotypes.csv")
