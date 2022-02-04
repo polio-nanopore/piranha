@@ -53,8 +53,11 @@ def parse_read_dir(readdir,config):
         for fn in f:
             if fn.endswith(".fastq"):
                 if not run_id:
-                    # read run id from first file name it comes to
-                    run_id = fn.split(".")[0].split("_")[-2]
+                    try:
+                        # read run id from first file name it comes to
+                        run_id = fn.split(".")[0].split("_")[-2]
+                    except:
+                        run_id = ""
                 barcode = r.split("/")[-1]
                 count_read_files[barcode]+=1
     
@@ -62,7 +65,7 @@ def parse_read_dir(readdir,config):
     
     print(green("Found read files"))
     print("----------------")
-    for d in count_read_files:
+    for d in sorted(count_read_files):
         if count_read_files[d] == 1:
             print(green(f"Barcode {d}:\t") + f"{count_read_files[d]} fastq file")
         else:
