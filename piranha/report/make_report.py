@@ -12,7 +12,9 @@ from io import StringIO
 import os
 from Bio import SeqIO
 
+from piranha import __version__
 from piranha.utils.log_colours import green,cyan
+from piranha.utils.config import *
 
 def count_reads(fastq_file):
     record_dict = SeqIO.index(fastq_file, "fastq")
@@ -77,18 +79,28 @@ def data_for_table(input_taxa, cns_path, data_for_report):
             data_for_report["taxa_table"].append(row_dict)
     return files_to_remove
     
-
-def make_report(report_to_generate,config,data_for_report,barcode):
+def make_report(report_to_generate,config,read_length_file,variation_file,barcode,config):
     #need to call this multiple times if there are multiple reports wanted
     
-    template_dir = os.path.abspath(os.path.dirname(config["report_template"]))
+    data_for_report = {}
+    data_for_report["lengths"] = []
+    with open(read_length_file, "r") as f:
+        for l in f:
+            l = l.rstrip("\n")
+            data_for_report["lengths"].append(l)
+
+    with open(variation_file,"r") as f:
+        data_for_report["variation_info"] = json.load(f)
+    config["report_title"] = "Test report"
+    template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
-    mytemplate = Template(filename=config["report_template"], lookup=mylookup)
+    mytemplate = Template(filename=config[KEY_REPORT_TEMPLATE], lookup=mylookup)
     buf = StringIO()
 
     ctx = Context(buf, 
                     date = date.today(), 
+                    version = __version__,
                     barcode = barcode,
                     data_for_report = data_for_report,
                     config=config)
