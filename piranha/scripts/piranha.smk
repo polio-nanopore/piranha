@@ -12,10 +12,11 @@ from piranha.analysis.filter_lengths import filter_reads_by_length
 
 rule all:
     input:
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","refs_present.csv"), barcode=config["barcodes"]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","haplotypes.csv"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
-        # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"])
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"])
 
 
 rule gather_files:
@@ -71,7 +72,7 @@ rule assess_broad_diversity:
         if not os.path.exists(params.tax_out):
             os.mkdir(params.tax_out)
 
-        parse_paf_file(input.map_file,
+        refs_present = parse_paf_file(input.map_file,
                         input.fastq,
                         output.taxa,
                         config[KEY_REFERENCE_SEQUENCES],
@@ -79,6 +80,12 @@ rule assess_broad_diversity:
                         output.new_config,
                         params.barcode,
                         config)
+
+        print(green(f"Broad diversity in {params.barcode}:"))
+        for ref in refs_present:
+            print(f"- {ref}")
+        print("----------------")
+
 
 rule assess_haplotypes:
     input:
@@ -93,9 +100,9 @@ rule assess_haplotypes:
     output:
         var_data = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","variation_info.json"),
         csv = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"),
-        config = os.path.join(config[KEY_OUTDIR],"{barcode}","assess_haplotypes","haplotype_config.yaml")
+        config = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotype_config.yaml")
     run:
-        print("Running consensus pipeline.")
+        print(green(f"Assessing haplotypes for {params.barcode}"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
                     "{config[log_string]} "
@@ -103,25 +110,26 @@ rule assess_haplotypes:
                     "--config barcode={params.barcode} outdir={params.outdir:q} "
                     "--cores {threads} &> {log:q}")
 
-rule get_consensus_sequences:
-    input:
-        snakefile = os.path.join(workflow.current_basedir,"cns_runner.smk"),
-        yaml = rules.assess_haplotypes.output.config
-    params:
-        barcode = "{barcode}",
-        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
-    threads: workflow.cores*0.5
-    log: os.path.join(config[KEY_TEMPDIR],"{barcode}_consensus.smk.log")
-    output:
-        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt")
-    run:
-        print("Running consensus pipeline.")
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} "
-                    "--cores {threads} && touch {output.taxa}")
+# rule get_consensus_sequences:
+#     input:
+#         snakefile = os.path.join(workflow.current_basedir,"cns_runner.smk"),
+#         yaml = rules.assess_haplotypes.output.config
+#     params:
+#         barcode = "{barcode}",
+#         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
+#     threads: workflow.cores*0.5
+#     log: os.path.join(config[KEY_TEMPDIR],"{barcode}_consensus.smk.log")
+#     output:
+#         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt")
+#     run:
+#         print(green(f"Generating consensus sequences for {params.barcode}."))
+#         print("----------------")
+#         shell("snakemake --nolock --snakefile {input.snakefile:q} "
+#                     "--forceall "
+#                     "{config[log_string]} "
+#                     "--configfile {input.yaml:q} "
+#                     "--config barcode={params.barcode} outdir={params.outdir:q} "
+#                     "--cores {threads} && touch {output.taxa}")
 
 
 # rule qc_cns_output:
@@ -145,35 +153,22 @@ rule get_consensus_sequences:
 #                     "--cores 4 && touch {output.taxa}")
 
 
-# rule generate_report:
-#     input:
-#         all_reads = os.path.join(config[KEY_OUTDIR],"{barcode}","unfiltered","nanopore_reads.fastq"),
-#         classified_reads = os.path.join(config[KEY_OUTDIR],"{barcode}","classified","classified_reads.unfiltered.fastq"),
-#         filtered_reads = os.path.join(config[KEY_OUTDIR],"{barcode}","read_length_filtered","filtered_reads.fastq"),
-#         classified_filtered = os.path.join(config[KEY_OUTDIR],"{barcode}","classified","classified_reads.filtered.fastq"),
-#         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_taxa","taxa_present.csv"),
-#         prompt = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_taxa","consensus_sequences","cns.prompt.txt"),
-#         yaml = os.path.join(config[KEY_OUTDIR],"{barcode}","config.yaml"),
-#     params:
-#         barcode = "{barcode}",
-#         cns_path = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_taxa","consensus_sequences")
-#     output:
-#         html = os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html")
-#     run:
-#         # for seq in os.path.join(config[KEY_OUTDIR],"{barcode}","processed_taxa","consensus_sequences"):
-#         # if file empty, remove, else add to table
-#         data_for_report = {}
-#         report.get_read_counts(input.all_reads, input.classified_reads, input.filtered_reads, input.classified_filtered,data_for_report)
-#         report.load_histograms_svg(input.histogram1, input.histogram2, data_for_report)
+rule generate_report:
+    input:
+        read_legnths = rules.filter_by_length.output.lengths,
+        variation_info = rules.assess_haplotypes.output.var_data,
+        yaml = rules.assess_haplotypes.output.config,
+    params:
+        barcode = "{barcode}",
+    output:
+        html = os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html")
+    run:
 
-#         to_remove = report.data_for_table(input.taxa,params.cns_path, data_for_report)
+        with open(input.yaml, 'r') as f:
+            config_loaded = yaml.safe_load(f)
 
-#         with open(input.yaml, 'r') as f:
-#             config_loaded = yaml.safe_load(f)
+        report.make_report(output.html,config_loaded,input.read_lengths,input.variation_info,params.barcode,config)
 
-#         report.make_report(output.html,config_loaded,data_for_report,params.barcode)
-#         # for i in to_remove:
-#         #     shell(f"rm {i}")
 
 # rule publish:
 #     input:
