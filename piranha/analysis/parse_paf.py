@@ -39,7 +39,6 @@ def write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir
                 fw.write(f"{reference},{len(ref_hits)},{cns}\n")
                 if cns == True:
                     refs_present.append(reference)
-                    print(reference)
 
                     with open(os.path.join(tax_outdir,f"{reference}.fasta"),"w") as fref:
                         ref_record = ref_index[reference]
@@ -72,5 +71,7 @@ def parse_paf_file(paf_file,read_file,sample_composition,references_sequences,ta
     refs_present = write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir,hits,config[KEY_MIN_READS])
 
     write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config)
+
+    return refs_present
 
 
