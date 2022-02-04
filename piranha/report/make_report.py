@@ -79,7 +79,7 @@ def data_for_table(input_taxa, cns_path, data_for_report):
             data_for_report["taxa_table"].append(row_dict)
     return files_to_remove
     
-def make_report(report_to_generate,config,read_length_file,variation_file,barcode,config):
+def make_report(report_to_generate,read_length_file,variation_file,barcode,config):
     #need to call this multiple times if there are multiple reports wanted
     
     data_for_report = {}

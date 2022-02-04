@@ -7,7 +7,7 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 from piranha.analysis.parse_paf import parse_paf_file
 from piranha.analysis.filter_lengths import filter_reads_by_length
-
+from piranha.report.make_report import make_report
 ##### Target rules #####
 
 rule all:
@@ -15,7 +15,7 @@ rule all:
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config["barcodes"]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
+        # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"])
 
 
@@ -155,7 +155,7 @@ rule assess_haplotypes:
 
 rule generate_report:
     input:
-        read_legnths = rules.filter_by_length.output.lengths,
+        read_lengths = rules.filter_by_length.output.lengths,
         variation_info = rules.assess_haplotypes.output.var_data,
         yaml = rules.assess_haplotypes.output.config,
     params:
@@ -167,7 +167,7 @@ rule generate_report:
         with open(input.yaml, 'r') as f:
             config_loaded = yaml.safe_load(f)
 
-        report.make_report(output.html,config_loaded,input.read_lengths,input.variation_info,params.barcode,config)
+        make_report(output.html,input.read_lengths,input.variation_info,params.barcode,config_loaded)
 
 
 # rule publish:
