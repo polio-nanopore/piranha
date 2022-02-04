@@ -18,7 +18,6 @@ def filter_reads_by_length(reads_in,reads_out,lengths_out,config):
         SeqIO.write(fastq_records,fw, "fastq")
     with open(lengths_out,"w") as fw:
         # this is in case we want to make a read length dist in the report
-        fw.write("length\n")
         for i in length_list:
             fw.write(f"{i}\n")
         fw.write("\n")
