@@ -8,11 +8,31 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 from piranha.analysis.get_haplotypes import *
 
+"""
+output files
+-------------
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.ref.sam"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.sorted.bam"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.sorted.bam.bai"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","cns.mod.fasta"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus.fasta"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.pre.vcf"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.vcf"
+config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","pseudoaln.fasta"
+config[KEY_TEMPDIR],"assess_haplotypes","haplotypes_{taxid}.csv"
+
+config[KEY_OUTDIR],"processed_data","variation_info.json"
+config[KEY_OUTDIR],"processed_data","haplotypes.csv"
+config[KEY_OUTDIR],"processed_data","haplotype_config.yaml"
+config[KEY_OUTDIR],"processed_data","{taxid}_{haplotype}.fastq"
+"""
+
 rule all:
     input:
-        expand(os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","variants.vcf"), taxid=config["taxa_present"]),
+        expand(os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.vcf"), taxid=config["taxa_present"]),
         os.path.join(config[KEY_OUTDIR],"processed_data","variation_info.json"),
-        os.path.join(config[KEY_OUTDIR],"assess_haplotypes","haplotype_config.yaml")
+        os.path.join(config[KEY_OUTDIR],"processed_data","haplotype_config.yaml")
 
 rule files:
     params:
@@ -25,7 +45,7 @@ rule minimap2:
         ref=rules.files.params.ref,
     log: os.path.join(config[KEY_TEMPDIR],"logs","{taxid}.minimap2.log")
     output:
-        sam = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","mapped.ref.sam")
+        sam = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.ref.sam")
     shell:
         """
         minimap2 -ax map-ont {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
@@ -34,8 +54,8 @@ rule sort_index:
     input:
         sam = rules.minimap2.output.sam
     output:
-        bam = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","mapped.sorted.bam"),
-        index = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","mapped.sorted.bam.bai")
+        bam = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.sorted.bam"),
+        index = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.sorted.bam.bai")
     shell:
         """
         samtools view -bS -F 4 {input.sam:q} | samtools sort -o {output[0]:q} &&
@@ -49,11 +69,11 @@ rule medaka_consensus:
         sam= rules.minimap2.output.sam
     log: os.path.join(config[KEY_TEMPDIR],"logs","{taxid}.medaka_consensus.log")
     params:
-        outdir=os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes"),
-        cns_mod = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","cns.mod.fasta")
+        outdir=os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}"),
+        cns_mod = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","cns.mod.fasta")
     output:
-        probs = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","consensus_probs.hdf"),
-        consensus= os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","consensus.fasta")
+        probs = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"),
+        consensus= os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus.fasta")
     threads:
         2
     shell:
@@ -70,14 +90,14 @@ rule medaka_consensus:
 
 rule medaka_variant:
     input:
-        probs = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","consensus_probs.hdf"),
+        probs = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"),
         ref = rules.files.params.ref,
         bam = rules.sort_index.output.bam
     log: os.path.join(config[KEY_TEMPDIR],"logs","{taxid}.medaka_variant.log")
     params:
-        temp_vcf = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","variants.pre.vcf")
+        temp_vcf = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.pre.vcf")
     output:
-        vcf = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","variants.vcf")
+        vcf = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.vcf")
     shell:
         """
         medaka variant {input.ref:q} {input.probs:q} {params.temp_vcf:q}  &> {log} 
@@ -90,7 +110,7 @@ rule sam_to_seq:
         ref = rules.files.params.ref
     log: os.path.join(config[KEY_TEMPDIR],"logs","{taxid}.gofasta.log")
     output:
-        fasta = os.path.join(config[KEY_OUTDIR],"{taxid}","assess_haplotypes","pseudoaln.fasta")
+        fasta = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","pseudoaln.fasta")
     shell:
         """
         gofasta sam toMultiAlign -r {input.ref:q} -s {input.sam:q} -o {output[0]:q} &> {log}
@@ -103,10 +123,11 @@ rule get_variant_data:
     output:
         json = os.path.join(config[KEY_OUTDIR],"processed_data","variation_info.json")
     run:
+        # this is for making a figure
         variation_dict = {}
         for taxon in config["taxa_present"]:
             ref = os.path.join(config[KEY_TAXA_OUTDIR],f"{taxon}.fasta")
-            fasta = os.path.join(config[KEY_OUTDIR],f"{taxon}","assess_haplotypes","pseudoaln.fasta")
+            fasta = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes",f"{taxon}","pseudoaln.fasta")
             
             var_dict = get_variation_pcent(ref,fasta)
             variation_dict[taxon] = var_dict
@@ -121,18 +142,18 @@ rule get_haplotype_data:
         reads = rules.files.params.reads
     params:
         taxon = "{taxid}",
-        outdir = os.path.join(config[KEY_OUTDIR],"{taxid}","haplotype_reads")
+        outdir = os.path.join(config[KEY_OUTDIR],"processed_data")
     output:
-        haplotypes = os.path.join(config[KEY_OUTDIR],"{taxid}","haplotypes.csv")
+        haplotypes = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","haplotypes_{taxid}.csv")
     run:
         get_haplotypes(input.fasta,input.vcf,input.reads,
                         output.haplotypes,params.outdir,params.taxon,config[KEY_MIN_READS],config[KEY_MIN_PCENT])
 
 rule gather_haplotypes:
     input:
-        expand(os.path.join(config[KEY_OUTDIR],"{taxid}","haplotypes.csv"), taxid=config["taxa_present"])
+        expand(os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","haplotypes_{taxid}.csv"), taxid=config["taxa_present"])
     output:
         csv = os.path.join(config[KEY_OUTDIR],"processed_data","haplotypes.csv"),
-        config = os.path.join(config[KEY_OUTDIR],"assess_haplotypes","haplotype_config.yaml")
+        config = os.path.join(config[KEY_OUTDIR],"processed_data","haplotype_config.yaml")
     run:
-        gather_haplotypes(input,output.csv,output.config,config)
+        gather_haplotype_data(input,output.csv,output.config,config)

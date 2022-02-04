@@ -34,7 +34,7 @@ def get_variation_pcent(ref,fasta):
     var_dict = {"x":x,"y":y}
     return var_dict
 
-def parse_vcf(fasta,vcf,min_reads,min_pcent,haplotypes_out):
+def parse_vcf(fasta,vcf,min_reads,min_pcent,taxon,haplotypes_out):
     variant_sites = []
     with open(vcf,"r") as f:
         for l in f:
@@ -64,57 +64,51 @@ def parse_vcf(fasta,vcf,min_reads,min_pcent,haplotypes_out):
     print(green("Haplotypes identified\n--------\n--------"))
     print("Sites: ", site_str)
     with open(haplotypes_out,"w") as fw:
-        fw.write(f"sites,haplotype,num_reads,make_cns,read_ids\n")
+        fw.write(f"taxon,sites,haplotype,num_reads,make_cns,read_ids\n")
         for i in haplo_records:
             num_reads = len(haplo_records[i])
             read_str = ';'.join(haplo_records[i])
             if num_reads > min_reads:
                 print(green(f"{i}: ") + f"{len(haplo_records[i])}")
                 read_haplotypes[i] = haplo_records[i]
-                fw.write(f"{site_str},{i},{num_reads},True,{read_str}\n")
+                fw.write(f"{taxon},{site_str},{i},{num_reads},True,{read_str}\n")
             else:
-                fw.write(f"{site_str},{i},{num_reads},False,{read_str}\n")
+                fw.write(f"{taxon},{site_str},{i},{num_reads},False,{read_str}\n")
     return read_haplotypes
 
                 
-def write_haplotype_fastq(reads,read_haplotypes,outdir):
+def write_haplotype_fastq(reads,taxon,read_haplotypes,outdir):
     
     reads = SeqIO.index(reads,"fastq")
     for h in read_haplotypes:
-        with open(os.path.join(outdir, f"{h}.fastq"),"w") as fw:
+        with open(os.path.join(outdir, f"{taxon}_{h}.fastq"),"w") as fw:
             for read in read_haplotypes[h]:
                 record = reads[read]
                 SeqIO.write(record,fw,"fastq")
             
-def get_haplotypes(fasta,vcf,reads,out_haplotypes,outdir,min_reads,min_pcent):
+def get_haplotypes(fasta,vcf,reads,out_haplotypes,outdir,taxon,min_reads,min_pcent):
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
-    haps = parse_vcf(fasta,vcf,min_reads,min_pcent,out_haplotypes)
+    haps = parse_vcf(fasta,vcf,min_reads,min_pcent,taxon,out_haplotypes)
 
-    write_haplotype_fastq(reads,haps,outdir)
+    write_haplotype_fastq(reads,taxon,haps,outdir)
 
     return list(haps.keys())
 
 
-def gather_haplotypes(input_list,output_csv,config_out,config):
+def gather_haplotype_data(input_list,output_csv,config_out,config):
 
     with open(output_csv, "w") as fw:
         writer = csv.DictWriter(fw, fieldnames = ["taxon","sites","haplotype","num_reads","make_cns","read_ids"],lineterminator='\n')
         writer.writeheader()
 
         for haplotype_file in input_list:
-            taxon = str(haplotype_file).split("/")[-2]
-            if not taxon in config["taxa_present"]:
-                sys.stderr(cyan(f"Error: incorrect file name pattern for {haplotype_file}"))
-                sys.exit(-1)
 
             with open(haplotype_file,"r") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
-                    new_row = row
-                    new_row["taxon"] = taxon
-                    writer.writerow(new_row)
+                    writer.writerow(row)
     
     with open(config_out,"w") as fw:
 
