@@ -37,7 +37,10 @@ KEY_THREADS="threads"
 KEY_LOG_API="log_api"
 KEY_LOG_STRING="log_string"
 KEY_QUIET="quiet"
+KEY_COLOUR_MAP = "colour_map"
+KEY_COLOUR_THEME="colour_theme"
 
+KEY_REPORT_TEMPLATE = "report_template"
 
 RESOURCE_KEY_FILENAME="filename"
 RESOURCE_KEY_DIRECTORY="directory"
