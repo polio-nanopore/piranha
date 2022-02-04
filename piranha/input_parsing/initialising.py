@@ -36,7 +36,11 @@ def get_defaults():
 
                     # misc defaults
                     KEY_THREADS:1,
-                    KEY_VERBOSE:False
+                    KEY_VERBOSE:False,
+
+                    KEY_COLOUR_MAP: ["#e68781","#476970","#f5eece"],
+                    KEY_COLOUR_THEME: "#e68781"
+
                     }
     return default_dict
 
