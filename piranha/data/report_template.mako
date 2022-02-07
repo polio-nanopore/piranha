@@ -553,10 +553,25 @@
                 },
             "encoding": {
               "x": {
-                "bin": true,
-                "field": "x"
+                "bin": {"maxbins":50},
+                "field": "x",
+                "title": "Read length (bp)",
+                "axis": {
+                      "grid": false,
+                      "labelFont":"Helvetica Neue",
+                      "labelFontSize":18,
+                      "titleFontSize":18,
+                      "titleFont":"Helvetica Neue"
+                    }
               },
-              "y": {"aggregate": "count"}
+              "y": {"aggregate": "count",
+                    "axis":{
+                        "grid": false,
+                        "labelFont":"Helvetica Neue",
+                        "labelFontSize":18,
+                        "titleFontSize":18,
+                        "titleFont":"Helvetica Neue"}
+                  }
             },
             "config":{
               "view": {"stroke": null},
