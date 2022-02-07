@@ -7,9 +7,9 @@
 
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg?token=GHSAT0AAAAAABHOJJPRFXUJULWKXQA5SVOMYP46NBA">
+    <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>${config["report_title"]}</title>
+    <title>${barcode} report</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -512,32 +512,6 @@
         });
         });
     </script>
-    <!-- <script>
-      var colorWell;
-      var defaultColor = "#557b86";
-      window.addEventListener("load", startup, false);
-      function startup() {
-        colorWell = document.querySelector("#colorWell");
-        colorWell.value = defaultColor;
-        colorWell.addEventListener("input", updateFirst, false);
-        colorWell.addEventListener("change", updateAll, false);
-        colorWell.select();
-      }
-      function updateFirst(event) {
-        var p = document.querySelector("accordion active");
-        // var toTopButton = document.getElementById("toTopBtn");
-        if (p) {
-          p.style.color = event.target.value;
-        }
-      }
-      function updateAll(event) {
-        document.querySelectorAll("accordion active").forEach(function(p) {
-          p.style.color = event.target.value;
-        });
-      }
-    </script> -->
-
-
 
 <script>
   function exportImageSVG(buttonID,svgID,name){
@@ -560,11 +534,112 @@
             <hr>
         </header>
         
-        <h1>${config["report_title"]}
+        <h1>${barcode} report
             <small class="text-muted" style="color:${themeColor}">${date}</small>
         </h1> 
         <br>
-        </div>
+      <% figure_count = 0 %>
+      <% length_info = data_for_report['lengths'] %>
+      <div id="length_histogram" style="width:95%"></div>
+        <script>
+          var vlSpec_hist = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": "container",
+            "height": 200,
+            "mark": "bar",
+            "datasets": {"length_histogram": ${length_info}},
+            "data": {
+              "name": "length_histogram"
+                },
+            "encoding": {
+              "x": {
+                "bin": true,
+                "field": "x"
+              },
+              "y": {"aggregate": "count"}
+            },
+            "config":{
+              "view": {"stroke": null},
+              "axis": {"grid": false},
+              "bar": {"fill":"#476970","stroke":"#476970"},
+              "text": {"font":"Helvetica Neue","fontWeight":0.1}
+              }
+          };          
+          vegaEmbed('#length_histogram', vlSpec_hist, {renderer: "svg"})
+                .then(result => console.log(result))
+                .catch(console.warn);
+        </script>
+          <% figure_count +=1 %>
+          <h3><strong>Figure ${figure_count}</strong> | Read length distribution for ${barcode}</h3>
+          <hr>
+
+      % for reference in data_for_report['variation_info']:
+        <% reference_name = reference.replace("_"," ").title() %>
+        <h2><a id = "header_${reference}"></a>${reference_name}</h2> 
+
+      <% figure_count +=1 %>
+      <% ref_variation_info = data_for_report['variation_info'][reference] %>
+      <br>
+      <div id="var_scatter" style="width:95%"></div>
+
+          <script>
+            var vlSpec_scatter = {
+              "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+              "width": "container",
+              "height": 200,
+              "datasets": {"var_scatter": ${ref_variation_info}},
+              "data": {
+                "name": "var_scatter"
+                  },
+                "mark": "point",
+                "encoding": {
+                  "x": {
+                    "field": "x", 
+                    "type": "quantitative",
+                    "title": "Position (bp)",
+                    "axis": {
+                      "grid": false,
+                      "labelFont":"Helvetica Neue",
+                      "labelFontSize":18,
+                      "titleFontSize":18,
+                      "titleFont":"Helvetica Neue"
+                    },
+                  },
+                  "y": 
+                  {"field": "y",
+                  "type":"quantitative",
+                  "title": "Percentage",
+                  "scale": {"domain": [0, 100]},
+                  "axis":{
+                  "grid": false,
+                  "labelFont":"Helvetica Neue",
+                  "labelFontSize":18,
+                  "titleFontSize":18,
+                  "titleFont":"Helvetica Neue"}
+                  }
+                    },
+                        "config": {
+                          "view": {"stroke": null},
+                          "axis": {"grid": false},
+                          "point": {"fill":"#476970","stroke":"#476970"},
+                          "text": {"font":"Helvetica Neue","fontWeight":0.1}
+                        }
+                };          
+          vegaEmbed('#var_scatter', vlSpec_scatter, {renderer: "svg"})
+                .then(result => console.log(result))
+                .catch(console.warn);
+        </script>
+          <% figure_count +=1 %>
+          <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${barcode}</h3>
+          <hr>
+          %endfor
+          
+          
+          <!-- <script type="text/javascript">
+            makeScatter("test_scatter", `${data_for_report["variation_info"]}`);
+          </script>  -->
+
+      </div>
     <br>
         
     <script>

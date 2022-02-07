@@ -87,10 +87,23 @@ def make_report(report_to_generate,read_length_file,variation_file,barcode,confi
     with open(read_length_file, "r") as f:
         for l in f:
             l = l.rstrip("\n")
-            data_for_report["lengths"].append(l)
+            try:
 
+                data_for_report["lengths"].append({"x":int(l)})
+            except:
+                pass
+    
+    data_for_report["variation_info"] = {}
     with open(variation_file,"r") as f:
-        data_for_report["variation_info"] = json.load(f)
+        var_data = json.load(f)
+        for ref in var_data:
+            data_for_report["variation_info"][ref] = []
+            x = var_data[ref]["x"]
+            y = var_data[ref]["y"]
+            
+            for i in range(len(x)):
+                data_for_report["variation_info"][ref].append({"x":x[i],"y":y[i]})
+
     config["report_title"] = "Test report"
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
