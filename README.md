@@ -18,9 +18,13 @@ Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 <strong>Note</strong>: Note: we recommend using piranha in the conda environment specified in the environment.yml file as per the instructions above. If you can't use conda for some reason, dependency details can be found in the environment.yml file.
 </p>
 
-<h4>Check the install worked</h4>
-<p>Type (in the <strong>piranha</strong> environment):</p>
+## Check the install worked
+Type (in the <strong>piranha</strong> environment):
+	`piranha -v`
 
-	piranha -v
+## Quick usage
+
+`piranha -i <demultiplexed read directory> -b <path/to/barcodes.csv>`
+
 <br>
 <br>
