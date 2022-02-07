@@ -15,7 +15,7 @@ Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 <h2>Dependencies If <strong>Not</strong> Installing Using the Conda Environment</h2>
 
 <p>
-<strong>Note</strong>: Note: we recommend using piranha in the conda environment specified in the environment.yml file as per the instructions above. If you can't use conda for some reason, dependency details can be found in the environment.yml file.
+<strong>Note</strong>: we recommend using piranha in the conda environment specified in the environment.yml file as per the instructions above. If you can't use conda for some reason, dependency details can be found in the environment.yml file.
 </p>
 
 ## Check the install worked
