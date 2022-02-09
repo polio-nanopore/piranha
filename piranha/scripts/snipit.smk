@@ -1,73 +1,49 @@
+import os
+from Bio import SeqIO
 
+from piranha.utils.log_colours import green,cyan
+from piranha.utils.config import *
 
 rule all:
-    expand(os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.svg"), taxid=config["taxa_present"]),
-
+    input:
+        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.svg"), taxid=config[KEY_TAXA_PRESENT]),
+        os.path.join(config[KEY_TEMPDIR],"snipit.txt")
 
 rule files:
     params:
-        ref=os.path.join(config[KEY_OUTDIR],"{taxid}.fasta"),
-        reads=os.path.join(config[KEY_OUTDIR],"{taxid}.fastq")
-
+        ref=os.path.join(config[KEY_TAXA_OUTDIR],"{taxid}.fasta")
 
 rule make_snipit_alignments:
     input:
         ref = rules.files.params.ref,
-        fasta = expand(rules.medaka_consensus.output.consensus, haplotype=config["haplotypes"])
+        fasta = config["fasta"]
     output:
-        os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.aln.fasta")
+        aln = os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.aln.fasta")
     run:
-        catchment_dict = collections.defaultdict(list)
-        with open(input.csv,"r") as f:
-            reader = csv.DictReader(f)
-            
-            if config["input_display_column"] in reader.fieldnames:
-                column = config["input_display_column"]
-            else:
-                column = config["input_id_column"]
+        with open(output.aln,"w") as fw:
+            for record in SeqIO.parse(input.ref,"fasta"):
+                fw.write(f">{record.id}|reference\n{record.seq}\n")
 
-            for row in reader:
-                if "query_boolean" in reader.fieldnames:
-                    query = row["query_boolean"]
-                
-                if query=="True":
-                    if row["source"] == "input_fasta":
-                        if row["qc_status"] == "Pass":
-                            catchment_dict[row["catchment"]].append((row[column], row["hash"]))
-                    else:
-                        catchment_dict[row["catchment"]].append((row[column], row["hash"]))
-
-        sequences = {}
-        for record in SeqIO.parse(input.fasta,"fasta"):
-            sequences[record.id] = record.seq
-
-        for record in SeqIO.parse(config["outgroup_fasta"],"fasta"):
-            reference = record
-        
-        for catchment in catchment_dict:
-            with open(os.path.join(config[KEY_TEMPDIR],"snipit",f"{catchment}.aln.fasta"),"w") as fw:
-                fw.write(f">{reference.id}\n{reference.seq}\n")
-
-                for query in catchment_dict[catchment]:
-                    fw.write(f">{query[0]}\n{sequences[query[1]]}\n")
+            for record in SeqIO.parse(input.fasta,"fasta"):
+                fw.write(f">{record.id}\n{record.seq}\n")
 
 rule run_snipit:
     input:
-        aln = os.path.join(config[KEY_TEMPDIR],"snipit","{catchment}.aln.fasta")
+        aln = rules.make_snipit_alignments.output.aln
     params:
-        out_stem =os.path.join(config[KEY_TEMPDIR],"snipit","{catchment}.snipit")
+        out_stem =os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}")
     output:
-        os.path.join(config[KEY_TEMPDIR],"snipit","{catchment}.snipit.svg")
+        os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.svg")
     run:
         try:
-            shell("""snipit {input.aln:q} -r "outgroup" -o {params.out_stem} -f svg""")
+            shell("""snipit {input.aln:q} -o {params.out_stem} -f svg -c wes""")
         except:
             shell("touch {output[0]:q}")
 
 rule gather_graphs:
     input:
-        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{catchment}.snipit.svg"), catchment=catchments)
+        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.svg"), taxid=config[KEY_TAXA_PRESENT])
     output:
-        os.path.join(config[KEY_TEMPDIR],"snipit","prompt.txt")
+        os.path.join(config[KEY_TEMPDIR],"snipit.txt")
     shell:
         "touch {output:q}"
