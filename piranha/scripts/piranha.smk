@@ -16,7 +16,8 @@ rule all:
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"])
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","consensus_sequences.fasta"), barcode=config["barcodes"])
 
 
 rule gather_files:
@@ -47,7 +48,7 @@ rule map_reads:
     params:
         barcode = "{barcode}"
     threads: workflow.cores
-    log: os.path.join(config[KEY_TEMPDIR],"{barcode}.minimap2_initial.log")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}.minimap2_initial.log")
     output:
         paf = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","filtered_reads.paf")
     shell:
@@ -86,7 +87,6 @@ rule assess_broad_diversity:
             print(f"- {ref}")
         print("----------------")
 
-
 rule assess_haplotypes:
     input:
         snakefile = os.path.join(workflow.current_basedir,"haplotype_reader.smk"),
@@ -94,9 +94,10 @@ rule assess_haplotypes:
         yaml = rules.assess_broad_diversity.output.new_config
     params:
         barcode = "{barcode}",
-        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
     threads: workflow.cores*0.5
-    log: os.path.join(config[KEY_TEMPDIR],"{barcode}_haplotype.smk.log")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_haplotype.smk.log")
     output:
         var_data = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","variation_info.json"),
         csv = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"),
@@ -107,8 +108,51 @@ rule assess_haplotypes:
                     "--forceall "
                     "{config[log_string]} "
                     "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} "
+                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
                     "--cores {threads} &> {log:q}")
+
+rule haplotype_consensus:
+    input:
+        yaml = rules.assess_haplotypes.output.config,
+        snakefile = os.path.join(workflow.current_basedir,"haplotype_consensus.smk")
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
+    output:
+        fasta = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","consensus_sequences.fasta")
+    run:
+        print(green("Running snipit pipeline."))
+
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                "--forceall "
+                "{config[log_string]} "
+                f"--directory '{config[KEY_TEMPDIR]}' "
+                "--configfile {input.yaml:q} "
+                "--config outdir={params.outdir:q}  tempdir={params.tempdir:q} "
+                "--cores {workflow.cores} ")
+
+
+rule generate_snipit:
+    input:
+        fasta = rules.haplotype_consensus.output.fasta,
+        snakefile = os.path.join(workflow.current_basedir,"snipit.smk")
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
+    output:
+        txt = os.path.join(config[KEY_OUTDIR],"{barcode}","snipit.txt")
+    run:
+        print(green("Running snipit pipeline."))
+
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                "--forceall "
+                "{config[log_string]} "
+                f"--directory '{config[KEY_TEMPDIR]}' "
+                "--configfile {input.yaml:q} "
+                "--config outdir={params.outdir:q}  tempdir={params.tempdir:q} "
+                "--cores {workflow.cores} ")
 
 # rule get_consensus_sequences:
 #     input:
@@ -122,7 +166,11 @@ rule assess_haplotypes:
 #     output:
 #         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt")
 #     run:
-#         print(green(f"Generating consensus sequences for {params.barcode}."))
+#         with open(input.yaml, 'r') as f:
+#             config_loaded = yaml.safe_load(f)
+#         print(green(f"Generating haplotype consensus sequences for {params.barcode}."))
+#         for h in config_loaded["haplotypes"]:
+#             print(f"- {h}")
 #         print("----------------")
 #         shell("snakemake --nolock --snakefile {input.snakefile:q} "
 #                     "--forceall "
