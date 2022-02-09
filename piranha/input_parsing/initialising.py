@@ -27,12 +27,13 @@ def get_defaults():
                     KEY_NO_TEMP:False,
                     KEY_OVERWRITE:False,
                     KEY_REFERENCES_FOR_CNS:["Sabin1_vacc","Sabin2_vacc","Sabin3_vacc"],
+                    KEY_SUMMARY_HEADERS: ["taxon","sites","haplotype","num_reads","make_cns"],
 
                     # input seq options 
                     KEY_MIN_READ_LENGTH:1000,
                     KEY_MAX_READ_LENGTH:1300,
                     KEY_MIN_READS:50,   # where to pad to using datafunk
-                    KEY_MIN_PCENT:5,
+                    KEY_MIN_PCENT:10,
 
                     # misc defaults
                     KEY_THREADS:1,
