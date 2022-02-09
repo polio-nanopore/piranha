@@ -46,6 +46,8 @@ RESOURCE_KEY_FILENAME="filename"
 RESOURCE_KEY_DIRECTORY="directory"
 RESOURCE_KEY="KEY"
 
+KEY_SUMMARY_HEADERS = "report_summary_headers"
+
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 dependency_list = ["minimap2","snakemake","medaka","racon"]
