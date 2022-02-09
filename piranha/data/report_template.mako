@@ -590,7 +590,7 @@
 
       % for reference in data_for_report['variation_info']:
         <% reference_name = reference.replace("_"," ").title() %>
-        <h2><a id = "header_${reference}"></a>${reference_name}</h2> 
+        <h4><a id = "header_${reference}"></a>${reference_name}</h4> 
 
       <% figure_count +=1 %>
       <% ref_variation_info = data_for_report['variation_info'][reference] %>
