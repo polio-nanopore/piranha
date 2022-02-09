@@ -49,9 +49,9 @@ rule medaka_consensus:
         sam= rules.minimap2.output.sam
     log: os.path.join(config[KEY_TEMPDIR],"logs","{taxid}.medaka_consensus.log")
     params:
-        outdir=os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}"),
-        cns_mod = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","cns.mod.fasta")
+        outdir=os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}")
     output:
+        cns_mod = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","cns.mod.fasta"),
         probs = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus.fasta"),
         cns_publish = os.path.join(config[KEY_OUTDIR],"processed_data","{taxid}.consensus.fasta")
@@ -62,8 +62,8 @@ rule medaka_consensus:
         if [ -s {input.sam:q} ]
         
         then
-            sed "s/[:,-]/_/g" {input.draft:q} > {params.cns_mod:q}
-            medaka_consensus -i {input.basecalls:q} -d {params.cns_mod:q} -o {params.outdir:q} -t 2 &> {log:q}
+            sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
+            medaka_consensus -i {input.basecalls:q} -d {output.cns_mod:q} -o {params.outdir:q} -t 2 &> {log:q}
             cp {output.consensus:q} {output.cns_publish:q}
         else
             touch {output.consensus:q}
@@ -73,8 +73,8 @@ rule medaka_consensus:
 
 rule medaka_variant:
     input:
+        ref = rules.medaka_consensus.output.cns_mod,
         probs = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"),
-        ref = rules.files.params.ref,
         bam = rules.sort_index.output.bam
     log: os.path.join(config[KEY_TEMPDIR],"logs","{taxid}.medaka_variant.log")
     params:
