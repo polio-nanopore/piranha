@@ -76,7 +76,15 @@ def parse_vcf(fasta,vcf,min_reads,min_pcent,taxon,haplotypes_out):
                 fw.write(f"{taxon},{site_str},{i},{num_reads},False,{read_str}\n")
     return read_haplotypes
 
-                
+def write_haplotype_ref(ref,taxon,read_haplotypes,outdir):
+    reference = ""
+    for record in SeqIO.parse(ref, "fasta"):
+        reference = record
+
+    for h in read_haplotypes:
+        with open(os.path.join(outdir, f"{taxon}_{h}.reference.fasta"),"w") as fw:
+            fw.write(f">{taxon}|reference\n{record.seq}\n")
+
 def write_haplotype_fastq(reads,taxon,read_haplotypes,outdir):
     
     reads = SeqIO.index(reads,"fastq")
@@ -85,14 +93,17 @@ def write_haplotype_fastq(reads,taxon,read_haplotypes,outdir):
             for read in read_haplotypes[h]:
                 record = reads[read]
                 SeqIO.write(record,fw,"fastq")
-            
-def get_haplotypes(fasta,vcf,reads,out_haplotypes,outdir,taxon,min_reads,min_pcent):
+
+
+def get_haplotypes(fasta,vcf,reads,ref,out_haplotypes,outdir,taxon,min_reads,min_pcent):
     if not os.path.exists(outdir):
         os.mkdir(outdir)
+
 
     haps = parse_vcf(fasta,vcf,min_reads,min_pcent,taxon,out_haplotypes)
 
     write_haplotype_fastq(reads,taxon,haps,outdir)
+    write_haplotype_ref(ref,taxon,haps,outdir)
 
     return list(haps.keys())
 
@@ -122,6 +133,5 @@ def gather_haplotype_data(input_list,output_csv,config_out,config):
                         haplotype_stem = f"{taxon}_{haplotype}"
                         haplotypes_out.append(haplotype_stem)
         config["haplotypes"] = haplotypes_out
-
-        yaml.dump(config, fw) 
-
+        
+        yaml.dump(config, fw)

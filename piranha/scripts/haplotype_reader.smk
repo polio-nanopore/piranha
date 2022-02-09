@@ -8,26 +8,6 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 from piranha.analysis.get_haplotypes import *
 
-"""
-output files
--------------
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.ref.sam"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.sorted.bam"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.sorted.bam.bai"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","cns.mod.fasta"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus.fasta"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.pre.vcf"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.vcf"
-config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","pseudoaln.fasta"
-config[KEY_TEMPDIR],"assess_haplotypes","haplotypes_{taxid}.csv"
-
-config[KEY_OUTDIR],"processed_data","variation_info.json"
-config[KEY_OUTDIR],"processed_data","haplotypes.csv"
-config[KEY_OUTDIR],"processed_data","haplotype_config.yaml"
-config[KEY_OUTDIR],"processed_data","{taxid}_{haplotype}.fastq"
-"""
-
 rule all:
     input:
         expand(os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","variants.vcf"), taxid=config["taxa_present"]),
@@ -73,7 +53,8 @@ rule medaka_consensus:
         cns_mod = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","cns.mod.fasta")
     output:
         probs = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus_probs.hdf"),
-        consensus= os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus.fasta")
+        consensus= os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","consensus.fasta"),
+        cns_publish = os.path.join(config[KEY_OUTDIR],"processed_data","{taxid}.consensus.fasta")
     threads:
         2
     shell:
@@ -83,8 +64,10 @@ rule medaka_consensus:
         then
             sed "s/[:,-]/_/g" {input.draft:q} > {params.cns_mod:q}
             medaka_consensus -i {input.basecalls:q} -d {params.cns_mod:q} -o {params.outdir:q} -t 2 &> {log:q}
+            cp {output.consensus:q} {output.cns_publish:q}
         else
             touch {output.consensus:q}
+            touch {output.cns_publish:q}
         fi
         """
 
@@ -139,15 +122,20 @@ rule get_haplotype_data:
     input:
         fasta = rules.sam_to_seq.output.fasta,
         vcf = rules.medaka_variant.output.vcf,
-        reads = rules.files.params.reads
+        reads = rules.files.params.reads,
+        ref = rules.files.params.ref
     params:
         taxon = "{taxid}",
-        outdir = os.path.join(config[KEY_OUTDIR],"processed_data")
+        outdir = os.path.join(config[KEY_OUTDIR],"initial_processing")
     output:
         haplotypes = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","haplotypes_{taxid}.csv")
     run:
-        get_haplotypes(input.fasta,input.vcf,input.reads,
+        haps = get_haplotypes(input.fasta,input.vcf,input.reads,input.ref,
                         output.haplotypes,params.outdir,params.taxon,config[KEY_MIN_READS],config[KEY_MIN_PCENT])
+        
+        print("Haplotypes identified using medaka")
+        for hap in haps:
+            print(f"- {hap}")
 
 rule gather_haplotypes:
     input:
@@ -156,4 +144,5 @@ rule gather_haplotypes:
         csv = os.path.join(config[KEY_OUTDIR],"processed_data","haplotypes.csv"),
         config = os.path.join(config[KEY_OUTDIR],"processed_data","haplotype_config.yaml")
     run:
-        gather_haplotype_data(input,output.csv,output.config,config)
+        haps = gather_haplotype_data(input,output.csv,output.config,config)
+
