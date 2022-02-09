@@ -587,74 +587,156 @@
           <% figure_count +=1 %>
           <h3><strong>Figure ${figure_count}</strong> | Read length distribution for ${barcode}</h3>
           <hr>
+          <h3><strong>Table 1</strong> | Summary of barcode content </h3>
+          <table class="display nowrap" id="myTable">
+            <thead>
+              <tr>
+              %for col in config["report_summary_headers"]:
+              <th style="width:10%;">${col.title().replace("_"," ")}</th>
+              %endfor
+              </tr>
+            </thead>
+            <tbody>
+              % for row in data_for_report["summary_data"]:
+                  <tr>
+                    %for col in config["report_summary_headers"]:
+                      %if col=="taxon":
+                      <td><a href="#header_${row[col]}" style="color:${themeColor}">${row[col]}</a></td>
+                      %else:
+                      <td>${row[col]}</td>
+                      %endif
+                    %endfor
+                  </tr>
+              % endfor
+              </tbody>
+            </table>
+            <button class="accordion">Export image</button>
+            <div class="panel">
+            <div class="row">
+              <div class="col-sm-2" ><strong>Export table: </strong></div>
+              <div class="col-sm-8" id="tableExportID"></div>
+            </div>
+          </div>
+            <hr>
+            <script type="text/javascript">
+              $(document).ready( function () {
+                  var table = $('#myTable').DataTable({
+                    "scrollY": "100px",
+                    "paging": false,
+                    "border-bottom":false,
+                    dom: 'frtip',
+                    buttons: ["copy","csv","print"]
+                  });
+                  table.buttons().container().appendTo( $('#tableExportID') );
+                  $('a.toggle-vis').on( 'click', function (e) {
+                      e.preventDefault();
+              
+                      // Get the column API object
+                      var column = table.column( $(this).attr('data-column') );
+              
+                      // Toggle the visibility
+                      column.visible( ! column.visible() );
+                  } );
+    
+                } );
+            </script>
 
-      % for reference in data_for_report['variation_info']:
+      % for reference in taxa_present:
         <% reference_name = reference.replace("_"," ").title() %>
-        <h4><a id = "header_${reference}"></a>${reference_name}</h4> 
+        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${reference_name} haplotype report</h2> 
 
-      <% figure_count +=1 %>
-      <% ref_variation_info = data_for_report['variation_info'][reference] %>
-      <br>
-      <div id="var_scatter" style="width:95%"></div>
-
-          <script>
-            var vlSpec_scatter = {
-              "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-              "width": "container",
-              "height": 200,
-              "datasets": {"var_scatter": ${ref_variation_info}},
-              "data": {
-                "name": "var_scatter"
-                  },
-                "mark": "point",
-                "encoding": {
-                  "x": {
-                    "field": "x", 
-                    "type": "quantitative",
-                    "title": "Position (bp)",
-                    "axis": {
-                      "grid": false,
-                      "labelFont":"Helvetica Neue",
-                      "labelFontSize":18,
-                      "titleFontSize":18,
-                      "titleFont":"Helvetica Neue"
+        <% ref_variation_info = data_for_report[reference]['variation_info'] %>
+        <br>
+        <div id="var_scatter_${reference}" style="width:95%"></div>
+            <script>
+              var vlSpec_scatter = {
+                "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                "width": "container",
+                "height": 200,
+                "datasets": {"var_scatter": ${ref_variation_info}},
+                "data": {
+                  "name": "var_scatter"
                     },
-                  },
-                  "y": 
-                  {"field": "y",
-                  "type":"quantitative",
-                  "title": "Percentage",
-                  "scale": {"domain": [0, 100]},
-                  "axis":{
-                  "grid": false,
-                  "labelFont":"Helvetica Neue",
-                  "labelFontSize":18,
-                  "titleFontSize":18,
-                  "titleFont":"Helvetica Neue"}
-                  }
+                  "mark": {"type": "point", "tooltip": {"content": "data"}},
+                  "encoding": {
+                    "x": {
+                      "field": "Position", 
+                      "type": "quantitative",
+                      "title": "Position (bp)",
+                      "axis": {
+                        "grid": false,
+                        "labelFont":"Helvetica Neue",
+                        "labelFontSize":18,
+                        "titleFontSize":18,
+                        "titleFont":"Helvetica Neue"
+                      },
                     },
-                        "config": {
-                          "view": {"stroke": null},
-                          "axis": {"grid": false},
-                          "point": {"fill":"#476970","stroke":"#476970"},
-                          "text": {"font":"Helvetica Neue","fontWeight":0.1}
-                        }
-                };          
-          vegaEmbed('#var_scatter', vlSpec_scatter, {renderer: "svg"})
-                .then(result => console.log(result))
-                .catch(console.warn);
-        </script>
-          <% figure_count +=1 %>
-          <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${barcode}</h3>
-          <hr>
+                    "y": 
+                    {"field": "Percentage",
+                    "type":"quantitative",
+                    "title": "Percentage Alt Allele",
+                    "scale": {"domain": [0, 100]},
+                    "axis":{
+                    "grid": false,
+                    "labelFont":"Helvetica Neue",
+                    "labelFontSize":18,
+                    "titleFontSize":18,
+                    "titleFont":"Helvetica Neue"}
+                    }
+                      },
+                          "config": {
+                            "view": {"stroke": null},
+                            "axis": {"grid": false},
+                            "point": {"fill":"#476970","stroke":"#476970"},
+                            "text": {"font":"Helvetica Neue","fontWeight":0.1}
+                          }
+                  };          
+                vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
+                      .then(result => console.log(result))
+                      .catch(console.warn);
+                </script>
+            <% figure_count +=1 %>
+            <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${barcode}</h3>
+            <hr>
+          
+            <button class="accordion">Export image</button>
+            <div class="panel">
+              <div class="row">
+                <div class="column">
+                  <button id="${reference}_snipit_svg">SVG</button>
+                </div>
+                <div class="column">
+                  <button id="${reference}_snipit_png">PNG</button>
+                </div>
+              </div>
+            </div>
+            %if data_for_report[reference]["num_sites"] >= 3:
+              <div style="width: 90%" id="${reference}_snipit"> 
+                ${data_for_report[reference]["snipit_svg"]}
+              </div>  
+            %else:
+              <div  class="row" style="width: 100%;">
+                <div class="column" style="width: 100%; float: left;" id="${reference}_snipit"> 
+                  ${data_for_report[reference]["snipit_svg"]}
+                </div>
+                <div class="column" style="margin-left: 10%;"> 
+                </div>
+              </div>
+            %endif
+            <script type="text/javascript">
+              exportImageSVG("#${reference}_snipit_svg","#${reference}_snipit","${reference}_snipit_graph");
+            </script>
+            <script type="text/javascript">
+              exportImagePNG("#${reference}_snipit_png","#${reference}_snipit","${reference}_snipit_graph");
+            </script>
+            <br>
+            <div>
+              <% figure_count +=1 %>
+              <h3><strong>Figure ${figure_count}</strong> | snipit plot for queries in ${reference_name}</h3>
+              <hr>
+            </div>
           %endfor
-          
-          
-          <!-- <script type="text/javascript">
-            makeScatter("test_scatter", `${data_for_report["variation_info"]}`);
-          </script>  -->
-
-      </div>
+    </div>
     <br>
         
     <script>
