@@ -16,95 +16,51 @@ from piranha import __version__
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
-def count_reads(fastq_file):
-    record_dict = SeqIO.index(fastq_file, "fastq")
-    return len(record_dict)
 
-def get_read_counts(all_reads, classified_reads, filtered_reads, classified_filtered,data_for_report):
-    a_count = count_reads(all_reads)
-    ac_count = count_reads(classified_reads)
-    f_count = count_reads(filtered_reads)
-    fc_count = count_reads(classified_filtered)
-
-    data_for_report["total_reads"] = str(a_count)
-    data_for_report["total_classified"] = str(ac_count)
-    data_for_report["total_prop_classified"]  = str(round(ac_count/a_count, 2))
-    data_for_report["filtered_reads"] = str(f_count)
-    data_for_report["filtered_classified"] = str(fc_count)
-    data_for_report["filtered_prop_classified"]  = str(round(fc_count/f_count, 2))
-
-def load_svgfile(file,key, data_for_report):
-    svg = ""
-    with open(file,"r") as f:
+def get_snipit(taxon,snipit_file):
+    snipit_svg = ""
+    with open(snipit_file,"r") as f:
         for l in f:
             l = l.rstrip("\n")
-            svg+=f"{l}\n"
-    data_for_report[key] = svg
+            snipit_svg+=f"{l}\n"
+    return snipit_svg
 
-def load_histograms_svg(hist1, hist2, data_for_report):
-    
-    load_svgfile(hist1, "histogram1", data_for_report)
-    load_svgfile(hist2, "histogram2", data_for_report)
+def make_report(report_to_generate,read_length_file,variation_file,haplotype_info,barcode,config):
 
-def data_for_table(input_taxa, cns_path, data_for_report):
+    taxa_present = config[KEY_TAXA_PRESENT]
 
-    cns_built = []
-    files_to_remove = []
-    for r,d,f in os.walk(cns_path):
-        for filename in f:
-            if filename.endswith(".fasta"):
-                count = 0
-                for record in SeqIO.parse(os.path.join(r, filename),"fasta"):
-                    count +=1
-                if count != 0:
-                    cns_built.append(filename.split(".")[0])
-                else:
-                    files_to_remove.append(os.path.join(r,filename))
-
-
-    #pcent_reads,sub_reads,reads,rank,taxid,taxon
-    data_for_report["taxa_table"] = []
-    with open(input_taxa, "r") as f:
-        reader = csv.DictReader(f)
-        #pcent_reads,sub_reads,reads,rank,taxid,taxon
-        data_for_report["table_columns"] = ["taxid","taxon","reads","sub_reads","pcent_reads","consensus_available"]
-        row_dict = {}
-        for row in reader:
-            row_dict = row
-            if row["taxid"] in cns_built:
-                row_dict["consensus_available"] = "True"
-            else:
-                row_dict["consensus_available"] = "False"
-                
-            data_for_report["taxa_table"].append(row_dict)
-    return files_to_remove
-    
-def make_report(report_to_generate,read_length_file,variation_file,barcode,config):
-    #need to call this multiple times if there are multiple reports wanted
-    
     data_for_report = {}
     data_for_report["lengths"] = []
     with open(read_length_file, "r") as f:
         for l in f:
             l = l.rstrip("\n")
             try:
-
                 data_for_report["lengths"].append({"x":int(l)})
             except:
                 pass
-    
-    data_for_report["variation_info"] = {}
+
+    for taxon in taxa_present:
+        data_for_report[taxon] = {}
+        data_for_report[taxon]["snipit_svg"] = get_snipit(taxon,os.path.join(config[KEY_TEMPDIR],"snipit",f"{taxon}.svg"))
+
+    summary_data = []
+    num_sites = {}
+    with open(haplotype_info,"r") as f:
+        reader = csv.DictReader(f)
+        
+        for row in reader:
+            new_row = row
+            num_sites[new_row["taxon"]] = len(new_row["sites"].split(";"))
+            summary_data.append(new_row)
+
+    data_for_report["summary_data"] = summary_data
+
     with open(variation_file,"r") as f:
         var_data = json.load(f)
-        for ref in var_data:
-            data_for_report["variation_info"][ref] = []
-            x = var_data[ref]["x"]
-            y = var_data[ref]["y"]
+        for taxon in var_data:
+            data_for_report[taxon]["variation_info"] = var_data[taxon]
+            data_for_report[taxon]["num_sites"] = num_sites[taxon]
             
-            for i in range(len(x)):
-                data_for_report["variation_info"][ref].append({"x":x[i],"y":y[i]})
-
-    config["report_title"] = "Test report"
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
@@ -116,6 +72,7 @@ def make_report(report_to_generate,read_length_file,variation_file,barcode,confi
                     version = __version__,
                     barcode = barcode,
                     data_for_report = data_for_report,
+                    taxa_present = config["taxa_present"],
                     config=config)
 
     try:
