@@ -136,6 +136,7 @@ rule haplotype_consensus:
 rule generate_snipit:
     input:
         fasta = rules.haplotype_consensus.output.fasta,
+        yaml = rules.assess_haplotypes.output.config,
         snakefile = os.path.join(workflow.current_basedir,"snipit.smk")
     params:
         barcode = "{barcode}",
@@ -145,18 +146,35 @@ rule generate_snipit:
         txt = os.path.join(config[KEY_OUTDIR],"{barcode}","snipit.txt")
     run:
         print(green("Running snipit pipeline."))
-
+        print(input.fasta)
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                 "--forceall "
                 "{config[log_string]} "
                 f"--directory '{config[KEY_TEMPDIR]}' "
                 "--configfile {input.yaml:q} "
-                "--config outdir={params.outdir:q}  tempdir={params.tempdir:q} "
+                "--config fasta={input.fasta:q} outdir={params.outdir:q}  tempdir={params.tempdir:q} "
                 "--cores {workflow.cores} ")
 
-# rule get_consensus_sequences:
+rule generate_report:
+    input:
+        haplotype_info = rules.assess_haplotypes.output.csv,
+        read_lengths = rules.filter_by_length.output.lengths,
+        variation_info = rules.assess_haplotypes.output.var_data,
+        yaml = rules.assess_haplotypes.output.config,
+        snipit = rules.generate_snipit.output.txt
+    params:
+        barcode = "{barcode}",
+    output:
+        html = os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html")
+    run:
+        with open(input.yaml, 'r') as f:
+            config_loaded = yaml.safe_load(f)
+
+        make_report(output.html,input.read_lengths,input.variation_info,input.haplotype_info,params.barcode,config_loaded)
+
+
+# rule get_overall_report:
 #     input:
-#         snakefile = os.path.join(workflow.current_basedir,"cns_runner.smk"),
 #         yaml = rules.assess_haplotypes.output.config
 #     params:
 #         barcode = "{barcode}",
@@ -164,7 +182,7 @@ rule generate_snipit:
 #     threads: workflow.cores*0.5
 #     log: os.path.join(config[KEY_TEMPDIR],"{barcode}_consensus.smk.log")
 #     output:
-#         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt")
+#         html = os.path.join(config[KEY_OUTDIR],"piranha_report.html")
 #     run:
 #         with open(input.yaml, 'r') as f:
 #             config_loaded = yaml.safe_load(f)
@@ -178,80 +196,3 @@ rule generate_snipit:
 #                     "--configfile {input.yaml:q} "
 #                     "--config barcode={params.barcode} outdir={params.outdir:q} "
 #                     "--cores {threads} && touch {output.taxa}")
-
-
-# rule qc_cns_output:
-#     input:
-#         snakefile = os.path.join(workflow.current_basedir,"cns_qc.smk"),
-#         taxa = rules.assess_broad_diversity.output.taxa,
-#         cns = rules.get_consensus_sequences.output.taxa,
-#         yaml = rules.assess_broad_diversity.output.new_config
-#     params:
-#         barcode = "{barcode}",
-#         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc")
-#     threads: workflow.cores*0.5
-#     output:
-#         taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","categorised_sample","cns_qc","snp.prompt.txt")
-#     run:
-#         print("Running consensus pipeline.")
-#         shell("snakemake --nolock --snakefile {input.snakefile:q} "
-#                     "--forceall "
-#                     "--configfile {input.yaml:q} "
-#                     "--config barcode={params.barcode} outdir={params.outdir:q} "
-#                     "--cores 4 && touch {output.taxa}")
-
-
-rule generate_report:
-    input:
-        read_lengths = rules.filter_by_length.output.lengths,
-        variation_info = rules.assess_haplotypes.output.var_data,
-        yaml = rules.assess_haplotypes.output.config,
-    params:
-        barcode = "{barcode}",
-    output:
-        html = os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html")
-    run:
-
-        with open(input.yaml, 'r') as f:
-            config_loaded = yaml.safe_load(f)
-
-        make_report(output.html,input.read_lengths,input.variation_info,params.barcode,config_loaded)
-
-
-# rule publish:
-#     input:
-#         report = os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"),
-#         fkrona = os.path.join(config[KEY_OUTDIR],"{barcode}","classified","krona.filtered.html"),
-#         ukrona = os.path.join(config[KEY_OUTDIR],"{barcode}","classified","krona.unfiltered.html"),
-#         cns= os.path.join(config[KEY_OUTDIR],"{barcode}","processed_taxa","consensus_sequences","cns.prompt.txt")
-#     params:
-#         barcode = "{barcode}",
-#         pcns_path = os.path.join(config["publish_path"],"{barcode}","consensus_sequences")
-#     output:
-#         preport = os.path.join(config["publish_path"],"{barcode}","analysis_report.html"),
-#         rreport =os.path.join(config["repo_path"],"{barcode}","analysis_report.html"),
-#         pcns = os.path.join(config["publish_path"],"{barcode}","consensus_sequences","cns.prompt.txt"),
-#         rcns = os.path.join(config["repo_path"],"{barcode}","consensus_sequences","cns.prompt.txt"),
-#         pfkrona = os.path.join(config["publish_path"],"{barcode}","krona.filtered.html"),
-#         pukrona = os.path.join(config["publish_path"],"{barcode}","krona.unfiltered.html"),
-#         rfkrona = os.path.join(config["repo_path"],"{barcode}","krona.filtered.html"),
-#         rukrona = os.path.join(config["repo_path"],"{barcode}","krona.unfiltered.html")
-#     run:
-#         shell(
-#             """
-#             cp {input.report} {output.preport}
-#             cp {input.report} {output.rreport}
-#             cp {input.fkrona} {output.pfkrona}
-#             cp {input.fkrona} {output.rfkrona}
-#             cp {input.ukrona} {output.pukrona}
-#             cp {input.ukrona} {output.rukrona}
-#             cp {input.cns} {output.pcns}
-#             cp {input.cns} {output.rcns}
-#             """)
-#         try:
-#             shell("""
-#             cp {params.cns_path}/*.fasta {params.rcns_path}
-#             cp {params.cns_path}/*.fasta {params.pcns_path}
-#             """)
-#         except:
-#             print("No consensus files to copy for barcode {params.barcode}")
