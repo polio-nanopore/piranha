@@ -19,6 +19,7 @@ KEY_OVERWRITE="overwrite"
 KEY_OUTPUT_REPORT="output_report"
 
 # ANALYSIS OPTION KEYS
+KEY_ANALYSIS_MODE = "analysis_mode"
 KEY_REFERENCES_FOR_CNS = "references_for_cns"
 KEY_MIN_READ_LENGTH = "min_read_length"
 KEY_MAX_READ_LENGTH = "max_read_length"
@@ -50,6 +51,7 @@ KEY_SUMMARY_HEADERS = "report_summary_headers"
 
 
 # DEPENDENCIES AND RESOURCES TO CHECK
+valid_analysis_modes = ["stool","environmental"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
 module_list = ["mako","Bio"]
 
