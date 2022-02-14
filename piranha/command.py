@@ -38,6 +38,7 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
 
     analysis_group = parser.add_argument_group('Analysis options')
+    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: stool, environmental. Default: stool")
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help="Minimum read length.")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help="Maximum read length.")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help="Minimum read depth required for consensus generation.")
@@ -77,7 +78,9 @@ def main(sysargs = sys.argv[1:]):
     config = init.setup_config_dict(cwd,args.config)
     # Checks access to package data and grabs the snakefile
     data_install_checks.check_install(config)
-    snakefile = data_install_checks.get_snakefile(thisdir)
+
+    analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
+    snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
     # Threads and verbosity to config
     
 
