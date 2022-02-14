@@ -11,7 +11,8 @@ setup(name='piranha',
       version=__version__,
       packages=find_packages(),
       scripts=[
-            "piranha/scripts/piranha.smk",
+            "piranha/scripts/piranha_stool.smk",
+            "piranha/scripts/piranha_environmental.smk",
             "piranha/scripts/haplotype_consensus.smk",
             "piranha/scripts/snipit.smk",
             "piranha/scripts/haplotype_reader.smk"
