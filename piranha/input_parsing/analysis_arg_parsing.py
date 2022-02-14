@@ -28,3 +28,11 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_PCENT]:
         check_if_int(key,config)
 
+def analysis_mode(analysis_mode_arg,config):
+    # if command line arg, overwrite config value
+    misc.add_arg_to_config(KEY_ANALYSIS_MODE,analysis_mode_arg,config)
+
+    if config[KEY_ANALYSIS_MODE] not in valid_analysis_modes:
+        error_str = ', '.join(valid_analysis_modes)
+        sys.stderr.write(cyan(f"`{KEY_ANALYSIS_MODE}` must be one of {error_str}.\n"))
+        sys.exit(-1)
