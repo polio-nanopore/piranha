@@ -15,10 +15,11 @@ def package_data_check(filename,directory,key,config):
         sys.stderr.write(cyan(f'Error: Missing package data.')+f'\n\t- {filename}\nPlease install the latest piranha version with `piranha --update`.\n')
         sys.exit(-1)
 
-def get_snakefile(thisdir):
-    snakefile = os.path.join(thisdir, 'scripts','piranha.smk')
+def get_snakefile(thisdir,analysis_mode):
+
+    snakefile = os.path.join(thisdir, 'scripts',f'piranha_{analysis_mode}.smk')
     if not os.path.exists(snakefile):
-        sys.stderr.write(cyan(f'Error: cannot find Snakefile at {snakefile}\n Check installation\n'))
+        sys.stderr.write(cyan(f'Error: cannot find Snakefile at {snakefile}\n Check installation or specify another analysis mode\n'))
         sys.exit(-1)
     return snakefile
 
