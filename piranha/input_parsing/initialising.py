@@ -30,6 +30,7 @@ def get_defaults():
                     KEY_SUMMARY_HEADERS: ["taxon","sites","haplotype","num_reads","make_cns"],
 
                     # input seq options 
+                    KEY_ANALYSIS_MODE:"stool", #options are stool or environmental
                     KEY_MIN_READ_LENGTH:1000,
                     KEY_MAX_READ_LENGTH:1300,
                     KEY_MIN_READS:50,   # where to pad to using datafunk
