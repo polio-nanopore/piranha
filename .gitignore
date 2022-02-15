@@ -8,6 +8,11 @@ __pycache__/
 # C extensions
 *.so
 
+#snakemake 
+.snakemake/
+app/
+artifice/
+
 # Distribution / packaging
 .Python
 build/
