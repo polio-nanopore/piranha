@@ -60,13 +60,13 @@ def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode
                 KEY_REFERENCE_GROUP:ref_group}
             writer.writerow(mapped_row)
 
-def write_out_hits(hits,outfile,barcode,min_reads):
+def write_out_hits(hits,outfile,min_reads):
     with open(outfile,"w") as fw:
         for hit in hits:
             reads = hits[hit]
             if len(reads) >= min_reads:
                 for read in reads:
-                    fw.write(f"{barcode},{read},{hit}\n")
+                    fw.write(f"{read},{hit}\n")
 
 def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config):
     
@@ -76,7 +76,7 @@ def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config
     ref_index =  SeqIO.index(references_sequences,"fasta")
     write_out_report(ref_index,ref_name_map,csv_out,hits,unmapped,total_reads,barcode)
 
-    write_out_hits(hits,hits_out,barcode,config[KEY_MIN_READS])
+    write_out_hits(hits,hits_out,config[KEY_MIN_READS])
 
 
 def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
@@ -85,8 +85,7 @@ def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
         reader = csv.DictReader(f)
         for row in reader:
             summary_rows[row[KEY_BARCODE]] = {KEY_BARCODE: row[KEY_BARCODE],
-                                            KEY_SAMPLE: row[KEY_SAMPLE],
-                                            KEY_VIRUS_PRESENT: ""
+                                            KEY_SAMPLE: row[KEY_SAMPLE]
                                             }
             for field in SAMPLE_SUMMARY_HEADER_FIELDS:
                 if field not in summary_rows[row[KEY_BARCODE]]: # the rest are ref counters
@@ -101,6 +100,7 @@ def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
                 reader = csv.DictReader(f)
                 
                 for row in reader:
+                        
                     summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
                     writer.writerow(row)
                     
@@ -109,4 +109,41 @@ def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
         writer.writeheader()
         for barcode in summary_rows:
             row = summary_rows[barcode]
+
             writer.writerow(row)
+
+def check_which_refs_to_write(input_csv,min_reads,min_pcent):
+    to_write = set()
+    with open(input_csv,"r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if int(row[KEY_NUM_READS]) >= min_reads and float(row[KEY_PERCENT]) >= min_pcent:
+                to_write.add(row[KEY_REFERENCE])
+                print(f"{row[KEY_REFERENCE_GROUP]}\t{row[KEY_NUM_READS]} reads\t{row[KEY_PERCENT]}% of sample")
+    return list(to_write)
+
+def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
+    seq_index = SeqIO.index(input_fastq, "fastq")
+    
+    to_write = check_which_refs_to_write(input_csv,config[KEY_MIN_READS],config[KEY_MIN_PCENT])
+    
+    handle_dict = {}
+    for ref in to_write:
+        handle_dict[ref] = open(os.path.join(outdir,f"{ref}.fastq"),"w")
+    
+    not_written = collections.Counter()
+    with open(input_hits,"r") as f:
+        for l in f:
+            hit,ref = l.rstrip("\n").split(",")
+            try:
+                record = seq_index[hit]
+                handle = handle_dict[ref]
+                SeqIO.write(record,handle,"fastq")
+            except:
+                pass
+
+    for ref in handle_dict:
+        handle_dict[ref].close()
+
+
+
