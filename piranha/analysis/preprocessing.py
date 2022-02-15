@@ -79,8 +79,12 @@ def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config
     write_out_hits(hits,hits_out,config[KEY_MIN_READS])
 
 
-def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
+def diversity_report(input_files,csv_out,summary_out,config):
+    barcodes_csv= config[KEY_BARCODES_CSV]
+    min_reads = config[KEY_MIN_READS]
+    min_pcent = config[KEY_MIN_PCENT]
     summary_rows = {}
+    refs_out = collections.defaultdict(list)
     with open(barcodes_csv,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -100,17 +104,25 @@ def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
                 reader = csv.DictReader(f)
                 
                 for row in reader:
-                        
-                    summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
-                    writer.writerow(row)
+                    if int(row[KEY_NUM_READS]) >= min_reads and float(row[KEY_PERCENT]) >= min_pcent:
+                        refs_out[row[KEY_BARCODE]].append(row[KEY_REFERENCE])
+                        summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
+                        writer.writerow(row)
                     
     with open(summary_out,"w") as fw2:
         writer = csv.DictWriter(fw2, fieldnames=SAMPLE_SUMMARY_HEADER_FIELDS, lineterminator="\n")
         writer.writeheader()
         for barcode in summary_rows:
             row = summary_rows[barcode]
-
             writer.writerow(row)
+
+    config[KEY_BARCODES] = []
+    for barcode in refs_out:
+        refs = list(set(refs_out[barcode]))
+        config[barcode]=refs
+        config[KEY_BARCODES].append(barcode)
+    
+    return config
 
 def check_which_refs_to_write(input_csv,min_reads,min_pcent):
     to_write = set()
