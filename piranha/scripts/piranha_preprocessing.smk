@@ -3,9 +3,9 @@ import collections
 from Bio import SeqIO
 import yaml
 
-from piranha.utils.log_colours import green,cyan
+from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
-from piranha.analysis.parse_paf import parse_paf_file,diversity_report
+from piranha.analysis.preprocessing import *
 from piranha.analysis.filter_lengths import filter_reads_by_length
 from piranha.report.make_report import make_report
 ##### Target rules #####
@@ -13,7 +13,8 @@ from piranha.report.make_report import make_report
 rule all:
     input:
         os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv"),
-        expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config["barcodes"])
+        expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES]),
+        expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES])
 
 rule gather_files:
     input:
@@ -42,7 +43,7 @@ rule map_reads:
     threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}.minimap2_initial.log")
     output:
-        paf = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","filtered_reads.paf")
+        paf = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.paf")
     shell:
         """
         minimap2 -t {threads} -x map-ont --secondary=no --paf-no-hit \
@@ -67,21 +68,29 @@ rule assess_broad_diversity:
                         params.barcode,
                         config)
 
-
+rule write_hit_fastq:
+    input:
+        csv = rules.assess_broad_diversity.output.csv,
+        hits = rules.assess_broad_diversity.output.hits,
+        fastq = rules.filter_by_length.output.fastq
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups")
+    output:
+        txt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt")
+    run:
+        shell("touch {output.txt:q}")
+        print(green(params.barcode))
+        write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,config)
 
 rule gather_diversity_report:
     input:
-        refs = expand(os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config["barcodes"]),
-        hits = expand(os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","hits_min_reads.csv"), barcode=config["barcodes"])
+        refs = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES]),
+        hits = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_min_reads.csv"), barcode=config[KEY_BARCODES]),
+        txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES])
     output:
         refs= os.path.join(config[KEY_OUTDIR],"sample_composition.csv"),
-        summary = os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv"),
-        hits = os.path.join(config[KEY_OUTDIR],"hits.csv")
+        summary = os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv")
     run:
-        shell("cat {input.hits} > {output.hits:q}")
-
         refs_present = diversity_report(input.refs,output.refs,output.summary,config[KEY_BARCODES_CSV])
-
-        print("----------------")
-        print(green(f"Broad diversity assessed."))
-        print("----------------")
+        print(yellow("-----------------------"))
