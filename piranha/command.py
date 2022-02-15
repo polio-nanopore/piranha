@@ -96,16 +96,18 @@ def main(sysargs = sys.argv[1:]):
     init.misc_args_to_config(args.verbose,args.threads,config)
     init.set_up_verbosity(config)
 
+    preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
+
     if config[KEY_VERBOSE]:
         print(red("\n**** CONFIG ****"))
         for k in sorted(config):
             print(green(f" - {k}: ") + f"{config[k]}")
-        status = snakemake.snakemake(snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
+        status = snakemake.snakemake(preprocessing_snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
                                     workdir=config[KEY_TEMPDIR], config=config, cores=config[KEY_THREADS],lock=False
                                     )
     else:
         logger = custom_logger.Logger()
-        status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
+        status = snakemake.snakemake(preprocessing_snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
                                     workdir=config[KEY_TEMPDIR], config=config, cores=config[KEY_THREADS],lock=False,
                                     quiet=True,log_handler=logger.log_handler
                                     )
