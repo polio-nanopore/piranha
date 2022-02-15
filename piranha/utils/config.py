@@ -71,7 +71,7 @@ VALUE_COLOUR_THEME="#e68781"
 
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 SAMPLE_SUMMARY_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
-                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped","virus_present"]
+                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["stool","environmental"]
