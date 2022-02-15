@@ -86,11 +86,14 @@ rule write_hit_fastq:
 rule gather_diversity_report:
     input:
         refs = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES]),
-        hits = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_min_reads.csv"), barcode=config[KEY_BARCODES]),
         txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES])
     output:
         refs= os.path.join(config[KEY_OUTDIR],"sample_composition.csv"),
-        summary = os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv")
+        summary = os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv"),
+        yaml = os.path.join(config[KEY_OUTDIR],"preprocessing_config.yaml")
     run:
-        refs_present = diversity_report(input.refs,output.refs,output.summary,config[KEY_BARCODES_CSV])
+        barcode_config = diversity_report(input.refs,output.refs,output.summary,config)
+        
+        with open(output.yaml, 'w') as fw:
+            yaml.dump(barcode_config, fw) 
         print(yellow("-----------------------"))

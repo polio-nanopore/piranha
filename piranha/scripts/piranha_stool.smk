@@ -13,25 +13,15 @@ rule all:
     input:
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","consensus_sequences.fasta"), barcode=config["barcodes"])
-        
-rule get_read_files:
-    input:
-    output:
-    run:
-        if not os.path.exists(params.tax_out):
-            os.mkdir(params.tax_out)
 
-        if cns == True:
-            refs_present.append(reference)
+"""
+input files
+os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv")
+os.path.join(config[KEY_OUTDIR],"hits.csv")
+os.path.join(config[KEY_OUTDIR],"sample_composition.csv")
+"""
 
-            with open(os.path.join(tax_outdir,f"{reference}.fasta"),"w") as fref:
-                ref_record = ref_index[reference]
-                fref.write(f">{ref_record.id} display_name={ref_group}\n{ref_record.seq}\n")
-            
-            with open(os.path.join(tax_outdir,f"{reference}.fastq"),"w") as freads:
-                for hit in ref_hits:
-                    SeqIO.write(seq_index[hit],freads,"fastq")
-
+def figure_out_
 
 def write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config):
     barcode_config = config
