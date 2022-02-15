@@ -22,26 +22,26 @@ def get_defaults():
                     KEY_RUNID: False,
 
                     # Output options
-                    KEY_OUTPUT_PREFIX:"analysis",
+                    KEY_OUTPUT_PREFIX:VALUE_OUTPUT_PREFIX,
                     KEY_DATESTAMP:False,
                     KEY_NO_TEMP:False,
                     KEY_OVERWRITE:False,
-                    KEY_REFERENCES_FOR_CNS:["Sabin1_vacc","Sabin2_vacc","Sabin3_vacc"],
-                    KEY_SUMMARY_HEADERS: ["taxon","sites","haplotype","num_reads","make_cns"],
+                    KEY_REFERENCES_FOR_CNS:VALUE_REFERENCES_FOR_CNS,
+                    KEY_SUMMARY_HEADERS: VALUE_SUMMARY_HEADERS,
 
                     # input seq options 
-                    KEY_ANALYSIS_MODE:"stool", #options are stool or environmental
-                    KEY_MIN_READ_LENGTH:1000,
-                    KEY_MAX_READ_LENGTH:1300,
-                    KEY_MIN_READS:50,   # where to pad to using datafunk
-                    KEY_MIN_PCENT:10,
+                    KEY_ANALYSIS_MODE:VALUE_ANALYSIS_MODE, #options are stool or environmental
+                    KEY_MIN_READ_LENGTH:VALUE_MIN_READ_LENGTH,
+                    KEY_MAX_READ_LENGTH:VALUE_MAX_READ_LENGTH,
+                    KEY_MIN_READS:VALUE_MIN_READS,   # where to pad to using datafunk
+                    KEY_MIN_PCENT:VALUE_MIN_PCENT,
 
                     # misc defaults
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
 
-                    KEY_COLOUR_MAP: ["#e68781","#476970","#f5eece"],
-                    KEY_COLOUR_THEME: "#e68781"
+                    KEY_COLOUR_MAP: VALUE_COLOUR_MAP,
+                    KEY_COLOUR_THEME: VALUE_COLOUR_THEME
 
                     }
     return default_dict
