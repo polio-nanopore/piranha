@@ -2,76 +2,111 @@ import csv
 from Bio import SeqIO
 import collections
 from piranha.utils.config import *
-
 import os
-import yaml
 
-def group_hits(paf_file):
+def make_ref_display_name_map(references):
+    ref_map = {}
+    for record in SeqIO.parse(references,"fasta"):
+        display_name = ""
+        for item in str(record.description).split(" "):
+            if item.startswith("display_name"):
+                display_name = item.split("=")[1]
+        ref_map[record.id] = display_name
+    
+    return ref_map
 
+def group_hits(paf_file,ref_name_map):
+    total_reads= 0
     hits = collections.defaultdict(set)
     with open(paf_file, "r") as f:
         for l in f:
             tokens = l.rstrip("\n").split("\t")
             hits[tokens[5]].add(tokens[0])
+            total_reads +=1
     
     ref_hits = {}
-    not_mapped = []
+    not_mapped = 0
     for hit in hits:
         if hit == '*':
-            not_mapped = hits[hit]
+            not_mapped += 1
         else:
             ref_hits[hit] = hits[hit]
-    return ref_hits, not_mapped
+    return ref_hits, not_mapped,total_reads
 
-def write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir,hits,min_reads):
-    refs_present = []
-    with open(sample_composition,"w") as fw:
-        fw.write("reference,num_reads,cns_build\n")
+def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode):
+
+    pcent_unmapped = round((100*(unmapped/total_reads)),2)
+    
+    with open(csv_out,"w") as fw:
+        writer = csv.DictWriter(fw, fieldnames=SAMPLE_HIT_HEADER_FIELDS,lineterminator="\n")
+        writer.writeheader()
+        
+        unmapped_row = {
+            KEY_BARCODE:barcode,
+            KEY_REFERENCE:"unmapped",
+            KEY_NUM_READS:unmapped,
+            KEY_PERCENT: pcent_unmapped,
+            KEY_REFERENCE_GROUP:"unmapped"}
+        writer.writerow(unmapped_row)
+
         for reference in hits:
-            ref_hits = list(set(hits[reference]))
-            cns = False
-            if len(ref_hits) >= min_reads:
-                cns = True
-                for enterovirus in ["Enterovirus","Echovirus","Coxsackievirus"]:
-                    if reference.startswith(enterovirus):
-                        cns = False
+            hit_count = len(hits[reference])
+            ref_group = ref_map[reference]
+            mapped_row = {
+                KEY_BARCODE:barcode,
+                KEY_REFERENCE:reference,
+                KEY_NUM_READS:hit_count,
+                KEY_PERCENT: round((100*(hit_count/total_reads)),2),
+                KEY_REFERENCE_GROUP:ref_group}
+            writer.writerow(mapped_row)
 
-                fw.write(f"{reference},{len(ref_hits)},{cns}\n")
-                if cns == True:
-                    refs_present.append(reference)
+def write_out_hits(hits,outfile,barcode,min_reads):
+    with open(outfile,"w") as fw:
+        for hit in hits:
+            reads = hits[hit]
+            if len(reads) >= min_reads:
+                for read in reads:
+                    fw.write(f"{barcode},{read},{hit}\n")
 
-                    with open(os.path.join(tax_outdir,f"{reference}.fasta"),"w") as fref:
-                        ref_record = ref_index[reference]
-                        fref.write(f">{ref_record.id}\n{ref_record.seq}\n")
-                    
-                    with open(os.path.join(tax_outdir,f"{reference}.fastq"),"w") as freads:
-                        for hit in ref_hits:
-                            SeqIO.write(seq_index[hit],freads,"fastq")
-            else:
-                fw.write(f"{reference},{len(ref_hits)},{cns}\n")
-    return refs_present
-
-def write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config):
-    barcode_config = config
-    barcode_config[KEY_BARCODE] = barcode
-    barcode_config[KEY_TAXA_PRESENT] = refs_present
-    barcode_config[KEY_HITS] = list(hits.keys())
-    barcode_config[KEY_TAXA_OUTDIR] = tax_outdir
-
-    with open(config_out, 'w') as fw:
-        yaml.dump(barcode_config, fw) 
-
-def parse_paf_file(paf_file,read_file,sample_composition,references_sequences,tax_outdir,config_out,barcode,config):
-
-    hits, not_mapped = group_hits(paf_file)
-
-    seq_index = SeqIO.index(read_file, "fastq")
+def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config):
+    
+    ref_name_map = make_ref_display_name_map(references_sequences)
+    
+    hits, unmapped,total_reads = group_hits(paf_file,ref_name_map)
     ref_index =  SeqIO.index(references_sequences,"fasta")
+    write_out_report(ref_index,ref_name_map,csv_out,hits,unmapped,total_reads,barcode)
 
-    refs_present = write_out_report_ref_reads(seq_index,ref_index,sample_composition,tax_outdir,hits,config[KEY_MIN_READS])
-
-    write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config)
-
-    return refs_present
+    write_out_hits(hits,hits_out,barcode,config[KEY_MIN_READS])
 
 
+def diversity_report(input_files,csv_out,summary_out,barcodes_csv):
+    summary_rows = {}
+    with open(barcodes_csv,"r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            summary_rows[row[KEY_BARCODE]] = {KEY_BARCODE: row[KEY_BARCODE],
+                                            KEY_SAMPLE: row[KEY_SAMPLE],
+                                            KEY_VIRUS_PRESENT: ""
+                                            }
+            for field in SAMPLE_SUMMARY_HEADER_FIELDS:
+                if field not in summary_rows[row[KEY_BARCODE]]: # the rest are ref counters
+                    summary_rows[row[KEY_BARCODE]][field] = 0
+
+    with open(csv_out,"w") as fw:
+        writer = csv.DictWriter(fw,fieldnames=SAMPLE_HIT_HEADER_FIELDS,lineterminator="\n")
+        writer.writeheader()
+
+        for report_file in input_files:
+            with open(report_file, "r") as f:
+                reader = csv.DictReader(f)
+                
+                for row in reader:
+                    summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
+                    writer.writerow(row)
+                    
+    with open(summary_out,"w") as fw2:
+        writer = csv.DictWriter(fw2, fieldnames=SAMPLE_SUMMARY_HEADER_FIELDS, lineterminator="\n")
+        writer.writeheader()
+        for barcode in summary_rows:
+            row = summary_rows[barcode]
+            writer.writerow(row)
