@@ -12,80 +12,12 @@ from piranha.report.make_report import make_report
 
 rule all:
     input:
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config["barcodes"]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","haplotypes.csv"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
         # expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences","cns.prompt.txt"), barcode=config["barcodes"]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","consensus_sequences.fasta"), barcode=config["barcodes"])
 
-
-rule gather_files:
-    input:
-        fastq = os.path.join(config[KEY_READDIR], "{barcode}", f"fastq_runid_{config[KEY_RUNID]}_0.fastq")
-    params:
-        file_path = os.path.join(config[KEY_READDIR], "{barcode}")
-    output:
-        fastq = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","nanopore_reads.fastq")
-    shell:
-        """
-        cat {params.file_path}/fastq_*.fastq > {output[0]}
-        """
-
-rule filter_by_length:
-    input:
-        rules.gather_files.output.fastq
-    output:
-        fastq = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","filtered_reads.fastq"),
-        lengths = os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","lengths.txt")
-    run:
-        filter_reads_by_length(input[0],output.fastq,output.lengths,config)
-
-rule map_reads:
-    input:
-        ref = config[KEY_REFERENCE_SEQUENCES],
-        fastq = rules.filter_by_length.output.fastq
-    params:
-        barcode = "{barcode}"
-    threads: workflow.cores
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}.minimap2_initial.log")
-    output:
-        paf = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","filtered_reads.paf")
-    shell:
-        """
-        minimap2 -t {threads} -x map-ont --secondary=no --paf-no-hit \
-        {input.ref:q} \
-        {input.fastq:q} -o {output:q} &> {log:q}
-        """
-
-rule assess_broad_diversity:
-    input:
-        map_file = rules.map_reads.output.paf,
-        fastq = rules.filter_by_length.output.fastq,
-        ref = config[KEY_REFERENCE_SEQUENCES]
-    params:
-        tax_out = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing"),
-        barcode = "{barcode}"
-    output:
-        new_config = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","config.yaml"),
-        taxa = os.path.join(config[KEY_OUTDIR],"{barcode}","initial_processing","refs_present.csv")
-    run:
-        if not os.path.exists(params.tax_out):
-            os.mkdir(params.tax_out)
-
-        refs_present = parse_paf_file(input.map_file,
-                        input.fastq,
-                        output.taxa,
-                        config[KEY_REFERENCE_SEQUENCES],
-                        params.tax_out,
-                        output.new_config,
-                        params.barcode,
-                        config)
-
-        print(green(f"Broad diversity in {params.barcode}:"))
-        for ref in refs_present:
-            print(f"- {ref}")
-        print("----------------")
 
 rule assess_haplotypes:
     input:
