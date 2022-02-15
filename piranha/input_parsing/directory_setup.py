@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from piranha.utils.log_colours import green,cyan
+from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils import misc
 from piranha.utils.config import *
 
@@ -53,6 +53,7 @@ def datestamped_outdir(config):
 
 def clear_old_files(config):
     if config[KEY_OVERWRITE] and os.path.exists(config[KEY_OUTDIR]):
+        print(yellow("-----------------------"))
         print(green("Overwriting previous output in ") + config[KEY_OUTDIR] + ".")
         old_files = glob.glob(f'{config[KEY_OUTDIR]}/*.*', recursive=True)
 

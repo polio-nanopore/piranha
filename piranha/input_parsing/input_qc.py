@@ -6,7 +6,7 @@ import csv
 
 from piranha.utils import misc
 
-from piranha.utils.log_colours import green,cyan
+from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
 
 def parse_barcodes_csv(barcodes_csv,config):
@@ -64,7 +64,7 @@ def parse_read_dir(readdir,config):
     config[KEY_RUNID] = run_id
     
     print(green("Found read files"))
-    print("----------------")
+    print(yellow("-----------------------"))
     for d in sorted(count_read_files):
         if count_read_files[d] == 1:
             print(green(f"Barcode {d}:\t") + f"{count_read_files[d]} fastq file")
