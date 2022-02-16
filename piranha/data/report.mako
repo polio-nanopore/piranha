@@ -384,90 +384,85 @@
     <div class="container">
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
-        <header class="piranha-header">
-            piranha ${version} | 
-            <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
-            <hr>
-        </header>
+      <header class="piranha-header">
+          piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+          <hr>
+      </header>
         
-        <h1>piranha report
-            <small class="text-muted" style="color:${themeColor}">${date}</small>
-        </h1>
-        <br>
+      <h1>piranha report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
+      <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
+      <br>
       <% figure_count = 0 %>
-          
-          <h3><strong>Table 1</strong> | Composition of samples in run </h3>
-          <table class="display nowrap" id="myTable">
-            <thead>
-              <tr>
-              %for col in config["table_header"]:
-              <th style="width:10%;">${col.title().replace("_"," ")}</th>
-              %endfor
-              </tr>
-            </thead>
-            <tbody>
-              % for row in data_for_report["summary_table"]:
-                  <tr>
-                    %for col in config["table_header"]:
-                      %if col=="sample":
-                      <td><a href="#header_${row[col]}" style="color:${themeColor}">${row[col]}</a></td>
-                      %else:
-                      <td>${row[col]}</td>
-                      %endif
-                    %endfor
-                  </tr>
-              % endfor
-              </tbody>
-            </table>
-            <button class="accordion">Export table</button>
-            <div class="panel">
-            <div class="row">
-              <div class="col-sm-2" ><strong>Export table: </strong></div>
-              <div class="col-sm-8" id="tableExportID"></div>
-            </div>
+      <h3><strong>Table 1</strong> | Composition of samples in run </h3>
+      <button class="accordion">Export table</button>
+        <div class="panel">
+          <div class="row">
+            <div class="col-sm-2" ><strong>Export table: </strong></div>
+            <div class="col-sm-8" id="tableExportID"></div>
           </div>
-            <hr>
-            <script type="text/javascript">
-              $(document).ready( function () {
-                  var table = $('#myTable').DataTable({
-                    "scrollY": "200px",
-                    "paging": false,
-                    "border-bottom":false,
-                    dom: 'frtip',
-                    buttons: ["copy","csv","print"]
-                  });
-                  table.buttons().container().appendTo( $('#tableExportID') );
-                  $('a.toggle-vis').on( 'click', function (e) {
-                      e.preventDefault();
-              
-                      // Get the column API object
-                      var column = table.column( $(this).attr('data-column') );
-              
-                      // Toggle the visibility
-                      column.visible( ! column.visible() );
-                  } );
-    
-                } );
-            </script>
-    </div>
-    <br>
+        </div>
         
-    <script>
-        var acc = document.getElementsByClassName("accordion");
-        var i;
-        for (i = 0; i < acc.length; i++) {
-              acc[i].addEventListener("click", function() {
-                this.classList.toggle("active");
-                var panel = this.nextElementSibling;
-                if (panel.style.maxHeight) {
-                  panel.style.maxHeight = null;
-                } else {
-                  panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
-                } 
+        <table class="display nowrap" id="myTable">
+          <thead>
+            <tr>
+              %for col in config["table_header"]:
+                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+              %endfor
+            </tr>
+          </thead>
+          <tbody>
+            % for row in data_for_report["summary_table"]:
+              <tr>
+                %for col in config["table_header"]:
+                  %if col=="sample":
+                    <td><a href="#header_${row[col]}" style="color:${themeColor}">${row[col]}</a></td>
+                  %else:
+                    <td>${row[col]}</td>
+                  %endif
+                %endfor
+              </tr>
+            % endfor
+          </tbody>
+        </table>
+        <hr>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              var table = $('#myTable').DataTable({
+                "scrollY": "200px",
+                "paging": false,
+                "border-bottom":false,
+                dom: 'frtip',
+                buttons: ["copy","csv","print"]
               });
-            }
+              table.buttons().container().appendTo( $('#tableExportID') );
+              $('a.toggle-vis').on( 'click', function (e) {
+                  e.preventDefault();
+          
+                  // Get the column API object
+                  var column = table.column( $(this).attr('data-column') );
+          
+                  // Toggle the visibility
+                  column.visible( ! column.visible() );
+              } );
+            } );
+        </script>
+      </div>
+    <br>
+    <script>
+      var acc = document.getElementsByClassName("accordion");
+      var i;
+      for (i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+              this.classList.toggle("active");
+              var panel = this.nextElementSibling;
+              if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+              } else {
+                panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
+              } 
+            });
+          }
     </script>
-
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>
@@ -476,15 +471,14 @@
             <p>
             <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg?token=GHSAT0AAAAAABHOJJPRFXUJULWKXQA5SVOMYP46NBA" vertical-align="left" width="50" height="50"></img>
             <p>
-        </div>
-
-      <div class="col-sm-11" style="text-align: right;">
-        piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
-
+          </div>
+          <div class="col-sm-11" style="text-align: right;">
+            piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small>
+          </div>
         <br><br>
         </p>
       </div>
     </footer>
-    </div>
-  </body>
+  </div>
+</body>
 </html>

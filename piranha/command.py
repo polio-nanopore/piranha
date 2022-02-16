@@ -55,6 +55,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
 
     misc_group = parser.add_argument_group('Misc options')
+    misc_group.add_argument('--username',action="store",help="Username to appear in report")
     misc_group.add_argument('-t', '--threads', action='store',dest="threads",type=int,help="Number of threads")
     misc_group.add_argument("--verbose",action="store_true",help="Print lots of stuff to screen")
     misc_group.add_argument("-v","--version", action='version', version=f"piranha {__version__}")
@@ -94,7 +95,7 @@ def main(sysargs = sys.argv[1:]):
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
     # ready to run? either verbose snakemake or quiet mode
-    init.misc_args_to_config(args.verbose,args.threads,config)
+    init.misc_args_to_config(args.verbose,args.threads,args.username,config)
     init.set_up_verbosity(config)
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")

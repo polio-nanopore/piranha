@@ -39,6 +39,7 @@ KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
 
 # MISC KEYS
+KEY_USERNAME="username"
 KEY_VERBOSE="verbose"
 KEY_THREADS="threads"
 KEY_LOG_API="log_api"

@@ -39,6 +39,7 @@ def get_defaults():
                     KEY_MIN_PCENT:VALUE_MIN_PCENT,
 
                     # misc defaults
+                    KEY_USERNAME:"",
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
 
@@ -149,9 +150,10 @@ def setup_config_dict(cwd,config_arg):
         config[KEY_INPUT_PATH] = cwd
     return config
 
-def misc_args_to_config(verbose,threads, config):
+def misc_args_to_config(verbose,threads,username,config):
     misc.add_arg_to_config(KEY_VERBOSE,verbose,config)
     misc.add_arg_to_config(KEY_THREADS,threads,config)
+    misc.add_arg_to_config(KEY_USERNAME,username,config)
 
 def set_up_verbosity(config):
     if config[KEY_VERBOSE]:
