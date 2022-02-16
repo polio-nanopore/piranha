@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import csv
 from Bio import SeqIO
 import collections

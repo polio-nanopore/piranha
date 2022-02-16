@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 
 from piranha.utils.log_colours import green,cyan

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import collections
 from Bio import SeqIO
@@ -5,33 +6,39 @@ import yaml
 
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
-from piranha.analysis.parse_paf import parse_paf_file
-from piranha.analysis.filter_lengths import filter_reads_by_length
-from piranha.report.make_report import make_report
 ##### Target rules #####
-rule all:
-    input:
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html"), barcode=config["barcodes"]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","processed_data","consensus_sequences.fasta"), barcode=config["barcodes"])
-
 """
 input files
 os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv")
 os.path.join(config[KEY_OUTDIR],"hits.csv")
 os.path.join(config[KEY_OUTDIR],"sample_composition.csv")
 """
+rule all:
+    input:
+        os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta"),
+        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
 
-def figure_out_
+rule generate_consensus_sequences:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"consensus.smk"),
+        yaml = os.path.join(config[KEY_TEMPDIR],"preprocessing_config.yaml"),
+        prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","prompt.txt")
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
+    threads: workflow.cores*0.5
+    output:
+        os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta")
+    run:
 
-def write_new_config(hits,refs_present,config_out,barcode,tax_outdir,config):
-    barcode_config = config
-    barcode_config[KEY_BARCODE] = barcode
-    barcode_config[KEY_TAXA_PRESENT] = refs_present
-    barcode_config[KEY_HITS] = list(hits.keys())
-    barcode_config[KEY_TAXA_OUTDIR] = tax_outdir
-
-    with open(config_out, 'w') as fw:
-        yaml.dump(barcode_config, fw) 
+        print(green(f"Generating consensus sequences for {params.barcode}"))
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                    "--forceall "
+                    "{config[log_string]} "
+                    "--configfile {input.yaml:q} "
+                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+                    "--cores {threads}")
 
 
 rule assess_haplotypes:
