@@ -9,7 +9,7 @@ from piranha.utils import data_install_checks
 from piranha.input_parsing import analysis_arg_parsing
 from piranha.input_parsing import directory_setup
 from piranha.input_parsing import input_qc
-
+from piranha.report.make_report import make_output_report
 import piranha.utils.custom_logger as custom_logger
 from piranha.utils.log_colours import green,cyan,red
 from piranha.utils.config import *
@@ -114,7 +114,7 @@ def main(sysargs = sys.argv[1:]):
                                     )
 
     if status: # translate "success" into shell exit code of 0
-        with open(os.path.join(config[KEY_TEMPDIR],"preprocessing_config.yaml"),"r") as f:
+        with open(os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),"r") as f:
             preprocessing_config = yaml.safe_load(f)
         
 
@@ -133,9 +133,14 @@ def main(sysargs = sys.argv[1:]):
                                         quiet=True,log_handler=logger.log_handler
                                         )
         if status: 
+            report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
+            summary_csv=os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY)
+            composition_csv=os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION)
+
+            make_output_report(report,summary_csv,composition_csv,config)
+
             return 0
         
-
 
         return 1
     return 1
