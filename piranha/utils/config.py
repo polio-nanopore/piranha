@@ -29,6 +29,7 @@ KEY_REFERENCE_SEQUENCES = "reference_sequences"
 
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
+KEY_DATE="date"
 KEY_REFERENCE = "reference"
 KEY_NUM_READS = "num_reads"
 KEY_PERCENT = "percent_of_sample"
@@ -73,6 +74,12 @@ SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads",
 SAMPLE_SUMMARY_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 
+# file names
+OUTPUT_REPORT = "report.html"
+SAMPLE_COMPOSITION = "sample_composition.csv"
+PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
+PREPROCESSING_CONFIG = "preprocessing_config.yaml"
+
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["stool","environmental"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
@@ -84,5 +91,8 @@ resources = [
         RESOURCE_KEY_FILENAME:"references.VP1.fasta"},
         {RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"report_template.mako"}
+        RESOURCE_KEY_FILENAME:"report.mako"},
+        {RESOURCE_KEY:"barcode_report_template",
+        RESOURCE_KEY_DIRECTORY:"data",
+        RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]
