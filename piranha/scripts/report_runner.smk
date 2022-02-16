@@ -2,28 +2,26 @@ import os
 import collections
 from Bio import SeqIO
 import yaml
-
+import pkg_resources
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
-from piranha.analysis.parse_paf import parse_paf_file
-from piranha.analysis.filter_lengths import filter_reads_by_length
-from piranha.report.make_report import make_report
+from piranha.report.make_report import make_output_report
 
 """
-requires snakemake --snakefile piranha/scripts/report_runner.smk --cores 1 --config barcode=barcode01 outdir=analysis_2022-02-09
+requires snakemake --snakefile piranha/scripts/report_runner.smk --cores 1 --config outdir=analysis_2022-02-09
 """
-barcode = config['barcode']
+package_datafile = os.path.join("data","report.mako")
+data = pkg_resources.resource_filename('piranha',package_datafile)
+config[KEY_REPORT_TEMPLATE] = data
 
 rule generate_report:
     input:
-        haplotype_info = os.path.join(config[KEY_OUTDIR],f"{barcode}","processed_data","haplotypes.csv"),
-        read_lengths = os.path.join(config[KEY_OUTDIR],f"{barcode}","processed_data","lengths.txt"),
-        variation_info = os.path.join(config[KEY_OUTDIR],f"{barcode}","processed_data","variation_info.json"),
-        yaml = os.path.join(config[KEY_OUTDIR],f"{barcode}","processed_data","haplotype_config.yaml")
+        summary_csv=os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
+        composition_csv=os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION),
+        yaml = os.path.join(config[KEY_OUTDIR],PREPROCESSING_CONFIG)
     output:
-        html = os.path.join(config[KEY_OUTDIR],f"{barcode}","analysis_report.html")
+        report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
     run:
-        with open(input.yaml, 'r') as f:
-            config_loaded = yaml.safe_load(f)
-
-        make_report(output.html,input.read_lengths,input.variation_info,input.haplotype_info,barcode,config_loaded)
+        with open(input.yaml,"r") as f:
+            config_loaded = yaml.safe_load(f) 
+        make_output_report(output.report,input.summary_csv,input.composition_csv,config_loaded)
