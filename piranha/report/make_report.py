@@ -25,19 +25,11 @@ def get_snipit(taxon,snipit_file):
             snipit_svg+=f"{l}\n"
     return snipit_svg
 
-def make_report(report_to_generate,read_length_file,variation_file,haplotype_info,barcode,config):
+def make_sample_report(report_to_generate,read_length_file,variation_file,haplotype_info,barcode,config):
 
     taxa_present = config[KEY_TAXA_PRESENT]
 
     data_for_report = {}
-    data_for_report["lengths"] = []
-    with open(read_length_file, "r") as f:
-        for l in f:
-            l = l.rstrip("\n")
-            try:
-                data_for_report["lengths"].append({"x":int(l)})
-            except:
-                pass
 
     for taxon in taxa_present:
         data_for_report[taxon] = {}
@@ -73,6 +65,41 @@ def make_report(report_to_generate,read_length_file,variation_file,haplotype_inf
                     barcode = barcode,
                     data_for_report = data_for_report,
                     taxa_present = config["taxa_present"],
+                    config=config)
+
+    try:
+        mytemplate.render_context(ctx)
+    except:
+        traceback = RichTraceback()
+        for (filename, lineno, function, line) in traceback.traceback:
+            print("File %s, line %s, in %s" % (filename, lineno, function))
+            print(line, "\n")
+        print("%s: %s" % (str(traceback.error.__class__.__name__), traceback.error))
+
+    with open(report_to_generate, 'w') as fw:
+        print(green("Generating: ") + f"{report_to_generate}")
+        fw.write(buf.getvalue())
+
+def make_output_report(report_to_generate,preprocessing_summary,sample_composition,config):
+
+    data_for_report = {"summary_table":[]}
+    with open(preprocessing_summary,"r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            data_for_report["summary_table"].append(row)
+    
+    config["table_header"] = SAMPLE_SUMMARY_HEADER_FIELDS
+    
+    template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
+    mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
+
+    mytemplate = Template(filename=config[KEY_REPORT_TEMPLATE], lookup=mylookup)
+    buf = StringIO()
+
+    ctx = Context(buf, 
+                    date = date.today(), 
+                    version = __version__,
+                    data_for_report = data_for_report,
                     config=config)
 
     try:
