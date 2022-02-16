@@ -138,7 +138,7 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
     seq_index = SeqIO.index(input_fastq, "fastq")
     
     to_write = check_which_refs_to_write(input_csv,config[KEY_MIN_READS],config[KEY_MIN_PCENT])
-    
+
     handle_dict = {}
     for ref in to_write:
         handle_dict[ref] = open(os.path.join(outdir,f"{ref}.fastq"),"w")
@@ -156,6 +156,17 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
 
     for ref in handle_dict:
         handle_dict[ref].close()
+    
+    return to_write
+
+def write_out_ref_fasta(to_write,ref_file,outdir):
+    ref_index = SeqIO.index(ref_file, "fasta")
+
+    for ref in to_write:
+        with open(os.path.join(outdir,f"{ref}.reference.fasta"),"w") as fw:
+            record = ref_index[ref]
+            fw.write(f">{record.description}\n{record.seq}\n")
+    
 
 
 

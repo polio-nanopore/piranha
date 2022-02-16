@@ -81,7 +81,10 @@ rule write_hit_fastq:
     run:
         shell("touch {output.txt:q}")
         print(green(params.barcode))
-        write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,config)
+        to_write = write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,config)
+
+        write_out_ref_fasta(to_write,config[KEY_REFERENCE_SEQUENCES],params.outdir)
+
 
 rule gather_diversity_report:
     input:
@@ -90,7 +93,7 @@ rule gather_diversity_report:
     output:
         refs= os.path.join(config[KEY_OUTDIR],"sample_composition.csv"),
         summary = os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv"),
-        yaml = os.path.join(config[KEY_OUTDIR],"preprocessing_config.yaml")
+        yaml = os.path.join(config[KEY_TEMPDIR],"preprocessing_config.yaml")
     run:
         barcode_config = diversity_report(input.refs,output.refs,output.summary,config)
         
