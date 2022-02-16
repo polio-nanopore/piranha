@@ -4,6 +4,7 @@ Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 
 <img src="./docs/piranha.svg" width="400">
 
+## See example report [here](https://aineotoole.co.uk/piranha/report.html)
 
 ## Installation instructions
 -  Clone the piranha repository with `git clone https://github.com/aineniamh/piranha.git && cd piranha`
