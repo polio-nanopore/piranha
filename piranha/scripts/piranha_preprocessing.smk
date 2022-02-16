@@ -60,7 +60,7 @@ rule assess_broad_diversity:
         barcode = "{barcode}"
     output:
         csv = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"),
-        hits = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_min_reads.csv")
+        hits = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_reads.csv")
     run:
         parse_paf_file(input.map_file,
                         output.csv,

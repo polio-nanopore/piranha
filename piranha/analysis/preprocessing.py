@@ -61,13 +61,12 @@ def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode
                 KEY_REFERENCE_GROUP:ref_group}
             writer.writerow(mapped_row)
 
-def write_out_hits(hits,outfile,min_reads):
+def write_out_hits(hits,outfile):
     with open(outfile,"w") as fw:
         for hit in hits:
             reads = hits[hit]
-            if len(reads) >= min_reads:
-                for read in reads:
-                    fw.write(f"{read},{hit}\n")
+            for read in reads:
+                fw.write(f"{read},{hit}\n")
 
 def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config):
     
@@ -77,7 +76,7 @@ def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config
     ref_index =  SeqIO.index(references_sequences,"fasta")
     write_out_report(ref_index,ref_name_map,csv_out,hits,unmapped,total_reads,barcode)
 
-    write_out_hits(hits,hits_out,config[KEY_MIN_READS])
+    write_out_hits(hits,hits_out)
 
 
 def diversity_report(input_files,csv_out,summary_out,config):
@@ -105,9 +104,9 @@ def diversity_report(input_files,csv_out,summary_out,config):
                 reader = csv.DictReader(f)
                 
                 for row in reader:
+                    summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
                     if int(row[KEY_NUM_READS]) >= min_reads and float(row[KEY_PERCENT]) >= min_pcent:
                         refs_out[row[KEY_BARCODE]].append(row[KEY_REFERENCE])
-                        summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
                         writer.writerow(row)
                     
     with open(summary_out,"w") as fw2:
