@@ -16,6 +16,7 @@ from piranha.utils.config import *
 
 import os
 import sys
+import yaml
 import argparse
 import snakemake
 
@@ -113,8 +114,30 @@ def main(sysargs = sys.argv[1:]):
                                     )
 
     if status: # translate "success" into shell exit code of 0
-       return 0
+        with open(os.path.join(config[KEY_TEMPDIR],"preprocessing_config.yaml"),"r") as f:
+            preprocessing_config = yaml.safe_load(f)
+        
 
+        if config[KEY_VERBOSE]:
+
+            print(red("\n**** CONFIG ****"))
+            for k in sorted(config):
+                print(green(f" - {k}: ") + f"{config[k]}")
+            status = snakemake.snakemake(snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
+                                        workdir=config[KEY_TEMPDIR], config=preprocessing_config, cores=config[KEY_THREADS],lock=False
+                                        )
+        else:
+            logger = custom_logger.Logger()
+            status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
+                                        workdir=config[KEY_TEMPDIR], config=preprocessing_config, cores=config[KEY_THREADS],lock=False,
+                                        quiet=True,log_handler=logger.log_handler
+                                        )
+        if status: 
+            return 0
+        
+
+
+        return 1
     return 1
 
 
