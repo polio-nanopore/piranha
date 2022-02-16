@@ -416,6 +416,12 @@
                 %for col in config["table_header"]:
                   %if col=="sample":
                     <td><a href="#header_${row[col]}" style="color:${themeColor}">${row[col]}</a></td>
+                  %elif col!="barcode":
+                    %if int(row[col])>config["min_read_depth"]:
+                      <td style="color:${themeColor}">${row[col]}</td>
+                    %else:
+                      <td>${row[col]}</td>
+                    %endif
                   %else:
                     <td>${row[col]}</td>
                   %endif
