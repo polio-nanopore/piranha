@@ -9,12 +9,11 @@ from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
 from piranha.analysis.preprocessing import *
 from piranha.analysis.filter_lengths import filter_reads_by_length
-from piranha.report.make_report import make_report
 ##### Target rules #####
 
 rule all:
     input:
-        os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv"),
+        os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES]),
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES])
 
@@ -93,9 +92,9 @@ rule gather_diversity_report:
         refs = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES]),
         txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES])
     output:
-        refs= os.path.join(config[KEY_OUTDIR],"sample_composition.csv"),
-        summary = os.path.join(config[KEY_OUTDIR],"preprocessing_summary.csv"),
-        yaml = os.path.join(config[KEY_TEMPDIR],"preprocessing_config.yaml")
+        refs= os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION),
+        summary = os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
+        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     run:
         barcode_config = diversity_report(input.refs,output.refs,output.summary,config)
         
