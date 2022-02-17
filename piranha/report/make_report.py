@@ -97,7 +97,8 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
     buf = StringIO()
 
     ctx = Context(buf, 
-                    date = date.today(), 
+                    date = date.today(),
+                    run_name=config[KEY_RUN_NAME],
                     version = __version__,
                     data_for_report = data_for_report,
                     config=config)
