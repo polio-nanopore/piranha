@@ -17,7 +17,7 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
 
-def get_snipit(taxon,snipit_file):
+def get_snipit(reference,snipit_file):
     snipit_svg = ""
     with open(snipit_file,"r") as f:
         for l in f:
@@ -25,33 +25,36 @@ def get_snipit(taxon,snipit_file):
             snipit_svg+=f"{l}\n"
     return snipit_svg
 
-def make_sample_report(report_to_generate,read_length_file,variation_file,haplotype_info,barcode,config):
+def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,config):
 
-    taxa_present = config[KEY_TAXA_PRESENT]
+    references = config[barcode]
 
     data_for_report = {}
 
-    for taxon in taxa_present:
-        data_for_report[taxon] = {}
-        data_for_report[taxon]["snipit_svg"] = get_snipit(taxon,os.path.join(config[KEY_TEMPDIR],"snipit",f"{taxon}.svg"))
+    for reference in references:
+        data_for_report[reference] = {}
+        data_for_report[reference]["snipit_svg"] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],"snipit",f"{reference}.svg"))
 
-    summary_data = []
-    num_sites = {}
-    with open(haplotype_info,"r") as f:
-        reader = csv.DictReader(f)
-        
-        for row in reader:
-            new_row = row
-            num_sites[new_row["taxon"]] = len(new_row["sites"].split(";"))
-            summary_data.append(new_row)
+    info = {}
 
-    data_for_report["summary_data"] = summary_data
+    for record in SeqIO.parse(consensus_seqs,"fasta"):
+        #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
+        record_sample,record_barcode,reference_group,ref,var_count,var_string,collection_date = record.id.split("|")
+        if ref == reference:
+            info = {KEY_BARCODE:barcode,
+                    KEY_SAMPLE:record_sample,
+                    KEY_REFERENCE_GROUP:reference_group,
+                    "Number of mutations": var_count,
+                    "Variants":var_string,
+                    "Collection date":date
+                    }
+
+    data_for_report[reference]["summary_data"] = info
 
     with open(variation_file,"r") as f:
         var_data = json.load(f)
-        for taxon in var_data:
-            data_for_report[taxon]["variation_info"] = var_data[taxon]
-            data_for_report[taxon]["num_sites"] = num_sites[taxon]
+        for reference in var_data:
+            data_for_report[reference]["variation_info"] = var_data[reference]
             
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
@@ -64,7 +67,6 @@ def make_sample_report(report_to_generate,read_length_file,variation_file,haplot
                     version = __version__,
                     barcode = barcode,
                     data_for_report = data_for_report,
-                    taxa_present = config["taxa_present"],
                     config=config)
 
     try:
