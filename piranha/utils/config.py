@@ -40,6 +40,7 @@ KEY_HITS = "hits"
 
 # MISC KEYS
 KEY_USERNAME="username"
+KEY_RUN_NAME="run_name"
 KEY_VERBOSE="verbose"
 KEY_THREADS="threads"
 KEY_LOG_API="log_api"
@@ -66,11 +67,12 @@ VALUE_MAX_READ_LENGTH = 1300
 VALUE_MIN_READS = 50
 VALUE_MIN_PCENT = 5
 
+VALUE_RUN_NAME="Nanopore run"
 VALUE_COLOUR_MAP=["#e68781","#476970","#f5eece"]
 VALUE_COLOUR_THEME="#e68781"
 
 #file headers
-
+VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 SAMPLE_SUMMARY_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
