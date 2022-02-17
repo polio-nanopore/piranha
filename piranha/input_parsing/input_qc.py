@@ -35,6 +35,9 @@ def parse_barcodes_csv(barcodes_csv,config):
                 sys.exit(-1)
             if row["sample"] in samples:
                 print(cyan(f"Warning: `{sample}` sample name provided for multiple barcodes."))
+            if '|' in row["barcode"] or '|' in row["sample"]:
+                sys.stderr.write(cyan(f"`|` cannot be used in barcode or sample name. Please remove this character and restart.\n"))
+                sys.exit(-1)
             barcodes.append(row["barcode"])
 
     config[KEY_BARCODES] = barcodes
