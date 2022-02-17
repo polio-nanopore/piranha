@@ -37,7 +37,8 @@ rule generate_consensus_sequences:
     threads: workflow.cores*0.5
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
     output:
-        os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta")
+        os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"),
+        os.path.join(config[KEY_OUTDIR],"{barcode}","variants.csv")
     run:
         print(green(f"Generating consensus sequences for {params.barcode}"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
@@ -52,32 +53,28 @@ rule gather_consensus_sequences:
         composition = rules.files.params.composition,
         fasta = expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
     output:
-        os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta")
+        fasta = os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta")
     run:
         gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta, output[0])
 
-
-# rule generate_snipit:
-#     input:
-#         fasta = rules.haplotype_consensus.output.fasta,
-#         yaml = rules.assess_haplotypes.output.config,
-#         snakefile = os.path.join(workflow.current_basedir,"snipit.smk")
-#     params:
-#         barcode = "{barcode}",
-#         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
-#         tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
-#     output:
-#         txt = os.path.join(config[KEY_OUTDIR],"{barcode}","snipit.txt")
-#     run:
-#         print(green("Running snipit pipeline."))
-#         print(input.fasta)
-#         shell("snakemake --nolock --snakefile {input.snakefile:q} "
-#                 "--forceall "
-#                 "{config[log_string]} "
-#                 f"--directory '{config[KEY_TEMPDIR]}' "
-#                 "--configfile {input.yaml:q} "
-#                 "--config fasta={input.fasta:q} outdir={params.outdir:q}  tempdir={params.tempdir:q} "
-#                 "--cores {workflow.cores} ")
+rule generate_snipits:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"snipit.smk"),
+        cns = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"),
+        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
+    params:
+        barcode = "{barcode}"
+    output:
+        txt = os.path.join(config[KEY_TEMPDIR],"{barcode}","snipit.txt")
+    run:
+        print(green("Running snipit pipeline."))
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                "--forceall "
+                "{config[log_string]} "
+                f"--directory '{config[KEY_TEMPDIR]}' "
+                "--configfile {input.yaml:q} "
+                "--config cns={input.cns:q} outdir={params.outdir:q}  tempdir={params.tempdir:q} "
+                "--cores {workflow.cores} ")
 
 # rule generate_report:
 #     input:
