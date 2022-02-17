@@ -31,7 +31,5 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file):
                         info = row
                 metadata = input_metadata[barcode]
 
-                record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
+                record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
                 fw.write(f">{record_id}\n{record.seq}\n")
-
-
