@@ -294,6 +294,10 @@
           float:right
         }
       @media print {
+        table {
+          /* tables don't split across pages if possible. */
+          page-break-inside: avoid;
+        }
         .tree-container{
         max-height: none;
         overflow: visible;
@@ -396,54 +400,6 @@
         </h1> 
         <br>
       <% figure_count = 0 %>
-      <% length_info = data_for_report['lengths'] %>
-      <div id="length_histogram" style="width:95%"></div>
-        <script>
-          var vlSpec_hist = {
-            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-            "width": "container",
-            "height": 200,
-            "mark": "bar",
-            "datasets": {"length_histogram": ${length_info}},
-            "data": {
-              "name": "length_histogram"
-                },
-            "encoding": {
-              "x": {
-                "bin": {"maxbins":50},
-                "field": "x",
-                "title": "Read length (bp)",
-                "axis": {
-                      "grid": false,
-                      "labelFont":"Helvetica Neue",
-                      "labelFontSize":18,
-                      "titleFontSize":18,
-                      "titleFont":"Helvetica Neue"
-                    }
-              },
-              "y": {"aggregate": "count",
-                    "axis":{
-                        "grid": false,
-                        "labelFont":"Helvetica Neue",
-                        "labelFontSize":18,
-                        "titleFontSize":18,
-                        "titleFont":"Helvetica Neue"}
-                  }
-            },
-            "config":{
-              "view": {"stroke": null},
-              "axis": {"grid": false},
-              "bar": {"fill":"#476970","stroke":"#476970"},
-              "text": {"font":"Helvetica Neue","fontWeight":0.1}
-              }
-          };          
-          vegaEmbed('#length_histogram', vlSpec_hist, {renderer: "svg"})
-                .then(result => console.log(result))
-                .catch(console.warn);
-        </script>
-          <% figure_count +=1 %>
-          <h3><strong>Figure ${figure_count}</strong> | Read length distribution for ${barcode}</h3>
-          <hr>
           <h3><strong>Table 1</strong> | Summary of barcode content </h3>
           <table class="display nowrap" id="myTable">
             <thead>
