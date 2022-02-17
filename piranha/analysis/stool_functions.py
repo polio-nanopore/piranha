@@ -22,25 +22,16 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file):
     with open(output_file,"w") as fw:
         for cns_file in input_cns_list:
             for record in SeqIO.parse(cns_file, "fasta"):
-                ref,barcode= record.description.split("|")
+                cns_info= record.description.split(" ")
+                ref,barcode,var_count,var_string=cns_info[0].split("|")
+                
                 info = []
                 for row in analysis_info[barcode]:
                     if row[KEY_REFERENCE] == ref:
                         info = row
                 metadata = input_metadata[barcode]
 
-                record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|num_nucleotides|{metadata[KEY_DATE]}"
+                record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
                 fw.write(f">{record_id}\n{record.seq}\n")
 
-
-"""
-composition
-barcode,reference,reference_group,num_reads,percent_of_sample
-barcode01,Sabin2_vacc,Sabin2-related,247,49.5
-barcode01,Sabin3_vacc,Sabin3-related,250,50.1
-barcode02,Sabin2_vacc,Sabin2-related,711,92.34
-barcode03,PAK19-18801,WPV1,285,93.44
-barcode04,Sabin3_vacc,Sabin3-related,250,100.0
-
-"""
 
