@@ -15,7 +15,7 @@ rule all:
         os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_OUTDIR],"variants.csv"),
         expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.vcf"), reference=REFERENCES),
-        os.path.join(config[KEY_OUTDIR],"processed_data","variation_info.json"),
+        os.path.join(config[KEY_OUTDIR],"variation_info.json"),
         expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES)
 
 rule files:
@@ -106,7 +106,7 @@ rule get_variation_info:
         expand(rules.files.params.reads, reference=REFERENCES),
         expand(rules.sam_to_seq.output.fasta,reference=REFERENCES)
     output:
-        json = os.path.join(config[KEY_OUTDIR],"processed_data","variation_info.json")
+        json = os.path.join(config[KEY_OUTDIR],"variation_info.json")
     run:
         # this is for making a figure
         variation_dict = {}
