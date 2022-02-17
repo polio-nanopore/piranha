@@ -15,8 +15,8 @@ rule files:
 
 rule make_snipit_alignments:
     input:
-        ref = rules.files.params.ref,
-        fasta = config["fasta"]
+        refs = config[KEY_REFERENCE_SEQUENCES],
+        fasta = config["cns"]
     output:
         aln = os.path.join(config[KEY_TEMPDIR],"snipit","{taxid}.aln.fasta")
     run:

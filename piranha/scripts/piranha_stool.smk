@@ -5,6 +5,7 @@ from Bio import SeqIO
 import yaml
 
 from piranha.analysis.stool_functions import *
+from piranha.report.make_report import make_sample_report
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 ##### Target rules #####
@@ -37,8 +38,9 @@ rule generate_consensus_sequences:
     threads: workflow.cores*0.5
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
     output:
-        os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"),
-        os.path.join(config[KEY_OUTDIR],"{barcode}","variants.csv")
+        fasta = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"),
+        csv= os.path.join(config[KEY_OUTDIR],"{barcode}","variants.csv"),
+        json = os.path.join(config[KEY_OUTDIR],"{barcode}","variation_info.json")
     run:
         print(green(f"Generating consensus sequences for {params.barcode}"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
@@ -57,64 +59,20 @@ rule gather_consensus_sequences:
     run:
         gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta, output[0])
 
-rule generate_snipits:
+rule generate_report:
     input:
-        snakefile = os.path.join(workflow.current_basedir,"snipit.smk"),
-        cns = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"),
+        consensus_seqs = rules.generate_consensus_sequences.output.fasta,
+        variation_info = rules.generate_consensus_sequences.output.json,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
-        barcode = "{barcode}"
+        outdir = os.path.join(config[KEY_OUTDIR],"barcode_reports"),
+        barcode = "{barcode}",
     output:
-        txt = os.path.join(config[KEY_TEMPDIR],"{barcode}","snipit.txt")
+        html = os.path.join(config[KEY_OUTDIR],"barcode_reports","{barcode}_report.html")
     run:
-        print(green("Running snipit pipeline."))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                "--forceall "
-                "{config[log_string]} "
-                f"--directory '{config[KEY_TEMPDIR]}' "
-                "--configfile {input.yaml:q} "
-                "--config cns={input.cns:q} outdir={params.outdir:q}  tempdir={params.tempdir:q} "
-                "--cores {workflow.cores} ")
+        with open(input.yaml, 'r') as f:
+            config_loaded = yaml.safe_load(f)
 
-# rule generate_report:
-#     input:
-#         haplotype_info = rules.assess_haplotypes.output.csv,
-#         read_lengths = rules.filter_by_length.output.lengths,
-#         variation_info = rules.assess_haplotypes.output.var_data,
-#         yaml = rules.assess_haplotypes.output.config,
-#         snipit = rules.generate_snipit.output.txt
-#     params:
-#         barcode = "{barcode}",
-#     output:
-#         html = os.path.join(config[KEY_OUTDIR],"{barcode}","analysis_report.html")
-#     run:
-#         with open(input.yaml, 'r') as f:
-#             config_loaded = yaml.safe_load(f)
+        make_sample_report(output.html,input.variation_info,input.consensus_seqs,params.barcode,config_loaded)
 
-#         make_report(output.html,input.read_lengths,input.variation_info,input.haplotype_info,params.barcode,config_loaded)
-
-
-# rule get_overall_report:
-#     input:
-#         yaml = rules.assess_haplotypes.output.config
-#     params:
-#         barcode = "{barcode}",
-#         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}")
-#     threads: workflow.cores*0.5
-#     log: os.path.join(config[KEY_TEMPDIR],"{barcode}_consensus.smk.log")
-#     output:
-#         html = os.path.join(config[KEY_OUTDIR],"piranha_report.html")
-#     run:
-#         with open(input.yaml, 'r') as f:
-#             config_loaded = yaml.safe_load(f)
-#         print(green(f"Generating haplotype consensus sequences for {params.barcode}."))
-#         for h in config_loaded["haplotypes"]:
-#             print(f"- {h}")
-#         print("----------------")
-#         shell("snakemake --nolock --snakefile {input.snakefile:q} "
-#                     "--forceall "
-#                     "{config[log_string]} "
-#                     "--configfile {input.yaml:q} "
-#                     "--config barcode={params.barcode} outdir={params.outdir:q} "
-#                     "--cores {threads} && touch {output.taxa}")
 
