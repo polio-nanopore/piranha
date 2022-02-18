@@ -390,11 +390,15 @@
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
         <header class="piranha-header">
-            piranha ${version} | 
-            <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
-            <hr>
-        </header>
-        
+        <div class="col-sm-1" style="text-align: left;">
+          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
+        </div>
+        <div class="col-sm-11" style="text-align: right;">
+          piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+        </div>
+        <br>
+        <hr>
+      </header>        
         <h1>${sample} report
             <small class="text-muted" style="color:${themeColor}">${date}</small>
         </h1> 
