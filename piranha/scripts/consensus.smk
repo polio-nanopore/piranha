@@ -8,6 +8,7 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
 BARCODE = config[KEY_BARCODE]
+SAMPLE = config[KEY_SAMPLE]
 REFERENCES = config[BARCODE]
 
 rule all:
@@ -129,9 +130,15 @@ rule join_cns_ref:
     run:
         with open(output[0],"w") as fw:
             for record in SeqIO.parse(input.ref,"fasta"):
-                fw.write(f">{record.description}\n{record.seq}\n")
+                display_name = ""
+                for field in record.description.split(" "):
+                    if field.startswith("display_name"):
+                        display_name = field.split("=")[1]
+
+                fw.write(f">{display_name} {record.description}\n{record.seq}\n")
             for record in SeqIO.parse(input.cns,"fasta"):
-                fw.write(f">{BARCODE}\n{record.seq}\n")
+                record_name = SAMPLE.replace(" ","_")
+                fw.write(f">{record_name}\n{record.seq}\n")
 
 rule align_cns_ref:
     input:
