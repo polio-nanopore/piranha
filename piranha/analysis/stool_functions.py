@@ -33,3 +33,12 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file):
 
                 record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
                 fw.write(f">{record_id}\n{record.seq}\n")
+
+def get_sample(barcodes_csv,barcode):
+    sample = ""
+    with open(barcodes_csv,"r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row[KEY_BARCODE] == barcode:
+                    sample = row[KEY_SAMPLE]
+    return sample
