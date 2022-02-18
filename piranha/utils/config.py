@@ -50,6 +50,7 @@ KEY_COLOUR_MAP = "colour_map"
 KEY_COLOUR_THEME="colour_theme"
 
 KEY_REPORT_TEMPLATE = "report_template"
+KEY_BARCODE_REPORT_TEMPLATE = "barcode_report_template"
 
 RESOURCE_KEY_FILENAME="filename"
 RESOURCE_KEY_DIRECTORY="directory"
@@ -67,7 +68,7 @@ VALUE_MAX_READ_LENGTH = 1300
 VALUE_MIN_READS = 50
 VALUE_MIN_PCENT = 5
 
-VALUE_RUN_NAME="Nanopore run"
+VALUE_RUN_NAME="Nanopore ru"
 VALUE_COLOUR_MAP=["#e68781","#476970","#f5eece"]
 VALUE_COLOUR_THEME="#e68781"
 

@@ -18,6 +18,7 @@ os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION)
 rule all:
     input:
         os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta"),
+        expand(os.path.join(config[KEY_OUTDIR],"barcode_reports","{barcode}_report.html"), barcode=config[KEY_BARCODES]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
 
 rule files:
@@ -61,7 +62,7 @@ rule gather_consensus_sequences:
 
 rule generate_report:
     input:
-        consensus_seqs = rules.generate_consensus_sequences.output.fasta,
+        consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_consensus_sequences.output.json,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
