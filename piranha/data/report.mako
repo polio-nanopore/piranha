@@ -294,6 +294,8 @@
           float:right
         }
       @media print {
+        @page{size: landscape
+        }
         table {
           /* tables don't split across pages if possible. */
           page-break-inside: avoid;
@@ -388,8 +390,14 @@
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
       <header class="piranha-header">
+        <div class="col-sm-1" style="text-align: left;">
+          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
+        </div>
+        <div class="col-sm-11" style="text-align: right;">
           piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
-          <hr>
+        </div>
+        <br>
+        <hr>
       </header>
         
       <h1>piranha report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
@@ -418,7 +426,8 @@
               <tr>
                 %for col in config["table_header"]:
                   %if col=="sample":
-                    <td><a href="#header_${row[col]}" style="color:${themeColor}">${row[col]}</a></td>
+                    <% this_barcode = row["barcode"] %>
+                    <td><a href="${config['outdir']}/barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
                   %elif col!="barcode":
                     %if int(row[col])>config["min_read_depth"]:
                       <td style="color:${themeColor}">${row[col]}</td>
