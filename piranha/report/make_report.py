@@ -28,44 +28,47 @@ def get_snipit(reference,snipit_file):
 def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,config):
 
     references = config[barcode]
-
+    
     data_for_report = {}
 
     for reference in references:
         data_for_report[reference] = {}
-        data_for_report[reference]["snipit_svg"] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],"snipit",f"{reference}.svg"))
+        data_for_report[reference]["snipit_svg"] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],f"{barcode}","snipit",f"{reference}.svg"))
 
-    info = {}
-
+    info_dict = {}
     for record in SeqIO.parse(consensus_seqs,"fasta"):
         #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
-        record_sample,record_barcode,reference_group,ref,var_count,var_string,collection_date = record.id.split("|")
-        if ref == reference:
+        record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
+        if barcode == record_barcode:
+            sample = record_sample
             info = {KEY_BARCODE:barcode,
                     KEY_SAMPLE:record_sample,
                     KEY_REFERENCE_GROUP:reference_group,
-                    "Number of mutations": var_count,
+                    "Number of mutations": int(var_count),
                     "Variants":var_string,
                     "Collection date":date
                     }
+            info_dict[reference] = info
 
-    data_for_report[reference]["summary_data"] = info
+    for reference in info_dict:
+        data_for_report[reference]["summary_data"] = info_dict[reference]
 
     with open(variation_file,"r") as f:
         var_data = json.load(f)
         for reference in var_data:
             data_for_report[reference]["variation_info"] = var_data[reference]
-            
-    template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
+    
+    template_dir = os.path.abspath(os.path.dirname(config[KEY_BARCODE_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
-    mytemplate = Template(filename=config[KEY_REPORT_TEMPLATE], lookup=mylookup)
+    mytemplate = Template(filename=config[KEY_BARCODE_REPORT_TEMPLATE], lookup=mylookup)
     buf = StringIO()
 
     ctx = Context(buf, 
                     date = date.today(), 
                     version = __version__,
                     barcode = barcode,
+                    sample = sample,
                     data_for_report = data_for_report,
                     config=config)
 
