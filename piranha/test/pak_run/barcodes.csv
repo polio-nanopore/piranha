@@ -1,6 +1,6 @@
 barcode,sample,date
-barcode01,test_sabin_like,2022-01-01
-barcode02,test_vdpv2,2022-01-02
-barcode03,test_wtpv,2022-01-07
-barcode04,test_8ntdiv,2022-01-05
+barcode01,Mixed Test,2022-01-01
+barcode02,Pure Test,2022-01-02
+barcode03,WT Test,2022-01-07
+barcode04,VDPV Test,2022-01-05
 barcode05,negative,
