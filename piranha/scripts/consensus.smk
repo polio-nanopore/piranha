@@ -55,8 +55,8 @@ rule medaka_consensus:
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.medaka_consensus.log")
     params:
         outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}"),
-        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","cns.mod.fasta")
     output:
+        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","cns.mod.fasta"),
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus.fasta")
     threads:
@@ -66,8 +66,8 @@ rule medaka_consensus:
         if [ -s {input.sam:q} ]
         
         then
-            sed "s/[:,-]/_/g" {input.draft:q} > {params.cns_mod:q}
-            medaka_consensus -i {input.basecalls:q} -d {params.cns_mod:q} -o {params.outdir:q} -t 2 &> {log:q}
+            sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
+            medaka_consensus -i {input.basecalls:q} -d {output.cns_mod:q} -o {params.outdir:q} -t 2 &> {log:q}
         else
             touch {output.consensus:q}
         fi
@@ -75,7 +75,7 @@ rule medaka_consensus:
 
 rule medaka_variant:
     input:
-        ref = rules.medaka_consensus.params.cns_mod,
+        ref = rules.medaka_consensus.output.cns_mod,
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus_probs.hdf"),
         bam = rules.sort_index.output.bam
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.medaka_variant.log")
