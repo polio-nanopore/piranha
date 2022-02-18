@@ -44,11 +44,13 @@ rule generate_consensus_sequences:
         json = os.path.join(config[KEY_OUTDIR],"{barcode}","variation_info.json")
     run:
         print(green(f"Generating consensus sequences for {params.barcode}"))
+        sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
                     "{config[log_string]} "
                     "--configfile {input.yaml:q} "
                     "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+                    f"sample='{sample}' "
                     "--cores {threads} &> {log:q}")
 
 rule gather_consensus_sequences:
