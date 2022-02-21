@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>piranha report</title>
+    <title>Test run report</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -99,42 +99,6 @@
           margin-right: auto;
           width: 50%;
           }
-      .node-background{
-          fill:dimgrey;
-          stroke:dimgrey;
-      }
-      .node circle{
-        stroke-width:0;
-        cursor:pointer;
-        /* fill:#7178bc; */
-        stroke:dimgrey;
-        }
-      .node circle.selected{
-        stroke-width:0;
-        cursor:pointer;
-        fill:#e68781;
-        stroke:dimgrey;
-        }
-      .node-background.query_boolean-True{
-          stroke:#e68781;
-      }
-      .node.query_boolean-True circle{
-        stroke:#e68781;
-      }
-      .node.query_boolean-True circle.selected{
-        stroke:#e68781;
-      }
-      .node-background.query_boolean-True circle.selected{
-          stroke:#e68781;
-      }
-      .node.query_boolean-True.hovered circle{
-          stroke:#e68781;
-      }
-      .node rect{
-        stroke-width:2;
-        fill:#e68781;
-        stroke:dimgrey;
-      }
       .svg-tooltip {
           background: rgba(69,77,93,.9);
           border-radius: .1rem;
@@ -174,10 +138,6 @@
           font-weight: 300;
           font-size: 0.9em;
         }
-      /* .starter-template {
-        padding: 40px 15px;
-        text-align: left;
-      } */
       .dataTables_wrapper.no-footer .dataTables_scrollBody {
         border-top: 1px solid  rgb(148, 148, 148);
         border-bottom: none;
@@ -294,10 +254,15 @@
           float:right
         }
       @media print {
+        @page{size: landscape
+        }
+        table {
+          /* tables don't split across pages if possible. */
+          page-break-inside: avoid;
+        }
         .tree-container{
         max-height: none;
         overflow: visible;
-        
         }
         
         .slider-block {
@@ -385,14 +350,20 @@
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
       <header class="piranha-header">
-          piranha 1.0 | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
-          <hr>
+        <div class="col-sm-4" style="text-align: left;">
+          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
+          PoSeCo | <small class="text-muted">Poliovirus Sequencing Consortium</small>
+        </div>
+        <div class="col-sm-8" style="text-align: right;">
+          piranha | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+        </div>
+        <br>
+        <hr>
       </header>
         
-      <h1>piranha report <small class="text-muted" style="color:#e68781">2022-02-16</small></h1>
+      <h1>Test run report <small class="text-muted" style="color:#e68781">2022-02-21</small></h1>
       <h3><strong>User</strong> | Áine O'Toole</h3>
       <br>
-      
       <h3><strong>Table 1</strong> | Composition of samples in run </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
@@ -401,7 +372,6 @@
             <div class="col-sm-8" id="tableExportID"></div>
           </div>
         </div>
-        
         <table class="display nowrap" id="myTable">
           <thead>
             <tr>
@@ -419,74 +389,210 @@
           </thead>
           <tbody>
               <tr>
-                    <td><a href="#header_test_sabin_like" style="color:#e68781">test_sabin_like</a></td>
+
+                    
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Mixed Test</a></td>
+
+
                     <td>barcode01</td>
+
+
+
                       <td>0</td>
+
+
+
+
                       <td style="color:#e68781">247</td>
+
+
+
+
                       <td style="color:#e68781">250</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>1</td>
+
+
+
+
                       <td>0</td>
+
+
               </tr>
               <tr>
-                    <td><a href="#header_test_vdpv2" style="color:#e68781">test_vdpv2</a></td>
+
+                    
+                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">Pure Test</a></td>
+
+
                     <td>barcode02</td>
+
+
+
                       <td>0</td>
+
+
+
+
                       <td style="color:#e68781">711</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td style="color:#e68781">52</td>
+
+
+
+
                       <td>1</td>
+
+
               </tr>
               <tr>
-                    <td><a href="#header_test_wtpv" style="color:#e68781">test_wtpv</a></td>
+
+                    
+                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WT Test</a></td>
+
+
                     <td>barcode03</td>
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>1</td>
+
+
+
+
                       <td>3</td>
+
+
+
+
                       <td style="color:#e68781">300</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>1</td>
+
+
+
+
                       <td>0</td>
+
+
               </tr>
               <tr>
-                    <td><a href="#header_test_8ntdiv" style="color:#e68781">test_8ntdiv</a></td>
+
+                    
+                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">VDPV Test</a></td>
+
+
                     <td>barcode04</td>
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td style="color:#e68781">250</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
+
+
+
+
                       <td>0</td>
-              </tr>
-              <tr>
-                    <td><a href="#header_negative" style="color:#e68781">negative</a></td>
-                    <td>barcode05</td>
-                      <td>0</td>
-                      <td>0</td>
-                      <td>5</td>
-                      <td>0</td>
-                      <td>0</td>
-                      <td>0</td>
-                      <td>0</td>
-                      <td>0</td>
+
+
               </tr>
           </tbody>
         </table>
-        <hr>
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable').DataTable({
                 "scrollY": "200px",
                 "paging": false,
                 "border-bottom":false,
+                "bInfo" : false,
                 dom: 'frtip',
                 buttons: ["copy","csv","print"]
               });
@@ -502,6 +608,72 @@
               } );
             } );
         </script>
+      <h3><strong>Table 2</strong> | Controls </h3>
+        <table class="table" id="controlTable">
+          <thead class="thead-light">
+            <tr>
+                <th>Sample</th>
+                <th>Barcode</th>
+                <th>Sabin1-Related</th>
+                <th>Sabin2-Related</th>
+                <th>Sabin3-Related</th>
+                <th>Wpv1</th>
+                <th>Wpv2</th>
+                <th>Wpv3</th>
+                <th>Nonpolioev</th>
+                <th>Unmapped</th>
+            </tr>
+          </thead>
+          <tbody>
+                
+                  <tr style="background-color:rgba(25, 67, 76, 0.3)">
+                        <td>negative</td>
+                      
+                        <td>barcode05</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>5</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                  </tr>
+                
+                  <tr style="background-color:rgba(230, 135, 129, 0.3)">
+                        <td>positive</td>
+                      
+                        <td>barcode06</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>5</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                          <td>0</td>
+                      
+                  </tr>
+          </tbody>
+        </table>
+        <hr>
       </div>
     <br>
     <script>
