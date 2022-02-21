@@ -87,12 +87,23 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,
 
 def make_output_report(report_to_generate,preprocessing_summary,sample_composition,config):
 
+    control_status = {"negative":True,"positive":True}
     data_for_report = {"summary_table":[]}
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             data_for_report["summary_table"].append(row)
-    
+            if row["sample"] == "negative":
+                for col in row:
+                    if col not in ["barcode","sample"]:
+                        if int(row[col])>config[KEY_MIN_READS]:
+                            control_status["negative"] = False
+            elif row["sample"] == "positive":
+                if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
+                    control_status["positive"] = False
+
+    data_for_report["control_status"] = control_status
+
     config["table_header"] = SAMPLE_SUMMARY_HEADER_FIELDS
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
