@@ -390,15 +390,16 @@
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
         <header class="piranha-header">
-        <div class="col-sm-1" style="text-align: left;">
-          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
-        </div>
-        <div class="col-sm-11" style="text-align: right;">
-          piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
-        </div>
-        <br>
-        <hr>
-      </header>        
+          <div class="col-sm-4" style="text-align: left;">
+            <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
+            PoSeCo | <small class="text-muted">Poliovirus Sequencing Consortium</small>
+          </div>
+          <div class="col-sm-8" style="text-align: right;">
+            piranha | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+          </div>
+          <br>
+          <hr>
+        </header>  
         <h1>${sample} report
             <small class="text-muted" style="color:${themeColor}">${date}</small>
         </h1> 
@@ -485,6 +486,7 @@
           <br>
           <hr>
         <% ref_variation_info = data_for_report[reference]['variation_info'] %>
+        <% variant_sites = data_for_report[reference]["variant_sites"] %>
         <br>
         <div id="var_scatter_${reference}" style="width:95%"></div>
             <script>
@@ -493,42 +495,68 @@
                 "width": "container",
                 "height": 200,
                 "datasets": {"var_scatter": ${ref_variation_info}},
-                "data": {
-                  "name": "var_scatter"
-                    },
-                  "mark": {"type": "point", "tooltip": {"content": "data"}},
-                  "encoding": {
-                    "x": {
-                      "field": "Position", 
-                      "type": "quantitative",
-                      "title": "Position (bp)",
-                      "axis": {
-                        "grid": false,
-                        "labelFont":"Helvetica Neue",
-                        "labelFontSize":18,
-                        "titleFontSize":18,
-                        "titleFont":"Helvetica Neue"
-                      },
-                    },
-                    "y": 
-                    {"field": "Percentage",
-                    "type":"quantitative",
-                    "title": "Percentage Alt Allele",
-                    "scale": {"domain": [0, 100]},
-                    "axis":{
-                    "grid": false,
-                    "labelFont":"Helvetica Neue",
-                    "labelFontSize":18,
-                    "titleFontSize":18,
-                    "titleFont":"Helvetica Neue"}
-                    }
-                      },
-                          "config": {
-                            "view": {"stroke": null},
-                            "axis": {"grid": false},
-                            "point": {"fill":"#476970","stroke":"#476970"},
-                            "text": {"font":"Helvetica Neue","fontWeight":0.1}
-                          }
+                "data": {"name": "var_scatter"},
+                  "layer": [{"mark": {"type": "point", 
+                                      "tooltip": {"content": "data"}, 
+                                      "fill":"#476970",
+                                      "stroke":"#476970",
+                                      "font":"Helvetica Neue","fontWeight":0.1},
+                              "encoding": {"x": {"field": "Position", 
+                                                  "type": "quantitative",
+                                                  "title": "Position (bp)",
+                                                  "axis": {"grid": false,
+                                                          "labelFont":"Helvetica Neue",
+                                                          "labelFontSize":18,
+                                                          "titleFontSize":18,
+                                                          "titleFont":"Helvetica Neue"
+                                                          }
+                                                },
+                                          "y": {"field": "Percentage",
+                                                "type":"quantitative",
+                                                "title": "Percentage Alt Allele",
+                                                "scale": {"domain": [0, 100]},
+                                                "axis":{"grid": false,
+                                                        "labelFont":"Helvetica Neue",
+                                                        "labelFontSize":18,
+                                                        "titleFontSize":18,
+                                                        "titleFont":"Helvetica Neue"
+                                                        }
+                                                }
+                                          }
+                                  },
+                        {"mark": {"type": "point", 
+                                  "tooltip": {"content": "data"}, 
+                                  "fill":"#e68781",
+                                  "stroke":"#e68781",
+                                  "opacity":1,
+                                  "stroke":null,
+                                  "size":150,
+                                  "font":"Helvetica Neue",
+                                  "fontWeight":0.1},
+                              "transform": [{"filter": {"field":"Position","oneOf":${variant_sites}}}],
+                              "encoding": {"x": {"field": "Position", 
+                                                  "type": "quantitative",
+                                                  "title": "Position (bp)",
+                                                  "axis": {"grid": false,
+                                                          "labelFont":"Helvetica Neue",
+                                                          "labelFontSize":18,
+                                                          "titleFontSize":18,
+                                                          "titleFont":"Helvetica Neue"
+                                                          }
+                                                },
+                                          "y": {"field": "Percentage",
+                                                "type":"quantitative",
+                                                "title": "Percentage Alt Allele",
+                                                "scale": {"domain": [0, 100]},
+                                                "axis":{"grid": false,
+                                                        "labelFont":"Helvetica Neue",
+                                                        "labelFontSize":18,
+                                                        "titleFontSize":18,
+                                                        "titleFont":"Helvetica Neue"
+                                                        }
+                                                }
+                                          }
+                                  }]
                   };          
                 vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
                       .then(result => console.log(result))
