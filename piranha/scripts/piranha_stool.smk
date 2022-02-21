@@ -17,13 +17,13 @@ os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION)
 """
 rule all:
     input:
-        os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta"),
+        os.path.join(config[KEY_OUTDIR],"published_data","consensus_sequences.fasta"),
         expand(os.path.join(config[KEY_OUTDIR],"barcode_reports","{barcode}_report.html"), barcode=config[KEY_BARCODES]),
         expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
 
 rule files:
     params:
-        composition=os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION),
+        composition=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION),
         summary=os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY)
 
 
@@ -39,14 +39,15 @@ rule generate_consensus_sequences:
     threads: workflow.cores*0.5
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
     output:
-        fasta = os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"),
-        csv= os.path.join(config[KEY_OUTDIR],"{barcode}","variants.csv"),
-        json = os.path.join(config[KEY_OUTDIR],"{barcode}","variation_info.json")
+        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
+        csv= os.path.join(config[KEY_TEMPDIR],"{barcode}","variants.csv"),
+        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json")
     run:
         print(green(f"Generating consensus sequences for {params.barcode}"))
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
+                    "--rerun-incomplete "
                     "{config[log_string]} "
                     "--configfile {input.yaml:q} "
                     "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
@@ -56,11 +57,13 @@ rule generate_consensus_sequences:
 rule gather_consensus_sequences:
     input:
         composition = rules.files.params.composition,
-        fasta = expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
+        fasta = expand(rules.generate_consensus_sequences.output.fasta, barcode=config[KEY_BARCODES])
+    params:
+        publish_dir = os.path.join(config[KEY_OUTDIR],"published_data")
     output:
-        fasta = os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta")
+        fasta = os.path.join(config[KEY_OUTDIR],"published_data","consensus_sequences.fasta")
     run:
-        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta, output[0])
+        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta, output[0],params.publish_dir)
 
 rule generate_report:
     input:

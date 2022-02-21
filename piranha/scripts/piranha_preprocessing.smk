@@ -92,7 +92,7 @@ rule gather_diversity_report:
         refs = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES]),
         txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES])
     output:
-        refs= os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION),
+        refs= os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION),
         summary = os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     run:

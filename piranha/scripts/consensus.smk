@@ -13,10 +13,10 @@ REFERENCES = config[BARCODE]
 
 rule all:
     input:
-        os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta"),
-        os.path.join(config[KEY_OUTDIR],"variants.csv"),
+        os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
+        os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.vcf"), reference=REFERENCES),
-        os.path.join(config[KEY_OUTDIR],"variation_info.json"),
+        os.path.join(config[KEY_TEMPDIR],"variation_info.json"),
         expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES)
 
 rule files:
@@ -107,7 +107,7 @@ rule get_variation_info:
         expand(rules.files.params.reads, reference=REFERENCES),
         expand(rules.sam_to_seq.output.fasta,reference=REFERENCES)
     output:
-        json = os.path.join(config[KEY_OUTDIR],"variation_info.json")
+        json = os.path.join(config[KEY_TEMPDIR],"variation_info.json")
     run:
         # this is for making a figure
         variation_dict = {}
@@ -177,16 +177,16 @@ rule gather_variants:
     input:
         expand(rules.assess_variants.output.csv, reference=REFERENCES)
     output:
-        csv = os.path.join(config[KEY_OUTDIR],"variants.csv")
+        csv = os.path.join(config[KEY_TEMPDIR],"variants.csv")
     run:
         join_variant_files(VARIANT_CALLS_HEADER_FIELDS,input,output.csv)
 
 rule gather_cns:
     input:
-        variants = os.path.join(config[KEY_OUTDIR],"variants.csv"),
+        variants = rules.gather_variants.output.csv,
         seqs = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus.fasta"), reference=REFERENCES)
     output:
-        os.path.join(config[KEY_OUTDIR],"consensus_sequences.fasta")
+        os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta")
     run:
         var_dict = {}
         with open(input.variants, "r") as f:
