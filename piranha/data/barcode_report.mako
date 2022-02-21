@@ -293,64 +293,133 @@
           border-radius: 5px; 
           float:right
         }
-      @media print {
-        table {
-          /* tables don't split across pages if possible. */
-          page-break-inside: avoid;
-        }
-        .tree-container{
-        max-height: none;
-        overflow: visible;
-        
-        }
-        
-        .slider-block {
-          display: none;
-        }
-        .container {
-        padding-right: 1.5cm;
-        padding-left: 1.5cm;
-        padding-bottom: 1.5cm;
-        margin: 1cm;
-        min-width: 2200px;
-        font-size:2.5vw;
-        }
-        .searchbar {
-          display: none;
-        }
-        h3{ 
-          font-size: 2.5vw;
-        }
-        h2 {
-          font-size: 4vw;
-          padding: 1cm;
-        }
-        h1 {
-          font-size: 5vw;
-        }
-        .command-block {
-          display: none;
-        }
-        pre {
-          display: none;
-        }
-        .piranha-logo {
-          width: 2cm;
-          height: 2cm;
-        }
-        .tree_svg {
-          width: 1200px
-        }
-        .page-footer {
-          display: none;
-        }
-        .piranha-header {
-          text-align: left;
-        }
-        .content-block, p {
-        page-break-inside: avoid;
-        }
-      }
+        @media print {
+                  html{zoom: 85%;}
+                  *,
+                  *::before,
+                  *::after {
+                    text-shadow: none !important;
+                    box-shadow: none !important;
+                  }
+                  a:not(.btn) {
+                    text-decoration: underline;
+                  }
+                  a[href]:after{content:none};
+                  abbr[title]::after {
+                    content: " (" attr(title) ")";
+                  }
+                  pre {
+                    white-space: pre-wrap !important;
+                  }
+                  pre,
+                  blockquote {
+                    border: 1px solid #adb5bd;
+                    page-break-inside: avoid;
+                  }
+                  tr,
+                  img {
+                    page-break-inside: avoid;
+                  }
+                  p,
+                  h2,
+                  h3 {
+                    orphans: 3;
+                    widows: 3;
+                  }
+                  h2,
+                  h3 {
+                    page-break-after: avoid;
+                  }
+                  @page {
+                    size: A4 portrait;
+                    size: 210mm 297mm ;
+                    margin-top: 250mm;
+                    margin-right: 250mm;
+                    margin-left: 250mm;
+                    margin-bottom: 250mm;
+                  }
+                  body {
+                    min-width: 210mm !important;
+                    -webkit-print-color-adjust:exact;
+                  }
+                  .container {
+                    min-width: 210mm !important;
+                  }
+                  .piranha-header {
+                    position: fixed;
+                    top: 0;
+                    top: 0px;
+                    right: 0px;
+                    width: 100%;
+                    height: 50px;
+                  }
+                  .spacer {
+                        width: 100%;
+                        height: 55px;
+                    }
+                  .page-footer {
+                    position: fixed;
+                    bottom: 50px;
+                    right: 0px;
+                    width: 100%;
+                    height: 50px;
+                  }
+                  .control {
+                    display: none;
+                  }
+                  .content-block, p {
+                    page-break-inside: avoid;
+                  }
+                  .searchbar {
+                    display: none;
+                  }
+                  .badge {
+                    border: 1px solid #000;
+                  }
+                  .table {
+                    color: inherit;
+                    background-color: inherit;
+                    border-collapse: collapse !important;
+                  }
+                  .table td,
+                  .table th {
+                    background-color: #fff !important;
+                  }
+                  .scroll-container {
+                    display: none;
+                }
+                  .table-bordered th,
+                  .table-bordered td {
+                    border: 1px solid #dee2e6 !important;
+                  }
+                  .table-dark {
+                    color: inherit;
+                  }
+                  .table-dark th,
+                  .table-dark td,
+                  .table-dark thead th,
+                  .table-dark tbody + tbody {
+                    border-color: #dee2e6;
+                  }
+                  .dataTables_filter {
+                    display: none;
+                  }
+                  .sorting_desc{
+                    display: none;
+                  }
+                  .sorting_asc{
+                    display: none;
+                  }
+                  .scrollX {
+                    display: none;
+                  }
+                  .accordion {
+                    display: none;
+                  }
+                  .panel {
+                    display: none;
+                  }
+                }
     </style>
   </head>
 
@@ -400,6 +469,9 @@
           <br>
           <hr>
         </header>  
+        <div class="spacer">
+          &nbsp;
+        </div>
         <h1>${sample} report
             <small class="text-muted" style="color:${themeColor}">${date}</small>
         </h1> 
@@ -488,7 +560,7 @@
         <% ref_variation_info = data_for_report[reference]['variation_info'] %>
         <% variant_sites = data_for_report[reference]["variant_sites"] %>
         <br>
-        <div id="var_scatter_${reference}" style="width:95%"></div>
+        <div id="var_scatter_${reference}" style="width:100%"></div>
             <script>
               var vlSpec_scatter = {
                 "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
