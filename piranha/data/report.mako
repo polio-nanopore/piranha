@@ -99,42 +99,6 @@
           margin-right: auto;
           width: 50%;
           }
-      .node-background{
-          fill:dimgrey;
-          stroke:dimgrey;
-      }
-      .node circle{
-        stroke-width:0;
-        cursor:pointer;
-        /* fill:#7178bc; */
-        stroke:dimgrey;
-        }
-      .node circle.selected{
-        stroke-width:0;
-        cursor:pointer;
-        fill:${themeColor};
-        stroke:dimgrey;
-        }
-      .node-background.query_boolean-True{
-          stroke:${themeColor};
-      }
-      .node.query_boolean-True circle{
-        stroke:${themeColor};
-      }
-      .node.query_boolean-True circle.selected{
-        stroke:${themeColor};
-      }
-      .node-background.query_boolean-True circle.selected{
-          stroke:${themeColor};
-      }
-      .node.query_boolean-True.hovered circle{
-          stroke:${themeColor};
-      }
-      .node rect{
-        stroke-width:2;
-        fill:${themeColor};
-        stroke:dimgrey;
-      }
       .svg-tooltip {
           background: rgba(69,77,93,.9);
           border-radius: .1rem;
@@ -174,10 +138,6 @@
           font-weight: 300;
           font-size: 0.9em;
         }
-      /* .starter-template {
-        padding: 40px 15px;
-        text-align: left;
-      } */
       .dataTables_wrapper.no-footer .dataTables_scrollBody {
         border-top: 1px solid  rgb(148, 148, 148);
         border-bottom: none;
@@ -400,10 +360,9 @@
         <hr>
       </header>
         
-      <h1>piranha report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
+      <h1>${run_name} report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
       <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       <br>
-      <% figure_count = 0 %>
       <h3><strong>Table 1</strong> | Composition of samples in run </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
@@ -412,7 +371,6 @@
             <div class="col-sm-8" id="tableExportID"></div>
           </div>
         </div>
-        
         <table class="display nowrap" id="myTable">
           <thead>
             <tr>
@@ -423,26 +381,31 @@
           </thead>
           <tbody>
             % for row in data_for_report["summary_table"]:
+              %if row["sample"] not in ["negative","positive"]:
               <tr>
                 %for col in config["table_header"]:
+
                   %if col=="sample":
                     <% this_barcode = row["barcode"] %>
-                    <td><a href="${config['outdir']}/barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
+                    <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
                   %elif col!="barcode":
+
                     %if int(row[col])>config["min_read_depth"]:
                       <td style="color:${themeColor}">${row[col]}</td>
                     %else:
                       <td>${row[col]}</td>
                     %endif
+
                   %else:
                     <td>${row[col]}</td>
                   %endif
+
                 %endfor
               </tr>
+              %endif
             % endfor
           </tbody>
         </table>
-        <hr>
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable').DataTable({
@@ -464,6 +427,42 @@
               } );
             } );
         </script>
+      <h3><strong>Table 2</strong> | Controls </h3>
+        <table class="table" id="controlTable">
+          <thead class="thead-light">
+            <tr>
+              %for col in config["table_header"]:
+                <th>${col.title().replace("_"," ")}</th>
+              %endfor
+            </tr>
+          </thead>
+          <tbody>
+            % for row in data_for_report["summary_table"]:
+              %if row["sample"] in ["negative","positive"]:
+                <% control_status = data_for_report["control_status"][row["sample"]] %>
+                %if control_status:
+                  <tr style="background-color:rgba(25, 67, 76, 0.3)">
+                %else:
+                  <tr style="background-color:rgba(230, 135, 129, 0.3)">
+                %endif
+                    %for col in config["table_header"]:
+                      %if col not in ["barcode","sample"]:
+                        %if int(row[col])>config["min_read_depth"]:
+                          <td><strong>${row[col]}</strong></td>
+                        %else:
+                          <td>${row[col]}</td>
+                        %endif
+                      %else:
+                        <td>${row[col]}</td>
+                      %endif
+                      
+                    %endfor
+                  </tr>
+              %endif
+            %endfor
+          </tbody>
+        </table>
+        <hr>
       </div>
     <br>
     <script>
