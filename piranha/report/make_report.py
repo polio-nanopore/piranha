@@ -36,6 +36,7 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,
         data_for_report[reference]["snipit_svg"] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],f"{barcode}","snipit",f"{reference}.svg"))
 
     info_dict = {}
+
     for record in SeqIO.parse(consensus_seqs,"fasta"):
         #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
         record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
@@ -49,6 +50,12 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,
                     "Collection date":date
                     }
             info_dict[reference] = info
+
+            data_for_report[reference]["variant_sites"] = []
+
+            for var in var_string.split(";"):
+                site = var.split(":")[0]
+                data_for_report[reference]["variant_sites"].append(int(site))
 
     for reference in info_dict:
         data_for_report[reference]["summary_data"] = info_dict[reference]
