@@ -7,7 +7,7 @@ dependencies:
   - biopython=1.79
   - coreutils=8.31
   - gofasta=0.0.6
-  - mafft=7.49
+  - mafft=7.490
   - medaka=1.0.3
   - minimap2=2.23
   - pip=21.3.1
