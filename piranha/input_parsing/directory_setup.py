@@ -55,7 +55,7 @@ def clear_old_files(config):
     if config[KEY_OVERWRITE] and os.path.exists(config[KEY_OUTDIR]):
         print(yellow("-----------------------"))
         print(green("Overwriting previous output in ") + config[KEY_OUTDIR] + ".")
-        old_files = glob.glob(f'{config[KEY_OUTDIR]}/*.*', recursive=True)
+        old_files = glob.glob(f'{config[KEY_OUTDIR]}/**/*.*', recursive=True)
 
         for d in [old_files]:
             for f in d:
