@@ -340,13 +340,14 @@
                   }
                   body {
                     min-width: 210mm !important;
+                    padding-top: 56px;
                     -webkit-print-color-adjust:exact;
                   }
                   .container {
                     min-width: 210mm !important;
                   }
                   .piranha-header {
-                    position: fixed;
+                    position:relative;
                     top: 0;
                     top: 0px;
                     right: 0px;
@@ -357,8 +358,9 @@
                         width: 100%;
                         height: 55px;
                     }
+                    
                   .page-footer {
-                    position: fixed;
+                    position: relative;
                     bottom: 50px;
                     right: 0px;
                     width: 100%;
