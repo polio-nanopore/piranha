@@ -471,6 +471,7 @@
               } );
             } );
         </script>
+      % if show_control_table:
       <h3><strong>Table 2</strong> | Controls </h3>
         <table class="table" id="controlTable">
           <thead class="thead-light">
@@ -506,7 +507,7 @@
             %endfor
           </tbody>
         </table>
-        <hr>
+      %endif
       </div>
     <br>
     <script>

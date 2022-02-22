@@ -96,18 +96,22 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
     control_status = {"negative":True,"positive":True}
     data_for_report = {"summary_table":[]}
+    show_control_table = False
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             data_for_report["summary_table"].append(row)
             if row["sample"] == "negative":
+                show_control_table = True
                 for col in row:
                     if col not in ["barcode","sample"]:
                         if int(row[col])>config[KEY_MIN_READS]:
                             control_status["negative"] = False
             elif row["sample"] == "positive":
+                show_control_table = True
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status["positive"] = False
+                    
 
     data_for_report["control_status"] = control_status
 
@@ -123,6 +127,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                     date = date.today(),
                     run_name=config[KEY_RUN_NAME],
                     version = __version__,
+                    show_control_table = show_control_table,
                     data_for_report = data_for_report,
                     config=config)
 
