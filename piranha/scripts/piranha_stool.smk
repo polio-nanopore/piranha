@@ -19,7 +19,7 @@ rule all:
     input:
         os.path.join(config[KEY_OUTDIR],"published_data","consensus_sequences.fasta"),
         expand(os.path.join(config[KEY_OUTDIR],"barcode_reports","{barcode}_report.html"), barcode=config[KEY_BARCODES]),
-        expand(os.path.join(config[KEY_OUTDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
+        expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
 
 rule files:
     params:
