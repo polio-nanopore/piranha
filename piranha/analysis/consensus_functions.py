@@ -40,14 +40,20 @@ def find_variants(reference_seq,query_seq):
     deletions = []
 
     for i in range(len(query_seq)):
+        # bases[0] == query seq
+        # bases[1] == ref seq
         bases = [query_seq[i],reference_seq[i]]
         if bases[0] != bases[1]:
+            
             if bases[0] in non_amb and bases[1] in non_amb:
+                #if neither of them are ambiguous
                 snp = f"{i+1}:{bases[1]}{bases[0]}" # position-reference-query
                 snps.append(snp)
             elif bases[0]=='-':
-                insertions.append(i+1)
+                #if there's a gap in the query, means a deletion
+                deletions.append(i+1)
             elif bases[1]=='-':
+                #if there's a gap in the ref, means an insertion
                 deletions.append(i+1)
 
     insertions = merge_indels(insertions,"ins")
