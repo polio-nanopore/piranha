@@ -54,7 +54,7 @@ def find_variants(reference_seq,query_seq):
                 deletions.append(i+1)
             elif bases[1]=='-':
                 #if there's a gap in the ref, means an insertion
-                deletions.append(i+1)
+                insertions.append(i+1)
 
     insertions = merge_indels(insertions,"ins")
     deletions = merge_indels(deletions,"del")
