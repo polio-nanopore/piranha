@@ -3,9 +3,11 @@ import collections
 from Bio import SeqIO
 import yaml
 
+from piranha.analysis.clean_gaps import *
 from piranha.analysis.consensus_functions import *
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
+
 
 BARCODE = config[KEY_BARCODE]
 SAMPLE = config[KEY_SAMPLE]
@@ -15,20 +17,21 @@ rule all:
     input:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
-        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.vcf"), reference=REFERENCES),
         os.path.join(config[KEY_TEMPDIR],"variation_info.json"),
-        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES)
+         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
+        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES)
 
 rule files:
     params:
         ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
         reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
 
-rule minimap2:
+rule minimap2_racon:
     input:
         reads=rules.files.params.reads,
         ref=rules.files.params.ref
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_racon.log")
     output:
         sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.ref.sam")
     shell:
@@ -36,9 +39,52 @@ rule minimap2:
         minimap2 -ax map-ont {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 
+rule racon:
+    input:
+        reads=rules.files.params.reads,
+        fasta=rules.files.params.ref,
+        sam= rules.minimap2_racon.output.sam
+    output:
+        os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_cns.fasta")
+    shell:
+        "racon --no-trimming -t 1 {input.reads} {input.sam} {input.fasta} > {output}"
+
+rule mafft_racon:
+    input:
+       fasta = rules.racon.output[0],
+       ref = rules.files.params.ref
+    output:
+        temp_file = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_ref.fasta"),
+        aln = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_ref.aln.fasta")
+    shell:
+        "cat {input.ref} {input.fasta} > {output.temp_file} && "
+        "mafft {output.temp_file} > {output.aln} "
+
+rule curate_indels_racon:
+    input:
+        aln = rules.mafft_racon.output.aln
+    params:
+        reference = "{reference}"
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_cns.clean.fasta")
+    run:
+        clean_cns_gaps("racon", SAMPLE, input.aln, output.fasta)
+
+rule minimap2_medaka:
+    input:
+        reads=rules.files.params.reads,
+        ref=rules.curate_indels_racon.output.fasta
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
+    output:
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.sam")
+    shell:
+        """
+        minimap2 -ax map-ont {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        """
+
 rule sort_index:
     input:
-        sam = rules.minimap2.output.sam
+        sam = rules.minimap2_medaka.output.sam
     output:
         bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"),
         index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam.bai")
@@ -51,15 +97,14 @@ rule sort_index:
 rule medaka_consensus:
     input:
         basecalls=rules.files.params.reads,
-        draft=rules.files.params.ref,
-        sam= rules.minimap2.output.sam
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.medaka_consensus.log")
+        draft=rules.curate_indels_racon.output.fasta,
+        sam= rules.minimap2_medaka.output.sam
     params:
-        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}"),
+        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka")
     output:
-        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","cns.mod.fasta"),
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus_probs.hdf"),
-        consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus.fasta")
+        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","cns.mod.fasta"),
+        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
+        consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
     threads:
         2
     shell:
@@ -68,31 +113,18 @@ rule medaka_consensus:
         
         then
             sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
-            medaka_consensus -i {input.basecalls:q} -d {output.cns_mod:q} -o {params.outdir:q} -t 2 &> {log:q}
+            medaka_consensus -i {input.basecalls:q} -d {output.cns_mod:q} -o {params.outdir:q} -t 2
         else
             touch {output.consensus:q}
+            touch {output.probs:q}
+            touch {output.cns_mod:q}
         fi
         """
 
-rule medaka_variant:
-    input:
-        ref = rules.medaka_consensus.output.cns_mod,
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus_probs.hdf"),
-        bam = rules.sort_index.output.bam
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.medaka_variant.log")
-    params:
-        temp_vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.pre.vcf")
-    output:
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.vcf")
-    shell:
-        """
-        medaka variant {input.ref:q} {input.probs:q} {params.temp_vcf:q}  &> {log} 
-        medaka tools annotate {params.temp_vcf:q} {input.ref:q} {input.bam:q} {output[0]} &> {log}
-        """
 
 rule sam_to_seq:
     input:
-        sam = rules.minimap2.output.sam,
+        sam = rules.minimap2_racon.output.sam,
         ref = rules.files.params.ref
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.gofasta.log")
     output:
@@ -101,6 +133,20 @@ rule sam_to_seq:
         """
         gofasta sam toMultiAlign -r {input.ref:q} -s {input.sam:q} -o {output[0]:q} &> {log}
         """
+
+rule sam_to_indels:
+    input:
+        sam = rules.minimap2_racon.output.sam,
+        ref = rules.files.params.ref
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.gofasta.log")
+    output:
+        ins = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","insertions.tsv"),
+        dels = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv")
+    shell:
+        """
+        gofasta sam indels --threshold {config[min_read_depth]} -s {input.sam:q} --insertions-out {output.ins:q} --deletions-out {output.dels:q} 
+        """
+
 
 rule get_variation_info:
     input:
@@ -150,9 +196,67 @@ rule align_cns_ref:
         mafft {input:q} > {output:q}
         """
 
-rule make_snipit_graph:
+rule curate_variants:
     input:
         aln = rules.align_cns_ref.output.aln
+    params:
+        reference = "{reference}"
+    output:
+        masked = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","masked.csv"),
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns_clean.fasta")
+    run:
+        masked = clean_medaka_cns(SAMPLE, input.aln, output.fasta)
+        with open(output.masked,"w") as fw:
+            for var in masked:
+                site = int(var) + 1
+                fw.write(f"{params.reference},{var},{masked[var]}\n")
+
+rule gather_masked_variants:
+    input:
+        expand(rules.curate_variants.output.masked, reference=REFERENCES)
+    output:
+        masked = os.path.join(config[KEY_TEMPDIR],"masked_variants.csv")
+    run:
+        with open(output.masked,"w") as fw:
+            fw.write("reference,site,variant\n")
+            for i in input:
+                with open(i, "r") as f:
+                    for l in f:
+                        l=l.rstrip("\n")
+                        fw.write(l + '\n')
+
+rule join_clean_cns_ref:
+    input:
+        ref=rules.files.params.ref,
+        cns=rules.curate_variants.output.fasta
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_medaka_cns_clean.fasta")
+    run:
+        with open(output[0],"w") as fw:
+            for record in SeqIO.parse(input.ref,"fasta"):
+                display_name = ""
+                for field in record.description.split(" "):
+                    if field.startswith("display_name"):
+                        display_name = field.split("=")[1]
+
+                fw.write(f">{display_name} {record.description}\n{record.seq}\n")
+            for record in SeqIO.parse(input.cns,"fasta"):
+                record_name = SAMPLE.replace(" ","_")
+                fw.write(f">{record_name}\n{record.seq}\n")
+
+rule align_clean_cns_ref:
+    input:
+        rules.join_clean_cns_ref.output.fasta
+    output:
+        aln = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_medaka_cns_clean.aln.fasta")
+    shell:
+        """
+        mafft {input:q} > {output:q}
+        """
+
+rule make_snipit_graph:
+    input:
+        aln = rules.align_clean_cns_ref.output.aln
     params:
         out_stem = os.path.join(config[KEY_TEMPDIR],"snipit","{reference}")
     output:
@@ -165,7 +269,7 @@ rule make_snipit_graph:
 
 rule assess_variants:
     input:
-        rules.align_cns_ref.output.aln
+        rules.align_clean_cns_ref.output.aln
     params:
         reference = "{reference}"
     output:
@@ -184,7 +288,7 @@ rule gather_variants:
 rule gather_cns:
     input:
         variants = rules.gather_variants.output.csv,
-        seqs = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","consensus.fasta"), reference=REFERENCES)
+        seqs = expand(rules.curate_variants.output.fasta, reference=REFERENCES)
     output:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta")
     run:
