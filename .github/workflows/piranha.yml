@@ -24,4 +24,4 @@ jobs:
       - name: Check piranha version
         run: piranha --version
       - name: Run piranha with test data
-        run: piranha -i piranha/test/pak_run/demultiplexed -b piranha/test/pak_run/barcodes.csv 2>&1 | tee piranha.log
+        run: piranha -i piranha/test/pak_run/demultiplexed -b piranha/test/pak_run/barcodes.csv -t 6 2>&1 | tee piranha.log
