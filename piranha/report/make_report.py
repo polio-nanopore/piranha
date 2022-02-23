@@ -25,7 +25,7 @@ def get_snipit(reference,snipit_file):
             snipit_svg+=f"{l}\n"
     return snipit_svg
 
-def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,config):
+def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_variants,barcode,config):
 
     references = config[barcode]
     
@@ -58,7 +58,13 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,barcode,
                 data_for_report[reference]["variant_sites"].append(int(site))
 
     for reference in info_dict:
+        data_for_report[reference]["masked_sites"] = []
         data_for_report[reference]["summary_data"] = info_dict[reference]
+
+    with open(masked_variants,"r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            data_for_report[reference]["masked_sites"].append(int(row["site"]))
 
     with open(variation_file,"r") as f:
         var_data = json.load(f)
