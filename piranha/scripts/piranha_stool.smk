@@ -41,6 +41,7 @@ rule generate_consensus_sequences:
     output:
         fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
         csv= os.path.join(config[KEY_TEMPDIR],"{barcode}","variants.csv"),
+        masked =  os.path.join(config[KEY_TEMPDIR],"{barcode}","masked_variants.csv"),
         json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json")
     run:
         print(green(f"Generating consensus sequences for {params.barcode}"))
@@ -69,6 +70,7 @@ rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_consensus_sequences.output.json,
+        masked_variants = rules.generate_consensus_sequences.output.masked,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
         outdir = os.path.join(config[KEY_OUTDIR],"barcode_reports"),
@@ -79,6 +81,6 @@ rule generate_report:
         with open(input.yaml, 'r') as f:
             config_loaded = yaml.safe_load(f)
 
-        make_sample_report(output.html,input.variation_info,input.consensus_seqs,params.barcode,config_loaded)
+        make_sample_report(output.html,input.variation_info,input.consensus_seqs,input.masked_variants,params.barcode,config_loaded)
 
 
