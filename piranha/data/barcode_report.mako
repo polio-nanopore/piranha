@@ -561,6 +561,7 @@
           <hr>
         <% ref_variation_info = data_for_report[reference]['variation_info'] %>
         <% variant_sites = data_for_report[reference]["variant_sites"] %>
+        <% masked_sites = data_for_report[reference]["masked_sites"] %>
         <br>
         <div id="var_scatter_${reference}" style="width:100%"></div>
             <script>
@@ -600,6 +601,39 @@
                                   },
                         {"mark": {"type": "point", 
                                   "tooltip": {"content": "data"}, 
+                                  "fill":"#CC8B3C",
+                                  "stroke":"#CC8B3C",
+                                  "opacity":1,
+                                  "stroke":null,
+                                  "size":150,
+                                  "font":"Helvetica Neue",
+                                  "fontWeight":0.1},
+                              "transform": [{"filter": {"field":"Position","oneOf":${variant_sites}}}],
+                              "encoding": {"x": {"field": "Position", 
+                                                  "type": "quantitative",
+                                                  "title": "Position (bp)",
+                                                  "axis": {"grid": false,
+                                                          "labelFont":"Helvetica Neue",
+                                                          "labelFontSize":18,
+                                                          "titleFontSize":18,
+                                                          "titleFont":"Helvetica Neue"
+                                                          }
+                                                },
+                                          "y": {"field": "Percentage",
+                                                "type":"quantitative",
+                                                "title": "Percentage Alt Allele",
+                                                "scale": {"domain": [0, 100]},
+                                                "axis":{"grid": false,
+                                                        "labelFont":"Helvetica Neue",
+                                                        "labelFontSize":18,
+                                                        "titleFontSize":18,
+                                                        "titleFont":"Helvetica Neue"
+                                                        }
+                                                }
+                                          }
+                                  },
+                          {"mark": {"type": "point", 
+                                  "tooltip": {"content": "data"}, 
                                   "fill":"#e68781",
                                   "stroke":"#e68781",
                                   "opacity":1,
@@ -607,7 +641,7 @@
                                   "size":150,
                                   "font":"Helvetica Neue",
                                   "fontWeight":0.1},
-                              "transform": [{"filter": {"field":"Position","oneOf":${variant_sites}}}],
+                              "transform": [{"filter": {"field":"Position","oneOf":${masked_sites}}}],
                               "encoding": {"x": {"field": "Position", 
                                                   "type": "quantitative",
                                                   "title": "Position (bp)",
