@@ -209,7 +209,7 @@ rule curate_variants:
         with open(output.masked,"w") as fw:
             for var in masked:
                 site = int(var) + 1
-                fw.write(f"{params.reference},{var},{masked[var]}\n")
+                fw.write(f"{params.reference},{site},{masked[var]}\n")
 
 rule gather_masked_variants:
     input:
