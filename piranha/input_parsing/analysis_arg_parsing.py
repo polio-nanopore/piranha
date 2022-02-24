@@ -39,6 +39,6 @@ def analysis_mode(analysis_mode_arg,config):
         sys.stderr.write(cyan(f"`{KEY_ANALYSIS_MODE}` must be one of {error_str}.\n"))
         sys.exit(-1)
 
-    if congig[KEY_ANALYSIS_MODE] != "stool":
+    if config[KEY_ANALYSIS_MODE] != "stool":
         sys.stderr.write(cyan(f"Only `stool` analysis mode currently implemented.\n"))
         sys.exit(-1)
