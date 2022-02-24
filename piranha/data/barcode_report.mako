@@ -636,7 +636,7 @@
                                   "tooltip": {"content": "data"}, 
                                   "fill":"#e68781",
                                   "stroke":"#e68781",
-                                  "opacity":0.9,
+                                  "opacity":1,
                                   "stroke":null,
                                   "size":150,
                                   "font":"Helvetica Neue",

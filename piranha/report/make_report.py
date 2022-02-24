@@ -64,11 +64,13 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
     with open(masked_variants,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            data_for_report[reference]["masked_sites"].append(int(row["site"]))
+            data_for_report[row["reference"]]["masked_sites"].append(int(row["site"]))
+            print(row)
 
     with open(variation_file,"r") as f:
         var_data = json.load(f)
         for reference in var_data:
+            print(data_for_report[reference]["masked_sites"])
             data_for_report[reference]["variation_info"] = var_data[reference]
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_BARCODE_REPORT_TEMPLATE]))
