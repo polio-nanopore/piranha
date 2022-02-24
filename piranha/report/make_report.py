@@ -51,11 +51,15 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
                     }
             info_dict[reference] = info
 
-            data_for_report[reference]["variant_sites"] = []
+            data_for_report[reference]["snp_sites"] = []
+            data_for_report[reference]["indel_sites"] = []
 
             for var in var_string.split(";"):
                 site = var.split(":")[0]
-                data_for_report[reference]["variant_sites"].append(int(site))
+                if "ins" in var or "del" in var:
+                    data_for_report[reference]["indel_sites"].append(int(site))
+                else:
+                    data_for_report[reference]["snp_sites"].append(int(site))
 
     for reference in info_dict:
         data_for_report[reference]["masked_sites"] = []
