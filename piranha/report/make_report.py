@@ -25,6 +25,8 @@ def get_snipit(reference,snipit_file):
             snipit_svg+=f"{l}\n"
     return snipit_svg
 
+# def include_call_info():
+
 def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_variants,barcode,config):
 
     references = config[barcode]
@@ -39,7 +41,12 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
 
     for record in SeqIO.parse(consensus_seqs,"fasta"):
         #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
-        record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
+        try:
+            record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
+        except:
+            record_sample,record_barcode,reference_group,reference,var_count,var_string = record.description.split("|")
+            collection_date = ""
+            
         if barcode == record_barcode:
             sample = record_sample
             info = {KEY_BARCODE:barcode,
@@ -47,7 +54,7 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
                     KEY_REFERENCE_GROUP:reference_group,
                     "Number of mutations": int(var_count),
                     "Variants":var_string,
-                    "Collection date":date
+                    "Collection date":collection_date
                     }
             info_dict[reference] = info
 
