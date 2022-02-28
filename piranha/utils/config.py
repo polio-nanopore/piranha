@@ -95,7 +95,7 @@ OUTPUT_REPORT = "report.html"
 SAMPLE_COMPOSITION = "sample_composition.csv"
 PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
 PREPROCESSING_CONFIG = "preprocessing_config.yaml"
-SAMPLE_SEQS = "sequences.fasta"
+SAMPLE_SEQS = "vp1_sequences.fasta"
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["stool","environmental"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
