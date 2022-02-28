@@ -30,7 +30,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vega@5.16.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.15.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.11.1"></script>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -527,6 +526,7 @@
           <table class="table">
             <thead class="thead-light">
               <tr>
+                <th>Pass</th>
                 %for col in config["composition_table_header"]:
                   <th>${col.title().replace("_"," ")}</th>
                 %endfor
@@ -538,8 +538,14 @@
                   <% control_status = data_for_report["control_status"][row["sample"]] %>
                   %if control_status:
                     <tr style="background-color:rgba(25, 67, 76, 0.3)">
+                    <td>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-check" viewBox="0 0 14 14">
+                        <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                      </svg>
+                    </td>
                   %else:
                     <tr style="background-color:rgba(230, 135, 129, 0.3)">
+                      <td></td>
                   %endif
                       %for col in config["composition_table_header"]:
                         %if col not in ["barcode","sample"]:
