@@ -13,7 +13,7 @@ from piranha.analysis.filter_lengths import filter_reads_by_length
 
 rule all:
     input:
-        os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
+        os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY),
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES]),
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES])
 
@@ -93,7 +93,7 @@ rule gather_diversity_report:
         txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES])
     output:
         refs= os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION),
-        summary = os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
+        summary = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY),
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     run:
         barcode_config = diversity_report(input.refs,output.refs,output.summary,config)
