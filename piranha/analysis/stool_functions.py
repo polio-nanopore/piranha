@@ -40,8 +40,11 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file,p
                     if row[KEY_REFERENCE] == ref:
                         info = row
                 metadata = input_metadata[barcode]
-                
-                record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
+                if KEY_DATE in metadata:
+                    record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
+                else:
+                    record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}"
+
                 fw.write(f">{record_id}\n{record.seq}\n")
                 handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
     
