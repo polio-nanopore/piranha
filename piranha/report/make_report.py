@@ -46,7 +46,7 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
         except:
             record_sample,record_barcode,reference_group,reference,var_count,var_string = record.description.split("|")
             collection_date = ""
-            
+
         if barcode == record_barcode:
             sample = record_sample
             info = {KEY_BARCODE:barcode,
@@ -109,15 +109,15 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
         print(green("Generating: ") + f"{report_to_generate}")
         fw.write(buf.getvalue())
 
-def make_output_report(report_to_generate,preprocessing_summary,sample_composition,config):
+def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,config):
 
     control_status = {"negative":True,"positive":True}
-    data_for_report = {"summary_table":[]}
+    data_for_report = {"summary_table":[],"composition_table":[]}
     show_control_table = False
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            data_for_report["summary_table"].append(row)
+            data_for_report["composition_table"].append(row)
             if row["sample"] == "negative":
                 show_control_table = True
                 for col in row:
@@ -128,11 +128,39 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 show_control_table = True
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status["positive"] = False
-                    
+
+     
+    for record in SeqIO.parse(consensus_seqs,"fasta"):
+        #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
+        try:
+            record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
+        except:
+            record_sample,record_barcode,reference_group,reference,var_count,var_string = record.description.split("|")
+            collection_date = ""
+
+        call = reference_group
+        if reference_group.startswith("Sabin"):
+            call_threshold = CALL_THRESHOLD_DICT[reference_group]
+            if int(var_count) > call_threshold:
+                call = "VDPV"
+            elif var_count == 0:
+                call = "Sabin"
+            else:
+                call = "Sabin-like"
+
+        info = {KEY_BARCODE:record_barcode,
+                KEY_SAMPLE:record_sample,
+                "Sample call": call,
+                KEY_REFERENCE_GROUP:reference_group,
+                "Number of mutations": int(var_count),
+                }
+                
+        data_for_report["summary_table"].append(info)
 
     data_for_report["control_status"] = control_status
-
-    config["table_header"] = SAMPLE_SUMMARY_HEADER_FIELDS
+    
+    config["composition_table_header"] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
+    config["summary_table_header"] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works

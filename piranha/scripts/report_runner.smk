@@ -18,10 +18,11 @@ rule generate_report:
     input:
         summary_csv=os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
         composition_csv=os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION),
-        yaml = os.path.join(config[KEY_OUTDIR],PREPROCESSING_CONFIG)
+        yaml = os.path.join(config[KEY_OUTDIR],PREPROCESSING_CONFIG),
+        seqs = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
     output:
         report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
     run:
         with open(input.yaml,"r") as f:
             config_loaded = yaml.safe_load(f) 
-        make_output_report(output.report,input.summary_csv,input.composition_csv,config_loaded)
+        make_output_report(output.report,input.summary_csv,input.composition_csv,input.seqs,config_loaded)
