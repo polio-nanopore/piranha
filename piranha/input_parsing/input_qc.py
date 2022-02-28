@@ -19,6 +19,10 @@ def parse_barcodes_csv(barcodes_csv,config):
         sys.stderr.write(cyan(f"Error: No barcode csv file provided.\n"))
         sys.exit(-1)
 
+    if not os.path.exists(config[KEY_BARCODES_CSV]):
+        sys.stderr.write(cyan(f"Error: Cannot find input file {config[KEY_BARCODES_CSV]}.\n"))
+        sys.exit(-1)
+
     barcodes= []
     samples = []
     with open(config[KEY_BARCODES_CSV],"r") as f:
