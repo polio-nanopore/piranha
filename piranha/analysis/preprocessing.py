@@ -91,7 +91,7 @@ def diversity_report(input_files,csv_out,summary_out,config):
             summary_rows[row[KEY_BARCODE]] = {KEY_BARCODE: row[KEY_BARCODE],
                                             KEY_SAMPLE: row[KEY_SAMPLE]
                                             }
-            for field in SAMPLE_SUMMARY_HEADER_FIELDS:
+            for field in SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS:
                 if field not in summary_rows[row[KEY_BARCODE]]: # the rest are ref counters
                     summary_rows[row[KEY_BARCODE]][field] = 0
 
@@ -110,7 +110,7 @@ def diversity_report(input_files,csv_out,summary_out,config):
                         writer.writerow(row)
                     
     with open(summary_out,"w") as fw2:
-        writer = csv.DictWriter(fw2, fieldnames=SAMPLE_SUMMARY_HEADER_FIELDS, lineterminator="\n")
+        writer = csv.DictWriter(fw2, fieldnames=SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS, lineterminator="\n")
         writer.writeheader()
         for barcode in summary_rows:
             row = summary_rows[barcode]
