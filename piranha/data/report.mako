@@ -428,7 +428,7 @@
           <thead>
             <tr>
               %for col in config["summary_table_header"]:
-                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                <th>${col.title().replace("_"," ")}</th>
               %endfor
             </tr>
           </thead>
@@ -451,7 +451,7 @@
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable1').DataTable({
-                "scrollY": '50vh',
+                'iDisplayLength': 100,
                 "paging": false,
                 "border-bottom":false,
                 "bInfo" : false,
@@ -459,15 +459,7 @@
                 buttons: ["copy","csv","print"]
               });
               table.buttons().container().appendTo( $('#tableExportID1') );
-              $('a.toggle-vis').on( 'click', function (e) {
-                  e.preventDefault();
-          
-                  // Get the column API object
-                  var column = table.column( $(this).attr('data-column') );
-          
-                  // Toggle the visibility
-                  column.visible( ! column.visible() );
-              } );
+              
             } );
         </script>
       <div class="pagebreak"> </div>
@@ -514,10 +506,11 @@
             % endfor
           </tbody>
         </table>
+        <br>
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable2').DataTable({
-                "scrollY": '50vh',
+                'iDisplayLength': 100,
                 "paging": false,
                 "border-bottom":false,
                 "bInfo" : false,
@@ -525,15 +518,7 @@
                 buttons: ["copy","csv","print"]
               });
               table.buttons().container().appendTo( $('#tableExportID2') );
-              $('a.toggle-vis').on( 'click', function (e) {
-                  e.preventDefault();
-          
-                  // Get the column API object
-                  var column = table.column( $(this).attr('data-column') );
-          
-                  // Toggle the visibility
-                  column.visible( ! column.visible() );
-              } );
+              
             } );
         </script>
       % if show_control_table:
