@@ -36,7 +36,7 @@ rule minimap2_racon:
         sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.ref.sam")
     shell:
         """
-        minimap2 -ax map-ont {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 
 rule racon:
@@ -79,7 +79,7 @@ rule minimap2_medaka:
         sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.sam")
     shell:
         """
-        minimap2 -ax map-ont {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 
 rule sort_index:
