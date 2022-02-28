@@ -26,7 +26,7 @@ rule gather_files:
         fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","nanopore_reads.fastq")
     shell:
         """
-        cat {params.file_path}/fastq_*.fastq > {output[0]}
+        cd '{params.file_path}' && cat *.fastq > {output[0]}
         """
 
 rule filter_by_length:
