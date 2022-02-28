@@ -289,10 +289,13 @@
                   h3 {
                     page-break-after: avoid;
                   }
+                  .pagebreak { 
+                    page-break-before: always; 
+                  }
                   @page {
                     size: A4 landscape;
                     size: 287mm 210mm;
-                    margin: 0.1cm;
+                    margin: 0.5cm;
                   }
                   body {
                     min-width: 300mm !important;
@@ -314,10 +317,14 @@
                     color: inherit;
                     background-color: inherit;
                     border-collapse: collapse !important;
+                    display: table-row!important;
                   }
                   .table td,
                   .table th {
                     background-color: #fff !important;
+                  }
+                  td,td {
+                      display: table-cell !important
                   }
                   .scroll-container {
                     display: none;
@@ -334,6 +341,9 @@
                   .table-dark thead th,
                   .table-dark tbody + tbody {
                     border-color: #dee2e6;
+                  }
+                  .dataTables_scroll {
+                    overflow:visible;
                   }
                   .dataTables_filter {
                     display: none;
@@ -406,27 +416,82 @@
       <h1>${run_name} report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
       <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       <br>
-      <h3><strong>Table 1</strong> | Composition of samples in run </h3>
+      <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
           <div class="row">
             <div class="col-sm-2" ><strong>Export table: </strong></div>
-            <div class="col-sm-8" id="tableExportID"></div>
+            <div class="col-sm-8" id="tableExportID1"></div>
           </div>
         </div>
-        <table class="display nowrap" id="myTable">
+        <table class="display nowrap" id="myTable1">
           <thead>
             <tr>
-              %for col in config["table_header"]:
+              %for col in config["summary_table_header"]:
                 <th style="width:10%;">${col.title().replace("_"," ")}</th>
               %endfor
             </tr>
           </thead>
           <tbody>
             % for row in data_for_report["summary_table"]:
+                %for col in config["summary_table_header"]:
+
+                  %if col=="sample":
+                    <% this_barcode = row["barcode"] %>
+                    <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
+                  %else:
+                    <td>${row[col]}</td>
+                  %endif
+
+                %endfor
+              </tr>
+            % endfor
+          </tbody>
+        </table>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              var table = $('#myTable1').DataTable({
+                "scrollY": '50vh',
+                "paging": false,
+                "border-bottom":false,
+                "bInfo" : false,
+                dom: 'frtip',
+                buttons: ["copy","csv","print"]
+              });
+              table.buttons().container().appendTo( $('#tableExportID1') );
+              $('a.toggle-vis').on( 'click', function (e) {
+                  e.preventDefault();
+          
+                  // Get the column API object
+                  var column = table.column( $(this).attr('data-column') );
+          
+                  // Toggle the visibility
+                  column.visible( ! column.visible() );
+              } );
+            } );
+        </script>
+      <div class="pagebreak"> </div>
+      <h3><strong>Table 2</strong> | Composition of samples </h3>
+      <button class="accordion">Export table</button>
+        <div class="panel">
+          <div class="row">
+            <div class="col-sm-2" ><strong>Export table: </strong></div>
+            <div class="col-sm-8" id="tableExportID2"></div>
+          </div>
+        </div>
+        <table class="display nowrap" id="myTable2">
+          <thead>
+            <tr>
+              %for col in config["composition_table_header"]:
+                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+              %endfor
+            </tr>
+          </thead>
+          <tbody>
+            % for row in data_for_report["composition_table"]:
               %if row["sample"] not in ["negative","positive"]:
               <tr>
-                %for col in config["table_header"]:
+                %for col in config["composition_table_header"]:
 
                   %if col=="sample":
                     <% this_barcode = row["barcode"] %>
@@ -451,15 +516,15 @@
         </table>
         <script type="text/javascript">
           $(document).ready( function () {
-              var table = $('#myTable').DataTable({
-                "scrollY": "200px",
+              var table = $('#myTable2').DataTable({
+                "scrollY": '50vh',
                 "paging": false,
                 "border-bottom":false,
                 "bInfo" : false,
                 dom: 'frtip',
                 buttons: ["copy","csv","print"]
               });
-              table.buttons().container().appendTo( $('#tableExportID') );
+              table.buttons().container().appendTo( $('#tableExportID2') );
               $('a.toggle-vis').on( 'click', function (e) {
                   e.preventDefault();
           
@@ -472,41 +537,42 @@
             } );
         </script>
       % if show_control_table:
-      <h3><strong>Table 2</strong> | Controls </h3>
-        <table class="table" id="controlTable">
-          <thead class="thead-light">
-            <tr>
-              %for col in config["table_header"]:
-                <th>${col.title().replace("_"," ")}</th>
-              %endfor
-            </tr>
-          </thead>
-          <tbody>
-            % for row in data_for_report["summary_table"]:
-              %if row["sample"] in ["negative","positive"]:
-                <% control_status = data_for_report["control_status"][row["sample"]] %>
-                %if control_status:
-                  <tr style="background-color:rgba(25, 67, 76, 0.3)">
-                %else:
-                  <tr style="background-color:rgba(230, 135, 129, 0.3)">
-                %endif
-                    %for col in config["table_header"]:
-                      %if col not in ["barcode","sample"]:
-                        %if int(row[col])>config["min_read_depth"]:
-                          <td><strong>${row[col]}</strong></td>
+        <div class="pagebreak"> </div>
+        <h3><strong>Table 3</strong> | Controls </h3>
+          <table class="table">
+            <thead class="thead-light">
+              <tr>
+                %for col in config["composition_table_header"]:
+                  <th>${col.title().replace("_"," ")}</th>
+                %endfor
+              </tr>
+            </thead>
+            <tbody>
+              % for row in data_for_report["composition_table"]:
+                %if row["sample"] in ["negative","positive"]:
+                  <% control_status = data_for_report["control_status"][row["sample"]] %>
+                  %if control_status:
+                    <tr style="background-color:rgba(25, 67, 76, 0.3)">
+                  %else:
+                    <tr style="background-color:rgba(230, 135, 129, 0.3)">
+                  %endif
+                      %for col in config["composition_table_header"]:
+                        %if col not in ["barcode","sample"]:
+                          %if int(row[col])>config["min_read_depth"]:
+                            <td><strong>${row[col]}</strong></td>
+                          %else:
+                            <td>${row[col]}</td>
+                          %endif
                         %else:
                           <td>${row[col]}</td>
                         %endif
-                      %else:
-                        <td>${row[col]}</td>
-                      %endif
-                      
-                    %endfor
-                  </tr>
-              %endif
-            %endfor
-          </tbody>
-        </table>
+                        
+                      %endfor
+                    </tr>
+                %endif
+              %endfor
+            </tbody>
+          </table>
       %endif
       </div>
     <br>
