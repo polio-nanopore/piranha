@@ -493,7 +493,7 @@
               % for reference in data_for_report:
               <% summary_data = data_for_report[reference]["summary_data"] %>
                   <tr>
-                    %for col in ["sample","barcode","reference_group","Collection date"]:
+                    %for col in ["sample","barcode","reference_group"]:
                       %if col=="reference_group":
                       <td><a href="#header_${reference}" style="color:${themeColor}">${summary_data[col]}</a></td>
                       %else:
@@ -509,26 +509,17 @@
             <script type="text/javascript">
               $(document).ready( function () {
                   var table = $('#myTable').DataTable({
-                    "scrollY": "100px",
+                    'iDisplayLength': 100,
                     "paging": false,
                     "border-bottom":false,
+                    "bInfo" : false,
                     dom: 'frtip',
                     buttons: ["copy","csv","print"]
                   });
                   table.buttons().container().appendTo( $('#tableExportID') );
-                  $('a.toggle-vis').on( 'click', function (e) {
-                      e.preventDefault();
-              
-                      // Get the column API object
-                      var column = table.column( $(this).attr('data-column') );
-              
-                      // Toggle the visibility
-                      column.visible( ! column.visible() );
-                  } );
-    
+                  
                 } );
             </script>
-
       % for reference in data_for_report:
         <% summary_data = data_for_report[reference]["summary_data"] %>
         <% reference_name = summary_data["reference_group"].replace("_"," ").title() %>
