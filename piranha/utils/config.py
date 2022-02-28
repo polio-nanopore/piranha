@@ -68,14 +68,26 @@ VALUE_MAX_READ_LENGTH = 1300
 VALUE_MIN_READS = 50
 VALUE_MIN_PCENT = 10
 
+# vdpv call thresholds
+
+CALL_THRESHOLD_DICT = {
+    "Sabin1-related":10,
+    "Sabin2-related":8,
+    "Sabin3-related":10
+}
+
+
+# report defaults
+
 VALUE_RUN_NAME="Nanopore sequencing"
 VALUE_COLOUR_MAP=["#e68781","#476970","#f5eece"]
 VALUE_COLOUR_THEME="#e68781"
 
 #file headers
 VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]
+SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample call","reference_group","Number of mutations"]
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
-SAMPLE_SUMMARY_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
+SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 
 # file names
@@ -83,7 +95,7 @@ OUTPUT_REPORT = "report.html"
 SAMPLE_COMPOSITION = "sample_composition.csv"
 PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
 PREPROCESSING_CONFIG = "preprocessing_config.yaml"
-
+SAMPLE_SEQS = "sequences.fasta"
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["stool","environmental"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
