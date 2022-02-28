@@ -136,10 +136,11 @@ def main(sysargs = sys.argv[1:]):
                                         )
         if status: 
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
-            summary_csv=os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY)
-            composition_csv=os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION)
+            summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
+            composition_csv=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION)
+            sample_seqs=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
 
-            make_output_report(report,summary_csv,composition_csv,config)
+            make_output_report(report,summary_csv,composition_csv,sample_seqs,config)
 
             return 0
         
