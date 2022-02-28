@@ -10,7 +10,7 @@ from piranha.utils.config import *
 
 
 BARCODE = config[KEY_BARCODE]
-SAMPLE = config[KEY_SAMPLE]
+SAMPLE = str(config[KEY_SAMPLE])
 REFERENCES = config[BARCODE]
 
 rule all:
@@ -183,7 +183,7 @@ rule join_cns_ref:
 
                 fw.write(f">{display_name} {record.description}\n{record.seq}\n")
             for record in SeqIO.parse(input.cns,"fasta"):
-                record_name = SAMPLE.replace(" ","_")
+                record_name = str(SAMPLE).replace(" ","_")
                 fw.write(f">{record_name}\n{record.seq}\n")
 
 rule align_cns_ref:

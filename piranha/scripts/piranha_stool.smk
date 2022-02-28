@@ -66,6 +66,7 @@ rule gather_consensus_sequences:
     run:
         gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta, output[0],params.publish_dir)
 
+
 rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,

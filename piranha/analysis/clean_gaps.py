@@ -49,7 +49,7 @@ def remove_gaps(aln):
 
 
 def clean_cns_gaps(step, sample, aln_file, outfile):
-    sample = sample.replace(" ","_")
+    sample = str(sample).replace(" ","_")
     round_string = f" note={step}"
 
     cns_id, new_consensus = remove_gaps(aln_file)
