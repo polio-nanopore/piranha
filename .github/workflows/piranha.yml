@@ -25,3 +25,5 @@ jobs:
         run: piranha --version
       - name: Run piranha with test data
         run: piranha -i piranha/test/pak_run/demultiplexed --verbose -b piranha/test/pak_run/barcodes01.csv -t 2 2>&1 | tee piranha.log
+      - name: Run piranha with all data
+        run: piranha -i piranha/test/pak_run/demultiplexed --verbose -b piranha/test/pak_run/barcodes.csv -t 2 2>&1 | tee piranha_all.log
