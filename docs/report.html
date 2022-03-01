@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>Test run report</title>
+    <title>Nanopore sequencing report</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -30,7 +30,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vega@5.16.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.15.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.11.1"></script>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -289,10 +288,13 @@
                   h3 {
                     page-break-after: avoid;
                   }
+                  .pagebreak { 
+                    page-break-before: always; 
+                  }
                   @page {
                     size: A4 landscape;
                     size: 287mm 210mm;
-                    margin: 0.1cm;
+                    margin: 0.5cm;
                   }
                   body {
                     min-width: 300mm !important;
@@ -314,10 +316,14 @@
                     color: inherit;
                     background-color: inherit;
                     border-collapse: collapse !important;
+                    display: table-row!important;
                   }
                   .table td,
                   .table th {
                     background-color: #fff !important;
+                  }
+                  td,td {
+                      display: table-cell !important
                   }
                   .scroll-container {
                     display: none;
@@ -334,6 +340,9 @@
                   .table-dark thead th,
                   .table-dark tbody + tbody {
                     border-color: #dee2e6;
+                  }
+                  .dataTables_scroll {
+                    overflow:visible;
                   }
                   .dataTables_filter {
                     display: none;
@@ -403,18 +412,156 @@
         <hr>
       </header>
         
-      <h1>Test run report <small class="text-muted" style="color:#e68781">2022-02-25</small></h1>
-      <h3><strong>User</strong> | Áine O'Toole</h3>
+      <h1>Nanopore sequencing report <small class="text-muted" style="color:#e68781">2022-02-28</small></h1>
+      <h3><strong>User</strong> |  Áine O'Toole </h3>
       <br>
-      <h3><strong>Table 1</strong> | Composition of samples in run </h3>
+      <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
           <div class="row">
             <div class="col-sm-2" ><strong>Export table: </strong></div>
-            <div class="col-sm-8" id="tableExportID"></div>
+            <div class="col-sm-8" id="tableExportID1"></div>
           </div>
         </div>
-        <table class="display nowrap" id="myTable">
+        <table class="display nowrap" id="myTable1">
+          <thead>
+            <tr>
+                <th>Sample</th>
+                <th>Barcode</th>
+                <th>Sample Call</th>
+                <th>Reference Group</th>
+                <th>Number Of Mutations</th>
+            </tr>
+          </thead>
+          <tbody>
+
+                    
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Mixed Test</a></td>
+
+
+                    <td>barcode01</td>
+
+
+                    <td>Sabin-like</td>
+
+
+                    <td>Sabin3-related</td>
+
+
+                    <td>8</td>
+
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Mixed Test</a></td>
+
+
+                    <td>barcode01</td>
+
+
+                    <td>Sabin-like</td>
+
+
+                    <td>Sabin2-related</td>
+
+
+                    <td>1</td>
+
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">Pure Test</a></td>
+
+
+                    <td>barcode02</td>
+
+
+                    <td>VDPV</td>
+
+
+                    <td>Sabin2-related</td>
+
+
+                    <td>11</td>
+
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WT Test</a></td>
+
+
+                    <td>barcode03</td>
+
+
+                    <td>WPV1</td>
+
+
+                    <td>WPV1</td>
+
+
+                    <td>105</td>
+
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WT Test</a></td>
+
+
+                    <td>barcode03</td>
+
+
+                    <td>WPV1</td>
+
+
+                    <td>WPV1</td>
+
+
+                    <td>111</td>
+
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">VDPV Test</a></td>
+
+
+                    <td>barcode04</td>
+
+
+                    <td>Sabin-like</td>
+
+
+                    <td>Sabin3-related</td>
+
+
+                    <td>8</td>
+
+              </tr>
+          </tbody>
+        </table>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              var table = $('#myTable1').DataTable({
+                'iDisplayLength': 100,
+                "paging": false,
+                "border-bottom":false,
+                "bInfo" : false,
+                dom: 'frtip',
+                buttons: ["copy","csv","print"]
+              });
+              table.buttons().container().appendTo( $('#tableExportID1') );
+              
+            } );
+        </script>
+      <div class="pagebreak"> </div>
+      <h3><strong>Table 2</strong> | Composition of samples </h3>
+      <button class="accordion">Export table</button>
+        <div class="panel">
+          <div class="row">
+            <div class="col-sm-2" ><strong>Export table: </strong></div>
+            <div class="col-sm-8" id="tableExportID2"></div>
+          </div>
+        </div>
+        <table class="display nowrap" id="myTable2">
           <thead>
             <tr>
                 <th style="width:10%;">Sample</th>
@@ -628,93 +775,92 @@
               </tr>
           </tbody>
         </table>
+        <br>
         <script type="text/javascript">
           $(document).ready( function () {
-              var table = $('#myTable').DataTable({
-                "scrollY": "200px",
+              var table = $('#myTable2').DataTable({
+                'iDisplayLength': 100,
                 "paging": false,
                 "border-bottom":false,
                 "bInfo" : false,
                 dom: 'frtip',
                 buttons: ["copy","csv","print"]
               });
-              table.buttons().container().appendTo( $('#tableExportID') );
-              $('a.toggle-vis').on( 'click', function (e) {
-                  e.preventDefault();
-          
-                  // Get the column API object
-                  var column = table.column( $(this).attr('data-column') );
-          
-                  // Toggle the visibility
-                  column.visible( ! column.visible() );
-              } );
+              table.buttons().container().appendTo( $('#tableExportID2') );
+              
             } );
         </script>
-      <h3><strong>Table 2</strong> | Controls </h3>
-        <table class="table" id="controlTable">
-          <thead class="thead-light">
-            <tr>
-                <th>Sample</th>
-                <th>Barcode</th>
-                <th>Sabin1-Related</th>
-                <th>Sabin2-Related</th>
-                <th>Sabin3-Related</th>
-                <th>Wpv1</th>
-                <th>Wpv2</th>
-                <th>Wpv3</th>
-                <th>Nonpolioev</th>
-                <th>Unmapped</th>
-            </tr>
-          </thead>
-          <tbody>
-                
-                  <tr style="background-color:rgba(25, 67, 76, 0.3)">
-                        <td>negative</td>
-                      
-                        <td>barcode05</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>5</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                  </tr>
-                
-                  <tr style="background-color:rgba(230, 135, 129, 0.3)">
-                        <td>positive</td>
-                      
-                        <td>barcode06</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>5</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                          <td>0</td>
-                      
-                  </tr>
-          </tbody>
-        </table>
+        <div class="pagebreak"> </div>
+        <h3><strong>Table 3</strong> | Controls </h3>
+          <table class="table">
+            <thead class="thead-light">
+              <tr>
+                <th>Pass</th>
+                  <th>Sample</th>
+                  <th>Barcode</th>
+                  <th>Sabin1-Related</th>
+                  <th>Sabin2-Related</th>
+                  <th>Sabin3-Related</th>
+                  <th>Wpv1</th>
+                  <th>Wpv2</th>
+                  <th>Wpv3</th>
+                  <th>Nonpolioev</th>
+                  <th>Unmapped</th>
+              </tr>
+            </thead>
+            <tbody>
+                  
+                    <tr style="background-color:rgba(25, 67, 76, 0.3)">
+                    <td style="text-align: center; vertical-align: middle;">
+                      <span class="glyphicon">&#xe013;</span>
+                    </td>
+                          <td>negative</td>
+                        
+                          <td>barcode05</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>5</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                    </tr>
+                  
+                    <tr style="background-color:rgba(230, 135, 129, 0.3)">
+                      <td></td>
+                          <td>positive</td>
+                        
+                          <td>barcode06</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>5</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                            <td>0</td>
+                        
+                    </tr>
+            </tbody>
+          </table>
       </div>
     <br>
     <script>
