@@ -36,7 +36,7 @@ rule generate_consensus_sequences:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
         tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
-    threads: workflow.cores*0.5
+    threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
     output:
         fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),

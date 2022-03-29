@@ -106,7 +106,7 @@ rule medaka_consensus:
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
     threads:
-        2
+        workflow.cores
     shell:
         """
         if [ -s {input.sam:q} ]
