@@ -66,7 +66,11 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
                 if "ins" in var or "del" in var:
                     data_for_report[reference]["indel_sites"].append(int(site))
                 else:
-                    data_for_report[reference]["snp_sites"].append(int(site))
+                    try:
+                        site = int(site)
+                        data_for_report[reference]["snp_sites"].append(site)
+                    except:
+                        data_for_report[reference]["snp_sites"].append(site)
 
     for reference in info_dict:
         data_for_report[reference]["masked_sites"] = []
