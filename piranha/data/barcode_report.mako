@@ -542,10 +542,12 @@
               <td>Number of mutations</td>
               <td>${summary_data["Number of mutations"]}</td>
             </tr>
+            % if summary_data["reference_group"].startswith("Sabin"):
             <tr>
               <td>Mutations</td>
               <td>${"<br>".join(summary_data["Variants"].split(";"))}</td>
             </tr>
+            %endif
           </tbody>
           </table>
           <br>
