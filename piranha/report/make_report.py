@@ -84,7 +84,34 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
     with open(variation_file,"r") as f:
         var_data = json.load(f)
         for reference in var_data:
-            data_for_report[reference][KEY_VARIATION_INFO] = var_data[reference]
+            snp_sites = data_for_report[reference][KEY_SNP_SITES]
+            masked_sites = data_for_report[reference][KEY_MASKED_SITES]
+            indel_sites = data_for_report[reference][KEY_INDEL_SITES]
+
+            all_sites_data = var_data[reference]
+
+            annotated_site_data = []
+            for site_data in all_sites_data:
+                if site_data["Position"] in snp_sites:
+                    site_data["snp_type"] = "SNP"
+                    site_data["colour"] = "#133239"
+                    site_data["size"] = 60
+                elif site_data["Position"] in masked_sites:
+                    site_data["snp_type"] = "masked"
+                    site_data["colour"] = "#e68781"
+                    site_data["size"] = 60
+                elif site_data["Position"] in indel_sites:
+                    site_data["snp_type"] = "indel"
+                    site_data["colour"] = "#B99C0C"
+                    site_data["size"] = 60
+                else:
+                    site_data["snp_type"] = "background"
+                    site_data["colour"] = "#ACAFB0"
+                    site_data["size"] = 30
+
+                annotated_site_data.append(site_data)
+
+            data_for_report[reference][KEY_VARIATION_INFO] = annotated_site_data
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_BARCODE_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works

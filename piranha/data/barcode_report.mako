@@ -565,10 +565,8 @@
                 "height": 200,
                 "datasets": {"var_scatter": ${ref_variation_info}},
                 "data": {"name": "var_scatter"},
-                  "layer": [{"mark": {"type": "point", 
-                                      "tooltip": {"content": "data"}, 
-                                      "fill":"#ACAFB0",
-                                      "stroke":"#ACAFB0",
+                "mark": {"type": "point", "filled":true,
+                                      "tooltip": {"content": "data"},
                                       "font":"Helvetica Neue","fontWeight":0.1},
                               "encoding": {"x": {"field": "Position", 
                                                   "type": "quantitative",
@@ -590,108 +588,15 @@
                                                         "titleFontSize":18,
                                                         "titleFont":"Helvetica Neue"
                                                         }
-                                                }
-                                          }
-                                  },
-                        {"mark": {"type": "point", 
-                                  "tooltip": {"content": "data"}, 
-                                  "fill":"#133239",
-                                  "stroke":"#133239",
-                                  "opacity":0.9,
-                                  "stroke":null,
-                                  "size":150,
-                                  "font":"Helvetica Neue",
-                                  "fontWeight":0.1},
-                              "transform": [{"filter": {"field":"Position","oneOf":${snp_sites}}}],
-                              "encoding": {"x": {"field": "Position", 
-                                                  "type": "quantitative",
-                                                  "title": "Position (bp)",
-                                                  "axis": {"grid": false,
-                                                          "labelFont":"Helvetica Neue",
-                                                          "labelFontSize":18,
-                                                          "titleFontSize":18,
-                                                          "titleFont":"Helvetica Neue"
-                                                          }
                                                 },
-                                          "y": {"field": "Percentage",
-                                                "type":"quantitative",
-                                                "title": "Percentage Alt Allele",
-                                                "scale": {"domain": [0, 100]},
-                                                "axis":{"grid": false,
-                                                        "labelFont":"Helvetica Neue",
-                                                        "labelFontSize":18,
-                                                        "titleFontSize":18,
-                                                        "titleFont":"Helvetica Neue"
-                                                        }
-                                                }
+                                          "color": {"field":"snp_type","
+                                                    type":"nominal",
+                                                    "scale": {"range": {"field": "colour"}}},
+                                          "size": {"field":"snp_type",
+                                                    "type":"nominal",
+                                                    "scale": {"range": {"field": "size"}}}
                                           }
-                                  },
-                            {"mark": {"type": "point", 
-                                  "tooltip": {"content": "data"}, 
-                                  "fill":"#B99C0C",
-                                  "stroke":"#B99C0C",
-                                  "opacity":0.9,
-                                  "stroke":null,
-                                  "size":150,
-                                  "font":"Helvetica Neue",
-                                  "fontWeight":0.1},
-                              "transform": [{"filter": {"field":"Position","oneOf":${indel_sites}}}],
-                              "encoding": {"x": {"field": "Position", 
-                                                  "type": "quantitative",
-                                                  "title": "Position (bp)",
-                                                  "axis": {"grid": false,
-                                                          "labelFont":"Helvetica Neue",
-                                                          "labelFontSize":18,
-                                                          "titleFontSize":18,
-                                                          "titleFont":"Helvetica Neue"
-                                                          }
-                                                },
-                                          "y": {"field": "Percentage",
-                                                "type":"quantitative",
-                                                "title": "Percentage Alt Allele",
-                                                "scale": {"domain": [0, 100]},
-                                                "axis":{"grid": false,
-                                                        "labelFont":"Helvetica Neue",
-                                                        "labelFontSize":18,
-                                                        "titleFontSize":18,
-                                                        "titleFont":"Helvetica Neue"
-                                                        }
-                                                }
                                           }
-                                  },
-                          {"mark": {"type": "point", 
-                                  "tooltip": {"content": "data"}, 
-                                  "fill":"#e68781",
-                                  "stroke":"#e68781",
-                                  "opacity":1,
-                                  "stroke":null,
-                                  "size":150,
-                                  "font":"Helvetica Neue",
-                                  "fontWeight":0.1},
-                              "transform": [{"filter": {"field":"Position","oneOf":${masked_sites}}}],
-                              "encoding": {"x": {"field": "Position", 
-                                                  "type": "quantitative",
-                                                  "title": "Position (bp)",
-                                                  "axis": {"grid": false,
-                                                          "labelFont":"Helvetica Neue",
-                                                          "labelFontSize":18,
-                                                          "titleFontSize":18,
-                                                          "titleFont":"Helvetica Neue"
-                                                          }
-                                                },
-                                          "y": {"field": "Percentage",
-                                                "type":"quantitative",
-                                                "title": "Percentage Alt Allele",
-                                                "scale": {"domain": [0, 100]},
-                                                "axis":{"grid": false,
-                                                        "labelFont":"Helvetica Neue",
-                                                        "labelFontSize":18,
-                                                        "titleFontSize":18,
-                                                        "titleFont":"Helvetica Neue"
-                                                        }
-                                                }
-                                          }
-                                  }]
                   };          
                 vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
                       .then(result => console.log(result))
