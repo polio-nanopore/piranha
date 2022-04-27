@@ -446,7 +446,6 @@
                   %else:
                     <td>${row[col]}</td>
                   %endif
-
                 %endfor
               </tr>
             % endfor

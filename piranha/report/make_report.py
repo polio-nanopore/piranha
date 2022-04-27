@@ -154,12 +154,22 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
             else:
                 call = "Sabin-like"
 
-        info = {KEY_BARCODE:record_barcode,
+            info = {KEY_BARCODE:record_barcode,
                 KEY_SAMPLE:record_sample,
                 "Sample call": call,
                 KEY_REFERENCE_GROUP:reference_group,
                 "Number of mutations": int(var_count),
                 }
+        else:
+            info = {KEY_BARCODE:record_barcode,
+                KEY_SAMPLE:record_sample,
+                "Sample call": call,
+                KEY_REFERENCE_GROUP:reference_group,
+                "Number of mutations": "NA",
+                }
+
+
+        
                 
         data_for_report[KEY_SUMMARY_TABLE].append(info)
 
