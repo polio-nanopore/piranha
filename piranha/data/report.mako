@@ -413,7 +413,12 @@
       </header>
         
       <h1>${run_name} report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
-      <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
+      %if config["username"]!="":
+        <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
+      %endif
+      %if config["institute"]!="":
+        <h3><strong>Institute</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
+      %endif
       <br>
       <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>

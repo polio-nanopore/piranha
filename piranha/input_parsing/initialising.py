@@ -41,6 +41,7 @@ def get_defaults():
                     # misc defaults
                     KEY_RUN_NAME:VALUE_RUN_NAME,
                     KEY_USERNAME:"",
+                    KEY_INSTITUTE:"",
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
 
@@ -151,10 +152,11 @@ def setup_config_dict(cwd,config_arg):
         config[KEY_INPUT_PATH] = cwd
     return config
 
-def misc_args_to_config(verbose,threads,username,run_name,config):
+def misc_args_to_config(verbose,threads,username,institute,run_name,config):
     misc.add_arg_to_config(KEY_VERBOSE,verbose,config)
     misc.add_arg_to_config(KEY_THREADS,threads,config)
     misc.add_arg_to_config(KEY_USERNAME,username,config)
+    misc.add_arg_to_config(KEY_INSTITUTE,institute,config)
     misc.add_arg_to_config(KEY_RUN_NAME,run_name,config)
 
 def set_up_verbosity(config):
