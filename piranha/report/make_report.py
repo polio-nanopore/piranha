@@ -114,24 +114,26 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
         fw.write(buf.getvalue())
 
 def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,config):
+    negative_control = config[KEY_NEGATIVE]
+    positive_control = config[KEY_POSITIVE]
 
-    control_status = {KEY_NEGATIVE:True,KEY_POSITIVE:True}
+    control_status = {negative_control:True,positive_control:True}
     data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     show_control_table = False
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
-            if row[KEY_SAMPLE] == config[KEY_NEGATIVE]:
+            if row[KEY_SAMPLE] == negative_control:
                 show_control_table = True
                 for col in row:
                     if col not in [KEY_BARCODE,KEY_SAMPLE]:
                         if int(row[col])>config[KEY_MIN_READS]:
-                            control_status[KEY_NEGATIVE] = False
-            elif row[KEY_SAMPLE] == config[KEY_POSITIVE]:
+                            control_status[negative_control] = False
+            elif row[KEY_SAMPLE] == positive_control:
                 show_control_table = True
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
-                    control_status[KEY_POSITIVE] = False
+                    control_status[positive_control] = False
 
      
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):

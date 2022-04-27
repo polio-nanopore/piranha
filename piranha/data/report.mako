@@ -539,7 +539,7 @@
             </thead>
             <tbody>
               % for row in data_for_report["composition_table"]:
-                %if row["sample"] in ["negative","positive"]:
+                %if row["sample"] in [config["negative"],config["positive"]]:
                   <% control_status = data_for_report["control_status"][row["sample"]] %>
                   %if control_status:
                     <tr style="background-color:rgba(25, 67, 76, 0.3)">
