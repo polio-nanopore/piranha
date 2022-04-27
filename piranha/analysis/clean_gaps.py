@@ -3,6 +3,7 @@
 from Bio import SeqIO
 from Bio import AlignIO
 import sys
+from piranha.utils.config import *
 
 from piranha.analysis.consensus_functions import find_variants,id_reference_cns
 
@@ -27,7 +28,7 @@ def trim_trailing_gaps(alignment):
 
 def remove_gaps(aln):
 
-    untrimmed_alignment = AlignIO.read(aln, "fasta")
+    untrimmed_alignment = AlignIO.read(aln, KEY_FASTA)
     trimmed = trim_trailing_gaps(untrimmed_alignment)
     
     cleaned_variants = []

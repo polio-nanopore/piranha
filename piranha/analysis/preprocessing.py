@@ -7,7 +7,7 @@ import os
 
 def make_ref_display_name_map(references):
     ref_map = {}
-    for record in SeqIO.parse(references,"fasta"):
+    for record in SeqIO.parse(references,KEY_FASTA):
         display_name = ""
         for item in str(record.description).split(" "):
             if item.startswith("display_name"):
@@ -73,7 +73,7 @@ def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config
     ref_name_map = make_ref_display_name_map(references_sequences)
     
     hits, unmapped,total_reads = group_hits(paf_file,ref_name_map)
-    ref_index =  SeqIO.index(references_sequences,"fasta")
+    ref_index =  SeqIO.index(references_sequences,KEY_FASTA)
     write_out_report(ref_index,ref_name_map,csv_out,hits,unmapped,total_reads,barcode)
 
     write_out_hits(hits,hits_out)
@@ -160,7 +160,7 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
     return to_write
 
 def write_out_ref_fasta(to_write,ref_file,outdir):
-    ref_index = SeqIO.index(ref_file, "fasta")
+    ref_index = SeqIO.index(ref_file, KEY_FASTA)
 
     for ref in to_write:
         with open(os.path.join(outdir,f"{ref}.reference.fasta"),"w") as fw:

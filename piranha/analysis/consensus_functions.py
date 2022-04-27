@@ -9,7 +9,7 @@ from piranha.utils.config import *
 
 def id_reference_cns(aln):
     ref_seq = False
-    for record in SeqIO.parse(aln, "fasta"):
+    for record in SeqIO.parse(aln, KEY_FASTA):
         if not ref_seq:
             ref_seq = str(record.seq).upper()
         else:
@@ -95,7 +95,7 @@ def join_variant_files(header_fields,in_files,output):
 
 
 def get_variation_pcent(ref,fasta):
-    ref_record = SeqIO.read(ref,"fasta")
+    ref_record = SeqIO.read(ref,KEY_FASTA)
     
     #set up site counter, 0-based
     variant_sites = {}
@@ -103,7 +103,7 @@ def get_variation_pcent(ref,fasta):
         variant_sites[i] = 0
 
     c = 0
-    for record in SeqIO.parse(fasta,"fasta"):
+    for record in SeqIO.parse(fasta,KEY_FASTA):
         c +=1
         index = 0
         for pos in zip(str(record.seq),str(ref_record.seq)):
@@ -116,7 +116,7 @@ def get_variation_pcent(ref,fasta):
     for site in variant_sites:
         variant_info[site] = collections.Counter()
 
-    for record in SeqIO.parse(fasta,"fasta"):
+    for record in SeqIO.parse(fasta,KEY_FASTA):
         for site in variant_sites:
             variant = str(record.seq)[site]
             variant_info[site][variant]+=1

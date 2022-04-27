@@ -31,7 +31,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file,p
 
     with open(output_file,"w") as fw:
         for cns_file in input_cns_list:
-            for record in SeqIO.parse(cns_file, "fasta"):
+            for record in SeqIO.parse(cns_file, KEY_FASTA):
                 cns_info= record.description.split(" ")
                 ref,barcode,var_count,var_string=cns_info[0].split("|")
                 

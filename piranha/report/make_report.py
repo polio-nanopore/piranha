@@ -35,11 +35,11 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
 
     for reference in references:
         data_for_report[reference] = {}
-        data_for_report[reference]["snipit_svg"] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],f"{barcode}","snipit",f"{reference}.svg"))
+        data_for_report[reference][KEY_SNIPIT_SVG] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],f"{barcode}","snipit",f"{reference}.svg"))
 
     info_dict = {}
 
-    for record in SeqIO.parse(consensus_seqs,"fasta"):
+    for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
         try:
             record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
@@ -58,33 +58,33 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
                     }
             info_dict[reference] = info
 
-            data_for_report[reference]["snp_sites"] = []
-            data_for_report[reference]["indel_sites"] = []
+            data_for_report[reference][KEY_SNP_SITES] = []
+            data_for_report[reference][KEY_INDEL_SITES] = []
 
             for var in var_string.split(";"):
                 site = var.split(":")[0]
                 if "ins" in var or "del" in var:
-                    data_for_report[reference]["indel_sites"].append(int(site))
+                    data_for_report[reference][KEY_INDEL_SITES].append(int(site))
                 else:
                     try:
                         site = int(site)
-                        data_for_report[reference]["snp_sites"].append(site)
+                        data_for_report[reference][KEY_SNP_SITES].append(site)
                     except:
-                        data_for_report[reference]["snp_sites"].append(site)
+                        data_for_report[reference][KEY_SNP_SITES].append(site)
 
     for reference in info_dict:
-        data_for_report[reference]["masked_sites"] = []
-        data_for_report[reference]["summary_data"] = info_dict[reference]
+        data_for_report[reference][KEY_MASKED_SITES] = []
+        data_for_report[reference][KEY_SUMMARY_DATA] = info_dict[reference]
 
     with open(masked_variants,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            data_for_report[row["reference"]]["masked_sites"].append(int(row["site"]))
+            data_for_report[row[KEY_REFERENCE]][KEY_MASKED_SITES].append(int(row[KEY_SITE]))
 
     with open(variation_file,"r") as f:
         var_data = json.load(f)
         for reference in var_data:
-            data_for_report[reference]["variation_info"] = var_data[reference]
+            data_for_report[reference][KEY_VARIATION_INFO] = var_data[reference]
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_BARCODE_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
@@ -115,26 +115,26 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
 
 def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,config):
 
-    control_status = {"negative":True,"positive":True}
-    data_for_report = {"summary_table":[],"composition_table":[]}
+    control_status = {KEY_NEGATIVE:True,KEY_POSITIVE:True}
+    data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     show_control_table = False
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            data_for_report["composition_table"].append(row)
-            if row["sample"] == "negative":
+            data_for_report[KEY_COMPOSITION_TABLE].append(row)
+            if row[KEY_SAMPLE] == KEY_NEGATIVE:
                 show_control_table = True
                 for col in row:
-                    if col not in ["barcode","sample"]:
+                    if col not in [KEY_BARCODE,KEY_SAMPLE]:
                         if int(row[col])>config[KEY_MIN_READS]:
-                            control_status["negative"] = False
-            elif row["sample"] == "positive":
+                            control_status[KEY_NEGATIVE] = False
+            elif row[KEY_SAMPLE] == KEY_POSITIVE:
                 show_control_table = True
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
-                    control_status["positive"] = False
+                    control_status[KEY_POSITIVE] = False
 
      
-    for record in SeqIO.parse(consensus_seqs,"fasta"):
+    for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
         try:
             record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
@@ -159,12 +159,12 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 "Number of mutations": int(var_count),
                 }
                 
-        data_for_report["summary_table"].append(info)
+        data_for_report[KEY_SUMMARY_TABLE].append(info)
 
-    data_for_report["control_status"] = control_status
+    data_for_report[KEY_CONTROL_STATUS] = control_status
     
-    config["composition_table_header"] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
-    config["summary_table_header"] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
+    config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
+    config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works

@@ -175,14 +175,14 @@ rule join_cns_ref:
         fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_cns.fasta")
     run:
         with open(output[0],"w") as fw:
-            for record in SeqIO.parse(input.ref,"fasta"):
+            for record in SeqIO.parse(input.ref,KEY_FASTA):
                 display_name = ""
                 for field in record.description.split(" "):
                     if field.startswith("display_name"):
                         display_name = field.split("=")[1]
 
                 fw.write(f">{display_name} {record.description}\n{record.seq}\n")
-            for record in SeqIO.parse(input.cns,"fasta"):
+            for record in SeqIO.parse(input.cns,KEY_FASTA):
                 record_name = str(SAMPLE).replace(" ","_")
                 fw.write(f">{record_name}\n{record.seq}\n")
 
@@ -233,14 +233,14 @@ rule join_clean_cns_ref:
         fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_medaka_cns_clean.fasta")
     run:
         with open(output[0],"w") as fw:
-            for record in SeqIO.parse(input.ref,"fasta"):
+            for record in SeqIO.parse(input.ref,KEY_FASTA):
                 display_name = ""
                 for field in record.description.split(" "):
                     if field.startswith("display_name"):
                         display_name = field.split("=")[1]
 
                 fw.write(f">{display_name} {record.description}\n{record.seq}\n")
-            for record in SeqIO.parse(input.cns,"fasta"):
+            for record in SeqIO.parse(input.cns,KEY_FASTA):
                 record_name = SAMPLE.replace(" ","_")
                 fw.write(f">{record_name}\n{record.seq}\n")
 
@@ -301,7 +301,7 @@ rule gather_cns:
         with open(output[0],"w") as fw:
             for in_file in input.seqs:
                 reference = os.path.basename(os.path.dirname(in_file))
-                for record in SeqIO.parse(in_file,"fasta"):
+                for record in SeqIO.parse(in_file,KEY_FASTA):
                     variant_count = var_dict[reference]["variant_count"]
                     variant_string = var_dict[reference]["variants"]
                     fw.write(f">{reference}|{BARCODE}|{variant_count}|{variant_string}\n{record.seq}\n")

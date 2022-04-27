@@ -8,9 +8,10 @@ import yaml
 csv.field_size_limit(sys.maxsize)
 
 from piranha.utils.log_colours import green,cyan
+from piranha.utils.config import *
 
 def get_variation_pcent(ref,fasta):
-    ref_record = SeqIO.read(ref,"fasta")
+    ref_record = SeqIO.read(ref,KEY_FASTA)
     
     #set up site counter, 0-based
     variant_sites = {}
@@ -18,7 +19,7 @@ def get_variation_pcent(ref,fasta):
         variant_sites[i] = 0
 
     c = 0
-    for record in SeqIO.parse(fasta,"fasta"):
+    for record in SeqIO.parse(fasta,KEY_FASTA):
         c +=1
         index = 0
         for pos in zip(str(record.seq),str(ref_record.seq)):
@@ -31,7 +32,7 @@ def get_variation_pcent(ref,fasta):
     for site in variant_sites:
         variant_info[site] = collections.Counter()
 
-    for record in SeqIO.parse(fasta,"fasta"):
+    for record in SeqIO.parse(fasta,KEY_FASTA):
         for site in variant_sites:
             variant = str(record.seq)[site]
             variant_info[site][variant]+=1
@@ -71,14 +72,14 @@ def parse_vcf(fasta,vcf,min_reads,min_pcent,taxon,haplotypes_out):
     haplo_counter = collections.Counter()
     haplo_records = collections.defaultdict(list)
     read_count = 0
-    for record in SeqIO.parse(fasta,"fasta"):
+    for record in SeqIO.parse(fasta,KEY_FASTA):
         read_count +=1
         read_haplotype = ""
         for i in variant_sites:
             read_haplotype+=f"{i}{record.seq[i-1]}"
         haplo_counter[read_haplotype] +=1
     print(haplo_counter)
-    for record in SeqIO.parse(fasta,"fasta"):
+    for record in SeqIO.parse(fasta,KEY_FASTA):
         read_haplotype = ""
         for i in variant_sites:
             read_haplotype+=f"{i}{record.seq[i-1]}"
@@ -102,7 +103,7 @@ def parse_vcf(fasta,vcf,min_reads,min_pcent,taxon,haplotypes_out):
 
 def write_haplotype_ref(ref,taxon,read_haplotypes,outdir):
     reference = ""
-    for record in SeqIO.parse(ref, "fasta"):
+    for record in SeqIO.parse(ref, KEY_FASTA):
         reference = record
 
     for h in read_haplotypes:
