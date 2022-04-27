@@ -95,19 +95,19 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
                 if site_data["Position"] in snp_sites:
                     site_data["snp_type"] = "SNP"
                     site_data["colour"] = "#133239"
-                    site_data["size"] = 60
+                    site_data["size"] = 20
                 elif site_data["Position"] in masked_sites:
                     site_data["snp_type"] = "masked"
                     site_data["colour"] = "#e68781"
-                    site_data["size"] = 60
+                    site_data["size"] = 20
                 elif site_data["Position"] in indel_sites:
                     site_data["snp_type"] = "indel"
                     site_data["colour"] = "#B99C0C"
-                    site_data["size"] = 60
+                    site_data["size"] = 20
                 else:
                     site_data["snp_type"] = "background"
                     site_data["colour"] = "#ACAFB0"
-                    site_data["size"] = 30
+                    site_data["size"] = 10
 
                 annotated_site_data.append(site_data)
 

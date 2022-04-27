@@ -565,38 +565,35 @@
                 "height": 200,
                 "datasets": {"var_scatter": ${ref_variation_info}},
                 "data": {"name": "var_scatter"},
-                "mark": {"type": "point", "filled":true,
-                                      "tooltip": {"content": "data"},
-                                      "font":"Helvetica Neue","fontWeight":0.1},
-                              "encoding": {"x": {"field": "Position", 
-                                                  "type": "quantitative",
-                                                  "title": "Position (bp)",
-                                                  "axis": {"grid": false,
-                                                          "labelFont":"Helvetica Neue",
-                                                          "labelFontSize":18,
-                                                          "titleFontSize":18,
-                                                          "titleFont":"Helvetica Neue"
-                                                          }
-                                                },
-                                          "y": {"field": "Percentage",
-                                                "type":"quantitative",
-                                                "title": "Percentage Alt Allele",
-                                                "scale": {"domain": [0, 100]},
-                                                "axis":{"grid": false,
-                                                        "labelFont":"Helvetica Neue",
-                                                        "labelFontSize":18,
-                                                        "titleFontSize":18,
-                                                        "titleFont":"Helvetica Neue"
-                                                        }
-                                                },
-                                          "color": {"field":"snp_type","
-                                                    type":"nominal",
-                                                    "scale": {"range": {"field": "colour"}}},
-                                          "size": {"field":"snp_type",
-                                                    "type":"nominal",
-                                                    "scale": {"range": {"field": "size"}}}
-                                          }
-                                          }
+                "mark": {"type": "point", "filled": true, "tooltip": {"content": "data"},
+                          "font":"Helvetica Neue",
+                          "fontWeight":0.1},
+                "encoding": {"x": {"field": "Position", 
+                                        "type": "quantitative",
+                                        "title": "Position (bp)",
+                                        "axis": {"grid": false,
+                                                "labelFont":"Helvetica Neue",
+                                                "labelFontSize":18,
+                                                "titleFontSize":18,
+                                                "titleFont":"Helvetica Neue"
+                                                }
+                                      },
+                              "y": {"field": "Percentage",
+                                      "type":"quantitative",
+                                      "title": "Percentage Alt Allele",
+                                      "scale": {"domain": [0, 100]},
+                                      "axis":{"grid": false,
+                                              "labelFont":"Helvetica Neue",
+                                              "labelFontSize":18,
+                                              "titleFontSize":18,
+                                              "titleFont":"Helvetica Neue"
+                                              }
+                                      },
+                              "color": {"field":"snp_type","type":"nominal","scale": {"range": {"field": "colour"}}},
+                              "size": {"field":"size",
+                                        "type":"nominal","legend":false,
+                                        "scale": {"domain": [10, 30]}}
+                            }
                   };          
                 vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
                       .then(result => console.log(result))
