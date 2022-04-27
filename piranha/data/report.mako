@@ -485,7 +485,7 @@
           </thead>
           <tbody>
             % for row in data_for_report["composition_table"]:
-              %if row["sample"] not in ["negative","positive"]:
+              %if row["sample"] not in [config["negative"],config["positive"]]:
               <tr>
                 %for col in config["composition_table_header"]:
 

@@ -37,6 +37,8 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument('-i','--readdir',help="Path to the directory containing fastq read files",dest="readdir")
     i_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
     i_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
+    i_group.add_argument("-pc","--positive-control",action="store",help="Sample name of positive control. Default: positive")
+    i_group.add_argument("-nc","--negative-control",action="store",help="Sample name of negative control. Default: negative")
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: stool, environmental. Default: stool")
@@ -93,6 +95,7 @@ def main(sysargs = sys.argv[1:]):
 
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,config)
     input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
+    input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)

@@ -41,6 +41,8 @@ def get_defaults():
                     # misc defaults
                     KEY_RUN_NAME:VALUE_RUN_NAME,
                     KEY_USERNAME:"",
+                    KEY_POSITIVE:VALUE_POSITIVE,
+                    KEY_NEGATIVE:VALUE_NEGATIVE,
                     KEY_INSTITUTE:"",
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,

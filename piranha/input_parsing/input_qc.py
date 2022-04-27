@@ -27,24 +27,26 @@ def parse_barcodes_csv(barcodes_csv,config):
     samples = []
     with open(config[KEY_BARCODES_CSV],"r") as f:
         reader = csv.DictReader(f)
-        for col in ["barcode","sample"]:
+        for col in [KEY_BARCODE,KEY_SAMPLE]:
             if not col in reader.fieldnames:
                 sys.stderr.write(cyan(f"`{col}` must be a column name in barcode csv file.\n"))
                 sys.exit(-1)
 
         for row in reader:
-            if row["barcode"] in barcodes:
-                barcode = row["barcode"]
+            if row[KEY_BARCODE] in barcodes:
+                barcode = row[KEY_BARCODE]
                 sys.stderr.write(cyan(f"`{barcode}` duplicated in barcode csv file. Note: barcodes must be unique.\n"))
                 sys.exit(-1)
-            if row["sample"] in samples:
+            if row[KEY_SAMPLE] in samples:
                 print(cyan(f"Warning: `{sample}` sample name provided for multiple barcodes."))
-            if '|' in row["barcode"] or '|' in row["sample"]:
+            if '|' in row[KEY_BARCODE] or '|' in row[KEY_SAMPLE]:
                 sys.stderr.write(cyan(f"`|` cannot be used in barcode or sample name. Please remove this character and restart.\n"))
                 sys.exit(-1)
-            barcodes.append(row["barcode"])
+            barcodes.append(row[KEY_BARCODE])
+            samples.append(row[KEY_SAMPLE])
 
     config[KEY_BARCODES] = barcodes
+    config[KEY_SAMPLES] = samples
 
 
 def parse_read_dir(readdir,config):
@@ -92,11 +94,21 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
 
     parse_barcodes_csv(barcodes_csv,config)
 
-    
-
     parse_read_dir(readdir,config)
 
     misc.add_file_to_config(KEY_REFERENCE_SEQUENCES,reference_sequences,config)
     misc.check_path_exists(config[KEY_REFERENCE_SEQUENCES])
+
+def control_group_parsing(positive_control, negative_control, config):
+    misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)
+    misc.add_arg_to_config(KEY_NEGATIVE,negative_control,config)
+
+    if config[KEY_POSITIVE] not in config[KEY_SAMPLES]:
+        print(cyan(f"Warning: cannot find positive control: {config[KEY_POSITIVE]}"))
+    if config[KEY_NEGATIVE] not in config[KEY_SAMPLES]:
+        print(cyan(f"Warning: cannot find negative control: {config[KEY_NEGATIVE]}"))
+
+
+
 
 

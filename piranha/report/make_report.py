@@ -122,13 +122,13 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
         reader = csv.DictReader(f)
         for row in reader:
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
-            if row[KEY_SAMPLE] == KEY_NEGATIVE:
+            if row[KEY_SAMPLE] == config[KEY_NEGATIVE]:
                 show_control_table = True
                 for col in row:
                     if col not in [KEY_BARCODE,KEY_SAMPLE]:
                         if int(row[col])>config[KEY_MIN_READS]:
                             control_status[KEY_NEGATIVE] = False
-            elif row[KEY_SAMPLE] == KEY_POSITIVE:
+            elif row[KEY_SAMPLE] == config[KEY_POSITIVE]:
                 show_control_table = True
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status[KEY_POSITIVE] = False
