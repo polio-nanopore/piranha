@@ -593,7 +593,8 @@
                               "size": {"field":"size",
                                         "type":"nominal","legend":false,
                                         "scale": {"domain": [10, 30]}}
-                            }
+                            },
+                    "config":{"legend":{"title":false}}
                   };          
                 vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
                       .then(result => console.log(result))
