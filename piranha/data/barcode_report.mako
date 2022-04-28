@@ -565,7 +565,8 @@
                 "height": 200,
                 "datasets": {"var_scatter": ${ref_variation_info}},
                 "data": {"name": "var_scatter"},
-                "mark": {"type": "point", "filled": true, "tooltip": {"content": "data"},
+                "mark": {"type": "point", "filled": true, 
+                          
                           "font":"Helvetica Neue",
                           "fontWeight":0.1},
                 "encoding": {"x": {"field": "Position", 
@@ -589,6 +590,15 @@
                                               "titleFont":"Helvetica Neue"
                                               }
                                       },
+                                      "tooltip": [
+                                            {"field": "Position", "type": "quantitative"},
+                                            {"field": "Percentage", "type": "quantitative"},
+                                            {"field": "A reads", "type": "nominal"},
+                                            {"field": "C reads", "type": "nominal"},
+                                            {"field": "G reads", "type": "nominal"},
+                                            {"field": "T reads", "type": "nominal"},
+                                            {"field": "- reads", "type": "nominal"}
+                                          ],
                               "color": {"field":"snp_type","type":"nominal","scale": {"range": {"field": "colour"}}},
                               "size": {"field":"size",
                                         "type":"nominal","legend":false,

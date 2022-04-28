@@ -114,11 +114,15 @@ def get_variation_pcent(ref,fasta):
 
     variant_info = {}
     for site in variant_sites:
-        variant_info[site] = collections.Counter()
+        variant_info[site] = {}
+        for base in ["A","T","C","G","-"]:
+            variant_info[site][base] = 0
 
     for record in SeqIO.parse(fasta,KEY_FASTA):
         for site in variant_sites:
             variant = str(record.seq)[site]
+            if variant not in variant_info[site]:
+                variant_info[site][variant]=0
             variant_info[site][variant]+=1
 
     x = []

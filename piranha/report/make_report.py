@@ -97,15 +97,15 @@ def make_sample_report(report_to_generate,variation_file,consensus_seqs,masked_v
                     site_data["colour"] = "#133239"
                     site_data["size"] = 20
                 elif site_data["Position"] in masked_sites:
-                    site_data["snp_type"] = "masked"
+                    site_data["snp_type"] = "Masked Variant"
                     site_data["colour"] = "#e68781"
                     site_data["size"] = 20
                 elif site_data["Position"] in indel_sites:
-                    site_data["snp_type"] = "indel"
+                    site_data["snp_type"] = "Insertion/ Deletion"
                     site_data["colour"] = "#B99C0C"
                     site_data["size"] = 20
                 else:
-                    site_data["snp_type"] = "background"
+                    site_data["snp_type"] = "Background variation"
                     site_data["colour"] = "#ACAFB0"
                     site_data["size"] = 10
 
