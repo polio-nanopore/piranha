@@ -12,7 +12,8 @@ setup(name='piranha',
       packages=find_packages(),
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
-            "piranha/scripts/piranha_stool.smk",
+            "piranha/scripts/piranha_vp1.smk",
+            "piranha/scripts/piranha_wg.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/piranha_environmental.smk",
             "piranha/scripts/haplotype_consensus.smk",
@@ -26,7 +27,7 @@ setup(name='piranha',
         ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
       url='https://github.com/aineniamh/piranha',
-      author='Aine OToole, Rachel Colquhoun & Corey Ansley',
+      author='Aine OToole',
       author_email='aine.otoole@ed.ac.uk',
       entry_points="""
       [console_scripts]
