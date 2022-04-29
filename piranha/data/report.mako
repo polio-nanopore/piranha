@@ -436,7 +436,7 @@
               %for col in config["summary_table_header"]:
                 <th>${col.title().replace("_"," ")}</th>
               %endfor
-              <th>FASTA file</th>
+              <th>${config["analysis_mode"].upper()} sequence</th>
             </tr>
           </thead>
           <tbody>
