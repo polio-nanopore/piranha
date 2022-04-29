@@ -450,7 +450,7 @@
                     <td>${row[col]}</td>
                   %endif
                 %endfor
-                <td><a download href="published_data/${this_barcode}/${this_barcode}.consensus.fasta" style="color:${themeColor}"><strong>Download</strong></a></td>
+                <td><a download href="published_data/${this_barcode}/${this_barcode}.consensus.fasta" style="color:${themeColor}"><strong>Download FASTA</strong></a></td>
               </tr>
             % endfor
           </tbody>
