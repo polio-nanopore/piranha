@@ -13,8 +13,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.datatables.net/select/1.3.4/css/select.dataTables.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.3.4/js/dataTables.select.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
@@ -434,6 +436,7 @@
               %for col in config["summary_table_header"]:
                 <th>${col.title().replace("_"," ")}</th>
               %endfor
+              <th>FASTA file</th>
             </tr>
           </thead>
           <tbody>
@@ -442,11 +445,12 @@
 
                   %if col=="sample":
                     <% this_barcode = row["barcode"] %>
-                    <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
+                    <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}"><strong>${row[col]}</strong></a></td>
                   %else:
                     <td>${row[col]}</td>
                   %endif
                 %endfor
+                <td><a download href="published_data/${this_barcode}/${this_barcode}.consensus.fasta" style="color:${themeColor}"><strong>Download</strong></a></td>
               </tr>
             % endfor
           </tbody>
@@ -454,6 +458,9 @@
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable1').DataTable({
+                select: {
+                        style: 'multi'
+                    },
                 'iDisplayLength': 100,
                 "paging": false,
                 "border-bottom":false,
@@ -494,7 +501,7 @@
                   %elif col!="barcode":
 
                     %if int(row[col])>config["min_read_depth"]:
-                      <td style="color:${themeColor}">${row[col]}</td>
+                      <td style="color:${themeColor}"><strong>${row[col]}</strong></td>
                     %else:
                       <td>${row[col]}</td>
                     %endif
