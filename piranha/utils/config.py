@@ -83,7 +83,7 @@ KEY_SUMMARY_HEADERS = "report_summary_headers"
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
-VALUE_ANALYSIS_MODE = "stool"
+VALUE_ANALYSIS_MODE = "vp1"
 VALUE_MIN_READ_LENGTH = 1000
 VALUE_MAX_READ_LENGTH = 1300
 VALUE_MIN_READS = 50
@@ -118,7 +118,7 @@ PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
 PREPROCESSING_CONFIG = "preprocessing_config.yaml"
 SAMPLE_SEQS = "vp1_sequences.fasta"
 # DEPENDENCIES AND RESOURCES TO CHECK
-valid_analysis_modes = ["stool","environmental"]
+valid_analysis_modes = ["vp1","wg"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
 module_list = ["mako","Bio"]
 

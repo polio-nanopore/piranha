@@ -41,7 +41,7 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument("-nc","--negative-control",action="store",help="Sample name of negative control. Default: negative")
 
     analysis_group = parser.add_argument_group('Analysis options')
-    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: stool, environmental. Default: stool")
+    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: `vp1`, `wg` (whole genome). Default: `vp1`")
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help="Minimum read length.")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help="Maximum read length.")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help="Minimum read depth required for consensus generation.")
