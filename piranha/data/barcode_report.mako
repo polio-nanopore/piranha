@@ -506,6 +506,11 @@
             </table>
             <br>
             <hr>
+            <h2 style="color:${themeColor}"><a id="header_${barcode}"></a>${barcode} variant report</h2> 
+            <iframe style="border-style:solid;border-width:0.5px;border-color:dimgrey" src="../published_data/${barcode}/${barcode}.consensus.fasta" width="100%" height="100"></iframe> 
+            <div style="text-align: right;"><a download href="../published_data/${barcode}/${barcode}.consensus.fasta" style="color:#e68781"><button>Download </button></a></div>
+            <br>
+            <hr>
             <script type="text/javascript">
               $(document).ready( function () {
                   var table = $('#myTable').DataTable({
