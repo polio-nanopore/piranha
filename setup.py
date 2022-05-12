@@ -13,7 +13,7 @@ setup(name='piranha',
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
             "piranha/scripts/piranha_vp1.smk",
-            "piranha/scripts/piranha_wg.smk",
+            "piranha/scripts/piranha_wg_2tile.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/piranha_environmental.smk",
             "piranha/scripts/haplotype_consensus.smk",
