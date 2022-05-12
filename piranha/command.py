@@ -41,7 +41,7 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument("-nc","--negative-control",action="store",help="Sample name of negative control. Default: negative")
 
     analysis_group = parser.add_argument_group('Analysis options')
-    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: `vp1`, `wg` (whole genome). Default: `vp1`")
+    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: `vp1`, `wg_2tile` (whole genome). Default: `vp1`")
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help="Minimum read length.")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help="Maximum read length.")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help="Minimum read depth required for consensus generation.")
@@ -57,7 +57,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
 
     misc_group = parser.add_argument_group('Misc options')
-    misc_group.add_argument('--run-name',action="store",help="Run name to appear in report")
+    misc_group.add_argument('--runname',action="store",help="Run name to appear in report")
     misc_group.add_argument('--username',action="store",help="Username to appear in report")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report")
     misc_group.add_argument('-t', '--threads', action='store',dest="threads",type=int,help="Number of threads")
@@ -83,9 +83,9 @@ def main(sysargs = sys.argv[1:]):
     # Initialise config dict
     config = init.setup_config_dict(cwd,args.config)
     # Checks access to package data and grabs the snakefile
+    analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
     data_install_checks.check_install(config)
 
-    analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
     snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
     # Threads and verbosity to config
     
@@ -100,7 +100,7 @@ def main(sysargs = sys.argv[1:]):
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
     # ready to run? either verbose snakemake or quiet mode
-    init.misc_args_to_config(args.verbose,args.threads,args.username,args.institute,args.run_name,config)
+    init.misc_args_to_config(args.verbose,args.threads,args.username,args.institute,args.runname,config)
     init.set_up_verbosity(config)
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
