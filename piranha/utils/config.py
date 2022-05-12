@@ -83,9 +83,15 @@ KEY_SUMMARY_HEADERS = "report_summary_headers"
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
+
 VALUE_ANALYSIS_MODE = "vp1"
-VALUE_MIN_READ_LENGTH = 1000
-VALUE_MAX_READ_LENGTH = 1300
+VALUE_ANALYSIS_MODE_VP1 = "vp1"
+VALUE_ANALYSIS_MODE_WG_2TILE = "wg_2tile"
+
+READ_LENGTH_DEFAULT_VP1 = [1000,1300]
+READ_LENGTH_DEFAULT_WG_2TILE = [3400,5200]
+
+
 VALUE_MIN_READS = 50
 VALUE_MIN_PCENT = 10
 
@@ -110,6 +116,8 @@ SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample call","referenc
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
+                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 
 # file names
 OUTPUT_REPORT = "report.html"
@@ -117,15 +125,15 @@ SAMPLE_COMPOSITION = "sample_composition.csv"
 PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
 PREPROCESSING_CONFIG = "preprocessing_config.yaml"
 SAMPLE_SEQS = "vp1_sequences.fasta"
+REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
+REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
+
 # DEPENDENCIES AND RESOURCES TO CHECK
-valid_analysis_modes = ["vp1","wg"]
+valid_analysis_modes = ["vp1","wg_2tile"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
 module_list = ["mako","Bio"]
 
 resources = [
-        {RESOURCE_KEY:"reference_sequences",
-        RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"references.VP1.fasta"},
         {RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
         RESOURCE_KEY_FILENAME:"report.mako"},
