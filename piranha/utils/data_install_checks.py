@@ -24,8 +24,14 @@ def get_snakefile(thisdir,analysis_mode):
     return snakefile
 
 def check_install(config):
+
     for resource in resources:
         package_data_check(resource[RESOURCE_KEY_FILENAME],resource[RESOURCE_KEY_DIRECTORY],resource[RESOURCE_KEY],config)
+
+    if config[KEY_ANALYSIS_MODE] == "vp1":
+        package_data_check(REFERENCE_SEQUENCES_FILE_VP1,"data",KEY_REFERENCE_SEQUENCES,config)
+    elif "wg" in config[KEY_ANALYSIS_MODE]:
+        package_data_check(REFERENCE_SEQUENCES_FILE_WG,"data",KEY_REFERENCE_SEQUENCES,config)
 
 # config={}
 # check_install()
