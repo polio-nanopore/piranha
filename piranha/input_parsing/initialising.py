@@ -33,11 +33,12 @@ def get_defaults():
 
                     # input seq options 
                     KEY_ANALYSIS_MODE:VALUE_ANALYSIS_MODE, #options are stool or environmental
-                    KEY_MIN_READ_LENGTH:VALUE_MIN_READ_LENGTH,
-                    KEY_MAX_READ_LENGTH:VALUE_MAX_READ_LENGTH,
                     KEY_MIN_READS:VALUE_MIN_READS,   # where to pad to using datafunk
                     KEY_MIN_PCENT:VALUE_MIN_PCENT,
 
+                    KEY_MIN_READ_LENGTH:READ_LENGTH_DEFAULT_VP1[0],
+                    KEY_MAX_READ_LENGTH:READ_LENGTH_DEFAULT_VP1[1],
+                    
                     # misc defaults
                     KEY_RUN_NAME:VALUE_RUN_NAME,
                     KEY_USERNAME:"",
