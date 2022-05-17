@@ -16,3 +16,4 @@ def filter_reads_by_length(reads_in,reads_out,config):
 
         SeqIO.write(fastq_records,fw, "fastq")
     
+    
