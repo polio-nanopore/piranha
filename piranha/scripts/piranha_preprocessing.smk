@@ -29,6 +29,7 @@ rule gather_files:
         cd '{params.file_path}' && cat *.fastq > {output[0]}
         """
 
+
 rule filter_by_length:
     input:
         rules.gather_files.output.fastq
@@ -51,6 +52,7 @@ rule map_reads:
         {input.ref:q} \
         {input.fastq:q} -o {output:q} &> {log:q}
         """
+
 
 rule assess_broad_diversity:
     input:

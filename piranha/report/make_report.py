@@ -202,7 +202,11 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
     data_for_report[KEY_CONTROL_STATUS] = control_status
     
-    config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
+    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
+        config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
+    else:
+        config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
+
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))

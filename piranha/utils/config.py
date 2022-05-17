@@ -114,10 +114,12 @@ VALUE_COLOUR_THEME="#e68781"
 VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]
 SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample call","reference_group","Number of mutations"]
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
-SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
+
+SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+
 
 # file names
 OUTPUT_REPORT = "report.html"
