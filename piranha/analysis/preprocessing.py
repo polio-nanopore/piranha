@@ -85,6 +85,13 @@ def diversity_report(input_files,csv_out,summary_out,config):
     min_pcent = config[KEY_MIN_PCENT]
     summary_rows = {}
     refs_out = collections.defaultdict(list)
+
+    SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
+
+    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
+        SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
+    
+
     with open(barcodes_csv,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -167,6 +174,5 @@ def write_out_ref_fasta(to_write,ref_file,outdir):
             record = ref_index[ref]
             fw.write(f">{record.description}\n{record.seq}\n")
     
-
 
 
