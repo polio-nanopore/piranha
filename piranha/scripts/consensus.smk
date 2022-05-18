@@ -17,10 +17,8 @@ rule all:
     input:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
-        os.path.join(config[KEY_TEMPDIR],"variation_info.json"),
-         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
+        os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
         expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
-        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES)
 
 rule files:
     params:
@@ -121,51 +119,6 @@ rule medaka_consensus:
         fi
         """
 
-
-rule sam_to_seq:
-    input:
-        sam = rules.minimap2_racon.output.sam,
-        ref = rules.files.params.ref
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.gofasta.log")
-    output:
-        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","pseudoaln.fasta")
-    shell:
-        """
-        gofasta sam toMultiAlign -r {input.ref:q} -s {input.sam:q} -o {output[0]:q} &> {log}
-        """
-
-rule sam_to_indels:
-    input:
-        sam = rules.minimap2_racon.output.sam,
-        ref = rules.files.params.ref
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.gofasta.log")
-    output:
-        ins = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","insertions.tsv"),
-        dels = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv")
-    shell:
-        """
-        gofasta sam indels --threshold {config[min_read_depth]} -s {input.sam:q} --insertions-out {output.ins:q} --deletions-out {output.dels:q} 
-        """
-
-
-rule get_variation_info:
-    input:
-        expand(rules.files.params.reads, reference=REFERENCES),
-        expand(rules.sam_to_seq.output.fasta,reference=REFERENCES)
-    output:
-        json = os.path.join(config[KEY_TEMPDIR],"variation_info.json")
-    run:
-        # this is for making a figure
-        variation_dict = {}
-        for reference in REFERENCES:
-            ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
-            fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","pseudoaln.fasta")
-            
-            var_dict = get_variation_pcent(ref,fasta)
-            variation_dict[reference] = var_dict
-
-        with open(output.json, "w") as fw:
-            fw.write(json.dumps(variation_dict))
 
 rule join_cns_ref:
     input:
@@ -305,3 +258,4 @@ rule gather_cns:
                     variant_count = var_dict[reference]["variant_count"]
                     variant_string = var_dict[reference]["variants"]
                     fw.write(f">{reference}|{BARCODE}|{variant_count}|{variant_string}\n{record.seq}\n")
+                    
