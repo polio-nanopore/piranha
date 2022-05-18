@@ -95,7 +95,7 @@ rule gather_consensus_sequences:
 rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
-        variation_info = rules.generate_consensus_sequences.output.json,
+        variation_info = rules.generate_variation_info.output.json,
         masked_variants = rules.generate_consensus_sequences.output.masked,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:

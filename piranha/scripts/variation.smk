@@ -14,16 +14,16 @@ SAMPLE = str(config[KEY_SAMPLE])
 REFERENCES = config[BARCODE]
 
 
-rule files:
-    params:
-        ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
-        reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
-
-
 rule all:
     input:
         os.path.join(config[KEY_TEMPDIR],"variation_info.json"),
         expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES)
+
+
+rule files:
+    params:
+        ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
+        reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
 
 
 rule sam_to_seq:
