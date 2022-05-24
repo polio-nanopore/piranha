@@ -4,6 +4,7 @@ import collections
 from Bio import SeqIO
 import csv
 from itertools import groupby, count
+from cigar import Cigar
 
 from piranha.utils.config import *
 
@@ -92,6 +93,44 @@ def join_variant_files(header_fields,in_files,output):
                 for l in f:
                     l = l.rstrip("\n")
                     fw.write(f"{l}\n")
+
+def adjust_position(ref_start,cs,seq,primer_length):
+
+    # new ref start
+    new_start = int(ref_start) + primer_length
+    new_start = ref_start
+    # new cigar string
+    c = Cigar(cs)
+    items = list(c.items())
+    start_mask = items[0][0]
+    end_mask = items[-1][0]
+
+    amended_start_mask = start_mask + primer_length
+    amended_end_mask = end_mask + primer_length
+
+    new_cigar = c.mask_left(amended_start_mask).mask_right(amended_end_mask)
+
+    # new sequence [primer_length:-primer_length]
+    new_seq = seq
+    print(len(c), len(new_cigar), len(seq), len(new_seq))
+    print(len(seq)-len(new_seq))
+    return str(new_start),new_cigar.cigar,new_seq
+
+def soft_mask_primer_sites(input_sam, output_sam, primer_length):
+    with open(output_sam, "w") as fw:
+        with open(input_sam,"r") as f:
+            for l in f:
+                l=l.rstrip("\n")
+
+                if not l.startswith("@"):
+                    tokens = l.split("\t")
+                    new_tokens = tokens
+                    new_tokens[3],new_tokens[5],new_tokens[9] = adjust_position(tokens[3],tokens[5],tokens[9],primer_length)
+                    new_l = "\t".join(new_tokens)
+                    fw.write(f"{new_l}\n")
+                else:
+                    fw.write(f"{l}\n")
+
 
 
 def get_variation_pcent(ref,fasta):
