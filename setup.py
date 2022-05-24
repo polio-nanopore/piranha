@@ -25,7 +25,7 @@ setup(name='piranha',
       install_requires=[
             "mako==1.1.6",
             "snipit==1.0.3"
-        ],
+      ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
       url='https://github.com/aineniamh/piranha',
       author='Aine OToole',

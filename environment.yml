@@ -14,3 +14,5 @@ dependencies:
   - python=3.6
   - racon=1.4.20
   - snakemake-minimal=6.8.0
+pip:
+  - git+https://github.com/ahstram/cigar.git
