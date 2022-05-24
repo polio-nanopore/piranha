@@ -80,9 +80,21 @@ rule minimap2_medaka:
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 
-rule sort_index:
+rule soft_mask_primers:
     input:
         sam = rules.minimap2_medaka.output.sam
+    output:
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.masked.sam")
+    run:
+        if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
+            soft_mask_primer_sites(input.sam, output.sam,30)
+        else:
+            soft_mask_primer_sites(input.sam, output.sam, 30)
+            # shell("cp {input.sam:q} {output.sam:q}")
+
+rule sort_index:
+    input:
+        sam = rules.soft_mask_primers.output.sam
     output:
         bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"),
         index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam.bai")
@@ -96,12 +108,16 @@ rule medaka_consensus:
     input:
         basecalls=rules.files.params.reads,
         draft=rules.curate_indels_racon.output.fasta,
-        sam= rules.minimap2_medaka.output.sam
+        sam= rules.soft_mask_primers.output.sam,
+        bam=rules.sort_index.output.bam
     params:
-        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka")
+        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka"),
+        model = config[KEY_MEDAKA_MODEL]
     output:
         cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","cns.mod.fasta"),
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
+        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","snps.vcf"),
+        vcf_gz = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","snps.vcf.gz"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
     threads:
         workflow.cores
@@ -111,14 +127,17 @@ rule medaka_consensus:
         
         then
             sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
-            medaka_consensus -i {input.basecalls:q} -d {output.cns_mod:q} -o {params.outdir:q} -t 2
+            medaka consensus --model {params.model} --chunk_len 800 --chunk_ovlp 400 -t {threads} {input.bam:q} {output.probs:q} 
+            medaka variant {input.draft:q} {output.probs:q} {output.vcf:q} 
+            bgzip -f {output.vcf:q}
+	        tabix -p vcf {output.vcf_gz:q}
+            bcftools consensus {output.vcf_gz:q} {output.consensus:q}
         else
             touch {output.consensus:q}
             touch {output.probs:q}
             touch {output.cns_mod:q}
         fi
         """
-
 
 rule join_cns_ref:
     input:
@@ -258,4 +277,3 @@ rule gather_cns:
                     variant_count = var_dict[reference]["variant_count"]
                     variant_string = var_dict[reference]["variants"]
                     fw.write(f">{reference}|{BARCODE}|{variant_count}|{variant_string}\n{record.seq}\n")
-                    
