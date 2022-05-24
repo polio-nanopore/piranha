@@ -27,6 +27,7 @@ KEY_MAX_READ_LENGTH = "max_read_length"
 KEY_MIN_READS = "min_read_depth"
 KEY_MIN_PCENT = "min_read_pcent"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
+KEY_MEDAKA_MODEL = "medaka_model"
 
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
@@ -91,6 +92,7 @@ VALUE_ANALYSIS_MODE_WG_2TILE = "wg_2tile"
 READ_LENGTH_DEFAULT_VP1 = [1000,1300]
 READ_LENGTH_DEFAULT_WG_2TILE = [3400,5200]
 
+VALUE_DEFAULT_MEDAKA_MODEL="r941_min_high_g360"
 
 VALUE_MIN_READS = 50
 VALUE_MIN_PCENT = 10
