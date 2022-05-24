@@ -69,6 +69,7 @@ rule assess_broad_diversity:
                         output.hits,
                         config[KEY_REFERENCE_SEQUENCES],
                         params.barcode,
+                        config[KEY_ANALYSIS_MODE],
                         config)
 
 rule write_hit_fastq:
