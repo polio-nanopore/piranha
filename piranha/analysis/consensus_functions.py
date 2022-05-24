@@ -94,11 +94,8 @@ def join_variant_files(header_fields,in_files,output):
                     l = l.rstrip("\n")
                     fw.write(f"{l}\n")
 
-def adjust_position(ref_start,cs,seq,primer_length):
+def adjust_position(cs,primer_length):
 
-    # new ref start
-    new_start = int(ref_start) + primer_length
-    new_start = ref_start
     # new cigar string
     c = Cigar(cs)
     items = list(c.items())
@@ -110,11 +107,7 @@ def adjust_position(ref_start,cs,seq,primer_length):
 
     new_cigar = c.mask_left(amended_start_mask).mask_right(amended_end_mask)
 
-    # new sequence [primer_length:-primer_length]
-    new_seq = seq
-    print(len(c), len(new_cigar), len(seq), len(new_seq))
-    print(len(seq)-len(new_seq))
-    return str(new_start),new_cigar.cigar,new_seq
+    return new_cigar.cigar
 
 def soft_mask_primer_sites(input_sam, output_sam, primer_length):
     with open(output_sam, "w") as fw:
@@ -125,7 +118,7 @@ def soft_mask_primer_sites(input_sam, output_sam, primer_length):
                 if not l.startswith("@"):
                     tokens = l.split("\t")
                     new_tokens = tokens
-                    new_tokens[3],new_tokens[5],new_tokens[9] = adjust_position(tokens[3],tokens[5],tokens[9],primer_length)
+                    new_tokens[5] = adjust_position(tokens[5],primer_length)
                     new_l = "\t".join(new_tokens)
                     fw.write(f"{new_l}\n")
                 else:

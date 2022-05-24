@@ -74,7 +74,7 @@ rule minimap2_medaka:
         ref=rules.curate_indels_racon.output.fasta
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
     output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.sam")
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.unmasked.sam")
     shell:
         """
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
@@ -116,22 +116,19 @@ rule medaka_consensus:
     output:
         cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","cns.mod.fasta"),
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","snps.vcf"),
-        vcf_gz = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","snps.vcf.gz"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
     threads:
         workflow.cores
     shell:
         """
+        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
+
         if [ -s {input.sam:q} ]
-        
+
         then
             sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
-            medaka consensus --model {params.model} --chunk_len 800 --chunk_ovlp 400 -t {threads} {input.bam:q} {output.probs:q} 
-            medaka variant {input.draft:q} {output.probs:q} {output.vcf:q} 
-            bgzip -f {output.vcf:q}
-	        tabix -p vcf {output.vcf_gz:q}
-            bcftools consensus {output.vcf_gz:q} {output.consensus:q}
+            medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
+            medaka stitch {output.probs:q} {output.cns_mod:q} {output.consensus:q} 
         else
             touch {output.consensus:q}
             touch {output.probs:q}
@@ -139,6 +136,12 @@ rule medaka_consensus:
         fi
         """
 
+"""
+            medaka variant {input.draft:q} {output.probs:q} {output.vcf:q} 
+            bgzip -f {output.vcf:q}
+	        tabix -p vcf {output.vcf_gz:q}
+            bcftools consensus {output.vcf_gz:q} {output.consensus:q}
+"""
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
