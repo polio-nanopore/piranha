@@ -16,13 +16,18 @@ def make_ref_display_name_map(references):
     
     return ref_map
 
-def group_hits(paf_file,ref_name_map):
+def group_hits(paf_file,padding,ref_name_map):
     total_reads= 0
     hits = collections.defaultdict(set)
     with open(paf_file, "r") as f:
         for l in f:
             tokens = l.rstrip("\n").split("\t")
-            hits[tokens[5]].add(tokens[0])
+            read_hit_start = int(tokens[2])+padding
+            read_hit_end = int(tokens[3])-padding
+            if tokens[4] == "+":
+                hits[tokens[5]].add((tokens[0],read_hit_start,read_hit_end))
+            else:
+                hits[tokens[5]].add((tokens[0],read_hit_end,read_hit_start))
             total_reads +=1
     
     ref_hits = {}
@@ -65,14 +70,19 @@ def write_out_hits(hits,outfile):
     with open(outfile,"w") as fw:
         for hit in hits:
             reads = hits[hit]
-            for read in reads:
-                fw.write(f"{read},{hit}\n")
+            for read,start,end in reads:
+                fw.write(f"{read},{hit},{start},{end}\n")
 
-def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,config):
+def parse_paf_file(paf_file,csv_out,hits_out,references_sequences,barcode,analysis_mode,config):
     
+    # this is how much of the mapped coords to mask from the sequences
+    padding = 0
+    if analysis_mode == VALUE_ANALYSIS_MODE_WG_2TILE:
+        padding = 30
+
     ref_name_map = make_ref_display_name_map(references_sequences)
     
-    hits, unmapped,total_reads = group_hits(paf_file,ref_name_map)
+    hits, unmapped,total_reads = group_hits(paf_file,padding,ref_name_map)
     ref_index =  SeqIO.index(references_sequences,KEY_FASTA)
     write_out_report(ref_index,ref_name_map,csv_out,hits,unmapped,total_reads,barcode)
 
@@ -153,13 +163,17 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
     not_written = collections.Counter()
     with open(input_hits,"r") as f:
         for l in f:
-            hit,ref = l.rstrip("\n").split(",")
             try:
+                hit,ref,start,end = l.rstrip("\n").split(",")
                 record = seq_index[hit]
+                
+                # trimmed = record[:int(start)].lower()+ record[int(start):int(end)] + record[:int(start)].lower()
                 handle = handle_dict[ref]
+
                 SeqIO.write(record,handle,"fastq")
             except:
                 pass
+
 
     for ref in handle_dict:
         handle_dict[ref].close()
