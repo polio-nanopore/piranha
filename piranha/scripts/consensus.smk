@@ -89,8 +89,8 @@ rule soft_mask_primers:
         if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
             soft_mask_primer_sites(input.sam, output.sam,30)
         else:
-            soft_mask_primer_sites(input.sam, output.sam, 30)
-            # shell("cp {input.sam:q} {output.sam:q}")
+            # soft_mask_primer_sites(input.sam, output.sam, 30)
+            shell("cp {input.sam:q} {output.sam:q}")
 
 rule sort_index:
     input:
