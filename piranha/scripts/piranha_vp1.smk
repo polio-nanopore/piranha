@@ -79,6 +79,32 @@ rule generate_variation_info:
                     f"sample='{sample}' "
                     "--cores {threads} &> {log:q}")
 
+rule generate_co_occurance_info:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"co_occurance.smk"),
+        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
+        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json"),
+        variants = os.path.join(config[KEY_TEMPDIR],"{barcode}","variants.csv"),
+        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
+    threads: workflow.cores
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_co_occurance.smk.log")
+    output:
+        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","co_occurance_info.json")
+    run:
+        sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
+        print(green(f"Gathering co-occurance info for {sample} ({params.barcode})"))
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                    "--forceall "
+                    "--rerun-incomplete "
+                    "{config[log_string]} "
+                    "--configfile {input.yaml:q} "
+                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+                    f"sample='{sample}' "
+                    "--cores {threads} &> {log:q}")
 
 rule gather_consensus_sequences:
     input:
@@ -96,6 +122,7 @@ rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_variation_info.output.json,
+        co_occurance_info = rules.generate_co_occurance_info.output.json,
         masked_variants = rules.generate_consensus_sequences.output.masked,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
