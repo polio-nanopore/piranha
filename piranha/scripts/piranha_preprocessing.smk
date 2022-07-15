@@ -19,7 +19,6 @@ rule all:
 
 rule gather_files:
     input:
-        fastq = os.path.join(config[KEY_READDIR], "{barcode}", f"fastq_runid_{config[KEY_RUNID]}_0.fastq")
     params:
         file_path = os.path.join(config[KEY_READDIR], "{barcode}")
     output:
