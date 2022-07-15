@@ -80,21 +80,21 @@ rule minimap2_medaka:
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 
-rule soft_mask_primers:
-    input:
-        sam = rules.minimap2_medaka.output.sam
-    output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.masked.sam")
-    run:
-        if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
-            soft_mask_primer_sites(input.sam, output.sam,30)
-        else:
-            # soft_mask_primer_sites(input.sam, output.sam, 30)
-            shell("cp {input.sam:q} {output.sam:q}")
+# rule soft_mask_primers:
+#     input:
+#         sam = rules.minimap2_medaka.output.sam
+#     output:
+#         sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.masked.sam")
+#     run:
+#         # if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
+#         #     soft_mask_primer_sites(input.sam, output.sam,30)
+#         # else:
+#             # soft_mask_primer_sites(input.sam, output.sam, 30)
+#         shell("cp {input.sam:q} {output.sam:q}")
 
 rule sort_index:
     input:
-        sam = rules.soft_mask_primers.output.sam
+        sam = rules.minimap2_medaka.output.sam
     output:
         bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"),
         index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam.bai")
@@ -108,7 +108,7 @@ rule medaka_consensus:
     input:
         basecalls=rules.files.params.reads,
         draft=rules.curate_indels_racon.output.fasta,
-        sam= rules.soft_mask_primers.output.sam,
+        sam= rules.minimap2_medaka.output.sam,
         bam=rules.sort_index.output.bam
     params:
         outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka"),

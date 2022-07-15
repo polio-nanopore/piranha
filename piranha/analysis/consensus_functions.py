@@ -4,7 +4,7 @@ import collections
 from Bio import SeqIO
 import csv
 from itertools import groupby, count
-from cigar import Cigar
+# from cigar import Cigar
 
 from piranha.utils.config import *
 
@@ -94,35 +94,35 @@ def join_variant_files(header_fields,in_files,output):
                     l = l.rstrip("\n")
                     fw.write(f"{l}\n")
 
-def adjust_position(cs,primer_length):
+# def adjust_position(cs,primer_length):
 
-    # new cigar string
-    c = Cigar(cs)
-    items = list(c.items())
-    start_mask = items[0][0]
-    end_mask = items[-1][0]
+#     # new cigar string
+#     c = Cigar(cs)
+#     items = list(c.items())
+#     start_mask = items[0][0]
+#     end_mask = items[-1][0]
 
-    amended_start_mask = start_mask + primer_length
-    amended_end_mask = end_mask + primer_length
+#     amended_start_mask = start_mask + primer_length
+#     amended_end_mask = end_mask + primer_length
 
-    new_cigar = c.mask_left(amended_start_mask).mask_right(amended_end_mask)
+#     new_cigar = c.mask_left(amended_start_mask).mask_right(amended_end_mask)
 
-    return new_cigar.cigar
+#     return new_cigar.cigar
 
-def soft_mask_primer_sites(input_sam, output_sam, primer_length):
-    with open(output_sam, "w") as fw:
-        with open(input_sam,"r") as f:
-            for l in f:
-                l=l.rstrip("\n")
+# def soft_mask_primer_sites(input_sam, output_sam, primer_length):
+#     with open(output_sam, "w") as fw:
+#         with open(input_sam,"r") as f:
+#             for l in f:
+#                 l=l.rstrip("\n")
 
-                if not l.startswith("@"):
-                    tokens = l.split("\t")
-                    new_tokens = tokens
-                    new_tokens[5] = adjust_position(tokens[5],primer_length)
-                    new_l = "\t".join(new_tokens)
-                    fw.write(f"{new_l}\n")
-                else:
-                    fw.write(f"{l}\n")
+#                 if not l.startswith("@"):
+#                     tokens = l.split("\t")
+#                     new_tokens = tokens
+#                     new_tokens[5] = adjust_position(tokens[5],primer_length)
+#                     new_l = "\t".join(new_tokens)
+#                     fw.write(f"{new_l}\n")
+#                 else:
+#                     fw.write(f"{l}\n")
 
 
 
