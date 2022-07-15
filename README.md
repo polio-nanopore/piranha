@@ -6,9 +6,10 @@ Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 
 ## See example report [here](https://aineotoole.co.uk/piranha/report.html)
 
-## Installation instructions
+## Installation instructions (for in development, will be put on bioconda later)
 -  Clone the piranha repository with `git clone https://github.com/aineniamh/piranha.git && cd piranha`
--  `conda env create -f environment.yml`
+-  `conda install -n base -c conda-forge mamba`
+-  `mamba env create -f environment.yml`
 -  `conda activate piranha`
 -  `pip install . `
 

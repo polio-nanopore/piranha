@@ -16,15 +16,17 @@ setup(name='piranha',
             "piranha/scripts/piranha_wg_2tile.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/variation.smk",
-            "piranha/scripts/piranha_environmental.smk",
-            "piranha/scripts/haplotype_consensus.smk",
-            "piranha/scripts/snipit.smk",
-            "piranha/scripts/haplotype_reader.smk"
+            "piranha/scripts/snipit.smk"
             ],
       package_data={"piranha":["data/*"]},
       install_requires=[
             "mako==1.1.6",
-            "snipit==1.0.3"
+            "snipit==1.0.3",
+            "biopython"
+            # "tensorflow~=2.7.0",
+            # "pysamstats",
+            # "pyspoa>=0.0.3 ",
+            # "pysam>=0.16.0.1"
       ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
       url='https://github.com/aineniamh/piranha',
