@@ -4,6 +4,7 @@ from Bio import SeqIO
 import yaml
 
 from piranha.analysis.clean_gaps import *
+
 from piranha.analysis.consensus_functions import *
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *

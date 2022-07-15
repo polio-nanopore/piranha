@@ -16,6 +16,7 @@ setup(name='piranha',
             "piranha/scripts/piranha_wg_2tile.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/variation.smk",
+            "piranha/scripts/co_occurance.smk",
             "piranha/scripts/snipit.smk"
             ],
       package_data={"piranha":["data/*"]},
