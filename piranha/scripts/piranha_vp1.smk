@@ -79,9 +79,9 @@ rule generate_variation_info:
                     f"sample='{sample}' "
                     "--cores {threads} &> {log:q}")
 
-rule generate_co_occurance_info:
+rule generate_co_occurrence_info:
     input:
-        snakefile = os.path.join(workflow.current_basedir,"co_occurance.smk"),
+        snakefile = os.path.join(workflow.current_basedir,"co_occurrence.smk"),
         fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
         json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json"),
         variants = os.path.join(config[KEY_TEMPDIR],"{barcode}","variants.csv"),
@@ -91,12 +91,12 @@ rule generate_co_occurance_info:
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
         tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
     threads: workflow.cores
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_co_occurance.smk.log")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_co_occurrence.smk.log")
     output:
-        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","co_occurance_info.json")
+        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","co_occurrence_info.json")
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
-        print(green(f"Gathering co-occurance info for {sample} ({params.barcode})"))
+        print(green(f"Gathering co-occurrence info for {sample} ({params.barcode})"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
                     "--rerun-incomplete "
@@ -122,7 +122,7 @@ rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_variation_info.output.json,
-        co_occurance_info = rules.generate_co_occurance_info.output.json,
+        co_occurrence_info = rules.generate_co_occurrence_info.output.json,
         masked_variants = rules.generate_consensus_sequences.output.masked,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
@@ -134,6 +134,12 @@ rule generate_report:
         with open(input.yaml, 'r') as f:
             config_loaded = yaml.safe_load(f)
 
-        make_sample_report(output.html,input.variation_info,input.consensus_seqs,input.masked_variants,params.barcode,config_loaded)
+        make_sample_report(output.html,
+                            input.variation_info,
+                            input.co_occurrence_info,
+                            input.consensus_seqs,
+                            input.masked_variants,
+                            params.barcode,
+                            config_loaded)
 
 
