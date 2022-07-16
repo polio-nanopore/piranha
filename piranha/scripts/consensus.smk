@@ -142,10 +142,80 @@ rule medaka_consensus:
 	        tabix -p vcf {output.vcf_gz:q}
             bcftools consensus {output.vcf_gz:q} {output.consensus:q}
 """
+
+
+rule minimap2_cns:
+    input:
+        reads=rules.files.params.reads,
+        ref=rules.medaka_consensus.output.consensus
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_cns.log")
+    output:
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.consensus.unmasked.sam")
+    shell:
+        """
+        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        """
+
+rule sort_index_cns:
+    input:
+        sam = rules.minimap2_cns.output.sam
+    output:
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped_cns.sorted.bam"),
+        index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped_cns.sorted.bam.bai")
+    shell:
+        """
+        samtools view -bS -F 4 {input.sam:q} | samtools sort -o {output[0]:q} &&
+        samtools index {output.bam:q} {output.index:q}
+        """
+
+rule medaka_cns_consensus:
+    input:
+        basecalls=rules.files.params.reads,
+        draft=rules.medaka_consensus.output.consensus,
+        sam= rules.minimap2_cns.output.sam,
+        bam=rules.sort_index_cns.output.bam
+    params:
+        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns"),
+        model = config[KEY_MEDAKA_MODEL],
+        reference = "{reference}"
+    output:
+        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","cns.mod.fasta"),
+        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus_probs.hdf"),
+        consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus.fasta")
+    threads:
+        workflow.cores
+    run:
+        if "Sabin" not in params.reference:
+            shell("""
+                [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
+
+                if [ -s {input.sam:q} ]
+
+                then
+                    sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
+                    medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
+                    medaka stitch {output.probs:q} {output.cns_mod:q} {output.consensus:q} 
+                else
+                    touch {output.consensus:q}
+                    touch {output.probs:q}
+                    touch {output.cns_mod:q}
+                fi
+                """)
+        else:
+            shell("""
+                    touch {output.consensus:q}
+                    touch {output.probs:q}
+                    touch {output.cns_mod:q}
+                """)
+
+
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
-        cns=rules.medaka_consensus.output.consensus
+        medaka_cns=rules.medaka_consensus.output.consensus,
+        cns_cns=rules.medaka_cns_consensus.output.consensus
+    params:
+        reference = "{reference}"
     output:
         fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_cns.fasta")
     run:
@@ -157,9 +227,15 @@ rule join_cns_ref:
                         display_name = field.split("=")[1]
 
                 fw.write(f">{display_name} {record.description}\n{record.seq}\n")
-            for record in SeqIO.parse(input.cns,KEY_FASTA):
-                record_name = str(SAMPLE).replace(" ","_")
-                fw.write(f">{record_name}\n{record.seq}\n")
+            if "Sabin" in params.reference:
+                for record in SeqIO.parse(input.medaka_cns,KEY_FASTA):
+                    record_name = str(SAMPLE).replace(" ","_")
+                    fw.write(f">{record_name}\n{record.seq}\n")
+            else:
+                for record in SeqIO.parse(input.cns_cns,KEY_FASTA):
+                    record_name = str(SAMPLE).replace(" ","_")
+                    fw.write(f">{record_name}\n{record.seq}\n")
+
 
 rule align_cns_ref:
     input:
@@ -199,6 +275,7 @@ rule gather_masked_variants:
                     for l in f:
                         l=l.rstrip("\n")
                         fw.write(l + '\n')
+
 
 rule join_clean_cns_ref:
     input:
