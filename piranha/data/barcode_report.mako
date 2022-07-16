@@ -655,7 +655,61 @@
               <h3><strong>Figure ${figure_count}</strong> | snipit plot for queries in ${reference_name}</h3>
               <hr>
             </div>
-          %endfor
+            <hr>
+          %if 'cooccurrence_info' in data_for_report[reference]:
+            <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
+            <br>
+            %if len(ref_cooccurrence_info) < 4:
+              <div id="co_plot_${reference}" style="width:50%"></div>
+            %else:
+              <div id="co_plot_${reference}" style="width:100%"></div>
+            %endif
+                <script>
+                  var vlSpec_bar = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "width": "container",
+                    "height": 300,
+                    "datasets": {"co_plot": ${ref_cooccurrence_info}},
+                    "data": {"name": "co_plot"},
+                    "mark": {"type": "bar", "filled": true, 
+                              
+                              "font":"Helvetica Neue",
+                              "fontWeight":0.1},
+                    "encoding": {"x": {"field": "Combination", 
+                                            "title": "Combination",
+                                            "axis": {"grid": false,
+                                                    "labelFont":"Helvetica Neue",
+                                                    "labelFontSize":18,
+                                                    "titleFontSize":18,
+                                                    "labelAngle":0,
+                                                    "titleFont":"Helvetica Neue"
+                                                    }
+                                          },
+                                  "y": {"field": "Percentage",
+                                          "type":"quantitative",
+                                          "title": "Percentage Alt Allele",
+                                          "scale": {"domain": [0, 100]},
+                                          "axis":{"grid": false,
+                                                  "labelFont":"Helvetica Neue",
+                                                  "labelFontSize":18,
+                                                  "titleFontSize":18,
+                                                  "titleFont":"Helvetica Neue"
+                                                  }
+                                          },
+                                  "color": {"value": "#e68781"}
+                                },
+                        "config":{"legend":{"title":false}}
+                      };          
+                    vegaEmbed('#co_plot_${reference}', vlSpec_bar, {renderer: "svg"})
+                          .then(result => console.log(result))
+                          .catch(console.warn);
+                    </script>
+              <% figure_count +=1 %>
+              <h3><strong>Figure ${figure_count}</strong> | Percentage co-occurrence of SNPs called against ${reference_name} reference in ${sample}</h3>
+              <hr>
+          %endif
+
+        %endfor
     </div>
     <br>
         
