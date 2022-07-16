@@ -4,7 +4,7 @@ from Bio import SeqIO
 import yaml
 import json
 
-from piranha.analysis.get_co_occurance import *
+from piranha.analysis.get_co_occurrence import *
 
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
@@ -18,7 +18,7 @@ REFERENCES = config[BARCODE]
 
 rule all:
     input:
-        os.path.join(config[KEY_TEMPDIR],"co_occurance_info.json")
+        os.path.join(config[KEY_TEMPDIR],"co_occurrence_info.json")
 
 
 rule files:
@@ -27,12 +27,12 @@ rule files:
         reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
 
 
-rule get_co_occurance:
+rule get_co_occurrence:
     input:
         fasta = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","pseudoaln.fasta"),reference=REFERENCES),
         csv = os.path.join(config[KEY_TEMPDIR],"variants.csv")
     output:
-        json = os.path.join(config[KEY_TEMPDIR],"co_occurance_info.json")
+        json = os.path.join(config[KEY_TEMPDIR],"co_occurrence_info.json")
     run:
         counter = {}
         with open(input.csv,"r") as f:
