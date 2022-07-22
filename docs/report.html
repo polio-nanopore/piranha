@@ -13,8 +13,10 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.datatables.net/select/1.3.4/css/select.dataTables.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.3.4/js/dataTables.select.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
@@ -412,8 +414,9 @@
         <hr>
       </header>
         
-      <h1>Nanopore sequencing report <small class="text-muted" style="color:#e68781">2022-02-28</small></h1>
-      <h3><strong>User</strong> |  Áine O'Toole </h3>
+      <h1>Nanopore sequencing report <small class="text-muted" style="color:#e68781">2022-07-16</small></h1>
+        <h3><strong>User</strong> | Aine O'Toole</h3>
+        <h3><strong>Institute</strong> | Institute of Evolutionary Biology</h3>
       <br>
       <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
@@ -431,116 +434,135 @@
                 <th>Sample Call</th>
                 <th>Reference Group</th>
                 <th>Number Of Mutations</th>
+              <th>VP1 sequence</th>
             </tr>
           </thead>
           <tbody>
 
                     
-                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Mixed Test</a></td>
-
-
-                    <td>barcode01</td>
-
-
-                    <td>Sabin-like</td>
-
-
-                    <td>Sabin3-related</td>
-
-
-                    <td>8</td>
-
-              </tr>
-
-                    
-                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Mixed Test</a></td>
-
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781"><strong>MixedTest</strong></a></td>
 
                     <td>barcode01</td>
 
-
                     <td>Sabin-like</td>
-
 
                     <td>Sabin2-related</td>
 
-
                     <td>1</td>
-
+                <td><a download href="published_data/barcode01/barcode01.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
 
                     
-                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">Pure Test</a></td>
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781"><strong>MixedTest</strong></a></td>
 
+                    <td>barcode01</td>
+
+                    <td>Sabin-like</td>
+
+                    <td>Sabin3-related</td>
+
+                    <td>8</td>
+                <td><a download href="published_data/barcode01/barcode01.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781"><strong>PureTest</strong></a></td>
 
                     <td>barcode02</td>
 
-
                     <td>VDPV</td>
-
 
                     <td>Sabin2-related</td>
 
-
                     <td>11</td>
-
+                <td><a download href="published_data/barcode02/barcode02.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
 
                     
-                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WT Test</a></td>
-
+                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781"><strong>WTTest</strong></a></td>
 
                     <td>barcode03</td>
 
+                    <td>WPV1</td>
 
                     <td>WPV1</td>
 
-
-                    <td>WPV1</td>
-
-
-                    <td>105</td>
-
+                    <td>NA</td>
+                <td><a download href="published_data/barcode03/barcode03.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
 
                     
-                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WT Test</a></td>
-
+                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781"><strong>WTTest</strong></a></td>
 
                     <td>barcode03</td>
 
+                    <td>WPV1</td>
 
                     <td>WPV1</td>
 
-
-                    <td>WPV1</td>
-
-
-                    <td>111</td>
-
+                    <td>NA</td>
+                <td><a download href="published_data/barcode03/barcode03.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
 
                     
-                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">VDPV Test</a></td>
-
+                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781"><strong>VDPVTest</strong></a></td>
 
                     <td>barcode04</td>
 
-
                     <td>Sabin-like</td>
-
 
                     <td>Sabin3-related</td>
 
-
                     <td>8</td>
+                <td><a download href="published_data/barcode04/barcode04.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
+              </tr>
 
+                    
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>somemixed</strong></a></td>
+
+                    <td>barcode07</td>
+
+                    <td>Sabin-like</td>
+
+                    <td>Sabin2-related</td>
+
+                    <td>0</td>
+                <td><a download href="published_data/barcode07/barcode07.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>somemixed</strong></a></td>
+
+                    <td>barcode07</td>
+
+                    <td>NonPolioEV</td>
+
+                    <td>NonPolioEV</td>
+
+                    <td>NA</td>
+                <td><a download href="published_data/barcode07/barcode07.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
+              </tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>somemixed</strong></a></td>
+
+                    <td>barcode07</td>
+
+                    <td>Sabin-like</td>
+
+                    <td>Sabin3-related</td>
+
+                    <td>2</td>
+                <td><a download href="published_data/barcode07/barcode07.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
           </tbody>
         </table>
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable1').DataTable({
+                select: {
+                        style: 'multi'
+                    },
                 'iDisplayLength': 100,
                 "paging": false,
                 "border-bottom":false,
@@ -580,7 +602,7 @@
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Mixed Test</a></td>
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">MixedTest</a></td>
 
 
                     <td>barcode01</td>
@@ -592,12 +614,12 @@
 
 
 
-                      <td style="color:#e68781">247</td>
+                      <td style="color:#e68781"><strong>248</strong></td>
 
 
 
 
-                      <td style="color:#e68781">250</td>
+                      <td style="color:#e68781"><strong>250</strong></td>
 
 
 
@@ -629,7 +651,7 @@
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">Pure Test</a></td>
+                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">PureTest</a></td>
 
 
                     <td>barcode02</td>
@@ -641,7 +663,7 @@
 
 
 
-                      <td style="color:#e68781">711</td>
+                      <td style="color:#e68781"><strong>712</strong></td>
 
 
 
@@ -666,7 +688,7 @@
 
 
 
-                      <td style="color:#e68781">52</td>
+                      <td style="color:#e68781"><strong>52</strong></td>
 
 
 
@@ -678,7 +700,7 @@
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WT Test</a></td>
+                    <td><a href="./barcode_reports/barcode03_report.html" target="_blank" style="color:#e68781">WTTest</a></td>
 
 
                     <td>barcode03</td>
@@ -700,7 +722,7 @@
 
 
 
-                      <td style="color:#e68781">335</td>
+                      <td style="color:#e68781"><strong>335</strong></td>
 
 
 
@@ -727,7 +749,7 @@
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">VDPV Test</a></td>
+                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">VDPVTest</a></td>
 
 
                     <td>barcode04</td>
@@ -744,7 +766,7 @@
 
 
 
-                      <td style="color:#e68781">250</td>
+                      <td style="color:#e68781"><strong>250</strong></td>
 
 
 
@@ -770,6 +792,55 @@
 
 
                       <td>0</td>
+
+
+              </tr>
+              <tr>
+
+                    
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781">somemixed</a></td>
+
+
+                    <td>barcode07</td>
+
+
+
+                      <td>0</td>
+
+
+
+
+                      <td style="color:#e68781"><strong>139</strong></td>
+
+
+
+
+                      <td style="color:#e68781"><strong>339</strong></td>
+
+
+
+
+                      <td>9</td>
+
+
+
+
+                      <td>0</td>
+
+
+
+
+                      <td>0</td>
+
+
+
+
+                      <td style="color:#e68781"><strong>215</strong></td>
+
+
+
+
+                      <td>1</td>
 
 
               </tr>
@@ -811,7 +882,7 @@
             <tbody>
                   
                     <tr style="background-color:rgba(25, 67, 76, 0.3)">
-                    <td style="text-align: center; vertical-align: middle;">
+                    <td>
                       <span class="glyphicon">&#xe013;</span>
                     </td>
                           <td>negative</td>
@@ -838,7 +909,7 @@
                   
                     <tr style="background-color:rgba(230, 135, 129, 0.3)">
                       <td></td>
-                          <td>positive</td>
+                          <td>positively</td>
                         
                           <td>barcode06</td>
                         
