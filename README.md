@@ -88,3 +88,15 @@ Misc options:
   -v, --version         show program's version number and exit
   -h, --help
   ```
+  
+  ## pipeline description
+  
+  - Gathers all read files for a given barcode together
+  - Filters these reads by length (Default only reads between 1000 and 1300 bases are included for further analysis)
+  - The reads are mapped against a panel of references. By default there is a reference panel included as part of piranha. It includes VP1 sequences from various wild-type polio viruses, reference Sabin-1, Sabin-2 and Sabin-3 sequences for identification of Sabin-like or VDPV polioviruses, and also a number of non-polio enterovirus reference seqeuences. A custom VP1 fasta file can be supplied with the `-r` flag.
+  - The read map files are parsed to assign each read to the closest virus sequence in the reference panel. This assigns each read a broad category of either Sabin-1 like, Sabin-2 like, Sabin-3 like, wild-type Poliovirus (1, 2, or 3), non-polio enterovirus, or unmapped.
+  - These broad category assignments are used to bin reads for further downstream analysis. Any bin with greater than the minimum read threshold (Default 50 reads, but can be customised) and minimum read percentage (default 10% of sample, but can be customised) is written out in a separate fastq file which will be used to generate the broad-category consensus sequence.
+  - For each bin, a consensus sequence is generated using medaka and variation information is calculated for each site in the alignment against the reference. This calculates the consensus variants within each sample. 
+  - The variants that are flagged by medaka are assessed for read co-occurance to tease apart variant haplotypes within the sample.
+  - For the entire run, and for each individual barcode/ sample, an interactive html report is generated summarising the information. 
+  
