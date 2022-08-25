@@ -41,6 +41,7 @@ def get_defaults():
                     
                     KEY_MEDAKA_MODEL:VALUE_DEFAULT_MEDAKA_MODEL,
                     # misc defaults
+                    KEY_LANGUAGE:VALUE_LANGUAGE,
                     KEY_RUN_NAME:VALUE_RUN_NAME,
                     KEY_USERNAME:"",
                     KEY_POSITIVE:VALUE_POSITIVE,

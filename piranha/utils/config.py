@@ -75,6 +75,9 @@ KEY_FASTA="fasta"
 KEY_REPORT_TEMPLATE = "report_template"
 KEY_BARCODE_REPORT_TEMPLATE = "barcode_report_template"
 
+KEY_LANGUAGE = "language"
+VALUE_LANGUAGE = "English"
+
 RESOURCE_KEY_FILENAME="filename"
 RESOURCE_KEY_DIRECTORY="directory"
 RESOURCE_KEY="KEY"
@@ -138,11 +141,18 @@ valid_analysis_modes = ["vp1","wg_2tile"]
 dependency_list = ["minimap2","snakemake","medaka","racon"]
 module_list = ["mako","Bio"]
 
-resources = [
-        {RESOURCE_KEY:"report_template",
+ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"report.mako"},
+        RESOURCE_KEY_FILENAME:"english_report.mako"},
         {RESOURCE_KEY:"barcode_report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"barcode_report.mako"}
+        RESOURCE_KEY_FILENAME:"english_barcode_report.mako"}
+        ]
+FRENCH_RESOURCES = [
+        {RESOURCE_KEY:"report_template",
+        RESOURCE_KEY_DIRECTORY:"data",
+        RESOURCE_KEY_FILENAME:"french_report.mako"},
+        {RESOURCE_KEY:"barcode_report_template",
+        RESOURCE_KEY_DIRECTORY:"data",
+        RESOURCE_KEY_FILENAME:"french_barcode_report.mako"}
     ]
