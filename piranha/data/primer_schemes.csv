@@ -1,0 +1,7 @@
+scheme,name,direction,note,sequence,position,length
+wg_2tile,panPV_For,forward,,AGAGGCCCACGTGGCGGCTAG,0,21
+wg_2tile,Q8,reverse,reverse_complement,ATGTGGAATAGAGACCTCTT,3470,20
+wg_2tile,Y7R,forward,,GGTTTTGTGTCAGCITGYAAYGA,2370,23
+wg_2tile,panPV_Rev,reverse,reverse_complement,TGTAGGGGTAAATTTTTCTTTAATTCGG,-1,28
+wg_1amp,panPV_For,forward,,AGAGGCCCACGTGGCGGCTAG,0,21
+wg_1amp,panPV_Rev,reverse,reverse_complement,TGTAGGGGTAAATTTTTCTTTAATTCGG,-1,28

@@ -50,3 +50,9 @@ rule get_co_occurrence:
         
         with open(output.json, "w") as fw:
             fw.write(json.dumps(counter))
+
+# rule gather_reads_for_cooccurrence:
+#     input:
+#         json = os.path.join(config[KEY_TEMPDIR],"co_occurrence_info.json"),
+#         reads = rules.files.params.reads
+#     output:

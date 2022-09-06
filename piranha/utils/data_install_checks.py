@@ -4,6 +4,7 @@ from piranha.utils.log_colours import green,cyan
 import sys
 import os
 from piranha.utils.config import *
+from piranha.utils import misc
 
 
 def package_data_check(filename,directory,key,config):
@@ -23,10 +24,17 @@ def get_snakefile(thisdir,analysis_mode):
         sys.exit(-1)
     return snakefile
 
-def check_install(config):
-
-    for resource in resources:
-        package_data_check(resource[RESOURCE_KEY_FILENAME],resource[RESOURCE_KEY_DIRECTORY],resource[RESOURCE_KEY],config)
+def check_install(language,config):
+    misc.add_arg_to_config(KEY_LANGUAGE,language, config)
+    if config[KEY_LANGUAGE] == "English":
+        for resource in ENGLISH_RESOURCES:
+            package_data_check(resource[RESOURCE_KEY_FILENAME],resource[RESOURCE_KEY_DIRECTORY],resource[RESOURCE_KEY],config)
+    elif config[KEY_LANGUAGE] == "French":
+        for resource in FRENCH_RESOURCES:
+            package_data_check(resource[RESOURCE_KEY_FILENAME],resource[RESOURCE_KEY_DIRECTORY],resource[RESOURCE_KEY],config)
+    else:
+        sys.stderr.write(cyan(f'Error: `{config[KEY_LANGUAGE]}`not a valid language option. Available languages are English and French.\n'))
+        sys.exit(-1)
 
     if config[KEY_ANALYSIS_MODE] == "vp1":
         package_data_check(REFERENCE_SEQUENCES_FILE_VP1,"data",KEY_REFERENCE_SEQUENCES,config)

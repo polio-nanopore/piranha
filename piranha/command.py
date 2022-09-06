@@ -57,6 +57,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
 
     misc_group = parser.add_argument_group('Misc options')
+    misc_group.add_argument('--language',action="store",help="Report language. Options: English, French. Default: English")
     misc_group.add_argument('--runname',action="store",help="Run name to appear in report")
     misc_group.add_argument('--username',action="store",help="Username to appear in report")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report")
@@ -84,7 +85,7 @@ def main(sysargs = sys.argv[1:]):
     config = init.setup_config_dict(cwd,args.config)
     # Checks access to package data and grabs the snakefile
     analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
-    data_install_checks.check_install(config)
+    data_install_checks.check_install(args.language,config)
 
     snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
     # Threads and verbosity to config

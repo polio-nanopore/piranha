@@ -23,10 +23,11 @@ rule gather_files:
         file_path = os.path.join(config[KEY_READDIR], "{barcode}")
     output:
         fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","nanopore_reads.fastq")
-    shell:
-        """
-        cd '{params.file_path}' && cat *.fastq > {output[0]}
-        """
+    run:
+        if not os.path.exists(params.file_path):
+            shell("touch {output.fastq:q}")
+        else:
+            shell("""cd '{params.file_path}' && cat *.fastq > {output[0]}""")
 
 
 rule filter_by_length:
