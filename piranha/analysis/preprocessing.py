@@ -37,11 +37,16 @@ def group_hits(paf_file,padding,ref_name_map):
             not_mapped += 1
         else:
             ref_hits[hit] = hits[hit]
+    if total_reads == 0:
+        return {}, 0, 0
     return ref_hits, not_mapped,total_reads
 
 def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode):
 
-    pcent_unmapped = round((100*(unmapped/total_reads)),2)
+    if total_reads == 0:
+        pcent_unmapped = 100
+    else:
+        pcent_unmapped = round((100*(unmapped/total_reads)),2)
     
     with open(csv_out,"w") as fw:
         writer = csv.DictWriter(fw, fieldnames=SAMPLE_HIT_HEADER_FIELDS,lineterminator="\n")
