@@ -13,6 +13,12 @@ Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 -  `conda activate piranha`
 -  `pip install . `
 
+## Updating piranha
+- Change directory to the piranha repository: `cd piranha`
+- Pull the latest changes from GitHub: `git pull`
+- Ensure you're in the piranha environment: `conda activate piranha`
+- Install the changes: `pip install .`
+
 <br>
 <h2>Dependencies If <strong>Not</strong> Installing Using the Conda Environment</h2>
 
