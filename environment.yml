@@ -4,11 +4,9 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - coreutils=8.31
-  - gofasta=0.0.6
-  - mafft=7.490
-  - medaka
-  - pysamstats
+  - python<3.10
+  - gofasta
+  - mafft
   - minimap2
-  - racon=1.5
-  - snakemake-minimal=6.8.0
+  - snakemake-minimal
+
