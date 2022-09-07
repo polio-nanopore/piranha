@@ -138,7 +138,7 @@ REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["vp1","wg_2tile"]
-dependency_list = ["minimap2","snakemake","medaka","racon"]
+dependency_list = ["minimap2","snakemake","medaka",]
 module_list = ["mako","Bio"]
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
