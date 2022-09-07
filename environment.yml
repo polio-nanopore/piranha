@@ -7,6 +7,9 @@ dependencies:
   - python<3.10
   - gofasta
   - mafft
-  - minimap2
+  - minimap2=2.11
+  - samtools=1.11
+  - bcftools=1.11
+  - tabix=1.11
   - snakemake-minimal
 
