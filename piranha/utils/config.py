@@ -50,9 +50,7 @@ KEY_SUMMARY_DATA="summary_data"
 KEY_VARIATION_INFO="variation_info"
 KEY_COOCCURRENCE_INFO="cooccurrence_info"
 KEY_POSITIVE="positive"
-VALUE_POSITIVE="positive"
 KEY_NEGATIVE = "negative"
-VALUE_NEGATIVE = "negative"
 KEY_SUMMARY_TABLE="summary_table"
 KEY_COMPOSITION_TABLE="composition_table"
 KEY_COMPOSITION_TABLE_HEADER="composition_table_header"
@@ -76,7 +74,6 @@ KEY_REPORT_TEMPLATE = "report_template"
 KEY_BARCODE_REPORT_TEMPLATE = "barcode_report_template"
 
 KEY_LANGUAGE = "language"
-VALUE_LANGUAGE = "English"
 
 RESOURCE_KEY_FILENAME="filename"
 RESOURCE_KEY_DIRECTORY="directory"
@@ -85,6 +82,11 @@ RESOURCE_KEY="KEY"
 KEY_SUMMARY_HEADERS = "report_summary_headers"
 
 # default values for config dict
+
+VALUE_LANGUAGE = "English"
+VALUE_POSITIVE="positive"
+VALUE_NEGATIVE = "negative"
+
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
@@ -138,7 +140,7 @@ REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["vp1","wg_2tile"]
-dependency_list = ["minimap2","snakemake","medaka","racon"]
+dependency_list = ["minimap2","snakemake","medaka",]
 module_list = ["mako","Bio"]
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",

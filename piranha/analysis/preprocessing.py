@@ -5,6 +5,25 @@ import collections
 from piranha.utils.config import *
 import os
 
+
+def gather_filter_reads_by_length(dir_in,reads_out,config):
+
+    if not os.path.exists(dir_in):
+        os.mkdir(dir_in)
+
+    fastq_records = []
+
+    with open(reads_out,"w") as fw:
+        for r,d,f in os.walk(dir_in):
+            for reads_in in f:
+                if reads_in.endswith(".fastq") or reads_in.endswith(".fq"):
+                    for record in SeqIO.parse(os.path.join(dir_in,reads_in),"fastq"):
+                        length = len(record)
+                        if length > int(config[KEY_MIN_READ_LENGTH]) and length < int(config[KEY_MAX_READ_LENGTH]):
+                            fastq_records.append(record)
+
+        SeqIO.write(fastq_records,fw, "fastq")
+
 def make_ref_display_name_map(references):
     ref_map = {}
     for record in SeqIO.parse(references,KEY_FASTA):
