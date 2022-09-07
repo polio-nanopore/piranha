@@ -487,11 +487,11 @@
             <tr>
               %for col in config["composition_table_header"]:
                 %if col=="sample":
-                    <td>Échantillon</td>
+                <th style="width:10%;">Échantillon</th>
                 %elif col=="unmapped":
-                    <td>Non mappé</td>
+                <th style="width:10%;">Non mappé</th>
                 %else:
-                  <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                <th style="width:10%;">${col.title().replace("_"," ")}</th>
                 %endif
               %endfor
             </tr>

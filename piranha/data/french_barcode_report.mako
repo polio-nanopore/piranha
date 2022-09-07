@@ -518,6 +518,7 @@
                     "paging": false,
                     "border-bottom":false,
                     "bInfo" : false,
+                    searching: false,
                     dom: 'frtip',
                     buttons: ["copy","csv","print"]
                   });
@@ -528,7 +529,7 @@
       % for reference in data_for_report:
         <% summary_data = data_for_report[reference]["summary_data"] %>
         <% reference_name = summary_data["reference_group"].replace("_"," ").title() %>
-        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${reference_name} variant report</h2> 
+        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>Rapport de variante ${reference_name}</h2> 
         <% table_count += 1 %>
         <h3><strong>Tableau ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
         <table class="table" id="table_${table_count}">
