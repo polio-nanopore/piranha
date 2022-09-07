@@ -47,7 +47,7 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help=f"Minimum read length. Default: {READ_LENGTH_DEFAULT_VP1[0]}")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help=f"Maximum read length. Default: {READ_LENGTH_DEFAULT_VP1[1]}")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help=f"Minimum read depth required for consensus generation. Default: {VALUE_MIN_READS}")
-    analysis_group.add_argument("-p","--min-read-pcent",action="store",type=int,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT")
+    analysis_group.add_argument("-p","--min-read-pcent",action="store",type=int,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT}")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
