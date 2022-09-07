@@ -587,7 +587,7 @@
                                       },
                               "y": {"field": "Percentage",
                                       "type":"quantitative",
-                                      "title": "Allèle alternatif en pourcentage",
+                                      "title": "Allèle alternatif en pourcentage (%)",
                                       "scale": {"domain": [0, 100]},
                                       "axis":{"grid": false,
                                               "labelFont":"Helvetica Neue",
@@ -653,7 +653,7 @@
             <br>
             <div>
               <% figure_count +=1 %>
-              <h3><strong>Figure ${figure_count}</strong> | graphique d'extraits pour les requêtes dans ${reference_name}</h3>
+              <h3><strong>Figure ${figure_count}</strong> | Graphique d'extraits pour les requêtes dans ${reference_name}</h3>
               <hr>
             </div>
             <hr>
@@ -688,7 +688,7 @@
                                           },
                                   "y": {"field": "Percentage",
                                           "type":"quantitative",
-                                          "title": "Pourcentage",
+                                          "title": "Pourcentage (%)",
                                           "scale": {"domain": [0, 100]},
                                           "axis":{"grid": false,
                                                   "labelFont":"Helvetica Neue",
