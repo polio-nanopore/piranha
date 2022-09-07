@@ -31,7 +31,7 @@ rule minimap2_medaka:
         ref=rules.files.params.ref
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
     output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.unmasked.sam")
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.ref.sam")
     shell:
         """
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
@@ -49,59 +49,85 @@ rule minimap2_medaka:
 #             # soft_mask_primer_sites(input.sam, output.sam, 30)
 #         shell("cp {input.sam:q} {output.sam:q}")
 
-rule medaka_haploid_variant:
+rule sort_index:
+    input:
+        sam = rules.minimap2_medaka.output.sam
+    output:
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"),
+        index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam.bai")
+    shell:
+        """
+        samtools view -bS -F 4 {input.sam:q} | samtools sort -o {output[0]:q} &&
+        samtools index {output.bam:q} {output.index:q}
+        """
+
+rule medaka_consensus:
     input:
         basecalls=rules.files.params.reads,
-        sam=rules.minimap2_medaka.output.sam,
-        draft=rules.files.params.ref
+        draft=rules.files.params.ref,
+        sam= rules.minimap2_medaka.output.sam,
+        bam=rules.sort_index.output.bam
     params:
         outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka"),
         model = config[KEY_MEDAKA_MODEL]
     output:
-        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","cns.mod.fasta"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","medaka.annotated.vcf"),
-        vcfgz = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","medaka.annotated.vcf.gz"),
+        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","cns.mod.fasta"),
+        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
     threads:
         workflow.cores
     shell:
         """
         [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-
         if [ -s {input.sam:q} ]
-
         then
-            sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod} 
-            medaka_haploid_variant -i {input.basecalls} -t {threads} -r {output.cns_mod} -m {params.model:q} -o {params.outdir:q}
-
-            
+            sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
+            medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
+            medaka stitch {output.probs:q} {output.cns_mod:q} {output.consensus:q} 
         else
             touch {output.consensus:q}
+            touch {output.probs:q}
             touch {output.cns_mod:q}
-            touch {output.vcf:q}
-            touch {output.vcfgz:q}
         fi
         """
 
+rule minimap2_cns:
+    input:
+        reads=rules.files.params.reads,
+        ref=rules.medaka_consensus.output.consensus
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_cns.log")
+    output:
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.consensus.sam")
+    shell:
         """
-        bgzip -c {output.vcf:q} > {output.vcfgz:q}
-        tabix -f -p vcf {output.vcfgz:q}
-        bcftools consensus {output.vcfgz:q} -o {output.consensus:q}
+        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 
-rule medaka_haploid_variant2:
+rule sort_index_cns:
+    input:
+        sam = rules.minimap2_cns.output.sam
+    output:
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped_cns.sorted.bam"),
+        index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped_cns.sorted.bam.bai")
+    shell:
+        """
+        samtools view -bS -F 4 {input.sam:q} | samtools sort -o {output[0]:q} &&
+        samtools index {output.bam:q} {output.index:q}
+        """
+
+rule medaka_cns_consensus:
     input:
         basecalls=rules.files.params.reads,
-        draft=rules.medaka_haploid_variant.output.consensus,
-        sam= rules.minimap2_medaka.output.sam
+        draft=rules.medaka_consensus.output.consensus,
+        sam= rules.minimap2_cns.output.sam,
+        bam=rules.sort_index_cns.output.bam
     params:
         outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns"),
         model = config[KEY_MEDAKA_MODEL],
         reference = "{reference}"
     output:
         cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","cns.mod.fasta"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","medaka.annotated.vcf"),
-        vcfgz = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","medaka.annotated.vcf.gz"),
+        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus.fasta")
     threads:
         workflow.cores
@@ -109,20 +135,15 @@ rule medaka_haploid_variant2:
         if "Sabin" not in params.reference:
             shell("""
                 [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-
                 if [ -s {input.sam:q} ]
-
                 then
                     sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
-                    medaka_haploid_variant -i {input.basecalls} -r {output.cns_mod:q} -m {params.model:q} -o {params.outdir:q}
-                    bgzip -f {output.vcf:q}
-                    tabix -p vcf {output.vcfgz:q}
-                    bcftools consensus {output.vcfgz:q} -o {output.consensus:q}
+                    medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
+                    medaka stitch {output.probs:q} {output.cns_mod:q} {output.consensus:q} 
                 else
                     touch {output.consensus:q}
+                    touch {output.probs:q}
                     touch {output.cns_mod:q}
-                    touch {output.vcf:q}
-                    touch {output.vcfgz:q}
                 fi
                 """)
         else:
@@ -136,8 +157,8 @@ rule medaka_haploid_variant2:
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
-        medaka_cns=rules.medaka_haploid_variant.output.consensus,
-        cns_cns=rules.medaka_haploid_variant2.output.consensus
+        medaka_cns=rules.medaka_consensus.output.consensus,
+        cns_cns=rules.medaka_cns_consensus.output.consensus
     params:
         reference = "{reference}"
     output:
