@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>${run_name} report</title>
+    <title>${run_name} communiqué</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -405,10 +405,10 @@
       <header class="piranha-header">
         <div class="col-sm-4" style="text-align: left;">
           <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
-          PoSeCo | <small class="text-muted">Poliovirus Sequencing Consortium</small>
+          PoSeCo | <small class="text-muted">Consortium de Séquençage du Poliovirus</small>
         </div>
         <div class="col-sm-8" style="text-align: right;">
-          piranha | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+          piranha | <small class="text-muted">Ressource d'investigation sur le Poliovirus Automatisation de l'Analyse des Haplotypes de Nanopores</small>
         </div>
         <br>
         <hr>
@@ -416,27 +416,27 @@
         
       <h1>${run_name} report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
       %if config["username"]!="":
-        <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
+        <h3><strong>Nom d'utilisateur</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       %endif
       %if config["institute"]!="":
-        <h3><strong>Institute</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
+        <h3><strong>Institut</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
       %endif
       <br>
-      <h3><strong>Table 1</strong> | Sample summary information </h3>
-      <button class="accordion">Export table</button>
+      <h3><strong>Tableau 1</strong> | Informations récapitulatives sur l'échantillon</h3>
+      <button class="accordion">Exporter le tableau</button>
         <div class="panel">
           <div class="row">
-            <div class="col-sm-2" ><strong>Export table: </strong></div>
+            <div class="col-sm-2" ><strong>Exporter le tableau: </strong></div>
             <div class="col-sm-8" id="tableExportID1"></div>
           </div>
         </div>
         <table class="display nowrap" id="myTable1">
           <thead>
             <tr>
-              %for col in config["summary_table_header"]:
-                <th>${col.title().replace("_"," ")}</th>
+              %for col in ["Échantillon","Barcode","L'annonce de l'échantillon","Groupe de référence","Nombre de mutations"]:
+              <th>${col}</th>
               %endfor
-              <th>${config["analysis_mode"].upper()} sequence</th>
+              <th>Séquences ${config["analysis_mode"].upper()}</th>
             </tr>
           </thead>
           <tbody>
@@ -464,6 +464,7 @@
                 'iDisplayLength': 100,
                 "paging": false,
                 "border-bottom":false,
+                searching: false,
                 "bInfo" : false,
                 dom: 'frtip',
                 buttons: ["copy","csv","print"]
@@ -473,11 +474,11 @@
             } );
         </script>
       <div class="pagebreak"> </div>
-      <h3><strong>Table 2</strong> | Composition of samples </h3>
-      <button class="accordion">Export table</button>
+      <h3><strong>Tableau 2</strong> | Composition des échantillons </h3>
+      <button class="accordion">Exporter le tableau</button>
         <div class="panel">
           <div class="row">
-            <div class="col-sm-2" ><strong>Export table: </strong></div>
+            <div class="col-sm-2" ><strong>Exporter le tableau: </strong></div>
             <div class="col-sm-8" id="tableExportID2"></div>
           </div>
         </div>
@@ -485,7 +486,13 @@
           <thead>
             <tr>
               %for col in config["composition_table_header"]:
-                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                %if col=="sample":
+                    <td>Échantillon</td>
+                %elif col=="unmapped":
+                    <td>Non mappé</td>
+                %else:
+                  <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                %endif
               %endfor
             </tr>
           </thead>
@@ -524,6 +531,7 @@
                 "paging": false,
                 "border-bottom":false,
                 "bInfo" : false,
+                searching: false,
                 dom: 'frtip',
                 buttons: ["copy","csv","print"]
               });
@@ -533,11 +541,11 @@
         </script>
       % if show_control_table:
         <div class="pagebreak"> </div>
-        <h3><strong>Table 3</strong> | Controls </h3>
+        <h3><strong>Tableau 3</strong> | Les contrôles </h3>
           <table class="table">
             <thead class="thead-light">
               <tr>
-                <th>Pass</th>
+                <th>Réussir</th>
                 %for col in config["composition_table_header"]:
                   <th>${col.title().replace("_"," ")}</th>
                 %endfor
@@ -601,7 +609,7 @@
             <p>
           </div>
           <div class="col-sm-11" style="text-align: right;">
-            piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small>
+            piranha ${version} | <small class="text-muted">Ressource d'investigation sur le Poliovirus Automatisation de l'Analyse des Haplotypes de Nanopores</small> <br><small class="text-muted">GNU General Public License v3.0</small>
           </div>
         <br><br>
         </p>

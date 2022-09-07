@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>${sample} report</title>
+    <title>Informations sur ${sample}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -463,10 +463,10 @@
         <header class="piranha-header">
           <div class="col-sm-4" style="text-align: left;">
             <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
-            PoSeCo | <small class="text-muted">Poliovirus Sequencing Consortium</small>
+            PoSeCo | <small class="text-muted"> Consortium de Séquençage du Poliovirus</small>
           </div>
           <div class="col-sm-8" style="text-align: right;">
-            piranha | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+            piranha | <small class="text-muted">Ressource d'investigation sur le Poliovirus Automatisation de l'Analyse des Haplotypes de Nanopores</small>
           </div>
           <br>
           <hr>
@@ -474,18 +474,18 @@
         <div class="spacer">
           &nbsp;
         </div>
-        <h1>${sample} report
+        <h1>Informations sur ${sample}
             <small class="text-muted" style="color:${themeColor}">${date}</small>
         </h1> 
         <br>
       <% figure_count = 0 %>
       <% table_count = 1 %>
-          <h3><strong>Table ${table_count} </strong> | Summary of sample content </h3>
+          <h3><strong>Tableau ${table_count} </strong> | Résumé du contenu de l'échantillon </h3>
           <table class="display nowrap" id="myTable">
             <thead>
               <tr>
-              %for col in ["sample","barcode","reference_group"]:
-              <th>${col.title().replace("_"," ")}</th>
+              %for col in ["Échantillon","Barcode","Groupe de référence"]:
+              <th>${col}</th>
               %endfor
               </tr>
             </thead>
@@ -506,7 +506,7 @@
             </table>
             <br>
             <hr>
-            <h2 style="color:${themeColor}"><a id="header_${barcode}"></a>${config["analysis_mode"].upper()} sequences</h2> 
+            <h2 style="color:${themeColor}"><a id="header_${barcode}"></a>Séquences ${config["analysis_mode"].upper()}</h2> 
             <iframe style="border-style:solid;border-width:0.5px;border-color:dimgrey" src="../published_data/${barcode}/${barcode}.consensus.fasta" width="100%" height="100"></iframe> 
             <div style="text-align: right;"><a download href="../published_data/${barcode}/${barcode}.consensus.fasta" style="color:#e68781"><button>Download </button></a></div>
             <br>
@@ -530,21 +530,21 @@
         <% reference_name = summary_data["reference_group"].replace("_"," ").title() %>
         <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${reference_name} variant report</h2> 
         <% table_count += 1 %>
-        <h3><strong>Table ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
+        <h3><strong>Tableau ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
         <table class="table" id="table_${table_count}">
           <thead class="thead-light">
             <tr>
               <th style="width:30%;"></th>
-              <th style="width:60%;">Information</th>
+              <th style="width:60%;">Les renseignements</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Reference group</td>
+              <td>Groupe de référence</td>
               <td>${summary_data["reference_group"]}</td>
             </tr>
             <tr>
-              <td>Number of mutations</td>
+              <td>Nombre de mutations</td>
               <td>${summary_data["Number of mutations"]}</td>
             </tr>
             % if summary_data["reference_group"].startswith("Sabin"):
@@ -586,7 +586,7 @@
                                       },
                               "y": {"field": "Percentage",
                                       "type":"quantitative",
-                                      "title": "Percentage Alt Allele",
+                                      "title": "Allèle alternatif en pourcentage",
                                       "scale": {"domain": [0, 100]},
                                       "axis":{"grid": false,
                                               "labelFont":"Helvetica Neue",
@@ -597,7 +597,7 @@
                                       },
                                       "tooltip": [
                                             {"field": "Position", "type": "quantitative"},
-                                            {"field": "Percentage", "type": "quantitative"},
+                                            {"field": "Pourcentage", "type": "quantitative"},
                                             {"field": "A reads", "type": "nominal"},
                                             {"field": "C reads", "type": "nominal"},
                                             {"field": "G reads", "type": "nominal"},
@@ -616,10 +616,10 @@
                       .catch(console.warn);
                 </script>
             <% figure_count +=1 %>
-            <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+            <h3><strong>Figure ${figure_count}</strong> | Variation (erreurs + mutations) à travers la référence ${reference_name} dans ${sample}</h3>
             <hr>
           
-            <button class="accordion">Export image</button>
+            <button class="accordion">Exporter une image</button>
             <div class="panel">
               <div class="row">
                 <div class="column">
@@ -652,7 +652,7 @@
             <br>
             <div>
               <% figure_count +=1 %>
-              <h3><strong>Figure ${figure_count}</strong> | snipit plot for queries in ${reference_name}</h3>
+              <h3><strong>Figure ${figure_count}</strong> | graphique d'extraits pour les requêtes dans ${reference_name}</h3>
               <hr>
             </div>
             <hr>
@@ -676,7 +676,7 @@
                               "font":"Helvetica Neue",
                               "fontWeight":0.1},
                     "encoding": {"x": {"field": "Combination", 
-                                            "title": "Combination",
+                                            "title": "Association",
                                             "axis": {"grid": false,
                                                     "labelFont":"Helvetica Neue",
                                                     "labelFontSize":18,
@@ -687,7 +687,7 @@
                                           },
                                   "y": {"field": "Percentage",
                                           "type":"quantitative",
-                                          "title": "Percentage Alt Allele",
+                                          "title": "Pourcentage",
                                           "scale": {"domain": [0, 100]},
                                           "axis":{"grid": false,
                                                   "labelFont":"Helvetica Neue",
@@ -705,7 +705,7 @@
                           .catch(console.warn);
                     </script>
               <% figure_count +=1 %>
-              <h3><strong>Figure ${figure_count}</strong> | Percentage co-occurrence of SNPs called against ${reference_name} reference in ${sample}</h3>
+              <h3><strong>Figure ${figure_count}</strong> | Pourcentage de cooccurrence de SNP appelés par rapport à la référence ${reference_name} dans ${sample}</h3>
               <hr>
           %endif
 
@@ -740,7 +740,7 @@
         </div>
 
       <div class="col-sm-11" style="text-align: right;">
-        piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
+        piranha ${version} | <small class="text-muted">Ressource d'investigation sur le Poliovirus Automatisation de l'Analyse des Haplotypes de Nanopores</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
 
         <br><br>
         </p>
