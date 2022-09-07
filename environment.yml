@@ -5,10 +5,10 @@ channels:
   - defaults
 dependencies:
   - python<3.10
-  - zlib
+  - coreutils=9.1
   - gofasta
   - mafft
-  - minimap2=2.11
+  - minimap2=2.17
   - samtools=1.11
   - bcftools=1.11
   - tabix=1.11
