@@ -5,7 +5,7 @@ channels:
   - defaults
 dependencies:
   - python<3.10
-  - coreutils
+  - zlib
   - gofasta
   - mafft
   - minimap2=2.11
