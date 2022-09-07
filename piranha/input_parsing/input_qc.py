@@ -91,7 +91,8 @@ def parse_read_dir(readdir,config):
 
     for barcode in config[KEY_BARCODES]:
         if barcode not in count_read_files:
-            print(cyan(f"Warning: No read files identified for barcode `{barcode}`.\nThis may be a negative control or a failed sample."))
+            print(green(f"Barcode {barcode}:\t") + f"0 fastq files")
+            print(cyan(f"Warning: No read files identified for barcode `{barcode}`.\nThis may be a negative control or a failed sample, but be aware it will not be analysed."))
 
 def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
 
