@@ -41,7 +41,9 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument("-nc","--negative-control",action="store",help="Sample name of negative control. Default: negative")
 
     analysis_group = parser.add_argument_group('Analysis options')
-    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: `vp1`, `wg_2tile` (whole genome). Default: `vp1`")
+    analysis_group.add_argument("-m","--analysis-mode",action="store",help="Specify analysis mode to run. Options: `vp1`. Default: `vp1`")
+    analysis_group.add_argument("--medaka-model",action="store",help="Medaka model to run analysis using. Default:")
+    analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help="Minimum read length.")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help="Maximum read length.")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help="Minimum read depth required for consensus generation.")
@@ -93,7 +95,7 @@ def main(sysargs = sys.argv[1:]):
 
     # Sort out where the query info is coming from, csv or id string, optional fasta seqs.
     # Checks if they're real files, of the right format and that QC args sensible values.
-
+    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,config)
     input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
     input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
