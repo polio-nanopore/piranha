@@ -44,7 +44,7 @@ rule generate_consensus_sequences:
         masked =  os.path.join(config[KEY_TEMPDIR],"{barcode}","masked_variants.csv")
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
-        print(green(f"Gathering variation info for {sample} ({params.barcode})"))
+        print(green(f"Calculating consensus sequences for {sample} ({params.barcode})"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
                     "--rerun-incomplete "
