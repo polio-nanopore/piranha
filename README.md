@@ -45,51 +45,55 @@ usage:
 
 Input options:
   -c CONFIG, --config CONFIG
-                        Input config file in yaml format, all command line
-                        arguments can be passed via the config file.
+                        Input config file in yaml format, all command line arguments can be passed via the config file.
   -i READDIR, --readdir READDIR
                         Path to the directory containing fastq read files
   -b BARCODES_CSV, --barcodes-csv BARCODES_CSV
-                        CSV file describing which barcodes were used on which
-                        sample
+                        CSV file describing which barcodes were used on which sample
   -r REFERENCE_SEQUENCES, --reference-sequences REFERENCE_SEQUENCES
                         Custom reference sequences file.
+  -pc POSITIVE_CONTROL, --positive-control POSITIVE_CONTROL
+                        Sample name of positive control. Default: `positive`
+  -nc NEGATIVE_CONTROL, --negative-control NEGATIVE_CONTROL
+                        Sample name of negative control. Default: `negative`
 
 Analysis options:
+  -m ANALYSIS_MODE, --analysis-mode ANALYSIS_MODE
+                        Specify analysis mode to run. Options: `vp1`. Default: `vp1`
+  --medaka-model MEDAKA_MODEL
+                        Medaka model to run analysis using. Default: r941_min_high_g360
+  --medaka-list-models  List available medaka models and exit.
   -n MIN_READ_LENGTH, --min-read-length MIN_READ_LENGTH
-                        Minimum read length.
+                        Minimum read length. Default: 1000
   -x MAX_READ_LENGTH, --max-read-length MAX_READ_LENGTH
-                        Maximum read length.
+                        Maximum read length. Default: 1300
   -d MIN_READ_DEPTH, --min-read-depth MIN_READ_DEPTH
-                        Minimum read depth required for consensus generation.
+                        Minimum read depth required for consensus generation. Default: 50
   -p MIN_READ_PCENT, --min-read-pcent MIN_READ_PCENT
-                        Minimum percentage of sample required for consensus
-                        generation.
+                        Minimum percentage of sample required for consensus generation. Default: 10
 
 Output options:
   -o OUTDIR, --outdir OUTDIR
-                        Output directory. Default: `analysis-2021-XX-YY`
+                        Output directory. Default: `analysis-2022-XX-YY`
   -pub PUBLISHDIR, --publishdir PUBLISHDIR
-                        Output publish directory. Default: `analysis-2021-XX-
-                        YY`
+                        Output publish directory. Default: `analysis-2022-XX-YY`
   -pre OUTPUT_PREFIX, --output-prefix OUTPUT_PREFIX
-                        Prefix of output directory & report name: Default:
-                        `analysis`
+                        Prefix of output directory & report name: Default: `analysis`
   --datestamp DATESTAMP
-                        Append datestamp to directory name when using
-                        <-o/--outdir>. Default: <-o/--outdir> without a
-                        datestamp
-  --overwrite           Overwrite output directory. Default: append an
-                        incrementing number if <-o/--outdir> already exists
+                        Append datestamp to directory name when using <-o/--outdir>. Default: <-o/--outdir> without a datestamp
+  --overwrite           Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists
   -temp TEMPDIR, --tempdir TEMPDIR
-                        Specify where you want the temp stuff to go. Default:
-                        `$TMPDIR`
-  --no-temp             Output all intermediate files. For development/
-                        debugging purposes
+                        Specify where you want the temp stuff to go. Default: `$TMPDIR`
+  --no-temp             Output all intermediate files. For development/ debugging purposes
 
 Misc options:
+  --language LANGUAGE   Report language. Options: English, French. Default: English
+  --runname RUNNAME     Run name to appear in report. Default: Nanopore sequencing
+  --username USERNAME   Username to appear in report. Default: no user name
+  --institute INSTITUTE
+                        Institute name to appear in report. Default: no institute name
   -t THREADS, --threads THREADS
-                        Number of threads
+                        Number of threads. Default: 1
   --verbose             Print lots of stuff to screen
   -v, --version         show program's version number and exit
   -h, --help
