@@ -13,6 +13,9 @@ Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 -  `conda activate piranha`
 -  `pip install . `
 
+## Installing via ARTIFICE GUI
+- Download the release package for your machine from the [ARTIFICE respository](https://github.com/CorwinAnsley/artifice/releases/tag/v1.3.3)
+
 ## Updating piranha
 - Change directory to the piranha repository: `cd piranha`
 - Pull the latest changes from GitHub: `git pull`
