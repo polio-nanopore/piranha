@@ -2,6 +2,11 @@
 
 Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 
+
+piranha is a tool in development as part of the Poliovirus Sequencing Consortium. It runs an automated analysis pipeline for sequencing VP1 regions of the poliovirus or non-polio enterovirus genome (whole genome analysis to be implemented soon) and produces an interactive report alongside the consensus data. 
+
+Any issues or feedback about the analysis or report please flag to this repository.
+
 <img src="./docs/piranha.svg" width="400">
 
 ## See example report [here](https://aineotoole.co.uk/piranha/report.html)
