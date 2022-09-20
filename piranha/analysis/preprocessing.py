@@ -4,7 +4,8 @@ from Bio import SeqIO
 import collections
 from piranha.utils.config import *
 import os
-
+import gzip
+import io
 
 def gather_filter_reads_by_length(dir_in,reads_out,config):
 
@@ -16,12 +17,18 @@ def gather_filter_reads_by_length(dir_in,reads_out,config):
     with open(reads_out,"w") as fw:
         for r,d,f in os.walk(dir_in):
             for reads_in in f:
-                if reads_in.endswith(".fastq") or reads_in.endswith(".fq"):
+                if reads_in.endswith(".gz") or reads_in.endswith(".gzip"):
+                    with gzip.open(os.path.join(dir_in,reads_in), "rt") as handle:
+                        for record in SeqIO.parse(handle, "fastq"):
+                            length = len(record)
+                            if length > int(config[KEY_MIN_READ_LENGTH]) and length < int(config[KEY_MAX_READ_LENGTH]):
+                                fastq_records.append(record)
+                                
+                elif reads_in.endswith(".fastq") or reads_in.endswith(".fq"):
                     for record in SeqIO.parse(os.path.join(dir_in,reads_in),"fastq"):
                         length = len(record)
                         if length > int(config[KEY_MIN_READ_LENGTH]) and length < int(config[KEY_MAX_READ_LENGTH]):
                             fastq_records.append(record)
-
         SeqIO.write(fastq_records,fw, "fastq")
 
 def make_ref_display_name_map(references):

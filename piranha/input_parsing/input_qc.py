@@ -66,7 +66,7 @@ def parse_read_dir(readdir,config):
     count_read_files = collections.Counter()
     for r,d,f in os.walk(config[KEY_READDIR]):
         for fn in f:
-            if fn.endswith(".fastq"):
+            if fn.endswith(".fastq") or fn.endswith(".fq") or fn.endswith(".gz") or fn.endswith(".gzip"):
                 if not run_id:
                     try:
                         # read run id from first file name it comes to
