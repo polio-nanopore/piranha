@@ -1,3 +1,5 @@
+
+
 import os
 import collections
 from Bio import SeqIO
@@ -122,9 +124,7 @@ rule medaka_consensus:
     shell:
         """
         [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-
         if [ -s {input.sam:q} ]
-
         then
             sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
             medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
@@ -188,9 +188,7 @@ rule medaka_cns_consensus:
         if "Sabin" not in params.reference:
             shell("""
                 [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-
                 if [ -s {input.sam:q} ]
-
                 then
                     sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
                     medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 

@@ -8,7 +8,6 @@ import yaml
 from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
 from piranha.analysis.preprocessing import *
-from piranha.analysis.filter_lengths import filter_reads_by_length
 ##### Target rules #####
 
 rule all:
@@ -17,26 +16,14 @@ rule all:
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES]),
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES])
 
-rule gather_files:
+rule filter_by_length:
     input:
     params:
         file_path = os.path.join(config[KEY_READDIR], "{barcode}")
     output:
-        fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","nanopore_reads.fastq")
-    run:
-        if not os.path.exists(params.file_path):
-            shell("touch {output.fastq:q}")
-        else:
-            shell("""cd '{params.file_path}' && cat *.fastq > {output[0]}""")
-
-
-rule filter_by_length:
-    input:
-        rules.gather_files.output.fastq
-    output:
         fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.fastq")
     run:
-        filter_reads_by_length(input[0],output.fastq,config)
+        gather_filter_reads_by_length(params.file_path,output.fastq,config)
 
 rule map_reads:
     input:
