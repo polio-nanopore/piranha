@@ -9,10 +9,10 @@ Any issues or feedback about the analysis or report please flag to this reposito
 
 <img src="./docs/piranha.svg" width="400">
 
-## See example report [here](https://aineotoole.co.uk/piranha/report.html)
+## See example report [here](https://polio-nanopore.github.io/piranha/report.html)
 
 ## Installation instructions (for in development, will be put on bioconda later)
--  Clone the piranha repository with `git clone https://github.com/aineniamh/piranha.git && cd piranha`
+-  Clone the piranha repository with `git clone https://github.com/polio-nanopore/piranha.git && cd piranha`
 -  `conda install -n base -c conda-forge mamba`
 -  `mamba env create -f environment.yml`
 -  `conda activate piranha`
