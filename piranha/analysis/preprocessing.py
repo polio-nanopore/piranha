@@ -277,10 +277,11 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
     config[KEY_BARCODES] = []
     for barcode in refs_out:
         refs = refs_out[barcode]
+        
         refs = [i for i in refs if i != "unmapped"]
         config[barcode]=refs
-        print(refs)
-        config[KEY_BARCODES].append(barcode)
+        if refs:
+            config[KEY_BARCODES].append(barcode)
     
     return config
 
@@ -290,8 +291,9 @@ def check_which_refs_to_write(input_csv,min_reads,min_pcent):
         reader = csv.DictReader(f)
         for row in reader:
             if int(row[KEY_NUM_READS]) >= min_reads and float(row[KEY_PERCENT]) >= min_pcent:
-                to_write.add(row[KEY_REFERENCE])
-                print(f"{row[KEY_REFERENCE_GROUP]}\t{row[KEY_NUM_READS]} reads\t{row[KEY_PERCENT]}% of sample")
+                if row[KEY_REFERENCE] != "unmapped":
+                    to_write.add(row[KEY_REFERENCE])
+                    print(f"{row[KEY_REFERENCE_GROUP]}\t{row[KEY_NUM_READS]} reads\t{row[KEY_PERCENT]}% of sample")
     return list(to_write)
 
 def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
@@ -318,10 +320,10 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
             except:
                 not_written[hit]+=1
 
-    if not_written:
-        print("Read hits not written because below threshold:")
-        for i in not_written:
-            print(i, not_written[i])
+    # if not_written:
+    #     print("Read hits not written because below threshold:")
+    #     for i in not_written:
+    #         print(i, not_written[i])
 
     for ref in handle_dict:
         handle_dict[ref].close()
