@@ -19,11 +19,12 @@ rule all:
 rule filter_by_length:
     input:
     params:
-        file_path = os.path.join(config[KEY_READDIR], "{barcode}")
+        file_path = os.path.join(config[KEY_READDIR], "{barcode}"),
+        barcode = "{barcode}"
     output:
         fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.fastq")
     run:
-        gather_filter_reads_by_length(params.file_path,output.fastq,config)
+        gather_filter_reads_by_length(params.file_path,params.barcode,output.fastq,config)
 
 rule map_reads:
     input:
@@ -80,13 +81,14 @@ rule write_hit_fastq:
 rule gather_diversity_report:
     input:
         refs = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"), barcode=config[KEY_BARCODES]),
-        txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES])
+        txt = expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"), barcode=config[KEY_BARCODES]),
+        ref = config[KEY_REFERENCE_SEQUENCES]
     output:
         refs= os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION),
         summary = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY),
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     run:
-        barcode_config = diversity_report(input.refs,output.refs,output.summary,config)
+        barcode_config = diversity_report(input.refs,output.refs,output.summary,input.ref,config)
         
         with open(output.yaml, 'w') as fw:
             yaml.dump(barcode_config, fw) 
