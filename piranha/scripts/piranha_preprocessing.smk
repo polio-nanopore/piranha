@@ -76,7 +76,6 @@ rule write_hit_fastq:
         to_write = write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,config)
 
         write_out_ref_fasta(to_write,config[KEY_REFERENCE_SEQUENCES],params.outdir)
-        print("complete")
 
 
 rule gather_diversity_report:

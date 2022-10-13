@@ -65,15 +65,21 @@ def parse_line(line,padding):
 
     return values
 
-def add_to_hit_dict(hits, mapping,unmapped):
+def add_to_hit_dict(hits, mapping,min_map_len,unmapped):
     if mapping["direction"] == "+":
         start = mapping["read_hit_start"]
         end = mapping["read_hit_end"]
-        hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
+        if int(mapping["aln_block_len"]) > min_map_len:
+            hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
+        else:
+            unmapped+=1
     elif mapping["direction"] == "-":
         start = mapping["read_hit_end"]
         end = mapping["read_hit_start"]
-        hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
+        if int(mapping["aln_block_len"]) > min_map_len:
+            hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
+        else:
+            unmapped+=1
     else:
         unmapped+=1
     return unmapped
@@ -105,7 +111,7 @@ def group_hits(paf_file,padding,ref_name_map,len_filter):
 
                     else:
 
-                        unmapped = add_to_hit_dict(hits, last_mapping,unmapped)
+                        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,unmapped)
                         total_reads +=1
 
                     mappings = []
@@ -114,7 +120,7 @@ def group_hits(paf_file,padding,ref_name_map,len_filter):
             else:
                 last_mapping = mapping
 
-        unmapped = add_to_hit_dict(hits, last_mapping,unmapped)
+        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,unmapped)
         total_reads +=1
     ref_hits = collections.defaultdict(list)
     not_mapped = 0
@@ -196,7 +202,7 @@ def parse_paf_file(paf_file,
 
         ref_name_map = make_ref_display_name_map(references_sequences)
         
-        len_filter = 0.6*config[KEY_MIN_READ_LENGTH]
+        len_filter = 0.4*config[KEY_MIN_READ_LENGTH]
 
         ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,padding,ref_name_map,len_filter)
         print(f"Barcode: {barcode}")
@@ -254,13 +260,13 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
                     if not barcode:
                         barcode = row[KEY_BARCODE]
 
-                    summary_rows[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
+                    summary_rows[barcode][row[KEY_REFERENCE_GROUP]] += int(row[KEY_NUM_READS])
 
                     if int(row[KEY_NUM_READS]) >= min_reads and float(row[KEY_PERCENT]) >= min_pcent:
                         refs_out[barcode].append(row[KEY_REFERENCE])
                         writer.writerow(row)
 
-    print("made it this far")
+
     with open(summary_out,"w") as fw2:
         writer = csv.DictWriter(fw2, fieldnames=SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS, lineterminator="\n")
         writer.writeheader()
@@ -270,6 +276,7 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
 
     config[KEY_BARCODES] = []
     for barcode in refs_out:
+        refs = refs_out[barcode]
         refs = [i for i in refs if i != "unmapped"]
         config[barcode]=refs
         print(refs)
@@ -291,25 +298,30 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
     seq_index = SeqIO.index(input_fastq, "fastq")
     
     to_write = check_which_refs_to_write(input_csv,config[KEY_MIN_READS],config[KEY_MIN_PCENT])
-
     handle_dict = {}
     for ref in to_write:
         handle_dict[ref] = open(os.path.join(outdir,f"{ref}.fastq"),"w")
     
     not_written = collections.Counter()
+
     with open(input_hits,"r") as f:
-        for l in f:
+        reader = csv.DictReader(f)
+        for row in reader:
             try:
-                hit,ref,start,end = l.rstrip("\n").split(",")
-                record = seq_index[hit]
-                
-                # trimmed = record[:int(start)].lower()+ record[int(start):int(end)] + record[:int(start)].lower()
-                handle = handle_dict[ref]
+                read_name = row["read_name"]
+                record = seq_index[read_name]
+
+                hit = row["hit"]
+                handle = handle_dict[hit]
 
                 SeqIO.write(record,handle,"fastq")
             except:
-                pass
+                not_written[hit]+=1
 
+    if not_written:
+        print("Read hits not written because below threshold:")
+        for i in not_written:
+            print(i, not_written[i])
 
     for ref in handle_dict:
         handle_dict[ref].close()
