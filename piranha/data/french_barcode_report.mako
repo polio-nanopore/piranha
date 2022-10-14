@@ -507,8 +507,12 @@
             <br>
             <hr>
             <h2 style="color:${themeColor}"><a id="header_${barcode}"></a>Séquences ${config["analysis_mode"].upper()}</h2> 
-            <iframe style="border-style:solid;border-width:0.5px;border-color:dimgrey" src="../published_data/${barcode}/${barcode}.consensus.fasta" width="100%" height="100"></iframe> 
-            <div style="text-align: right;"><a download href="../published_data/${barcode}/${barcode}.consensus.fasta" style="color:#e68781"><button>Download </button></a></div>
+            <p style="height: 200px; white-space:wrap; word-wrap:break-word; overflow:scroll; border-width:2px; border-style:solid; border-color:#e68781; padding: 1em;">
+              ${sequences}
+              <br>
+            </p>
+            <!-- <iframe style="border-style:solid;border-width:0.5px;border-color:dimgrey" src="../published_data/${barcode}/${barcode}.consensus.fasta" width="100%" height="100"></iframe> 
+            <div style="text-align: right;"><a download href="../published_data/${barcode}/${barcode}.consensus.fasta" style="color:#e68781"><button>Download </button></a></div> -->
             <br>
             <hr>
             <script type="text/javascript">
