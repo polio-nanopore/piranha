@@ -422,6 +422,15 @@
         <h3><strong>Institute</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
       %endif
       <br>
+      %if flagged_high_npev:
+      <h3><strong>Warning</strong> | The following samples have a significant number of NonPolioEV reads, which may lead to reduced sensitivity for poliovirus detection.</h3>
+      <p style="white-space:wrap; word-wrap:break-word; overflow:scroll; border-width:2px; border-style:solid; border-color:#e68781; padding: 1em;">
+      %for sample in flagged_high_npev:
+        - ${sample}<br>
+      %endfor
+    </p>
+    %endif  
+      <br>
       <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
@@ -485,7 +494,7 @@
           <thead>
             <tr>
               %for col in config["composition_table_header"]:
-                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                <th style="width:10%;">${col}</th>
               %endfor
             </tr>
           </thead>
@@ -531,9 +540,57 @@
               
             } );
         </script>
+
+    <div class="pagebreak"> </div>
+    <h3><strong>Table 3</strong> | Flagged samples </h3>
+    <button class="accordion">Export table</button>
+      <div class="panel">
+        <div class="row">
+          <div class="col-sm-2" ><strong>Export table: </strong></div>
+          <div class="col-sm-8" id="tableExportID3"></div>
+        </div>
+      </div>
+      <table class="display nowrap" id="myTable3">
+        <thead>
+          <tr>
+              <th style="width:30%;">Identical sequences</th>
+              <th style="width:70%;">Sequence IDs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% set_count = 0 %>
+          % for set in flagged_seqs:
+            <% set_count += 1 %>
+              <td>${set_count}</td>
+              
+              <td style="overflow:scroll;">
+                % for seqid in set:
+                  ${seqid}<br>
+                %endfor
+              </td>
+
+          % endfor
+        </tbody>
+      </table>
+      <br>
+      <script type="text/javascript">
+        $(document).ready( function () {
+            var table = $('#myTable3').DataTable({
+              'iDisplayLength': 100,
+              "paging": false,
+              "border-bottom":false,
+              "bInfo" : false,
+              dom: 'frtip',
+              buttons: ["copy","csv","print"]
+            });
+            table.buttons().container().appendTo( $('#tableExportID3') );
+            
+          } );
+      </script>
+
       % if show_control_table:
         <div class="pagebreak"> </div>
-        <h3><strong>Table 3</strong> | Controls </h3>
+        <h3><strong>Table 4</strong> | Controls </h3>
           <table class="table">
             <thead class="thead-light">
               <tr>
