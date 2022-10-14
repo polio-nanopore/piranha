@@ -45,7 +45,10 @@ def make_sample_report(report_to_generate,
 
     info_dict = {}
     sequences = ""
+
+
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
+            
         sequences += f">{record.description}<br>{record.seq}<br>"
         fields = record.description.split("|")
         
@@ -85,6 +88,8 @@ def make_sample_report(report_to_generate,
                         data_for_report[reference][KEY_SNP_SITES].append(site)
                     except:
                         data_for_report[reference][KEY_SNP_SITES].append(site)
+
+    
 
     for reference in info_dict:
         data_for_report[reference][KEY_MASKED_SITES] = []
@@ -190,8 +195,11 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status[positive_control] = False
 
-     
+    identical_seq_check = collections.defaultdict(list)
+
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
+        identical_seq_check[str(record.seq)].append(record.description)
+
         fields = record.description.split("|")
 
         record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
@@ -232,6 +240,11 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 
         data_for_report[KEY_SUMMARY_TABLE].append(info)
 
+    flagged_seqs = []
+    for seq in identical_seq_check:
+        if len(identical_seq_check[seq]) > 1:
+            flagged_seqs.append(identical_seq_check[seq])
+
     data_for_report[KEY_CONTROL_STATUS] = control_status
     
     if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
@@ -253,6 +266,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                     version = __version__,
                     show_control_table = show_control_table,
                     data_for_report = data_for_report,
+                    flagged_seqs = flagged_seqs,
                     config=config)
 
     try:

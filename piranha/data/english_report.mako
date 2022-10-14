@@ -531,9 +531,57 @@
               
             } );
         </script>
+
+    <div class="pagebreak"> </div>
+    <h3><strong>Table 3</strong> | Flagged samples </h3>
+    <button class="accordion">Export table</button>
+      <div class="panel">
+        <div class="row">
+          <div class="col-sm-2" ><strong>Export table: </strong></div>
+          <div class="col-sm-8" id="tableExportID3"></div>
+        </div>
+      </div>
+      <table class="display nowrap" id="myTable3">
+        <thead>
+          <tr>
+              <th style="width:30%;">Identical sequences</th>
+              <th style="width:70%;">Sequence IDs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% set_count = 0 %>
+          % for set in flagged_seqs:
+            <% set_count += 1 %>
+              <td>${set_count}</td>
+              
+              <td style="overflow:scroll;">
+                % for seqid in set:
+                  ${seqid}<br>
+                %endfor
+              </td>
+
+          % endfor
+        </tbody>
+      </table>
+      <br>
+      <script type="text/javascript">
+        $(document).ready( function () {
+            var table = $('#myTable3').DataTable({
+              'iDisplayLength': 100,
+              "paging": false,
+              "border-bottom":false,
+              "bInfo" : false,
+              dom: 'frtip',
+              buttons: ["copy","csv","print"]
+            });
+            table.buttons().container().appendTo( $('#tableExportID3') );
+            
+          } );
+      </script>
+
       % if show_control_table:
         <div class="pagebreak"> </div>
-        <h3><strong>Table 3</strong> | Controls </h3>
+        <h3><strong>Table 4</strong> | Controls </h3>
           <table class="table">
             <thead class="thead-light">
               <tr>
