@@ -41,18 +41,16 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata, o
                         info = row
                 metadata = input_metadata[barcode]
                 record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}"
-
                 if all_metdata:
                     for col in metadata:
                         if col != KEY_SAMPLE and col != KEY_BARCODE:
-                            record_id += f"{metadata[col]}"
+                            record_id += f"|{col}={metadata[col]}"
                 else:
                     if KEY_DATE in metadata:
-                        record_id += f"|{metadata[KEY_DATE]}"
+                        record_id += f"|{KEY_DATE}={metadata[KEY_DATE]}"
                     
                     if KEY_EPID in metadata:
-                        record_id += f"|{metadata[KEY_EPID]}"
-
+                        record_id += f"|{KEY_EPID}={metadata[KEY_EPID]}"
                 fw.write(f">{record_id}\n{record.seq}\n")
                 handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
     
