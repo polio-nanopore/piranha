@@ -177,6 +177,8 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
     negative_control = config[KEY_NEGATIVE]
     positive_control = config[KEY_POSITIVE]
 
+    flagged_high_npev = []
+
     control_status = {negative_control:True,positive_control:True}
     data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     show_control_table = False
@@ -194,6 +196,9 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 show_control_table = True
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status[positive_control] = False
+            else:
+                if int(row["NonPolioEV"])>100:
+                    flagged_high_npev.append(row[KEY_SAMPLE])
 
     identical_seq_check = collections.defaultdict(list)
 
@@ -267,6 +272,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                     show_control_table = show_control_table,
                     data_for_report = data_for_report,
                     flagged_seqs = flagged_seqs,
+                    flagged_high_npev = flagged_high_npev,
                     config=config)
 
     try:

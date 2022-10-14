@@ -422,6 +422,15 @@
         <h3><strong>Institute</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
       %endif
       <br>
+      %if flagged_high_npev:
+      <h3><strong>Warning</strong> | The following samples have a significant number of NonPolioEV reads, which may lead to reduced sensitivity for poliovirus detection.</h3>
+      <p style="white-space:wrap; word-wrap:break-word; overflow:scroll; border-width:2px; border-style:solid; border-color:#e68781; padding: 1em;">
+      %for sample in flagged_high_npev:
+        - ${sample}<br>
+      %endfor
+    </p>
+    %endif  
+      <br>
       <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
@@ -485,7 +494,7 @@
           <thead>
             <tr>
               %for col in config["composition_table_header"]:
-                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                <th style="width:10%;">${col}</th>
               %endfor
             </tr>
           </thead>
