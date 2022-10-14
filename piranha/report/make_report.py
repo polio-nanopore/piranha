@@ -44,8 +44,9 @@ def make_sample_report(report_to_generate,
         data_for_report[reference][KEY_SNIPIT_SVG] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],f"{barcode}","snipit",f"{reference}.svg"))
 
     info_dict = {}
-
+    sequences = ""
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
+        sequences += f">{record.description}<br>{record.seq}<br>"
         fields = record.description.split("|")
         
         record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
@@ -151,6 +152,7 @@ def make_sample_report(report_to_generate,
                     barcode = barcode,
                     sample = sample,
                     data_for_report = data_for_report,
+                    sequences = sequences,
                     config=config)
 
     try:
