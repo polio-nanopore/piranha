@@ -46,12 +46,16 @@ def make_sample_report(report_to_generate,
     info_dict = {}
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
-        #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
-        try:
-            record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
-        except:
-            record_sample,record_barcode,reference_group,reference,var_count,var_string = record.description.split("|")
-            collection_date = ""
+        fields = record.description.split("|")
+        
+        record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
+        additional_fields = fields[6:]
+
+        
+        additional_info = {}
+        for field in additional_fields:
+            key,value = field.split("=")
+            additional_info[key]=value
 
         if barcode == record_barcode:
             sample = record_sample
@@ -59,9 +63,12 @@ def make_sample_report(report_to_generate,
                     KEY_SAMPLE:record_sample,
                     KEY_REFERENCE_GROUP:reference_group,
                     "Number of mutations": int(var_count),
-                    "Variants":var_string,
-                    "Collection date":collection_date
+                    "Variants":var_string
                     }
+
+            for key in additional_info:
+                info[key] = additional_info[key]
+
             info_dict[reference] = info
 
             data_for_report[reference][KEY_SNP_SITES] = []
@@ -183,12 +190,16 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
      
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
-        #f"{sample]}|{barcode}|{reference_group}|{var_count}|{var_string}|{date}"
-        try:
-            record_sample,record_barcode,reference_group,reference,var_count,var_string,collection_date = record.description.split("|")
-        except:
-            record_sample,record_barcode,reference_group,reference,var_count,var_string = record.description.split("|")
-            collection_date = ""
+        fields = record.description.split("|")
+
+        record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
+        additional_fields = fields[6:]
+
+        additional_info = {}
+        for field in additional_fields:
+            key,value = field.split("=")
+            additional_info[key]=value
+
 
         call = reference_group
         if reference_group.startswith("Sabin"):
