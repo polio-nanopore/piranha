@@ -6,7 +6,7 @@ import csv
 
 from piranha.utils.config import *
 
-def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file,publish_dir):
+def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata, output_file,publish_dir):
     if not os.path.exists(publish_dir):
         os.mkdir(publish_dir)
     
@@ -40,10 +40,18 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list, output_file,p
                     if row[KEY_REFERENCE] == ref:
                         info = row
                 metadata = input_metadata[barcode]
-                if KEY_DATE in metadata:
-                    record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}|{metadata[KEY_DATE]}"
+                record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}"
+
+                if all_metdata:
+                    for col in metadata:
+                        if col != KEY_SAMPLE and col != KEY_BARCODE:
+                            record_id += f"{metadata[col]}"
                 else:
-                    record_id = f"{metadata[KEY_SAMPLE]}|{barcode}|{info[KEY_REFERENCE_GROUP]}|{ref}|{var_count}|{var_string}"
+                    if KEY_DATE in metadata:
+                        record_id += f"|{metadata[KEY_DATE]}"
+                    
+                    if KEY_EPID in metadata:
+                        record_id += f"|{metadata[KEY_EPID]}"
 
                 fw.write(f">{record_id}\n{record.seq}\n")
                 handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
