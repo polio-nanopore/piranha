@@ -115,6 +115,7 @@ rule gather_consensus_sequences:
     output:
         fasta = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
     run:
+        print(green("Gathering fasta files"))
         gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA], output[0],params.publish_dir)
 
 
