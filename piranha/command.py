@@ -48,6 +48,7 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help=f"Maximum read length. Default: {READ_LENGTH_DEFAULT_VP1[1]}")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help=f"Minimum read depth required for consensus generation. Default: {VALUE_MIN_READS}")
     analysis_group.add_argument("-p","--min-read-pcent",action="store",type=int,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT}")
+    analysis_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -97,6 +98,8 @@ def main(sysargs = sys.argv[1:]):
     # Checks if they're real files, of the right format and that QC args sensible values.
     analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,config)
+    misc.add_arg_to_config(KEY_ALL_METADATA,args.all_metadata_to_header,config)
+
     input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
     input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
 
