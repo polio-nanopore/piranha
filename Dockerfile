@@ -11,7 +11,7 @@ RUN apt-get update -y && apt-get upgrade -y
 RUN apt install build-essential -y --no-install-recommends
 
 # copy in piranha
-RUN git clone https://github.com/aineniamh/piranha.git
+RUN git clone https://github.com/polio-nanopore/piranha.git
 
 # TEMP change branch
 RUN cd /data/piranha
