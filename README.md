@@ -2,7 +2,7 @@
 
 Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
 
-Piranha is a tool developed to help standardise and streamline sequencing of poliovirus. It's been developed by members of the Rambaut group at the University of Edinburgh as part of the [Poliovirus Sequencing Consortium](https://polio-nanopore.github.io/). Piranha runs an end-to-end read-to-report analysis that produces distributable, interactive reports alongside analysed consensus data. It produces an overall report, summarising the entire sequencing run, as well as a sample-specific report. Samples with virus of interest, such as VDPV are highlighted and certain quality-control flags can alert the user if there are issues with the run (such as a failed negative or positive control or identical sequences between samples that may be the result of contamination). 
+Piranha is a tool developed to help standardise and streamline sequencing of poliovirus. It's been developed by members of the Rambaut group at the University of Edinburgh as part of the [Poliovirus Sequencing Consortium](https://www.protocols.io/workspaces/poliovirus-sequencing-consortium). Piranha runs an end-to-end read-to-report analysis that produces distributable, interactive reports alongside analysed consensus data. It produces an overall report, summarising the entire sequencing run, as well as a sample-specific report. Samples with virus of interest, such as VDPV are highlighted and certain quality-control flags can alert the user if there are issues with the run (such as a failed negative or positive control or identical sequences between samples that may be the result of contamination). 
 
 
 Any issues or feedback about the analysis or report please flag to this repository.
@@ -167,7 +167,7 @@ barcode04,negative,,
 barcode05,positive,,
 ```
 
-## What should my reads look like?
+## What should my reads/read directory look like?
 Piranha is configured to make analysis as straightforward as possible for users running MinION sequencing. Piranha takes the output of guppy directly and looks for the demultiplexed read directory containing the barcodes you've specified in your barcodes.csv. Guppy outputs directories in the structure:
 
 
@@ -198,6 +198,53 @@ This is what piranha will look for. Point the software to the directory containi
 
 <br>
 <br>
+
+## Input configuration
+
+Piranha has been preconfigured with defaults specific to the VP1 protocol developed by the [Polio Sequencing Consortium]https://www.protocols.io/workspaces/poliovirus-sequencing-consortium). All command line arguments (full list below) can be configured either as command line flags when running piranha, or as snake case arguments in a yaml config file (which can then be supplied with the `-c` flag).
+
+For example, you can supply a custom references file (piranha has a default one supplied, which you can access [here](https://github.com/polio-nanopore/piranha/blob/main/piranha/data/references.vp1.fasta)) using the `-r` flag, or by pointing to it within the config file.
+
+<strong>Example Case 1: command line argument</strong>
+
+```(piranha) aine$ piranha -i /localdisk/home/data/minion_run_1/fastq_pass -b /localdisk/home/data/minion_run_1/barcodes.csv -r /localdisk/home/custom_reference_file.fasta ```
+
+This command shows an example piranha run, where everything is in the default settings except the reference file. In this case you point piranha to the read directory, the barcodes.csv file and your custom reference file. 
+
+
+<strong>Example Case 2: config file</strong>
+
+Example config file (called config.yaml in current working directory). Actual example file can be found [here](https://github.com/polio-nanopore/piranha/blob/main/docs/config.yaml).
+
+```
+readdir: /localdisk/home/data/minion_run_1/fastq_pass
+barcodes_csv: /localdisk/home/data/minion_run_1/barcodes.csv
+reference_sequences: /localdisk/home/custom_reference_file.fasta
+```
+
+Then to run piranha you can simply run the command below, and all the information in the file will be included in your run.
+
+```(piranha) aine$ piranha -c config.yaml```
+
+## Flag which samples are controls
+
+Piranha allows you to specify which samples are controls (positive or negative). If the sample name is `negative` or `positive` within the barcode csv file, piranha will automatically detect that these are your controls. See minimal example above for format. 
+
+You can overwrite this if you would rather call your controls something else (like `nc`, `my_fave_control` etc) with the flags `-pc,--positive-control` or `-nc,--negative-control`. 
+
+Example:
+
+```piranha -i path/to/fastq_pass -b barcodes.csv -pc Positive1 -nc "my negative control"```
+
+Alternatively you can supply this in a config file with the fields:
+```
+positive_control: Positive1
+negative_control: Negative1
+```
+
+But you need to make sure that the fields match within barcodes.csv. Also note that above because I've put spaces in sample names for my command line example negative control, this command will need quotes around the full name or else the terminal won't interpret it as a single field. ALSO, it's in general better to avoid having spaces in sample names because if you get a consensus sequence out of piranha as a fasta file, record ids are defined as the field up to the first space, so you can lose information in downstream analysis software if you're not careful. Best to just avoid spaces (and also special characters like `:`, `;` and `|`) in general when dealing with this kind of data that might have phylogenetics run on it.
+
+Samples flagged as controls will appear in the report at the end in a separate table as well and will be flagged as either passing (row in table coloured green and a tick appears) or not passing (row in rable coloured red and no tick appears). Piranha's behaviour treats negative controls as passing if there are fewer than the configured minimum number of reads in the sample (Default: 50 reads) and positive controls as passing if there is more than the minimum number of reads in the sample for non-polio enterovirus (Default: 50 reads). 
 
 ## Full usage
 ```
