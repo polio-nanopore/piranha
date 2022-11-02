@@ -1,0 +1,3 @@
+readdir: /localdisk/home/data/minion_run_1/fastq_pass
+barcodes_csv: /localdisk/home/data/minion_run_1/barcodes.csv
+reference_sequences: /localdisk/home/custom_reference_file.fasta
