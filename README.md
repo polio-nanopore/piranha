@@ -11,12 +11,13 @@ Any issues or feedback about the analysis or report please flag to this reposito
 
 ## See example report [here](https://polio-nanopore.github.io/piranha/report.html)
 
+## See example data [here](https://github.com/polio-nanopore/piranha/tree/main/piranha/test/pak_run)
 
 
 ## Installing via ARTIFICE GUI
 - Download the release package for your machine from the [ARTIFICE respository](https://github.com/CorwinAnsley/artifice/releases/tag/v1.3.3)
 
-## Installation instructions (quick command reference)
+## Installation instructions (quick command line reference)
 
 >You need to have Git, a version of conda (link to Miniconda [here](https://docs.conda.io/en/latest/miniconda.html)) and mamba installed to run the following commands. 
 
@@ -141,6 +142,60 @@ Example:
 
 `piranha -i <demultiplexed read directory> -b <path/to/barcodes.csv>`
 
+## What to put in a barcodes.csv file?
+At a minimum, two columns- one for barcode information and one with the name you'd like your sample to be called. This is also where you can flag which samples are negative or positive controls. Barcode and sample names should be unique and sample names shouldn't contain spaces or special characters. This is because the sample name will get incorporated into the output consensus fasta header and spaces in a fasta header disrupt the sequence ID.
+
+### Minimal example:
+```
+barcode,sample
+barcode01,EDI001
+barcode02,EDI002
+barcode03,EDI003
+barcode04,negative
+barcode05,positive
+```
+
+You can also include additional information in your barcode.csv. If you include a `date` column or an `EPID` column they'll automatically be included in the fasta header output too. Dates should always be in ISO format (YYYY-MM-DD) for metadata best practice. Piranha has a flag `--all-metadata-to-header` that will take any metadata fields in your barcodes.csv and append them to the final output file (separated by a `|` pipe symbol). Be aware any odd characters or spaces in these fields will also get added to the fasta header and can interfere with downstream phylogenetics you might want to run (e.g. `:`,`;`) can cause issues with some tree-building or reading software). 
+
+### Example with extra information:
+```
+barcode,sample,EPID,date
+barcode01,EDI001,EPI111,2022-10-10
+barcode02,EDI002,EPI112,2022-09-20
+barcode03,EDI003,EPI113,2022-09,21
+barcode04,negative,,
+barcode05,positive,,
+```
+
+## What should my reads look like?
+Piranha is configured to make analysis as straightforward as possible for users running MinION sequencing. Piranha takes the output of guppy directly and looks for the demultiplexed read directory containing the barcodes you've specified in your barcodes.csv. Guppy outputs directories in the structure:
+
+
+```
+fastq_pass/
+├── barcode01/
+│    ├── FAT75518_pass_barcode01_6d172881_0.fastq.gz
+│    ├── FAT75518_pass_barcode01_6d172881_1.fastq.gz
+│    └── FAT75518_pass_barcode01_6d172881_2.fastq.gz
+├── barcode02/
+│    ├── FAT75518_pass_barcode02_6d172881_0.fastq.gz
+│    ├── FAT75518_pass_barcode02_6d172881_1.fastq.gz
+│    ├── FAT75518_pass_barcode02_6d172881_2.fastq.gz
+│    ├── FAT75518_pass_barcode02_6d172881_3.fastq.gz
+│    ├── FAT75518_pass_barcode02_6d172881_4.fastq.gz
+│    └── FAT75518_pass_barcode02_6d172881_5.fastq.gz
+├── barcode03/
+│    ├── FAT75518_pass_barcode03_6d172881_0.fastq.gz
+│    ├── FAT75518_pass_barcode03_6d172881_1.fastq.gz
+│    └── FAT75518_pass_barcode03_6d172881_2.fastq.gz
+└── barcode05/
+     ├── FAT75518_pass_barcode05_6d172881_0.fastq.gz
+     ├── FAT75518_pass_barcode05_6d172881_1.fastq.gz
+     └── FAT75518_pass_barcode05_6d172881_2.fastq.gz
+```
+This is what piranha will look for. Point the software to the directory containing the different barcodeXX sub-directories and it will iterate within these to find the files. Piranha can accept fastq (fq) or fastq.gz files. It will only attempt to analyse the barcodes present in the input csv file. 
+
+
 <br>
 <br>
 
@@ -178,6 +233,9 @@ Analysis options:
                         Minimum read depth required for consensus generation. Default: 50
   -p MIN_READ_PCENT, --min-read-pcent MIN_READ_PCENT
                         Minimum percentage of sample required for consensus generation. Default: 10
+  --all-metadata-to-header
+                        Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the
+                        record id, so avoid these.
 
 Output options:
   -o OUTDIR, --outdir OUTDIR
