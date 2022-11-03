@@ -289,6 +289,22 @@ The default read length range filters accepts reads between 1000 and 1300 nucleo
 
 These parameters set the minimum number of reads hitting a particular reference in the reference file (and the minimum percentage of reads within the sample) that are necessary to create a binned read group and attempt to make a consensus sequence for that particular sample. By default a minimum of 50 reads are necessary to build a consensus sequence and a minimum of 10% of the sample is required to be represented by that particular reference before it will attempt to create a consensus for this. 
 
+### How many reads should I count as a signal? 
+
+We have set the minimum read depth to be 50 reads in order to attempt to make a consensus. Within piranha, we run minimap2 to map reads against the background reference panel (in a similar manner to [RAMPART](https://github.com/artic-network/rampart)). The top hit within the background reference panel is reported, by default showing the "display_name" field. The categories displayed are:
+
+- Sabin1-Related
+- Sabin2-Related
+- Sabin3-Related
+- WPV1
+- WPV2
+- WPV3
+- NonPolioEV
+- Unmapped
+
+When sequencing samples at high depth, using mapping software on the raw nanopore reads (which are error prone) can lead to a certain level of noise. Hits above the minimum read depth threshold (Default >50) are highlighted in red in the final report. If the population of reads mapping to a particular reference successfully makes a consensus sequence at the end of the piranha pipeline, this is an indication of a genuine population of reads rather than noise.
+
+Importantly, the reference that is hit within the background references file does not fully indicate what consensus sequence will be generated from the read population. Further phylogenetic analysis should be performed to confirm the identity of the sequence that you get. 
 
 
 ## Full usage
