@@ -49,7 +49,7 @@ def make_sample_report(report_to_generate,
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
             
-        sequences += f">{record.description}<br>{record.seq}<br>"
+        
         fields = record.description.split("|")
         
         record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
@@ -62,6 +62,9 @@ def make_sample_report(report_to_generate,
             additional_info[key]=value
 
         if barcode == record_barcode:
+            
+            sequences+= f">{record.description}<br>{record.seq}<br>"
+            
             sample = record_sample
             info = {KEY_BARCODE:barcode,
                     KEY_SAMPLE:record_sample,
