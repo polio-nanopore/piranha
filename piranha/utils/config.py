@@ -127,9 +127,19 @@ SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads",
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+
+
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode",
+                    "Sabin1-related|num_reads","Sabin1-related|num_mutations","Sabin1-related|call",
+                    "Sabin2-related|num_reads","Sabin2-related|num_mutations","Sabin2-related|call",
+                    "Sabin3-related|num_reads","Sabin3-related|num_mutations","Sabin3-related|call",
+                    "WPV1|num_reads","WPV1|call","WPV1|num_mutations",
+                    "WPV2|num_reads","WPV2|call","WPV2|num_mutations",
+                    "WPV3|num_reads","WPV3|call","WPV3|num_mutations",
+                    "NonPolioEV|num_reads","NonPolioEV|call","NonPolioEV|num_mutations"]
 
 # file names
 OUTPUT_REPORT = "report.html"
