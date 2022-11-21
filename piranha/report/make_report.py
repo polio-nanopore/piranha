@@ -27,6 +27,22 @@ def get_snipit(reference,snipit_file):
 
 # def include_call_info():
 
+def detailed_composition_report(input_report,output_report,config):
+    """
+    barcode,reference,reference_group,num_reads,percent_of_sample
+    barcode07,Poliovirus2-Sabin_AY184220,Sabin2-related,138,21.2
+    barcode07,Poliovirus3-Sabin_AY184221,Sabin3-related,339,52.07
+    """
+
+    with open(output_report,"w") as fw:
+        barcode_compiled = collections.defaultdict(list)
+        with open(input_report,"r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                barcode_compiled[row[KEY_BARCODE]].append(row)
+
+    
+
 def make_sample_report(report_to_generate,
                         variation_file,
                         co_occurrence_file,
@@ -176,7 +192,63 @@ def make_sample_report(report_to_generate,
         print(green("Generating: ") + f"{report_to_generate}")
         fw.write(buf.getvalue())
 
-def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,config):
+def make_detailed_csv(data_for_report,output):
+    """
+    SUMMARY TABLE
+        list of: {KEY_BARCODE:record_barcode,
+                    KEY_SAMPLE:record_sample,
+                    "Sample call": call,
+                    KEY_REFERENCE_GROUP:reference_group,
+                    "Number of mutations": int(var_count),
+                    }
+    COMPOSITION TABLE
+        rows of:
+        sample,barcode,Sabin1-related,Sabin2-related,Sabin3-related,WPV1,WPV2,WPV3,NonPolioEV,unmapped
+        MixedTest,barcode01,0,246,250,0,0,0,1,0
+        PureTest,barcode02,0,709,0,0,0,0,7,12
+        WTTest,barcode03,0,1,3,246,0,0,1,10
+        VDPVTest,barcode04,0,0,250,0,0,0,0,0
+        negative,barcode05,0,0,5,0,0,0,0,0
+        positively,barcode06,0,0,5,0,0,0,0,0
+        somemixed,barcode07,0,138,339,9,0,0,74,23
+
+    """
+
+    #detailed report cols: "sample,barcode,Sabin1-related|read_count,Sabin1-related|num_mutations,Sabin1-related|call,..."
+
+    combined_barcodes = collections.defaultdict(dict)
+    for row in data_for_report[KEY_SUMMARY_TABLE]:
+        combined_barcodes[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] = [row["Sample call"],row["Number of mutations"]]
+
+    with open(output,"w") as fw:
+        writer = csv.DictWriter(fw,fieldnames=DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1,lineterminator="\n")
+        writer.writeheader()
+        to_write = {}
+        for col in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1:
+            to_write[col] = ""
+
+        for row in data_for_report[KEY_COMPOSITION_TABLE]:
+            to_write[KEY_SAMPLE] = row[KEY_SAMPLE]
+            to_write[KEY_BARCODE] = row[KEY_BARCODE]
+
+            for col in row:
+                if col not in [KEY_SAMPLE,KEY_BARCODE,"unmapped"]:
+                    to_write[f"{col}|num_reads"] = row[col]
+
+            for ref_group in combined_barcodes[row[KEY_BARCODE]]:
+                call,num_mutations = combined_barcodes[row[KEY_BARCODE]][ref_group]
+                to_write[f"{ref_group}|call"] = call
+                to_write[f"{ref_group}|num_mutations"] = num_mutations
+        
+            writer.writerow(to_write)
+
+
+
+
+
+
+
+def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
     negative_control = config[KEY_NEGATIVE]
     positive_control = config[KEY_POSITIVE]
 
@@ -243,9 +315,6 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 "Number of mutations": "NA",
                 }
 
-
-        
-                
         data_for_report[KEY_SUMMARY_TABLE].append(info)
 
     flagged_seqs = []
@@ -262,6 +331,8 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
+    make_detailed_csv(data_for_report,detailed_csv_out)
+
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
@@ -275,6 +346,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                     show_control_table = show_control_table,
                     data_for_report = data_for_report,
                     flagged_seqs = flagged_seqs,
+                    detailed_csv_out = detailed_csv_out,
                     flagged_high_npev = flagged_high_npev,
                     config=config)
 
