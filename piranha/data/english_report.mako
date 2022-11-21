@@ -431,12 +431,15 @@
     </p>
     %endif  
       <br>
+
       <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
           <div class="row">
             <div class="col-sm-2" ><strong>Export table: </strong></div>
-            <div class="col-sm-8" id="tableExportID1"></div>
+            <div class="col-sm-4" id="tableExportID1"></div>
+            <div class="col-sm-3" ><strong>Export detailed table: </strong></div>
+            <div class="col-sm-2" ><button><a href="${detailed_csv_out}" download="detailed_run_report.csv">Download</a></button></div>
           </div>
         </div>
         <table class="display nowrap" id="myTable1">

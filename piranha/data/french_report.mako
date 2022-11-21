@@ -427,7 +427,9 @@
         <div class="panel">
           <div class="row">
             <div class="col-sm-2" ><strong>Exporter le tableau: </strong></div>
-            <div class="col-sm-8" id="tableExportID1"></div>
+            <div class="col-sm-4" id="tableExportID1"></div>
+            <div class="col-sm-4" ><strong>Exporter le tableau détaillé: </strong></div>
+            <div class="col-sm-2" ><button><a href="${detailed_csv_out}" download="detailed_run_report.csv">Télécharger</a></button></div>
           </div>
         </div>
         <table class="display nowrap" id="myTable1">
