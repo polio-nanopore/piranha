@@ -149,8 +149,10 @@ def main(sysargs = sys.argv[1:]):
             summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
             composition_csv=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION)
             sample_seqs=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
+            
+            detailed_csv = os.path.join(config[KEY_OUTDIR],"detailed_run_report.csv")
 
-            make_output_report(report,summary_csv,composition_csv,sample_seqs,config)
+            make_output_report(report,summary_csv,composition_csv,sample_seqs,detailed_csv,config)
 
             return 0
         

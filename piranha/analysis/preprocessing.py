@@ -338,5 +338,3 @@ def write_out_ref_fasta(to_write,ref_file,outdir):
             record = ref_index[ref]
             fw.write(f">{record.description}\n{record.seq}\n")
     
-
-
