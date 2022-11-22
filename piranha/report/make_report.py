@@ -249,32 +249,49 @@ def make_detailed_csv(data_for_report,output):
 
 
 def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
+    
+    # which are the negative controls and positive controls
     negative_control = config[KEY_NEGATIVE]
     positive_control = config[KEY_POSITIVE]
 
+    # which will be flagged as high npev samples
     flagged_high_npev = []
 
+    # does it pass control or not
     control_status = {negative_control:True,positive_control:True}
-    data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
+    #are there any controls
     show_control_table = False
-
+    
+    # collate data for tables in the report
+    data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            # add directly to data for report composition table (2)
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
+
+            # handling controls
             if row[KEY_SAMPLE] == negative_control:
                 show_control_table = True
                 for col in row:
                     if col not in [KEY_BARCODE,KEY_SAMPLE]:
+                        # if there are any reads above the min read threshold
+                        # sample fails as a negative control
                         if int(row[col])>config[KEY_MIN_READS]:
                             control_status[negative_control] = False
             elif row[KEY_SAMPLE] == positive_control:
                 show_control_table = True
+                # if the npev reads are below the min read threshold
+                # sample fails as a positive control
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status[positive_control] = False
             else:
-                
+                # deciding whether to flag the npev table
+                # if there are any polio reads
+                # if pcent of sample that is npev greater than min pcent
+                # flag the table
+
                 total_reads = 0
                 total_polio_reads = 0
                 for col in row:
@@ -289,6 +306,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                     if proportion_npev > config[KEY_PERCENT]:
                         flagged_high_npev.append(row[KEY_SAMPLE])
 
+    # to check if there are identical seqs in the run
     identical_seq_check = collections.defaultdict(list)
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
@@ -296,7 +314,9 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
         fields = record.description.split("|")
 
+        # the first fields there will always be
         record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
+        # additional fields that have been added to header
         additional_fields = fields[6:]
 
         additional_info = {}
@@ -307,6 +327,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
         call = reference_group
         if reference_group.startswith("Sabin"):
+            # configured number of mutations in sabin for the call threshold of VDPV
             call_threshold = CALL_THRESHOLD_DICT[reference_group]
             if int(var_count) > call_threshold:
                 call = "VDPV"
@@ -331,20 +352,25 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
         data_for_report[KEY_SUMMARY_TABLE].append(info)
 
+    # flag if there are identical seqs
     flagged_seqs = []
     for seq in identical_seq_check:
         if len(identical_seq_check[seq]) > 1:
             flagged_seqs.append(identical_seq_check[seq])
 
+    # do we need the control table
     data_for_report[KEY_CONTROL_STATUS] = control_status
     
+    # composition table header
     if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
     else:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
 
+    # summary table header
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
+    # detailed csv for download (1)
     make_detailed_csv(data_for_report,detailed_csv_out)
 
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
