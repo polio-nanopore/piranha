@@ -41,6 +41,7 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument("-nc","--negative-control",action="store",help=f"Sample name of negative control. Default: `{VALUE_NEGATIVE}`")
 
     analysis_group = parser.add_argument_group('Analysis options')
+    analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`. Default: `{VALUE_SAMPLE_TYPE}`")
     analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run. Options: `vp1`. Default: `{VALUE_ANALYSIS_MODE}`")
     analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
     analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
@@ -86,6 +87,10 @@ def main(sysargs = sys.argv[1:]):
 
     # Initialise config dict
     config = init.setup_config_dict(cwd,args.config)
+    
+    # Check if valid sample_type
+    analysis_arg_parsing.sample_type(args.sample_type,config)
+
     # Checks access to package data and grabs the snakefile
     analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
     data_install_checks.check_install(args.language,config)

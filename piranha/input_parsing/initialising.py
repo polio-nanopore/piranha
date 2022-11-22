@@ -31,8 +31,9 @@ def get_defaults():
                     KEY_REFERENCES_FOR_CNS:VALUE_REFERENCES_FOR_CNS,
                     KEY_SUMMARY_HEADERS: VALUE_SUMMARY_HEADERS,
 
-                    # input seq options 
-                    KEY_ANALYSIS_MODE:VALUE_ANALYSIS_MODE, #options are stool or environmental
+                    # input seq options
+                    KEY_SAMPLE_TYPE:VALUE_SAMPLE_TYPE,  #options are stool or environmental
+                    KEY_ANALYSIS_MODE:VALUE_ANALYSIS_MODE, #options are vp1 currently
                     KEY_MIN_READS:VALUE_MIN_READS,   # where to pad to using datafunk
                     KEY_MIN_PCENT:VALUE_MIN_PCENT,
 

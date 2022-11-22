@@ -53,6 +53,15 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_PCENT]:
         check_if_int(key,config)
 
+def sample_type(sample_type_arg,config):
+    # if command line arg, overwrite config value
+    misc.add_arg_to_config(KEY_SAMPLE_TYPE,sample_type_arg,config)
+    
+    if config[KEY_SAMPLE_TYPE] not in valid_sample_types:
+        error_str = ', '.join(valid_sample_types)
+        sys.stderr.write(cyan(f"`{KEY_SAMPLE_TYPE}` must be one of {error_str}.\n"))
+        sys.exit(-1)
+
 def analysis_mode(analysis_mode_arg,config):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_ANALYSIS_MODE,analysis_mode_arg,config)
@@ -62,7 +71,7 @@ def analysis_mode(analysis_mode_arg,config):
         sys.stderr.write(cyan(f"`{KEY_ANALYSIS_MODE}` must be one of {error_str}.\n"))
         sys.exit(-1)
 
-        # known issue with this: if these values get overwritten by an input config file, the defaults will override them
+    # known issue with this: if these values get overwritten by an input config file, the defaults will override them
     analysis_mode = config[KEY_ANALYSIS_MODE]
     if analysis_mode == VALUE_ANALYSIS_MODE_WG_2TILE and (config[KEY_MIN_READ_LENGTH]==READ_LENGTH_DEFAULT_VP1[0] and config[KEY_MIN_READ_LENGTH]==READ_LENGTH_DEFAULT_VP1[1]):
         config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DEFAULT_WG_2TILE[0]

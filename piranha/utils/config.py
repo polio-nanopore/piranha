@@ -20,6 +20,7 @@ KEY_OVERWRITE="overwrite"
 KEY_OUTPUT_REPORT="output_report"
 
 # ANALYSIS OPTION KEYS
+KEY_SAMPLE_TYPE = "sample_type"
 KEY_ANALYSIS_MODE = "analysis_mode"
 KEY_REFERENCES_FOR_CNS = "references_for_cns"
 KEY_MIN_READ_LENGTH = "min_read_length"
@@ -93,6 +94,7 @@ VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
 
+VALUE_SAMPLE_TYPE = "stool"
 VALUE_ANALYSIS_MODE = "vp1"
 VALUE_ANALYSIS_MODE_VP1 = "vp1"
 VALUE_ANALYSIS_MODE_WG_2TILE = "wg_2tile"
@@ -152,6 +154,8 @@ REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["vp1","wg_2tile"]
+valid_sample_types = ["stool","environmental"]
+
 dependency_list = ["minimap2","snakemake","medaka",]
 module_list = ["mako","Bio"]
 
