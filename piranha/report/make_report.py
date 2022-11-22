@@ -272,8 +272,20 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
                     control_status[positive_control] = False
             else:
-                if int(row["NonPolioEV"])>100:
-                    flagged_high_npev.append(row[KEY_SAMPLE])
+                
+                total_reads = 0
+                total_polio_reads = 0
+                for col in row:
+                    if col not in [KEY_SAMPLE,KEY_BARCODE]:
+                        total_reads+=row[col]
+
+                        if col not in ["NonPolioEV","unmapped"]:
+                            total_polio_reads+= row[col]
+                
+                if total_polio_reads>0:
+                    proportion_npev = 100*(int(row["NonPolioEV"])/total_reads)
+                    if proportion_npev > config[KEY_PERCENT]:
+                        flagged_high_npev.append(row[KEY_SAMPLE])
 
     identical_seq_check = collections.defaultdict(list)
 
