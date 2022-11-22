@@ -257,6 +257,8 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
     control_status = {negative_control:True,positive_control:True}
     data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     show_control_table = False
+
+    
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
