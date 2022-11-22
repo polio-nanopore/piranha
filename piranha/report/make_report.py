@@ -303,7 +303,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 
                 if total_polio_reads>0:
                     proportion_npev = 100*(int(row["NonPolioEV"])/total_reads)
-                    if proportion_npev > config[KEY_PERCENT]:
+                    if proportion_npev > config[KEY_MIN_PCENT]:
                         flagged_high_npev.append(row[KEY_SAMPLE])
 
     # to check if there are identical seqs in the run
