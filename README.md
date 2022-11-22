@@ -247,6 +247,15 @@ But you need to make sure that the fields match within barcodes.csv. Also note t
 
 Samples flagged as controls will appear in the report at the end in a separate table as well and will be flagged as either passing (row in table coloured green and a tick appears) or not passing (row in rable coloured red and no tick appears). Piranha's behaviour treats negative controls as passing if there are fewer than the configured minimum number of reads in the sample (Default: 50 reads) and positive controls as passing if there is more than the minimum number of reads in the sample for non-polio enterovirus (Default: 50 reads). 
 
+
+## Matching reads against the reference file
+Piranha takes nanopore sequencing reads (`fastq`) and matches them against a reference set of enterovirus VP1 sequences. This matching is currently performed with minimap2 ([Li 2018](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778)), run in the mode configured for noisynanopore data (`-x map-ont`). For more information on the details of what this pre-configured setting is, visit this [link](https://lh3.github.io/minimap2/minimap2.html). In addition to these pre-configured settings, within piranha we currently only consider primary alignments (i.e. the best hit) for each read against the reference file, rather than all potential matches.
+
+This reference set includes representatives of wild-type poliovirus 1, 2 and 3, as well as Sabin-1, 2 and 3 as well as a selection of other enterovirus VP1 sequences too.
+
+> IMPORTANT: Nanopore reads can have up to ~10% error rate and sporadic mapping to some references can occur at the read level, particularly when sequencing at great depth. When looking at the output read counts in the piranha report, this must be interpreted with caution and awareness of the underlying noise in the data. For example, low numbers of reads may map to WPV2 or WPV3 as they are present in the default database. This *DOES NOT* mean that WPV2 or WPV3 is present in your sample. Hits with greater than the minimun read count are highlighted in the report in the sample composition table (Table 2). If the read count passes the minimum thresholds (number of reads and percentage of sample) the reads will be taken forward for consensus building. It is only possible at the consensus level to get an accurate picture of that read population in your sample.
+
+
 ### Read thresholds
 
 There are a number of default thresholds applied, which can be overwritten depending on your purposes.
@@ -283,13 +292,6 @@ When sequencing samples at high depth, using mapping software on the raw nanopor
 Importantly, the reference that is hit within the background references file does not fully indicate what consensus sequence will be generated from the read population. Further phylogenetic analysis should be performed to confirm the identity of the sequence that you get. 
 
 
-## Matching reads against the reference file
-Piranha takes nanopore sequencing reads (`fastq`) and matches them against a reference set of enterovirus VP1 sequences. This matching is currently performed with minimap2 ([Li 2018](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778)), run in the mode configured for noisynanopore data (`-x map-ont`). For more information on the details of what this pre-configured setting is, visit this [link](https://lh3.github.io/minimap2/minimap2.html). In addition to these pre-configured settings, within piranha we currently only consider primary alignments (i.e. the best hit) for each read against the reference file, rather than all potential matches.
-
-This reference set includes representatives of wild-type poliovirus 1, 2 and 3, as well as Sabin-1, 2 and 3 as well as a selection of other enterovirus VP1 sequences too.
-
-> IMPORTANT: Nanopore reads can have up to ~10% error rate and sporadic mapping to some references can occur at the read level, particularly when sequencing at great depth. When looking at the output read counts in the piranha report, this must be interpreted with caution and awareness of the underlying noise in the data. For example, low numbers of reads may map to WPV2 or WPV3 as they are present in the default database. This *DOES NOT* mean that WPV2 or WPV3 is present in your sample. Hits with greater than the minimun read count are highlighted in the report in the sample composition table (Table 2). If the read count passes the minimum thresholds (number of reads and percentage of sample) the reads will be taken forward for consensus building. It is only possible at the consensus level to get an accurate picture of that read population in your sample.
-
 ## Custom reference file
 Users can specify their own reference file or by default piranha will access the reference file packaged with the software.
 
@@ -304,13 +306,13 @@ GGTATTGAAGATTTGACTTCTGAA...
 
 Notably, `display_name` allows multiple references to be aggregated together/ anonymised within the final report. Current compatibility within piranha allows `display_name` fields to include: `WPV1`,`WPV2`,`WPV3`,`Sabin1-related`,`Sabin2-related`,`Sabin3-related` and `NonPolioEV`.
 
-## Initial processing summary
+## Initial processing pipeline
 
 - Gathers all read files for a given barcode together
-  - Filters these reads by length (Default only reads between 1000 and 1300 bases are included for further analysis)
-  - The reads are mapped against a panel of references. By default there is a reference panel included as part of piranha. It includes VP1 sequences from various wild-type polio viruses, reference Sabin-1, Sabin-2 and Sabin-3 sequences for identification of Sabin-like or VDPV polioviruses, and also a number of non-polio enterovirus reference seqeuences. A custom VP1 fasta file can be supplied with the `-r` flag.
-  - The read map files are parsed to assign each read to the closest virus sequence in the reference panel. This assigns each read a broad category of either Sabin-1 like, Sabin-2 like, Sabin-3 like, wild-type Poliovirus (1, 2, or 3), non-polio enterovirus, or unmapped.
-  - These broad category assignments are used to bin reads for further downstream analysis. Any bin with greater than the minimum read threshold (Default 50 reads, but can be customised) and minimum read percentage (default 10% of sample, but can be customised) is written out in a separate fastq file which will be used to generate the broad-category consensus sequence.
+- Filters these reads by length (Default only reads between 1000 and 1300 bases are included for further analysis)
+- The reads are mapped against a panel of references. By default there is a reference panel included as part of piranha. It includes VP1 sequences from various wild-type polio viruses, reference Sabin-1, Sabin-2 and Sabin-3 sequences for identification of Sabin-like or VDPV polioviruses, and also a number of non-polio enterovirus reference seqeuences. A custom VP1 fasta file can be supplied with the `-r` flag.
+- The read map files are parsed to assign each read to the closest virus sequence in the reference panel. This assigns each read a broad category of either Sabin-1 like, Sabin-2 like, Sabin-3 like, wild-type Poliovirus (1, 2, or 3), non-polio enterovirus, or unmapped.
+- These broad category assignments are used to bin reads for further downstream analysis. Any bin with greater than the minimum read threshold (Default 50 reads, but can be customised) and minimum read percentage (default 10% of sample, but can be customised) is written out in a separate fastq file which will be used to generate the broad-category consensus sequence.
 
 # Analysis for each mapped read bin
 - For each bin, a consensus sequence is generated using medaka and variation information is calculated for each site in the alignment against the reference. This calculates the consensus variants within each sample.
@@ -322,7 +324,7 @@ Notably, `display_name` allows multiple references to be aggregated together/ an
 
 Piranha is configured by default to work with the nested amplification VP1 protocol developed by the [Polio Sequencing Consortium](https://www.protocols.io/workspaces/poliovirus-sequencing-consortium). If you're testing another protocol or want to modify the default analysis behaviour you can configure thresholds and models with various command line arguments (the snake case of the long-form arguments can be supplied in an input config file, see example [here](https://github.com/polio-nanopore/piranha/blob/main/docs/config.yaml)). 
 
-### ```--medaka-model```
+### `--medaka-model`
 Piranha uses medaka to generate consensus sequences. Medaka is software developed by Oxford nanopore technologies that explicitly deals with the error profile of nanopore data. Unlike Illumina sequencing, the error profile in sequencing reads generated by nanopore technology is not randomly distributed. Areas of low complexity, repetitive regions and particularly homopolymeric runs are lower in accuracy. Software like medaka (instead of traditional variant calling and consensus generation software) uses machine learning methods to compensate for this non-random error profile and for a long time the leading variant calling software for nanopore sequencing has used machine learning methods (e.g. nanopolish and medaka).
 
 By default the medaka model run is `r941_min_high_g360`. You should ensure to run the appropriate model for your data. The format of medaka model names is of:
@@ -351,13 +353,11 @@ To completely overwrite the output directory name (rather than just the prefix),
 
 If you're running multiple analyses from the same directory and not supplying new directory names, piranha will append an incrementing number to the end of the directory name so that the contents within the previous run output don't cause conflicts within the new run. To change this default behaviour and overwrite the previous directory, use the `--overwrite` flag. Note: this will wipe all the contents within the `analysis-YYYY-MM-DD` directory and re-populate it with the output of the new piranha run. 
 
-## Temporary files
+### Temporary files
 
 By default, piranha removes the intermediate files it produces during the analysis run. If you want to access the intermediate files (for example, the bam files, the read bins etc.) run with `--no-temp` and all intermediate files will be kept.
 
 By default temporary files are stored in `$TMPDIR`, which then gets wiped when the process completes. If you want to store temp files elsewhere this can be done with `--tempdir`.
-
-## Output configuration
 
 ### Customising the report
 The output report can include some information about the sequencing run, the name of the individual running the report and the institute doing the sequencing. To give the report a specific run name (rather than the default title `Nanopore sequencing report`) supply the new name with the command line flag `--runname` or as `runname: ` in the config file. Similarly, to enable the report to display the name of the user and institute, provide `--username` and `--institute` (or within the config file). 
