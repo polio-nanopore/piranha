@@ -296,10 +296,10 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
                 total_polio_reads = 0
                 for col in row:
                     if col not in [KEY_SAMPLE,KEY_BARCODE]:
-                        total_reads+=row[col]
+                        total_reads+=int(row[col])
 
                         if col not in ["NonPolioEV","unmapped"]:
-                            total_polio_reads+= row[col]
+                            total_polio_reads+= int(row[col])
                 
                 if total_polio_reads>0:
                     proportion_npev = 100*(int(row["NonPolioEV"])/total_reads)
