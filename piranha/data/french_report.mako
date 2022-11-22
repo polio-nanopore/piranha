@@ -422,6 +422,15 @@
         <h3><strong>Institut</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
       %endif
       <br>
+      %if flagged_high_npev and config["sample_type"]=="environmental":
+      <h3><strong>Attention</strong> | Les échantillons suivants ont un nombre important de reads NonPolioEV, ce qui peut entraîner une sensibilité réduite pour la détection du poliovirus.</h3>
+      <p style="white-space:wrap; word-wrap:break-word; overflow:scroll; border-width:2px; border-style:solid; border-color:#e68781; padding: 1em;">
+      %for sample in flagged_high_npev:
+        - ${sample}<br>
+      %endfor
+    </p>
+    %endif  
+      <br>
       <h3><strong>Tableau 1</strong> | Informations récapitulatives sur l'échantillon</h3>
       <button class="accordion">Exporter le tableau</button>
         <div class="panel">
