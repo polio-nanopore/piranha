@@ -4,6 +4,7 @@ import collections
 from Bio import SeqIO
 import csv
 from itertools import groupby, count
+import pysam
 # from cigar import Cigar
 
 from piranha.utils.config import *
