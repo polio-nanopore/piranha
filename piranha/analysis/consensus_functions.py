@@ -125,53 +125,63 @@ def join_variant_files(header_fields,in_files,output):
 #                     fw.write(f"{l}\n")
 
 
+#Get the reference bases at each position and stick it in a dictionary
+def ref_dict_maker(ref_fasta):
+    ref_dict = {}
+    ref_fasta = pysam.FastaFile(ref_fasta)
+    for idx, base in enumerate(ref_fasta.fetch(ref_fasta.references[0])):
+        ref_dict[idx] = base
 
-def get_variation_pcent(ref,fasta):
-    ref_record = SeqIO.read(ref,KEY_FASTA)
-    
-    #set up site counter, 0-based
-    variant_sites = {}
-    for i in range(len(ref_record)):
-        variant_sites[i] = 0
+    return ref_dict
 
-    c = 0
-    for record in SeqIO.parse(fasta,KEY_FASTA):
-        c +=1
-        index = 0
-        for pos in zip(str(record.seq),str(ref_record.seq)):
-            
-            if pos[0] != pos[1]:
-                variant_sites[index]+=1
-            index +=1
+#function to calculate the percentage of non ref bases at a given position
+def non_ref_prcnt_calc(pos,pileup_dict,ref_dict):
+    non_ref_prcnt = 0
+    ref_count = 0
+    total = 0
+    if ref_dict[pos] != "N":
+        ref_base = ref_dict[pos] + " reads"
+        for key in pileup_dict:
+            if key != "Position":
+                total += pileup_dict[key]
+        ref_count = pileup_dict[ref_base]
+        non_ref_prcnt = round((100 - ((ref_count / total) * 100)), 2)
 
-    variant_info = {}
-    for site in variant_sites:
-        variant_info[site] = {}
-        for base in ["A","T","C","G","-"]:
-            variant_info[site][base] = 0
+    return non_ref_prcnt
 
-    for record in SeqIO.parse(fasta,KEY_FASTA):
-        for site in variant_sites:
-            variant = str(record.seq)[site]
-            if variant not in variant_info[site]:
-                variant_info[site][variant]=0
-            variant_info[site][variant]+=1
-
-    x = []
-    y = []
-    info = []
+#Use mpileup to get bases per read at each postion, then calculate % vs ref for each
+def pileupper(bamfile,ref_dict,base_q=13):
+    bamfile = pysam.AlignmentFile(bamfile, "rb" )
     variation_info = []
-    for site in variant_sites:
-        
-        pcent_variants = round(100*(variant_sites[site]/c), 1)
-        x = site+1
-        y = pcent_variants
+    for pileupcolumn in bamfile.pileup(bamfile.references[0], min_base_quality=base_q):
+        pileup_dict = {}
 
-        var_counts = variant_info[site]
-        site_data = {"Position":x,"Percentage":y}
-        for i in var_counts:
-            site_data[f"{i} reads"] = var_counts[i]
-        
-        variation_info.append(site_data)
+        A_counter, G_counter, C_counter, T_counter, del_counter = 0,0,0,0,0
 
-    return variation_info
+        for pileupread in pileupcolumn.pileups:
+            if not pileupread.is_del and not pileupread.is_refskip:
+                # query position is None if is_del or is_refskip is set.
+                counts_list = []
+                #print(pileupread.alignment.query_position)
+                #print(pileupread.alignment.query_sequence[pileupread.query_position])
+                if pileupread.alignment.query_sequence[pileupread.query_position] == "A":
+                    A_counter += 1
+                elif pileupread.alignment.query_sequence[pileupread.query_position] == "G":
+                    G_counter += 1
+                elif pileupread.alignment.query_sequence[pileupread.query_position] == "C":
+                    C_counter += 1
+                elif pileupread.alignment.query_sequence[pileupread.query_position] == "T":
+                    T_counter += 1
+            else:
+                del_counter += 1
+        pileup_dict["Position"] = pileupcolumn.pos + 1
+        pileup_dict["A reads"] = A_counter
+        pileup_dict["C reads"] = C_counter
+        pileup_dict["T reads"] = T_counter
+        pileup_dict["G reads"] = G_counter
+        pileup_dict["- reads"] = del_counter
+        pileup_dict["Percentage"] = non_ref_prcnt_calc(pileupcolumn.pos,pileup_dict,ref_dict)
+        pileup_dict["ref_base"] = ref_dict[pileupcolumn.pos]
+        variation_info.append(pileup_dict)
+
+    return (variation_info)
