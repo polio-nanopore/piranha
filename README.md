@@ -365,6 +365,33 @@ The output report can include some information about the sequencing run, the nam
 ### Output language
 The reports are available in English (default) and in French.
 
+# Output report description
+
+> Header
+The header includes the title of the run (supply with `--runname`) and the date of report generation.
+
+> User and Institute
+Optionally the report can also display user and institute information beneath the header (`--username` and `--institute` flags).
+
+> Table 1 | Sample summary information
+This table gives summary information about which viruses were identified within each sample and, for Sabin-related polioviruses, the number of mutations away from Sabin. It also has a link that allows you to download a particular consensus sequence. The rows can be sorted by each column in either ascending or descending order by clicking on the column header. By default, the table is sorted by sample name. It's possible to search the table by typing in the text box on the right-hand side. 
+
+Under the table header, there's a dropdown menu that gives options to export the displayed table (either by copying to the clipboard, as a csv or directly printing it). By clicking on rows within the table, it's possible to select the subset of rows you're interested in exporting and this is what will be sent to the clipboard, file or printer.
+
+To the right, there is a button to download the detailed table. This additional table has a compiled set of data from the sequencing run. By default the information provided in this this file are as follows.
+
+First columns:
+```
+sample, barcode, EPID, institute,...
+```
+Then any additional fields supplied in the barcodes.csv for each sample (e.g. date of collection, date of sequencing)
+
+Then information about each reference group in turn. For example, Sabin1-related:
+```
+Sabin1-related|closest_reference,Sabin1-related|num_reads,Sabin1-related|nt_diff_from_reference,Sabin1-related|pcent_match,Sabin1-related|classification,...
+```
+Finally a generic comments column that can be modified later (or prepopulated if provided in the barcodes.csv).
+
 
 ## Full usage
 ```
