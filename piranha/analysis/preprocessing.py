@@ -327,7 +327,7 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
 
     for ref in handle_dict:
         handle_dict[ref].close()
-    
+
     return to_write
 
 def write_out_ref_fasta(to_write,ref_file,outdir):

@@ -67,13 +67,20 @@ rule write_hit_fastq:
         fastq = rules.filter_by_length.output.fastq
     params:
         barcode = "{barcode}",
-        outdir = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups")
+        outdir = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups"),
+        publish_dir = os.path.join(config[KEY_OUTDIR],"published_data","{barcode}")
     output:
-        txt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt")
+        txt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt"),
+        pub_txt = os.path.join(config[KEY_OUTDIR],"published_data","{barcode}","prompt.txt")
     run:
-        shell("touch {output.txt:q}")
+        shell("touch {output.txt:q} && touch {output.pub_txt:q}")
         print(green(params.barcode))
         to_write = write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,config)
+
+        for ref in to_write:
+            written = os.path.join(params.outdir,f"{ref}.fastq")
+            published = os.path.join(params.publish_dir,f"{ref}.fastq")
+            shell(f"cp {written} {published}")
 
         write_out_ref_fasta(to_write,config[KEY_REFERENCE_SEQUENCES],params.outdir)
 

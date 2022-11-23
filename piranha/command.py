@@ -159,6 +159,13 @@ def main(sysargs = sys.argv[1:]):
 
             make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,sample_seqs,detailed_csv,config)
 
+            for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
+                for fn in f:
+
+                    if not os.path.getsize(os.path.join(r,fn)):
+                        os.remove(os.path.join(r,fn))
+
+
             return 0
         
 
