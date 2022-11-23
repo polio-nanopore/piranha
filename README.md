@@ -377,7 +377,7 @@ Optionally the report can also display user and institute information beneath th
 
 ## Table 1 | Sample summary information
 
-This table gives summary information about which viruses were identified within each sample and, for Sabin-related polioviruses, the number of mutations away from Sabin. It also has a link that allows you to download a particular consensus sequence. The rows can be sorted by each column in either ascending or descending order by clicking on the column header. By default, the table is sorted by sample name. It's possible to search the table by typing in the text box on the right-hand side. 
+This table gives summary information about which viruses were identified within each sample and, for Sabin-related polioviruses, the number of mutations away from Sabin. It also has a link that allows you to download a particular consensus sequence. The rows can be sorted by each column in either ascending or descending order by clicking on the column header. By default, the table is sorted by sample name. It's possible to search the table by typing in the text box on the right-hand side. Clicking on the sample name within the table will redirect the user to the individual sample reports. Be aware this link works in situ, when path to the sample report relative to the main output report has not changed, but if the report is moved or distributed without the barcode reports, this link will no longer function.
 
 Under the table header, there's a dropdown menu that gives options to export the displayed table (either by copying to the clipboard, as a csv or directly printing it). By clicking on rows within the table, it's possible to select the subset of rows you're interested in exporting and this is what will be sent to the clipboard, file or printer.
 
@@ -405,6 +405,42 @@ This table will only appear if there are identical sequences in your sequencing 
 
 ## Table 4 | Controls
 If a negative and/or positive control are included in your sequencing run (piranha will automatically detect them if their sample name is `negative` or `positive`, or the user can specify the name of their controls with the command line flags or by providing them in a config file). If the control "passes" (i.e. has fewer than 50 reads for the negative control or has more than 100 reads in the NonPolioEV category for the positive control), the row will be coloured green and have a tick mark under the "Pass" column. If the controls fail, the row will be coloured red. If the controls fail, this may be an indication of a failed sequencing run. 
+
+# Sample report
+
+This report gives additional information specific to the sequences generated for each sample. 
+
+## Summary of sample content
+This table summarises the reference groups found within the sample. Clicking on the reference group within the table will link the user down to the appropriate section of the report.
+
+## VP1 sequences
+
+All consensus sequences generated for this sample are available within this box in fasta format. The header of the fasta file by default is of the format:
+
+```
+>sample|barcode|reference_group|reference|number_nt_diffs_from_reference|variants
+AAGTCAGTCATCAGCTGACT...CAGTGATCGAGCTAGTAT
+```
+
+Additional information can be detected and appended to this fasta header. By default, if a `date` column or `EPID` column is provided in the barcodes.csv file, this will be appended to the header. Piranha has a flag `--all-metadata-to-header` that will append all metadata fields provided in the input csv file to the header.
+
+This fasta file can be highlighted and copied to the clipboard, or accessed as part of the "published_data" directory in the output directory of piranha.
+
+## Reference group specific report
+
+This section of the report exists for each reference group identified within the sample. 
+
+### Table | Reference group table
+Firstly, a table summarises the number of mutations and what mutations have been identified relative to the closest reference. 
+
+### Figure | Variation (errors + mutations) across reference 
+The variation figure shows the noise within the data in contrast to the variants that get called within the sample. Each point represents the percentage alternative allele present at that site in the VP1 sequence. The baseline reference for Sabin-related sequences is the relevant Sabin reference, whereas for the other reference groups (wild-type poliovirus and non-polio enterovirus) the baseline reference is the consensus sequence generated. This means that for Sabin-related sequences, the differences relative to Sabin are highlighted and for the other read populations within the sample, differences within sample relative to the consensus of that read population are highlighted. The SNPs called by Medaka relative to the chosen baseline reference (either Sabin or consensus sequence) are highlighted in dark green and insertion-deletion mutations (if any) are highlighted in yellow. Masked variants are highlighted in red. A variant will be masked if it will cause a frameshift within the VP1 region (like an indel whose length is not a multiple of 3) or if it is part of a string of variants in very close proximity (highlighting an issue around that area). 
+
+### Figure | snipit plot
+This snipit plot ([https://github.com/aineniamh/snipit](https://github.com/aineniamh/snipit)) highlights the consensus differences relative to the reference. 
+
+### Figure | Percentage co-occurrence of SNPs called against reference
+This plot calculates the percentage of reads that share the variants called against the reference, and can give a noisy estimate of haplotypes present within the sample.
 
 # Full usage
 ```
