@@ -74,7 +74,7 @@ We now need to create the piranha environment. Hopefully you have mamba installe
 
 If you see the message `mamba not found` then you should install mamba with:
 
-```(base) aine$ mamba env create -f environment.yml```
+```(base) aine$ conda install mamba -c conda-forge```
 
 Activate the piranha environment:
 
