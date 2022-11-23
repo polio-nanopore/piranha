@@ -367,13 +367,16 @@ The reports are available in English (default) and in French.
 
 # Output report description
 
-> Header
+## Header
+
 The header includes the title of the run (supply with `--runname`) and the date of report generation.
 
-> User and Institute
+## User and Institute
+
 Optionally the report can also display user and institute information beneath the header (`--username` and `--institute` flags).
 
-> Table 1 | Sample summary information
+## Table 1 | Sample summary information
+
 This table gives summary information about which viruses were identified within each sample and, for Sabin-related polioviruses, the number of mutations away from Sabin. It also has a link that allows you to download a particular consensus sequence. The rows can be sorted by each column in either ascending or descending order by clicking on the column header. By default, the table is sorted by sample name. It's possible to search the table by typing in the text box on the right-hand side. 
 
 Under the table header, there's a dropdown menu that gives options to export the displayed table (either by copying to the clipboard, as a csv or directly printing it). By clicking on rows within the table, it's possible to select the subset of rows you're interested in exporting and this is what will be sent to the clipboard, file or printer.
@@ -392,8 +395,18 @@ Sabin1-related|closest_reference,Sabin1-related|num_reads,Sabin1-related|nt_diff
 ```
 Finally a generic comments column that can be modified later (or prepopulated if provided in the barcodes.csv).
 
+An example of this detailed file can be found [here](https://github.com/polio-nanopore/piranha/blob/main/docs/detailed_run_report.csv).
 
-## Full usage
+## Table 2 | Composition of samples
+This table displays read counts for each sample that have mapped to each of the reference groups. Similar to Table 1, this table can be sorted, searched and exported. 
+
+## Table 3 | Flagged samples
+This table will only appear if there are identical sequences in your sequencing run. It flags samples that contain consensus sequences that are completely identical. This may be a sign of contamination within the sequencing run, but doesn't necessarily mean this. This table serves as a prompt to investigate why these sequences may be identical. 
+
+## Table 4 | Controls
+If a negative and/or positive control are included in your sequencing run (piranha will automatically detect them if their sample name is `negative` or `positive`, or the user can specify the name of their controls with the command line flags or by providing them in a config file). If the control "passes" (i.e. has fewer than 50 reads for the negative control or has more than 100 reads in the NonPolioEV category for the positive control), the row will be coloured green and have a tick mark under the "Pass" column. If the controls fail, the row will be coloured red. If the controls fail, this may be an indication of a failed sequencing run. 
+
+# Full usage
 ```
 usage: 
 	piranha -c <config.yaml> [options]
