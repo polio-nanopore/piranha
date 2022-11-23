@@ -18,8 +18,8 @@ REFERENCES = config[BARCODE]
 rule all:
     input:
         os.path.join(config[KEY_TEMPDIR],"variation_info.json"),
-        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES)
-
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","pseudoaln.fasta"), reference=REFERENCES)
 
 rule files:
     params:
@@ -74,8 +74,8 @@ rule sam_to_indels:
 
 rule get_variation_info:
     input:
-        expand(rules.files.params.reads, reference=REFERENCES),
-        expand(rules.sam_to_seq.output.fasta,reference=REFERENCES)
+        ref = expand(rules.files.params.ref, reference=REFERENCES),
+        bams = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"), reference=REFERENCES)
     output:
         json = os.path.join(config[KEY_TEMPDIR],"variation_info.json")
     run:
@@ -86,10 +86,14 @@ rule get_variation_info:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
             else:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka","consensus.fasta")
-            
-            fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","pseudoaln.fasta")
-            
-            var_dict = get_variation_pcent(ref,fasta)
+
+            bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","mapped.sorted.bam")
+
+            shell("""
+                samtools faidx {input.ref}
+                """)
+            ref_dict = ref_dict_maker(ref)
+            var_dict = pileupper(bamfile,ref_dict)
             variation_dict[reference] = var_dict
 
         with open(output.json, "w") as fw:
