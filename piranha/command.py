@@ -49,7 +49,6 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help=f"Maximum read length. Default: {READ_LENGTH_DEFAULT_VP1[1]}")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help=f"Minimum read depth required for consensus generation. Default: {VALUE_MIN_READS}")
     analysis_group.add_argument("-p","--min-read-pcent",action="store",type=int,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT}")
-    analysis_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -59,9 +58,10 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument('--overwrite', action="store_true",help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
     o_group.add_argument('-temp','--tempdir',action="store",help="Specify where you want the temp stuff to go. Default: `$TMPDIR`")
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
+    o_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
+    o_group.add_argument('--language',action="store",help=f"Output report language. Options: English, French. Default: {VALUE_LANGUAGE}")
 
     misc_group = parser.add_argument_group('Misc options')
-    misc_group.add_argument('--language',action="store",help=f"Report language. Options: English, French. Default: {VALUE_LANGUAGE}")
     misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUN_NAME}")
     misc_group.add_argument('--username',action="store",help="Username to appear in report. Default: no user name")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report. Default: no institute name")
@@ -157,7 +157,7 @@ def main(sysargs = sys.argv[1:]):
             
             detailed_csv = os.path.join(config[KEY_OUTDIR],"detailed_run_report.csv")
 
-            make_output_report(report,summary_csv,composition_csv,sample_seqs,detailed_csv,config)
+            make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,sample_seqs,detailed_csv,config)
 
             return 0
         

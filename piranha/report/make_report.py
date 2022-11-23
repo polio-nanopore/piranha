@@ -25,24 +25,6 @@ def get_snipit(reference,snipit_file):
             snipit_svg+=f"{l}\n"
     return snipit_svg
 
-# def include_call_info():
-
-def detailed_composition_report(input_report,output_report,config):
-    """
-    barcode,reference,reference_group,num_reads,percent_of_sample
-    barcode07,Poliovirus2-Sabin_AY184220,Sabin2-related,138,21.2
-    barcode07,Poliovirus3-Sabin_AY184221,Sabin3-related,339,52.07
-    """
-
-    with open(output_report,"w") as fw:
-        barcode_compiled = collections.defaultdict(list)
-        with open(input_report,"r") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                barcode_compiled[row[KEY_BARCODE]].append(row)
-
-    
-
 def make_sample_report(report_to_generate,
                         variation_file,
                         co_occurrence_file,
@@ -192,7 +174,7 @@ def make_sample_report(report_to_generate,
         print(green("Generating: ") + f"{report_to_generate}")
         fw.write(buf.getvalue())
 
-def make_detailed_csv(data_for_report,output):
+def make_detailed_csv(data_for_report,barcodes_csv,output):
     """
     SUMMARY TABLE
         list of: {KEY_BARCODE:record_barcode,
@@ -214,41 +196,68 @@ def make_detailed_csv(data_for_report,output):
 
     """
 
-    #detailed report cols: "sample,barcode,Sabin1-related|read_count,Sabin1-related|num_mutations,Sabin1-related|call,..."
+    #detailed report cols: "sample,barcode,EPID,Institute,...[from_csv]...,[detailed composition header fields],..."
+
+    """
+    #detailed header fields
+    "Sabin-related|closest_reference","Sabin-related|num_reads","Sabin-related|nt_diff_from_reference","Sabin-related|pcent_match","Sabin-related|classification",
+    "WT-Polio|closest_reference","WT-Polio|num_reads","WT-Polio|nt_diff_from_reference","WT-Polio|pcent_match","WT-Polio|classification",
+    "NonPolioEV|num_reads","comments"
+    """
 
     combined_barcodes = collections.defaultdict(dict)
     for row in data_for_report[KEY_SUMMARY_TABLE]:
-        combined_barcodes[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] = [row["Sample call"],row["Number of mutations"]]
+        combined_barcodes[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] = row
+
+    sample_metadata = {}
+    metadata_headers = []
+    with open(barcodes_csv,"r") as f:
+        reader = csv.DictReader(f)
+        metadata_headers = reader.fieldnames
+        for row in reader:
+            sample_metadata[row[KEY_BARCODE]] = row
+
+    header_fields = [KEY_SAMPLE,KEY_BARCODE,KEY_EPID,KEY_INSTITUTE]
+    for i in metadata_headers:
+        if i not in header_fields:
+            header_fields.append(i)
+
+    for i in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS:
+        header_fields.append(i)
 
     with open(output,"w") as fw:
-        writer = csv.DictWriter(fw,fieldnames=DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1,lineterminator="\n")
+        writer = csv.DictWriter(fw,fieldnames=header_fields,lineterminator="\n")
         writer.writeheader()
         to_write = {}
-        for col in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1:
-            to_write[col] = ""
+        for i in header_fields:
+            to_write[i] = ""
 
         for row in data_for_report[KEY_COMPOSITION_TABLE]:
             to_write[KEY_SAMPLE] = row[KEY_SAMPLE]
             to_write[KEY_BARCODE] = row[KEY_BARCODE]
+            
+            metadata = sample_metadata[row[KEY_BARCODE]]
+            
+            #take in info from barcodes csv here
+            for field in metadata:
+                to_write[field] = metadata[field]
 
+            # read count
             for col in row:
                 if col not in [KEY_SAMPLE,KEY_BARCODE,"unmapped"]:
                     to_write[f"{col}|num_reads"] = row[col]
 
             for ref_group in combined_barcodes[row[KEY_BARCODE]]:
-                call,num_mutations = combined_barcodes[row[KEY_BARCODE]][ref_group]
-                to_write[f"{ref_group}|call"] = call
-                to_write[f"{ref_group}|num_mutations"] = num_mutations
+                info = combined_barcodes[row[KEY_BARCODE]][ref_group]
+                to_write[f"{ref_group}|closest_reference"] = info[KEY_REFERENCE]
+                to_write[f"{ref_group}|nt_diff_from_reference"] = info["Number of mutations"]
+                to_write[f"{ref_group}|pcent_match"] = info[KEY_PERCENT]
+                to_write[f"{ref_group}|classification"] = info["Sample classification"]
         
             writer.writerow(to_write)
 
 
-
-
-
-
-
-def make_output_report(report_to_generate,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
+def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
     
     # which are the negative controls and positive controls
     negative_control = config[KEY_NEGATIVE]
@@ -311,7 +320,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         identical_seq_check[str(record.seq)].append(record.description)
-
+        
         fields = record.description.split("|")
 
         # the first fields there will always be
@@ -323,7 +332,11 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
         for field in additional_fields:
             key,value = field.split("=")
             additional_info[key]=value
+        
+        length_of_seq = len(record)
 
+        prop_diff = int(var_count)/length_of_seq
+        pcent_match = round((1-prop_diff)*100, 2)
 
         call = reference_group
         if reference_group.startswith("Sabin"):
@@ -338,16 +351,20 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
 
             info = {KEY_BARCODE:record_barcode,
                 KEY_SAMPLE:record_sample,
-                "Sample call": call,
+                "Sample classification": call,
                 KEY_REFERENCE_GROUP:reference_group,
+                KEY_REFERENCE:reference,
                 "Number of mutations": int(var_count),
+                KEY_PERCENT:pcent_match
                 }
         else:
             info = {KEY_BARCODE:record_barcode,
                 KEY_SAMPLE:record_sample,
-                "Sample call": call,
+                "Sample classification": call,
                 KEY_REFERENCE_GROUP:reference_group,
+                KEY_REFERENCE:reference,
                 "Number of mutations": "NA",
+                KEY_PERCENT:pcent_match
                 }
 
         data_for_report[KEY_SUMMARY_TABLE].append(info)
@@ -371,7 +388,7 @@ def make_output_report(report_to_generate,preprocessing_summary,sample_compositi
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
     # detailed csv for download (1)
-    make_detailed_csv(data_for_report,detailed_csv_out)
+    make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out)
 
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
