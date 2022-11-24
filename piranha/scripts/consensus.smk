@@ -20,6 +20,7 @@ rule all:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"), reference=REFERENCES),
         expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
 
 rule files:
@@ -27,56 +28,31 @@ rule files:
         ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
         reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
 
-rule minimap2_racon:
+rule medaka_haploid_variant:
     input:
         reads=rules.files.params.reads,
         ref=rules.files.params.ref
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_racon.log")
-    output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.ref.sam")
-    shell:
-        """
-        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
-        """
-
-rule racon:
-    input:
-        reads=rules.files.params.reads,
-        fasta=rules.files.params.ref,
-        sam= rules.minimap2_racon.output.sam
-    output:
-        os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_cns.fasta")
-    shell:
-        "racon --no-trimming -t 1 {input.reads} {input.sam} {input.fasta} > {output}"
-
-rule mafft_racon:
-    input:
-       fasta = rules.racon.output[0],
-       ref = rules.files.params.ref
-    output:
-        temp_file = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_ref.fasta"),
-        aln = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_ref.aln.fasta")
-    shell:
-        "cat {input.ref} {input.fasta} > {output.temp_file} && "
-        "mafft {output.temp_file} > {output.aln} "
-
-rule curate_indels_racon:
-    input:
-        aln = rules.mafft_racon.output.aln
     params:
-        reference = "{reference}"
+        model = config[KEY_MEDAKA_MODEL],
+        outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
     output:
-        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","racon_cns.clean.fasta")
-    run:
-        clean_cns_gaps("racon", SAMPLE, input.aln, output.fasta)
+        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
+    shell:
+        """
+        medaka_haploid_variant -i {input.reads:q} \
+                               -r {input.ref:q} \
+                               -o {params.outdir} \
+                               -f -x
+        """
 
 rule minimap2_medaka:
     input:
         reads=rules.files.params.reads,
-        ref=rules.curate_indels_racon.output.fasta
+        ref=rules.files.params.ref
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
     output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.unmasked.sam")
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sam")
     shell:
         """
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
@@ -109,7 +85,7 @@ rule sort_index:
 rule medaka_consensus:
     input:
         basecalls=rules.files.params.reads,
-        draft=rules.curate_indels_racon.output.fasta,
+        draft=rules.files.params.ref,
         sam= rules.minimap2_medaka.output.sam,
         bam=rules.sort_index.output.bam
     params:
