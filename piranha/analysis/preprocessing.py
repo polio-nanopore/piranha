@@ -296,7 +296,7 @@ def check_which_refs_to_write(input_csv,min_reads,min_pcent):
                     print(f"{row[KEY_REFERENCE_GROUP]}\t{row[KEY_NUM_READS]} reads\t{row[KEY_PERCENT]}% of sample")
     return list(to_write)
 
-def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
+def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,primer_length,config):
     seq_index = SeqIO.index(input_fastq, "fastq")
     
     to_write = check_which_refs_to_write(input_csv,config[KEY_MIN_READS],config[KEY_MIN_PCENT])
@@ -316,7 +316,9 @@ def write_out_fastqs(input_csv,input_hits,input_fastq,outdir,config):
                 hit = row["hit"]
                 handle = handle_dict[hit]
 
-                SeqIO.write(record,handle,"fastq")
+                trimmed_record = record[primer_length:-primer_length]
+
+                SeqIO.write(trimmed_record,handle,"fastq")
             except:
                 not_written[hit]+=1
 
