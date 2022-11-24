@@ -52,7 +52,7 @@ rule minimap2_medaka:
         ref=rules.files.params.ref
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
     output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sam")
+        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.ref.sam")
     shell:
         """
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
