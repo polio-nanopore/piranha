@@ -146,7 +146,12 @@ def non_ref_prcnt_calc(pos,pileup_dict,ref_dict):
             if key != "Position":
                 total += pileup_dict[key]
         ref_count = pileup_dict[ref_base]
-        non_ref_prcnt = round((100 - ((ref_count / total) * 100)), 2)
+        if (total == 0):
+            non_ref_prcnt = 0
+        elif (ref_count == 0):
+            non_ref_prcnt = 100
+        else:
+            non_ref_prcnt = round((100 - ((ref_count / total) * 100)), 2)
 
     return non_ref_prcnt
 
@@ -163,8 +168,6 @@ def pileupper(bamfile,ref_dict,base_q=13):
             if not pileupread.is_del and not pileupread.is_refskip:
                 # query position is None if is_del or is_refskip is set.
                 counts_list = []
-                #print(pileupread.alignment.query_position)
-                #print(pileupread.alignment.query_sequence[pileupread.query_position])
                 if pileupread.alignment.query_sequence[pileupread.query_position] == "A":
                     A_counter += 1
                 elif pileupread.alignment.query_sequence[pileupread.query_position] == "G":
@@ -182,7 +185,7 @@ def pileupper(bamfile,ref_dict,base_q=13):
         pileup_dict["G reads"] = G_counter
         pileup_dict["- reads"] = del_counter
         pileup_dict["Percentage"] = non_ref_prcnt_calc(pileupcolumn.pos,pileup_dict,ref_dict)
-        pileup_dict["ref_base"] = ref_dict[pileupcolumn.pos]
+        pileup_dict["Ref base"] = ref_dict[pileupcolumn.pos]
         variation_info.append(pileup_dict)
 
     return (variation_info)
