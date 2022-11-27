@@ -71,7 +71,7 @@ rule sam_to_indels:
                 gofasta sam indels --threshold {config[min_read_depth]} -s {input.sam_cns:q} --insertions-out {output.ins:q} --deletions-out {output.dels:q} 
                 """)
 
-
+            
 rule get_variation_info:
     input:
         ref = expand(rules.files.params.ref, reference=REFERENCES),
@@ -84,14 +84,13 @@ rule get_variation_info:
         for reference in REFERENCES:
             if "Sabin" in reference:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
+                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","mapped.sorted.bam")
             else:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka","consensus.fasta")
+                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","mapped_cns.sorted.bam")
 
-            bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","mapped.sorted.bam")
+            shell(f"samtools faidx {ref}")
 
-            shell("""
-                samtools faidx {input.ref}
-                """)
             ref_dict = ref_dict_maker(ref)
             var_dict = pileupper(bamfile,ref_dict)
             variation_dict[reference] = var_dict
