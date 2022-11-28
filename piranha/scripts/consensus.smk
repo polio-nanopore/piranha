@@ -27,11 +27,13 @@ rule files:
         ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
         reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
 
-rule minimap2_racon:
+rule medaka_haploid_variant:
     input:
         reads=rules.files.params.reads,
         ref=rules.files.params.ref
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_racon.log")
+    params:
+        model = config[KEY_MEDAKA_MODEL],
+        outdir =  os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
     output:
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
         vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"),
@@ -39,13 +41,20 @@ rule minimap2_racon:
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
     shell:
         """
-        medaka_haploid_variant -i {input.reads:q} \
-                               -r {input.ref:q} \
-                               -o {params.outdir} \
-                               -f -x && \
-        medaka stitch {output.probs} {input.ref} {output.cns}
+        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
+        if [ -s {input.ref:q} ]
+        then
+            medaka_haploid_variant -i {input.reads:q} \
+                                -r {input.ref:q} \
+                                -o {params.outdir:q} \
+                                -f -x && \
+            medaka stitch {output.probs:q} {input.ref:q} {output.cns:q}
+        else
+            touch {output.cns:q}
+            touch {output.probs:q}
+            touch {output.vcf:q}
+        fi
         """
-
 
 rule medaka_haploid_variant_cns:
     input:
@@ -58,14 +67,22 @@ rule medaka_haploid_variant_cns:
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus_probs.hdf"),
         vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","medaka.vcf"),
         cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}_cns.hapoid_variant.log")
     shell:
         """
-        medaka_haploid_variant -i {input.reads:q} \
-                               -r {input.ref:q} \
-                               -o {params.outdir} \
-                               -f -x && \
-        medaka stitch {output.probs} {input.ref} {output.cns}
+        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
+        if [ -s {input.ref:q} ]
+        then
+            medaka_haploid_variant -i {input.reads:q} \
+                                -r {input.ref:q} \
+                                -o {params.outdir} \
+                                -f -x && \
+            medaka stitch {output.probs} {input.ref} {output.cns}
+        else
+            touch {output.cns:q}
+            touch {output.probs:q}
+            touch {output.vcf:q}
+        fi
         """
 
 
