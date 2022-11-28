@@ -228,11 +228,13 @@ def make_detailed_csv(data_for_report,barcodes_csv,output):
     with open(output,"w") as fw:
         writer = csv.DictWriter(fw,fieldnames=header_fields,lineterminator="\n")
         writer.writeheader()
-        to_write = {}
-        for i in header_fields:
-            to_write[i] = ""
+        
 
         for row in data_for_report[KEY_COMPOSITION_TABLE]:
+            to_write = {}
+            to_write = {}
+            for i in header_fields:
+                to_write[i] = ""
             to_write[KEY_SAMPLE] = row[KEY_SAMPLE]
             to_write[KEY_BARCODE] = row[KEY_BARCODE]
             
