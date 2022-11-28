@@ -42,13 +42,14 @@ def medaka_options_parsing(medaka_model,medaka_list_models,config):
         sys.stderr.write(cyan(f"Medaka model specified not valid: `{config[KEY_MEDAKA_MODEL]}`.\nPlease use --medaka-list-models to see which models are available.\nIf needed, update medaka version with `pip install --upgrade medaka`.\n"))
         sys.exit(-1)
 
-def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_read_pcent,config):
+def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_read_pcent,primer_length,config):
 
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_MIN_READ_LENGTH,min_read_length,config)
     misc.add_arg_to_config(KEY_MAX_READ_LENGTH,max_read_length,config)
     misc.add_arg_to_config(KEY_MIN_READS,min_read_depth,config)
     misc.add_arg_to_config(KEY_MIN_PCENT,min_read_pcent,config)
+    misc.add_arg_to_config(KEY_PRIMER_LENGTH,primer_length,config)
 
     for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_PCENT]:
         check_if_int(key,config)
