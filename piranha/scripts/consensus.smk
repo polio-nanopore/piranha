@@ -36,14 +36,17 @@ rule medaka_haploid_variant:
         model = config[KEY_MEDAKA_MODEL],
         outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
     output:
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf")
+        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
+        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"),
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta")
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
     shell:
         """
         medaka_haploid_variant -i {input.reads:q} \
                                -r {input.ref:q} \
                                -o {params.outdir} \
-                               -f -x
+                               -f -x && \
+        medaka stitch {output.probs} {input.ref} {output.cns}
         """
 
 rule minimap2_medaka:
@@ -57,18 +60,6 @@ rule minimap2_medaka:
         """
         minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
-
-# rule soft_mask_primers:
-#     input:
-#         sam = rules.minimap2_medaka.output.sam
-#     output:
-#         sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.racon_cns.masked.sam")
-#     run:
-#         # if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
-#         #     soft_mask_primer_sites(input.sam, output.sam,30)
-#         # else:
-#             # soft_mask_primer_sites(input.sam, output.sam, 30)
-#         shell("cp {input.sam:q} {output.sam:q}")
 
 rule sort_index:
     input:
@@ -92,7 +83,6 @@ rule medaka_consensus:
         outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka"),
         model = config[KEY_MEDAKA_MODEL]
     output:
-        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","cns.mod.fasta"),
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
     threads:
@@ -102,13 +92,11 @@ rule medaka_consensus:
         [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
         if [ -s {input.sam:q} ]
         then
-            sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
             medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
-            medaka stitch {output.probs:q} {output.cns_mod:q} {output.consensus:q} 
+            medaka stitch {output.probs:q} {input.draft:q} {output.consensus:q} 
         else
             touch {output.consensus:q}
             touch {output.probs:q}
-            touch {output.cns_mod:q}
         fi
         """
 
@@ -155,7 +143,6 @@ rule medaka_cns_consensus:
         model = config[KEY_MEDAKA_MODEL],
         reference = "{reference}"
     output:
-        cns_mod = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","cns.mod.fasta"),
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus_probs.hdf"),
         consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus.fasta")
     threads:
@@ -166,20 +153,17 @@ rule medaka_cns_consensus:
                 [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
                 if [ -s {input.sam:q} ]
                 then
-                    sed "s/[:,-]/_/g" {input.draft:q} > {output.cns_mod:q}
                     medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
-                    medaka stitch {output.probs:q} {output.cns_mod:q} {output.consensus:q} 
+                    medaka stitch {output.probs:q} {input.draft:q} {output.consensus:q} 
                 else
                     touch {output.consensus:q}
                     touch {output.probs:q}
-                    touch {output.cns_mod:q}
                 fi
                 """)
         else:
             shell("""
                     touch {output.consensus:q}
                     touch {output.probs:q}
-                    touch {output.cns_mod:q}
                 """)
 
 
