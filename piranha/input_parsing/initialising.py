@@ -41,7 +41,8 @@ def get_defaults():
                     KEY_MAX_READ_LENGTH:READ_LENGTH_DEFAULT_VP1[1],
                     
                     KEY_MEDAKA_MODEL:VALUE_DEFAULT_MEDAKA_MODEL,
-
+                    KEY_PRIMER_LENGTH:VALUE_PRIMER_LENGTH,
+                    
                     KEY_ALL_METADATA:False,
                     # misc defaults
                     KEY_LANGUAGE:VALUE_LANGUAGE,

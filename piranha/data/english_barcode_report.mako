@@ -608,7 +608,8 @@
                                             {"field": "C reads", "type": "nominal"},
                                             {"field": "G reads", "type": "nominal"},
                                             {"field": "T reads", "type": "nominal"},
-                                            {"field": "- reads", "type": "nominal"}
+                                            {"field": "- reads", "type": "nominal"},
+                                            {"field": "Ref base", "type": "nominal"}
                                           ],
                               "color": {"field":"snp_type","type":"nominal","scale": {"range": {"field": "colour"}}},
                               "size": {"field":"size",

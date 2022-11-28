@@ -66,6 +66,7 @@ rule write_hit_fastq:
         hits = rules.assess_broad_diversity.output.hits,
         fastq = rules.filter_by_length.output.fastq
     params:
+        primer_len = config[KEY_PRIMER_LENGTH],
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups"),
         publish_dir = os.path.join(config[KEY_OUTDIR],"published_data","{barcode}")
@@ -75,7 +76,7 @@ rule write_hit_fastq:
     run:
         shell("touch {output.txt:q} && touch {output.pub_txt:q}")
         print(green(params.barcode))
-        to_write = write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,config)
+        to_write = write_out_fastqs(input.csv,input.hits,input.fastq,params.outdir,params.primer_len,config)
 
         for ref in to_write:
             written = os.path.join(params.outdir,f"{ref}.fastq")

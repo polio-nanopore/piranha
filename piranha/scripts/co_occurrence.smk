@@ -24,12 +24,57 @@ rule all:
 rule files:
     params:
         ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
+        cns= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),
         reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
 
+rule minimap2_ref:
+    input:
+        reads=rules.files.params.reads,
+        ref=rules.files.params.ref
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
+    output:
+        sam = os.path.join(config[KEY_TEMPDIR],"haplotype","{reference}","mapped.ref.sam")
+    shell:
+        """
+        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        """
+
+rule minimap2_cns:
+    input:
+        reads=rules.files.params.reads,
+        ref=rules.files.params.ref
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}_cns.minimap2.log")
+    output:
+        sam = os.path.join(config[KEY_TEMPDIR],"haplotype","{reference}","mapped.cns.sam")
+    shell:
+        """
+        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        """
+
+rule sam_to_seq:
+    input:
+        sam_ref = os.path.join(config[KEY_TEMPDIR],"haplotype","{reference}","mapped.ref.sam"),
+        sam_cns = os.path.join(config[KEY_TEMPDIR],"haplotype","{reference}","mapped.cns.sam"),
+        ref = rules.files.params.ref,
+        cns = rules.files.params.cns
+    params:
+        reference = "{reference}"
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.gofasta.log")
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"haplotype","{reference}","pseudoaln.fasta")
+    run:
+        if "Sabin" in params.reference:
+            shell("""
+                gofasta sam toMultiAlign -r {input.ref:q} -s {input.sam_ref:q} -o {output[0]:q} &> {log}
+                """)
+        else:
+            shell("""
+                gofasta sam toMultiAlign -r {input.cns:q} -s {input.sam_cns:q} -o {output[0]:q} &> {log}
+                """)
 
 rule get_co_occurrence:
     input:
-        fasta = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","pseudoaln.fasta"),reference=REFERENCES),
+        fasta = expand(os.path.join(config[KEY_TEMPDIR],"haplotype","{reference}","pseudoaln.fasta"),reference=REFERENCES),
         csv = os.path.join(config[KEY_TEMPDIR],"variants.csv")
     output:
         json = os.path.join(config[KEY_TEMPDIR],"co_occurrence_info.json")
