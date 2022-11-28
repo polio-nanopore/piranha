@@ -49,129 +49,34 @@ rule medaka_haploid_variant:
         medaka stitch {output.probs} {input.ref} {output.cns}
         """
 
-rule minimap2_medaka:
+
+rule medaka_haploid_variant_cns:
     input:
         reads=rules.files.params.reads,
-        ref=rules.files.params.ref
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2.log")
-    output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.ref.sam")
-    shell:
-        """
-        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
-        """
-
-rule sort_index:
-    input:
-        sam = rules.minimap2_medaka.output.sam
-    output:
-        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"),
-        index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam.bai")
-    shell:
-        """
-        samtools view -bS -F 4 {input.sam:q} | samtools sort -o {output[0]:q} &&
-        samtools index {output.bam:q} {output.index:q}
-        """
-
-rule medaka_consensus:
-    input:
-        basecalls=rules.files.params.reads,
-        draft=rules.files.params.ref,
-        sam= rules.minimap2_medaka.output.sam,
-        bam=rules.sort_index.output.bam
+        ref=rules.medaka_haploid_variant.output.cns
     params:
-        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka"),
-        model = config[KEY_MEDAKA_MODEL]
-    output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus_probs.hdf"),
-        consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka","consensus.fasta")
-    threads:
-        workflow.cores
-    shell:
-        """
-        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-        if [ -s {input.sam:q} ]
-        then
-            medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
-            medaka stitch {output.probs:q} {input.draft:q} {output.consensus:q} 
-        else
-            touch {output.consensus:q}
-            touch {output.probs:q}
-        fi
-        """
-
-"""
-            medaka variant {input.draft:q} {output.probs:q} {output.vcf:q} 
-            bgzip -f {output.vcf:q}
-	        tabix -p vcf {output.vcf_gz:q}
-            bcftools consensus {output.vcf_gz:q} {output.consensus:q}
-"""
-
-
-rule minimap2_cns:
-    input:
-        reads=rules.files.params.reads,
-        ref=rules.medaka_consensus.output.consensus
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_cns.log")
-    output:
-        sam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.consensus.unmasked.sam")
-    shell:
-        """
-        minimap2 -ax map-ont --score-N=0 --secondary=no {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
-        """
-
-rule sort_index_cns:
-    input:
-        sam = rules.minimap2_cns.output.sam
-    output:
-        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped_cns.sorted.bam"),
-        index = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped_cns.sorted.bam.bai")
-    shell:
-        """
-        samtools view -bS -F 4 {input.sam:q} | samtools sort -o {output[0]:q} &&
-        samtools index {output.bam:q} {output.index:q}
-        """
-
-rule medaka_cns_consensus:
-    input:
-        basecalls=rules.files.params.reads,
-        draft=rules.medaka_consensus.output.consensus,
-        sam= rules.minimap2_cns.output.sam,
-        bam=rules.sort_index_cns.output.bam
-    params:
-        outdir=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns"),
         model = config[KEY_MEDAKA_MODEL],
-        reference = "{reference}"
+        outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns")
     output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus_probs.hdf"),
-        consensus= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns","consensus.fasta")
-    threads:
-        workflow.cores
-    run:
-        if "Sabin" not in params.reference:
-            shell("""
-                [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-                if [ -s {input.sam:q} ]
-                then
-                    medaka consensus --model "{params.model}" {input.bam:q} {output.probs:q} 
-                    medaka stitch {output.probs:q} {input.draft:q} {output.consensus:q} 
-                else
-                    touch {output.consensus:q}
-                    touch {output.probs:q}
-                fi
-                """)
-        else:
-            shell("""
-                    touch {output.consensus:q}
-                    touch {output.probs:q}
-                """)
+        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus_probs.hdf"),
+        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","medaka.vcf"),
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
+    shell:
+        """
+        medaka_haploid_variant -i {input.reads:q} \
+                               -r {input.ref:q} \
+                               -o {params.outdir} \
+                               -f -x && \
+        medaka stitch {output.probs} {input.ref} {output.cns}
+        """
 
 
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
-        medaka_cns=rules.medaka_consensus.output.consensus,
-        cns_cns=rules.medaka_cns_consensus.output.consensus
+        medaka_cns=rules.medaka_haploid_variant.output.cns,
+        cns_cns=rules.medaka_haploid_variant_cns.output.cns
     params:
         reference = "{reference}"
     output:

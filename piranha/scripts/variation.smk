@@ -85,7 +85,7 @@ rule get_variation_info:
             if "Sabin" in reference:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
             else:
-                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka","consensus.fasta")
+                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","consensus.fasta")
             
             fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","pseudoaln.fasta")
             
