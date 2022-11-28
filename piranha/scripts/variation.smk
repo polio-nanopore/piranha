@@ -18,8 +18,8 @@ REFERENCES = config[BARCODE]
 rule all:
     input:
         os.path.join(config[KEY_TEMPDIR],"variation_info.json"),
-        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES)
-
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","deletions.tsv"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","pseudoaln.fasta"), reference=REFERENCES)
 
 rule files:
     params:
@@ -71,11 +71,11 @@ rule sam_to_indels:
                 gofasta sam indels --threshold {config[min_read_depth]} -s {input.sam_cns:q} --insertions-out {output.ins:q} --deletions-out {output.dels:q} 
                 """)
 
-
+            
 rule get_variation_info:
     input:
-        expand(rules.files.params.reads, reference=REFERENCES),
-        expand(rules.sam_to_seq.output.fasta,reference=REFERENCES)
+        ref = expand(rules.files.params.ref, reference=REFERENCES),
+        bams = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","mapped.sorted.bam"), reference=REFERENCES)
     output:
         json = os.path.join(config[KEY_TEMPDIR],"variation_info.json")
     run:
@@ -84,12 +84,15 @@ rule get_variation_info:
         for reference in REFERENCES:
             if "Sabin" in reference:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
+                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","calls_to_ref.bam")
             else:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","consensus.fasta")
-            
-            fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","pseudoaln.fasta")
-            
-            var_dict = get_variation_pcent(ref,fasta)
+                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant_cns","calls_to_ref.bam")
+
+            shell(f"samtools faidx {ref}")
+
+            ref_dict = ref_dict_maker(ref)
+            var_dict = pileupper(bamfile,ref_dict)
             variation_dict[reference] = var_dict
 
         with open(output.json, "w") as fw:
