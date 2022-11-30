@@ -86,6 +86,7 @@ def parse_variants(alignment,out_report,barcode,reference):
     with open(out_report,"w") as fw:
         fw.write(f"{barcode},{reference},{len(variants)},{var_string}\n")
 
+
 def join_variant_files(header_fields,in_files,output):
     with open(output,"w") as fw:
         header = ",".join(header_fields) + "\n"
@@ -126,16 +127,39 @@ def non_ref_prcnt_calc(pos,pileup_dict,ref_dict):
 
     return non_ref_prcnt
 
+def parse_variant_file(var_file):
+    var_dict = collections.defaultdict(dict)
+    with open(var_file, "r") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            
+            variants = row["variants"].split(";")
+            if variants != ['']:
+                for var in variants:
+                    pos,snp = var.split(":")
+                    ref,alt = snp
+
+                    var_dict[row[KEY_REFERENCE]][int(pos)] = [ref,alt]
+
+    return var_dict
+
 def parse_vcf(vcf):
     var_dict = {}
 
     vcf_file = pysam.VariantFile(vcf)
     for rec in vcf_file.fetch():
+        
         length_var = len(rec.ref)
         qual = round(rec.qual,2)
         start_pos = rec.pos
+        
         if length_var >1:
+            print(start_pos, rec.ref,rec.alts)
             for i in range(length_var):
+                print(i, rec.ref[i])
+                print(i, rec.alts[0][i])
+                #Poliovirus3-Sabin_AY184221	473	.	TC	T	2.494	PASS	.	GT:GQ	1:2
+
                 var_dict[start_pos] = [rec.ref[i],rec.alts[0][i],qual]
                 start_pos+=1
         else:
@@ -153,6 +177,7 @@ def add_to_cooccurance_analysis(pileupread,read_vars,genome_position):
 #                 read_vars[pileupread.alignment.query_name][pileupcolumn.pos] = "ref"
     elif pileupread.is_del:
         read_vars[pileupread.alignment.query_name][genome_position] = "-"
+    return read_vars
 
 
 #Use mpileup to get bases per read at each postion, then calculate % vs ref for each
@@ -169,11 +194,10 @@ def pileupper(bamfile,ref_dict,var_dict,base_q=13):
 
         genome_position = pileupcolumn.pos+1
         
-
         for pileupread in pileupcolumn.pileups:
             if genome_position in var_dict:
-                add_to_cooccurance_analysis(pileupread,read_vars,genome_position)
 
+                read_vars = add_to_cooccurance_analysis(pileupread,read_vars,genome_position)
             if not pileupread.is_del and not pileupread.is_refskip:
                 # query position is None if is_del or is_refskip is set.
                 counts_list = []
@@ -248,14 +272,9 @@ def calculate_coocc_json(var_dict,read_vars):
     
     merged = pd.merge(long_alts, long_refs)
     
-    for i in sorted(total_hq_allele):
-        print(i, total_hq_allele[i])
-    
     merged["Total"] = [total_hq_allele[x] for x in merged["SNP1"]]
     merged["PcentAlt"] = round(100* (merged["Alt"] / merged["Total"]),0)
     merged["PcentRef"] = round(100* (merged["Ref"] / merged["Total"]),0)
-    print(merged)
     coocurrance =  merged.to_json(orient="records")
     
-    print(coocurrance)
     return coocurrance

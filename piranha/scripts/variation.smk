@@ -74,6 +74,7 @@ rule files:
             
 rule get_variation_info:
     input:
+        variant_file = os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         ref = expand(rules.files.params.ref, reference=REFERENCES),
         bams = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","calls_to_ref.bam"), reference=REFERENCES)
     output:
@@ -81,24 +82,30 @@ rule get_variation_info:
     run:
         # this is for making a figure
         variation_dict = {}
+        all_var_dict = parse_variant_file(input.variant_file)
+
+
         for reference in REFERENCES:
+
             variation_dict[reference] = {"variation":[],"coocc":[]}
             if "Sabin" in reference:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","calls_to_ref.bam")
-                vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","medaka.annotated.vcf")
             else:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","consensus.fasta")
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant_cns","calls_to_ref.bam")
-                vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant_cns","medaka.annotated.vcf")
             shell(f"samtools faidx {ref}")
 
             ref_dict = ref_dict_maker(ref)
-            var_dict = parse_vcf(vcf)
+
+            var_dict = all_var_dict[reference]
+            
             variation_json,read_vars = pileupper(bamfile,ref_dict,var_dict)
             variation_dict[reference]["variation"] = variation_json
-
-            variation_dict[reference]["coocc"] = calculate_coocc_json(var_dict,read_vars)
+            if var_dict:
+                variation_dict[reference]["coocc"] = calculate_coocc_json(var_dict,read_vars)
+            else:
+                variation_dict[reference]["coocc"] = []
 
         with open(output.json, "w") as fw:
-            fw.write(json.dumps(variation_dict))
+            json.dump(variation_dict, fw)
