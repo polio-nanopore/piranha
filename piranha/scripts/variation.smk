@@ -85,15 +85,19 @@ rule get_variation_info:
             if "Sabin" in reference:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","calls_to_ref.bam")
+                vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","medaka.annotated.vcf")
             else:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","consensus.fasta")
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant_cns","calls_to_ref.bam")
-
+                vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant_cns","medaka.annotated.vcf")
             shell(f"samtools faidx {ref}")
 
             ref_dict = ref_dict_maker(ref)
-            var_dict = pileupper(bamfile,ref_dict)
-            variation_dict[reference] = var_dict
+            var_dict = parse_vcf(vcf)
+            variation_json,read_vars = pileupper(bamfile,ref_dict,var_dict)
+            variation_dict[reference] = variation_json
+
+            coocc_json = calculate_coocc_json(var_dict,read_vars)
 
         with open(output.json, "w") as fw:
             fw.write(json.dumps(variation_dict))

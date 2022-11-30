@@ -5,6 +5,7 @@ from Bio import SeqIO
 import csv
 from itertools import groupby, count
 import pysam
+import pandas as pd
 # from cigar import Cigar
 
 from piranha.utils.config import *
@@ -95,36 +96,6 @@ def join_variant_files(header_fields,in_files,output):
                     l = l.rstrip("\n")
                     fw.write(f"{l}\n")
 
-# def adjust_position(cs,primer_length):
-
-#     # new cigar string
-#     c = Cigar(cs)
-#     items = list(c.items())
-#     start_mask = items[0][0]
-#     end_mask = items[-1][0]
-
-#     amended_start_mask = start_mask + primer_length
-#     amended_end_mask = end_mask + primer_length
-
-#     new_cigar = c.mask_left(amended_start_mask).mask_right(amended_end_mask)
-
-#     return new_cigar.cigar
-
-# def soft_mask_primer_sites(input_sam, output_sam, primer_length):
-#     with open(output_sam, "w") as fw:
-#         with open(input_sam,"r") as f:
-#             for l in f:
-#                 l=l.rstrip("\n")
-
-#                 if not l.startswith("@"):
-#                     tokens = l.split("\t")
-#                     new_tokens = tokens
-#                     new_tokens[5] = adjust_position(tokens[5],primer_length)
-#                     new_l = "\t".join(new_tokens)
-#                     fw.write(f"{new_l}\n")
-#                 else:
-#                     fw.write(f"{l}\n")
-
 
 #Get the reference bases at each position and stick it in a dictionary
 def ref_dict_maker(ref_fasta):
@@ -155,16 +126,54 @@ def non_ref_prcnt_calc(pos,pileup_dict,ref_dict):
 
     return non_ref_prcnt
 
+def parse_vcf(vcf):
+    var_dict = {}
+
+    vcf_file = pysam.VariantFile(vcf)
+    for rec in vcf_file.fetch():
+        length_var = len(rec.ref)
+        qual = round(rec.qual,2)
+        start_pos = rec.pos
+        if length_var >1:
+            for i in range(length_var):
+                var_dict[start_pos] = [rec.ref[i],rec.alts[0][i],qual]
+                start_pos+=1
+        else:
+             var_dict[rec.pos] = [rec.ref,rec.alts[0],qual]
+    return var_dict
+
+def add_to_cooccurance_analysis(pileupread,read_vars,genome_position):
+    if not pileupread.is_del:
+        read_pos = pileupread.query_position
+        read_base = pileupread.alignment.query_sequence[read_pos]
+        read_vars[pileupread.alignment.query_name][genome_position]= read_base
+#             elif pileupread.is_refskip:
+#                 print("ref",pileupcolumn.pos,pileupread.alignment.query_name)
+#                 read_pos = pileupread.query_position         
+#                 read_vars[pileupread.alignment.query_name][pileupcolumn.pos] = "ref"
+    elif pileupread.is_del:
+        read_vars[pileupread.alignment.query_name][genome_position] = "-"
+
+
 #Use mpileup to get bases per read at each postion, then calculate % vs ref for each
-def pileupper(bamfile,ref_dict,base_q=13):
+def pileupper(bamfile,ref_dict,var_dict,base_q=13):
     bamfile = pysam.AlignmentFile(bamfile, "rb" )
+
     variation_info = []
+    
+    read_vars = collections.defaultdict(dict)
+
     for pileupcolumn in bamfile.pileup(bamfile.references[0], min_base_quality=base_q):
         pileup_dict = {}
-
         A_counter, G_counter, C_counter, T_counter, del_counter = 0,0,0,0,0
 
+        genome_position = pileupcolumn.pos+1
+        
+
         for pileupread in pileupcolumn.pileups:
+            if genome_position in var_dict:
+                add_to_cooccurance_analysis(pileupread,read_vars,genome_position)
+
             if not pileupread.is_del and not pileupread.is_refskip:
                 # query position is None if is_del or is_refskip is set.
                 counts_list = []
@@ -188,4 +197,65 @@ def pileupper(bamfile,ref_dict,base_q=13):
         pileup_dict["Ref base"] = ref_dict[pileupcolumn.pos]
         variation_info.append(pileup_dict)
 
-    return (variation_info)
+
+    return variation_info,read_vars
+
+
+def calculate_coocc_json(var_dict,read_vars):
+
+    binary_alts = collections.defaultdict(list)
+    binary_refs = collections.defaultdict(list)
+    
+    
+    total_hq_allele = collections.Counter()
+    for position in sorted(var_dict):
+        
+        ref_allele = var_dict[position][0]
+        alt_allele = var_dict[position][1]
+        
+        for read in read_vars:
+            if position in read_vars[read]:
+                total_hq_allele[position] +=1
+                variant = read_vars[read][position]
+                if variant == ref_allele:
+                    binary_refs[read].append(1)
+                    binary_alts[read].append(0)
+                elif variant == alt_allele:
+                    binary_refs[read].append(0)
+                    binary_alts[read].append(1)
+#                     print(variant,alt_allele)
+                else:
+                    #noise/sub_cns var
+#                     print(variant,alt_allele,ref_allele)
+                    binary_refs[read].append(0)
+                    binary_alts[read].append(0)
+            
+            else:
+                binary_refs[read].append(0)
+                binary_alts[read].append(0)
+    
+    header = []
+    for i in var_dict:
+        header.append(i)
+
+    df_refs = pd.DataFrame.from_dict(binary_refs, orient='index',columns=header)
+    coocc_refs= df_refs.T.dot(df_refs)
+    long_refs = coocc_refs.stack().reset_index().set_axis('SNP1 SNP2 Ref'.split(), axis=1)
+
+    df_alts = pd.DataFrame.from_dict(binary_alts, orient='index',columns=header)
+    coocc_alts= df_alts.T.dot(df_alts)
+    long_alts = coocc_alts.stack().reset_index().set_axis('SNP1 SNP2 Alt'.split(), axis=1)
+    
+    merged = pd.merge(long_alts, long_refs)
+    
+    for i in sorted(total_hq_allele):
+        print(i, total_hq_allele[i])
+    
+    merged["Total"] = [total_hq_allele[x] for x in merged["SNP1"]]
+    merged["PcentAlt"] = round(100* (merged["Alt"] / merged["Total"]),0)
+    merged["PcentRef"] = round(100* (merged["Ref"] / merged["Total"]),0)
+    print(merged)
+    coocurrance =  merged.to_json(orient="records")
+    
+    print(coocurrance)
+    return coocurrance
