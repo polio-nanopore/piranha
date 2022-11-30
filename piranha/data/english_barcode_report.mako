@@ -664,7 +664,7 @@
             </div>
             <hr>
           %if 'cooccurrence_info' in data_for_report[reference]:
-            <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
+            <!-- <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
             <br>
             %if len(ref_cooccurrence_info) < 4:
               <div id="co_plot_${reference}" style="width:50%"></div>
@@ -713,7 +713,98 @@
                     </script>
               <% figure_count +=1 %>
               <h3><strong>Figure ${figure_count}</strong> | Percentage co-occurrence of SNPs called against ${reference_name} reference in ${sample}</h3>
-              <hr>
+              <hr> -->
+
+              <div class="row">
+                <div class="column" id="coocc1" style="width:50%"></div>
+                <div class="column" id="coocc2" style="width:50%"></div>
+                </div>
+                <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
+                <script type="text/javascript">
+                  const myData = ${ref_cooccurrence_info};
+                    
+                    vlSpec_coocc1 = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "data": {"values": myData},
+                    "mark": "rect",
+                    "width": 100,
+                    "height": 100,
+                    "title": {
+                      "fontSize": 16,
+                    },
+                    "encoding": {
+                      "y": {"field": "SNP1", "type": "ordinal"},
+                      "x": {"field": "SNP2", "type": "ordinal"},
+                      "color": {"type": "quantitative", "field": "PcentRef",
+                        "scale":{"domain":[0,100], "scheme":"yelloworangered"}}
+                    },
+                    "axes": [
+                          {
+                            "orient": "top", 
+                            "scale": "x", 
+                            "labelAngle": -45,
+                            "tickOffset": 0,
+                            "labelAlign": "right",
+                            "domain": false,
+                            "title": "Features"
+                          },
+                          {
+                            "orient": "left", 
+                            "scale": "y", 
+                            "domain": false,
+                            "title": "Features"
+                          }
+                      ],
+                    "config": {
+                      "axis": {"grid": true, "tickBand": "extent"}
+                    }
+                  }
+                vegaEmbed('#coocc1', vlSpec_coocc1, {renderer: "svg"})
+                                      .then(result => console.log(result))
+                                      .catch(console.warn);
+                    vlSpec_coocc2 = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "data": {"values": myData},
+                    "mark": "rect",
+                    "width": 100,
+                    "height": 100,
+                    "title": {
+                      "fontSize": 16,
+                    },
+                    "encoding": {
+                      "y": {"field": "SNP1", "type": "ordinal"},
+                      "x": {"field": "SNP2", "type": "ordinal"},
+                      "color": {"type": "quantitative", "field": "PcentAlt",
+                        "scale":{"domain":[0,100],"scheme":"yelloworangered"}}
+                    },
+                    "axes": [
+                          {
+                            "orient": "top", 
+                            "scale": "x", 
+                            "labelAngle": -45,
+                            "tickOffset": 0,
+                            "labelAlign": "right",
+                            "domain": false,
+                            "title": "Features"
+                          },
+                          {
+                            "orient": "left", 
+                            "scale": "y", 
+                            "domain": false,
+                            "title": "Features"
+                          }
+                      ],
+                    "config": {
+                      "axis": {"grid": true, "tickBand": "extent"}
+                    }
+                  };
+                vegaEmbed('#coocc2', vlSpec_coocc2, {renderer: "svg"})
+                                      .then(result => console.log(result))
+                                      .catch(console.warn);
+        </script>
+        <% figure_count +=1 %>
+        <h3><strong>Figure ${figure_count}</strong> | Co-occurrence matrix of Reference and Variant alleles called against ${reference_name} reference in ${sample}. This is the percentage of bases that cover those sites in the mapping file that are of a high quality (>13) and that are either the reference allele or the allele of the variant called at that site.</h3>
+        <hr>
           %endif
 
         %endfor
