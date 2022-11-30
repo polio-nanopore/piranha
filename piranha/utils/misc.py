@@ -80,9 +80,6 @@ def header(v):
                                         {v}""")+green("""
                         ****************************************
                                                                 
-                       Aine O'Toole, Rachel Colquhoun, Corey Ansley, 
-                                    Andrew Rambaut        
-                                 Edinburgh University          
 \n"""))
 
 def preamble(v):

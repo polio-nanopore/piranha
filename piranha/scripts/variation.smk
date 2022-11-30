@@ -82,6 +82,7 @@ rule get_variation_info:
         # this is for making a figure
         variation_dict = {}
         for reference in REFERENCES:
+            variation_dict[reference] = {"variation":[],"coocc":[]}
             if "Sabin" in reference:
                 ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","calls_to_ref.bam")
@@ -95,9 +96,9 @@ rule get_variation_info:
             ref_dict = ref_dict_maker(ref)
             var_dict = parse_vcf(vcf)
             variation_json,read_vars = pileupper(bamfile,ref_dict,var_dict)
-            variation_dict[reference] = variation_json
+            variation_dict[reference]["variation"] = variation_json
 
-            coocc_json = calculate_coocc_json(var_dict,read_vars)
+            variation_dict[reference]["coocc"] = calculate_coocc_json(var_dict,read_vars)
 
         with open(output.json, "w") as fw:
             fw.write(json.dumps(variation_dict))

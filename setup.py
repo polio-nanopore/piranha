@@ -22,6 +22,7 @@ setup(name='piranha',
       package_data={"piranha":["data/*"]},
       install_requires=[
             "mako==1.2",
+            "pandas~=1.5",
             "snipit",
             "biopython",
             "medaka>=1.7.1"
