@@ -143,7 +143,7 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = [
                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|num_reads","NonPolioEV|classification","NonPolioEV|nt_diff_from_reference","comments"]
+                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
 
 # file names
 OUTPUT_REPORT = "report.html"
