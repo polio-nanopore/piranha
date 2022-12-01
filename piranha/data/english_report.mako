@@ -30,7 +30,7 @@
     <script src="https://github.com/devongovett/blob-stream/releases/download/v0.1.3/blob-stream.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/svg-to-pdfkit/source.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega@5.16.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.15.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.11.1"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
