@@ -119,10 +119,11 @@ def make_sample_report(report_to_generate,
         for reference in variation_json:
 
             all_sites_data = variation_json[reference]["variation"]
+            
             coocc_data = variation_json[reference]["coocc"]
-            if coocc_data:
+            if coocc_data and "Sabin" in reference:
                 data_for_report[reference][KEY_COOCCURRENCE_INFO] = coocc_data
-                
+
             snp_sites = data_for_report[reference][KEY_SNP_SITES]
             masked_sites = data_for_report[reference][KEY_MASKED_SITES]
             indel_sites = data_for_report[reference][KEY_INDEL_SITES]
