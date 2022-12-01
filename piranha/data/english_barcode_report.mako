@@ -623,7 +623,11 @@
                       .catch(console.warn);
                 </script>
             <% figure_count +=1 %>
-            <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+            %if "Sabin" in reference:
+              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+            %else:
+              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in ${sample}. SNPs and indels called against closest reference highlighted.</h3>
+            %endif
             <hr>
           
             <button class="accordion">Export image</button>
