@@ -28,7 +28,7 @@
     <script src="https://github.com/devongovett/blob-stream/releases/download/v0.1.3/blob-stream.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/svg-to-pdfkit/source.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega@5.16.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.15.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.11.1"></script>
 
     <meta charset="utf-8">
@@ -623,7 +623,11 @@
                       .catch(console.warn);
                 </script>
             <% figure_count +=1 %>
-            <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+            %if "Sabin" in reference:
+              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+            %else:
+              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in ${sample}. SNPs and indels called against closest reference highlighted.</h3>
+            %endif
             <hr>
           
             <button class="accordion">Export image</button>
@@ -637,7 +641,7 @@
                 </div>
               </div>
             </div>
-            %if summary_data["Number of mutations"] >= 3:
+            %if summary_data["Number of mutations"] >= 3 or summary_data["Number of mutations"] == 0:
               <div style="width: 90%" id="${reference}_snipit"> 
                 ${data_for_report[reference]["snipit_svg"]}
               </div>  
@@ -663,57 +667,104 @@
               <hr>
             </div>
             <hr>
-          %if 'cooccurrence_info' in data_for_report[reference]:
-            <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
-            <br>
-            %if len(ref_cooccurrence_info) < 4:
-              <div id="co_plot_${reference}" style="width:50%"></div>
-            %else:
-              <div id="co_plot_${reference}" style="width:100%"></div>
-            %endif
-                <script>
-                  var vlSpec_bar = {
+              %if 'cooccurrence_info' in data_for_report[reference]:
+              <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
+              <div class="row">
+                <div class="column" id="coocc1" style="width:50%"></div>
+                <div class="column" id="coocc2" style="width:50%"></div>
+                </div>
+                
+                <script type="text/javascript">
+                  const myData = ${ref_cooccurrence_info};
+                    
+                  vlSpec_coocc1 = {
                     "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-                    "width": "container",
-                    "height": 300,
-                    "datasets": {"co_plot": ${ref_cooccurrence_info}},
-                    "data": {"name": "co_plot"},
-                    "mark": {"type": "bar", "filled": true, 
-                              
-                              "font":"Helvetica Neue",
-                              "fontWeight":0.1},
-                    "encoding": {"x": {"field": "Combination", 
-                                            "title": "Combination",
-                                            "axis": {"grid": false,
-                                                    "labelFont":"Helvetica Neue",
-                                                    "labelFontSize":18,
-                                                    "titleFontSize":18,
-                                                    "labelAngle":0,
-                                                    "titleFont":"Helvetica Neue"
-                                                    }
-                                          },
-                                  "y": {"field": "Percentage",
-                                          "type":"quantitative",
-                                          "title": "Percentage Alt Allele",
-                                          "scale": {"domain": [0, 100]},
-                                          "axis":{"grid": false,
-                                                  "labelFont":"Helvetica Neue",
-                                                  "labelFontSize":18,
-                                                  "titleFontSize":18,
-                                                  "titleFont":"Helvetica Neue"
-                                                  }
-                                          },
-                                  "color": {"value": "#e68781"}
-                                },
-                        "config":{"legend":{"title":false}}
-                      };          
-                    vegaEmbed('#co_plot_${reference}', vlSpec_bar, {renderer: "svg"})
-                          .then(result => console.log(result))
-                          .catch(console.warn);
-                    </script>
-              <% figure_count +=1 %>
-              <h3><strong>Figure ${figure_count}</strong> | Percentage co-occurrence of SNPs called against ${reference_name} reference in ${sample}</h3>
-              <hr>
+                    "data": {"values": myData},
+                    "mark": "rect",
+                    "width": 100,
+                    "height": 100,
+                    "title": {
+                      "fontSize": 16,
+                    },
+                    "encoding": {
+                      "y": {"field": "SNP1", 
+                            "type": "ordinal",
+                            "title": "Variant site",
+                            "axis": {
+                                                "labelFont":"Helvetica Neue",
+                                                "titleFontSize":10,
+                                                "titleFontWeight":400,
+                                                "labelFontWeight":300,
+                                                "titleFont":"Helvetica Neue"}},
+                      "x": {"field": "SNP2", "type": "ordinal",
+                            "title": "Variant site",
+                            "axis": {
+                                                "labelFont":"Helvetica Neue",
+                                                "titleFontSize":10,
+                                                "titleFontWeight":400,
+                                                "labelFontWeight":300,
+                                                "titleFont":"Helvetica Neue"}},
+                      "color": {"type": "quantitative", "field": "PcentAlt",
+                        "scale":{"domain":[0,100], "scheme":"yelloworangered"}}
+                    },
+                    "config": {
+                      "legend":{"labelFontSize":8,
+                                "titleFontWeight":400,
+                                "labelFontWeight":300,
+                                "titleFontSize":10,
+                                "titleFontWeight":300},
+                      "axis": {"grid": true, "tickBand": "extent"}
+                    }
+                  }
+                vegaEmbed('#coocc1', vlSpec_coocc1, {renderer: "svg"})
+                                      .then(result => console.log(result))
+                                      .catch(console.warn);
+                    vlSpec_coocc2 = {
+                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                    "data": {"values": myData},
+                    "mark": "rect",
+                    "width": 100,
+                    "height": 100,
+                    "title": {
+                      "fontSize": 16,
+                    },
+                    "encoding": {
+                      "y": {"field": "SNP1", 
+                            "type": "ordinal",
+                            "title": "Variant site",
+                            "axis": {
+                                                "labelFont":"Helvetica Neue",
+                                                "titleFontSize":10,
+                                                "titleFontWeight":400,
+                                                "labelFontWeight":300,
+                                                "titleFont":"Helvetica Neue"}},
+                      "x": {"field": "SNP2", "type": "ordinal",
+                            "title": "Variant site",
+                            "axis": {
+                                                "labelFont":"Helvetica Neue",
+                                                "titleFontSize":10,
+                                                "titleFontWeight":400,
+                                                "labelFontWeight":300,
+                                                "titleFont":"Helvetica Neue"}},
+                      "color": {"type": "quantitative", "field": "PcentRef",
+                        "scale":{"domain":[0,100], "scheme":"yelloworangered"}}
+                    },
+                    "config": {
+                      "legend":{"labelFontSize":8,
+                                "titleFontWeight":400,
+                                "labelFontWeight":300,
+                                "titleFontSize":10,
+                                "titleFontWeight":300},
+                      "axis": {"grid": true, "tickBand": "extent"}
+                    }
+                  };
+                vegaEmbed('#coocc2', vlSpec_coocc2, {renderer: "svg"})
+                                      .then(result => console.log(result))
+                                      .catch(console.warn);
+        </script>
+        <% figure_count +=1 %>
+        <h3><strong>Figure ${figure_count}</strong> | Co-occurrence matrix of Reference and Variant alleles called against ${reference_name} reference in ${sample}. This is the percentage of bases that cover those sites in the mapping file that are of a high quality (>13) and that are either the reference allele or the allele of the variant called at that site.</h3>
+        <hr>
           %endif
 
         %endfor

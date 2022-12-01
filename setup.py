@@ -16,12 +16,12 @@ setup(name='piranha',
             "piranha/scripts/piranha_wg_2tile.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/variation.smk",
-            "piranha/scripts/co_occurrence.smk",
             "piranha/scripts/snipit.smk"
             ],
       package_data={"piranha":["data/*"]},
       install_requires=[
             "mako==1.2",
+            "pandas~=1.5",
             "snipit",
             "biopython",
             "medaka>=1.7.1"
