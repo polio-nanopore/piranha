@@ -27,7 +27,6 @@ def get_snipit(reference,snipit_file):
 
 def make_sample_report(report_to_generate,
                         variation_file,
-                        co_occurrence_file,
                         consensus_seqs,
                         masked_variants,
                         barcode,
@@ -101,19 +100,6 @@ def make_sample_report(report_to_generate,
         for row in reader:
             data_for_report[row[KEY_REFERENCE]][KEY_MASKED_SITES].append(int(row[KEY_SITE]))
     
-    # with open(co_occurrence_file,"r") as f:
-    #     co_occurrence_data = json.load(f)
-    #     for reference in co_occurrence_data:
-    #         comb_data = []
-    #         #{"Poliovirus3-Sabin_AY184221": {"17T;160A": 42, "17T;160G": 48}}
-    #         for comb in co_occurrence_data[reference]:
-    #             comb_info = {}
-    #             comb_info["Combination"] = comb
-    #             comb_info["Percentage"] = co_occurrence_data[reference][comb]
-    #             comb_data.append(comb_info)
-
-    #         data_for_report[reference][KEY_COOCCURRENCE_INFO] = comb_data
-
     with open(variation_file,"r") as f:
         variation_json = json.load(f)
         for reference in variation_json:
