@@ -6,6 +6,7 @@ import csv
 from itertools import groupby, count
 import pysam
 import pandas as pd
+import json
 # from cigar import Cigar
 
 from piranha.utils.config import *
@@ -276,5 +277,6 @@ def calculate_coocc_json(var_dict,read_vars):
     merged["PcentAlt"] = round(100* (merged["Alt"] / merged["Total"]),0)
     merged["PcentRef"] = round(100* (merged["Ref"] / merged["Total"]),0)
     coocurrance =  merged.to_json(orient="records")
+    coocurrance_json_string = json.loads(coocurrance)
     
-    return coocurrance
+    return coocurrance_json_string
