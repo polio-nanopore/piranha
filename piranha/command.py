@@ -66,6 +66,7 @@ def main(sysargs = sys.argv[1:]):
     misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUN_NAME}")
     misc_group.add_argument('--username',action="store",help="Username to appear in report. Default: no user name")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report. Default: no institute name")
+    misc_group.add_argument('--orientation',action="store",help="Orientation of barcodes in wells on a 96-well plate. If `well` is supplied as a column in the barcode.csv, this default orientation will be overwritten. Default: `horizontal`. Options: `horizontal` or `vertical`.")
     misc_group.add_argument('-t', '--threads', action='store',dest="threads",type=int,help="Number of threads. Default: 1")
     misc_group.add_argument("--verbose",action="store_true",help="Print lots of stuff to screen")
     misc_group.add_argument("-v","--version", action='version', version=f"piranha {__version__}")
@@ -95,6 +96,7 @@ def main(sysargs = sys.argv[1:]):
     # Checks access to package data and grabs the snakefile
     analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
     data_install_checks.check_install(args.language,config)
+    misc.add_check_valid_arg(KEY_ORIENTATION,args.orientation,VALID_ORIENTATION,config)
 
     snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
     # Threads and verbosity to config
