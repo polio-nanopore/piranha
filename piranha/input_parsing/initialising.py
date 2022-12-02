@@ -45,6 +45,7 @@ def get_defaults():
                     
                     KEY_ALL_METADATA:False,
                     # misc defaults
+                    KEY_ORIENTATION:VALUE_ORIENTATION,
                     KEY_LANGUAGE:VALUE_LANGUAGE,
                     KEY_RUN_NAME:VALUE_RUN_NAME,
                     KEY_USERNAME:"",
