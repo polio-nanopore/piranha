@@ -251,6 +251,109 @@ def make_detailed_csv(data_for_report,barcodes_csv,output):
         
             writer.writerow(to_write)
 
+def well_to_dict(barcode_well_map,j,i,c):
+    if i<10:
+        well = f"{j}0{i}"
+        
+    else:
+        well = f"{j}{i}"
+        
+    if c<10:
+        barcode_well_map[well] = f"barcode0{c}"
+    else:
+        barcode_well_map[well] = f"barcode{c}"
+        
+def assign_bcode_to_well(orientation):
+    barcode_well_map = {}
+    c = 0
+    if orientation == "vertical":
+        for i in range(1,13):
+            for j in ["A","B","C","D","E","F","G","H"]:
+                c +=1
+                well_to_dict(barcode_well_map,j,i,c)
+                
+    elif orientation == "horizontal":
+        for j in ["A","B","C","D","E","F","G","H"]:
+            for i in range(1,13):
+                c +=1
+                well_to_dict(barcode_well_map,j,i,c)
+                
+                
+    return barcode_well_map
+                
+
+def barcode_to_well(barcode_csv,orientation):
+    
+    barcode_well_map = {}
+    with open(barcode_csv,"r") as f:
+        reader = csv.DictReader(f)
+        if "well" in reader.fieldnames:
+            for row in reader:
+                barcode_well_map[row["well"]]=row["barcode"]
+        else:
+            barcode_well_map = assign_bcode_to_well(orientation)
+            
+        return barcode_well_map
+            
+        
+
+
+def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
+    
+    
+    barcode_well_map = barcode_to_well(barcode_csv,orientation)   
+    wells_to_json = []
+    
+    
+    all_positive_types = []
+    for i in positives_for_plate_viz:
+        types = positives_for_plate_viz[i].keys()
+        for t in types:
+            all_positive_types.append(t)
+    all_positive_types = sorted(all_positive_types)
+            
+    
+    for j in ["A","B","C","D","E","F","G","H"]:
+        for i in range(1,13):
+            if i<10:
+                well = f"{j}0{i}"
+            else:
+                well = f"{j}{i}"
+            info = {
+                "x":i,
+                "y":j
+            }
+            
+            pos_type = ""
+            detailed_pos = []
+            info["All"] = "Absent"
+            if well in barcode_well_map:
+                
+                barcode = barcode_well_map[well]
+                info["Barcode"] = barcode
+                
+                
+                if barcode in positives_for_plate_viz:
+                    positives = positives_for_plate_viz[barcode]
+                    info["All"] = "Present"
+                    for i in all_positive_types:
+                        if i in positives:
+                            info[i] = "Present"
+                        else:
+                            info[i] = "Absent"
+                else:
+                    for i in all_positive_types:
+                        info[i] = "Absent"
+            else:
+                info["Barcode"] = ""
+                
+            for pos in detailed_pos:
+                wells_to_json.append(info)
+            
+            if not detailed_pos:
+                wells_to_json.append(info)
+            
+    return json.dumps(wells_to_json), all_positive_types
 
 def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
     
@@ -268,7 +371,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     
     # collate data for tables in the report
     data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
-    
+    positives_for_plate_viz = collections.defaultdict(dict)
+
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -302,9 +406,12 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     if col not in [KEY_SAMPLE,KEY_BARCODE]:
                         total_reads+=int(row[col])
 
+                        if int(row[col])>config[KEY_MIN_READS]:
+                            positives_for_plate_viz[row[KEY_BARCODE]][col] = int(row[col])
+                            
                         if col not in ["NonPolioEV","unmapped"]:
                             total_polio_reads+= int(row[col])
-                
+
                 if total_polio_reads>0:
                     proportion_npev = 100*(int(row["NonPolioEV"])/total_reads)
                     if proportion_npev > config[KEY_MIN_PCENT]:
@@ -312,6 +419,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
 
     # to check if there are identical seqs in the run
     identical_seq_check = collections.defaultdict(list)
+
+    plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION])
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         identical_seq_check[str(record.seq)].append(record.description)
@@ -396,6 +505,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     run_name=config[KEY_RUN_NAME],
                     version = __version__,
                     show_control_table = show_control_table,
+                    plate_json = plate_json,
+                    positive_types = positive_types,
                     data_for_report = data_for_report,
                     flagged_seqs = flagged_seqs,
                     detailed_csv_out = detailed_csv_out,

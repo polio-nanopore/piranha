@@ -31,6 +31,12 @@ def add_col_to_metadata(new_column_name, new_column_dict, metadata, new_metadata
 
                 writer.writerow(new_row)
 
+def add_check_valid_arg(KEY,arg,valid_values,config):
+    add_arg_to_config(KEY,arg,config)
+    if config[KEY] not in valid_values:
+        sys.stderr.write(cyan(f'{config[KEY]} not a valid option for {KEY}. Please specify one of `{"`, `".join(valid_values)}`\n'))
+        sys.exit(-1)
+
 def check_date_format(to_check, line_count, header):
 
     date_format = "%Y-%m-%d"
