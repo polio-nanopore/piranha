@@ -305,12 +305,12 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
     wells_to_json = []
     
     
-    all_positive_types = []
+    all_positive_types = set()
     for i in positives_for_plate_viz:
         types = positives_for_plate_viz[i].keys()
         for t in types:
-            all_positive_types.append(t)
-    all_positive_types = sorted(all_positive_types)
+            all_positive_types.add(t)
+    all_positive_types = sorted(list(all_positive_types))
             
     
     for j in ["A","B","C","D","E","F","G","H"]:
