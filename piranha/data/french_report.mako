@@ -431,6 +431,60 @@
     </p>
     %endif  
       <br>
+
+
+      <div id="plateViz"></div>
+ <script>
+        var vlSpec_plate = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+          "width": 450,
+          "height": 350,
+          "data": {"values": ${plate_json}},
+        "params": [
+            {"name":"filterBy",
+              "value":"All",
+              "bind":{"input":"select",
+                      "options":${positive_types},
+                      "labels":${positive_types},
+                      "name":"Filter by: "
+                     }}
+          ],
+        "layer":[
+              {
+                "transform": [{"calculate": "datum[filterBy]", "as": "EV reads present"}],
+                "mark": {"type":"circle","size":500},
+                "encoding": {
+                  "x": {"field": "x", "type": "nominal",
+                  "title": "",
+                          "axis": {"grid": false,
+                                  "labelFont":"Helvetica Neue",
+                                  "labelFontSize":18,
+                                  "labelAngle": 0
+                                  }},
+                  "y": {"field": "y", "type": "ordinal",
+                  "title": "",
+                          "axis": {"grid": false,
+                                  "labelFont":"Helvetica Neue",
+                                  "labelFontSize":18
+                                  }},
+                  "fill": {"field": "EV reads present"},
+                "tooltip": [
+                  {"field": "Barcode", "type": "nominal"},
+                  % for t in positive_types:
+                    {"field": "${t}", "type": "nominal"},
+                  % endfor
+                ]
+                }
+              }]
+          };
+                vegaEmbed('#plateViz', vlSpec_plate, {renderer: "svg"})
+                      .then(result => console.log(result))
+                      .catch(console.warn);
+      </script>
+      </div> 
+      <h3><strong>Figure 1</strong> | Emplacement du barcode sur la plaque 96 puits</h3>
+      <br>
+
       <h3><strong>Tableau 1</strong> | Informations récapitulatives sur l'échantillon</h3>
       <button class="accordion">Exporter le tableau</button>
         <div class="panel">
