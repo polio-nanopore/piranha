@@ -661,7 +661,6 @@
           }
     </script>
 
-
 <div id="plateViz"></div>
 <script>
        var vlSpec_plate = {
@@ -710,9 +709,10 @@
                      .then(result => console.log(result))
                      .catch(console.warn);
      </script>
-     </div> 
      <h3><strong>Figure 1</strong> | Emplacement du barcode sur la plaque 96 puits</h3>
      <br>
+    </div>
+
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>

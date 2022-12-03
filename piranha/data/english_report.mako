@@ -698,10 +698,11 @@
                      .then(result => console.log(result))
                      .catch(console.warn);
      </script>
-     </div> 
+     
      <h3><strong>Figure 1</strong> | Barcodes location on 96-well plate </h3>
      <br>
-     
+    </div> 
+
 
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
