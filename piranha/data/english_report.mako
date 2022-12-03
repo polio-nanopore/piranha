@@ -451,7 +451,7 @@
           ],
         "layer":[
               {
-                "transform": [{"calculate": "datum[filterBy]", "as": "Reads present"}],
+                "transform": [{"calculate": "datum[filterBy]", "as": "EV reads present"}],
                 "mark": {"type":"circle","size":500},
                 "encoding": {
                   "x": {"field": "x", "type": "nominal",
@@ -467,7 +467,7 @@
                                   "labelFont":"Helvetica Neue",
                                   "labelFontSize":18
                                   }},
-                  "fill": {"field": "Reads present"},
+                  "fill": {"field": "EV reads present"},
                 "tooltip": [
                   {"field": "Barcode", "type": "nominal"},
                   % for t in positive_types:
