@@ -306,6 +306,7 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
     
     
     all_positive_types = set()
+    all_positive_types.add("All")
     for i in positives_for_plate_viz:
         types = positives_for_plate_viz[i].keys()
         for t in types:
@@ -321,12 +322,13 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
                 well = f"{j}{i}"
             info = {
                 "x":i,
-                "y":j
+                "y":j,
+                "All":"Absent"
             }
             
             pos_type = ""
             detailed_pos = []
-            info["All"] = "Absent"
+
             if well in barcode_well_map:
                 
                 barcode = barcode_well_map[well]
@@ -347,11 +349,7 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
             else:
                 info["Barcode"] = ""
                 
-            for pos in detailed_pos:
-                wells_to_json.append(info)
-            
-            if not detailed_pos:
-                wells_to_json.append(info)
+            wells_to_json.append(info)
             
     return json.dumps(wells_to_json), all_positive_types
 
