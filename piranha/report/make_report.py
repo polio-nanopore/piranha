@@ -327,7 +327,6 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
             }
             
             pos_type = ""
-            detailed_pos = []
 
             if well in barcode_well_map:
                 
@@ -337,9 +336,10 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
                 
                 if barcode in positives_for_plate_viz:
                     positives = positives_for_plate_viz[barcode]
-                    info["All"] = "Present"
+                    
                     for i in all_positive_types:
                         if i in positives:
+                            info["All"] = "Present"
                             info[i] = "Present"
                         else:
                             info[i] = "Absent"
