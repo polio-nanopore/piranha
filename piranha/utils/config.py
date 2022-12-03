@@ -35,6 +35,7 @@ KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
 KEY_DATE="date"
 KEY_EPID="EPID"
+KEY_WELL = "well"
 KEY_ALL_METADATA="all_metadata_to_header"
 KEY_REFERENCE = "reference"
 KEY_NUM_READS = "num_reads"
@@ -43,6 +44,7 @@ KEY_REFERENCE_GROUP = "reference_group"
 KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
+
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"
@@ -60,6 +62,7 @@ KEY_COMPOSITION_TABLE="composition_table"
 KEY_COMPOSITION_TABLE_HEADER="composition_table_header"
 KEY_SUMMARY_TABLE_HEADER="summary_table_header"
 KEY_CONTROL_STATUS="control_status"
+KEY_ORIENTATION="orientation"
 
 # MISC KEYS
 KEY_USERNAME="username"
@@ -119,7 +122,8 @@ CALL_THRESHOLD_DICT = {
 
 
 # report defaults
-
+VALUE_ORIENTATION="vertical"
+VALID_ORIENTATION=["vertical","horizontal"]
 VALUE_RUN_NAME="Nanopore sequencing"
 VALUE_COLOUR_MAP=["#e68781","#476970","#f5eece"]
 VALUE_COLOUR_THEME="#e68781"

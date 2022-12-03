@@ -29,8 +29,8 @@
     <script src="https://cdn.jsdelivr.net/npm/pdfkit/js/pdfkit.min.js"></script>
     <script src="https://github.com/devongovett/blob-stream/releases/download/v0.1.3/blob-stream.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/svg-to-pdfkit/source.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.16.0"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.11.1"></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -431,7 +431,6 @@
     </p>
     %endif  
       <br>
-
       <h3><strong>Table 1</strong> | Sample summary information </h3>
       <button class="accordion">Export table</button>
         <div class="panel">
@@ -651,6 +650,60 @@
             });
           }
     </script>
+<div id="plateViz"></div>
+<script>
+       var vlSpec_plate = {
+         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+         "width": 450,
+         "height": 350,
+         "data": {"values": ${plate_json}},
+       "params": [
+           {"name":"filterBy",
+             "value":"All",
+             "bind":{"input":"select",
+                     "options":${positive_types},
+                     "labels":${positive_types},
+                     "name":"Filter by: "
+                    }}
+         ],
+       "layer":[
+             {
+               "transform": [{"calculate": "datum[filterBy]", "as": "EV reads present"}],
+               "mark": {"type":"circle","size":500},
+               "encoding": {
+                 "x": {"field": "x", "type": "nominal",
+                 "title": "",
+                         "axis": {"grid": false,
+                                 "labelFont":"Helvetica Neue",
+                                 "labelFontSize":18,
+                                 "labelAngle": 0
+                                 }},
+                 "y": {"field": "y", "type": "ordinal",
+                 "title": "",
+                         "axis": {"grid": false,
+                                 "labelFont":"Helvetica Neue",
+                                 "labelFontSize":18
+                                 }},
+                 "fill": {"field": "EV reads present"},
+               "tooltip": [
+                 {"field": "Barcode", "type": "nominal"},
+                 % for t in positive_types:
+                   {"field": "${t}", "type": "nominal"},
+                 % endfor
+               ]
+               }
+             }]
+         };
+               vegaEmbed('#plateViz', vlSpec_plate, {renderer: "svg"})
+                     .then(result => console.log(result))
+                     .catch(console.warn);
+     </script>
+     
+     <h3><strong>Figure 1</strong> | Barcodes location on 96-well plate </h3>
+     <br>
+    </div> 
+
+
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>
