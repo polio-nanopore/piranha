@@ -563,13 +563,14 @@
           <% set_count = 0 %>
           % for set in flagged_seqs:
             <% set_count += 1 %>
+            <tr>
               <td>${set_count}</td>
-              
               <td style="overflow:scroll;">
                 % for seqid in set:
                   ${seqid}<br>
                 %endfor
               </td>
+            </tr>
 
           % endfor
         </tbody>

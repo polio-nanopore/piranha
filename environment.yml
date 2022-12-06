@@ -6,7 +6,6 @@ channels:
 dependencies:
   - python<3.10
   - coreutils=9.1
-  - gofasta
   - mafft
   - minimap2=2.17
   - samtools=1.11
