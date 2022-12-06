@@ -442,7 +442,7 @@ The variation figure shows the noise within the data in contrast to the variants
 This snipit plot ([https://github.com/aineniamh/snipit](https://github.com/aineniamh/snipit)) highlights the consensus differences relative to the reference. 
 
 ### Figure | Percentage co-occurrence of SNPs called against reference
-This plot calculates the percentage of reads that share the variants called against the reference, and can give a noisy estimate of haplotypes present within the sample.
+This plot calculates the percentage of reads that share the variants called against the reference, and can give a noisy estimate of haplotypes present within the sample. The calculation only takes bases of high-quality into account, so counts reflect the level of support rather than the level of coverage. For each variant, the percentage displayed is a function of the total high quality bases at that site, and for each variant the cooccurance is a percentage of high quality bases at each site in turn that share both variants. This figure can give an idea if mixed populations are present within the sample. 
 
 # Full usage
 ```
