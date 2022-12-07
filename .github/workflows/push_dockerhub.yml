@@ -38,3 +38,5 @@ jobs:
           docker push polionanopore/piranha:latest
           docker tag polionanopore/piranha:latest polionanopore/piranha:${{ github.event.release.tag_name }}
           docker push polionanopore/piranha:${{ github.event.release.tag_name }}
+          docker tag polionanopore/piranha:latest coreyansley/artifice_piranha:latest
+          docker push coreyansley/artifice_piranha:latest
