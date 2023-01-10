@@ -124,6 +124,7 @@ Example:
 - A common issue can be related to internet connectivity. If a download has failed because of a break in internet, I suggest running through the commands again and just try again. `mamba` and `conda` can cache the files already downloaded, so often you can make progress even if internet connectivity is an issue.
 - Similarly, if you have a laptop with not enough storage space, installation and download can fail. To solve this, try clear some space on your machine and try again.
 - If you're still having trouble installing via the command line, piranha can be installed using the ARTIFICE GUI (linked above).
+- Please post an issue to the GitHub if there are further unresolved issues.
 
 
 ## Updating piranha
