@@ -133,6 +133,16 @@ Example:
 - Ensure you're in the piranha environment: `conda activate piranha`
 - Install the changes: `pip install .`
 
+If there has been a major change to piranha, it's possible the environment will need to be updated as follows:
+- Change directory to the piranha repository: `cd piranha`
+- Pull the latest changes from GitHub: `git pull`
+- Ensure you're in the piranha environment: `conda activate piranha`
+- Update the environment: `mamba env update -f environment.yml`
+
+Piranha is also available now on bioconda and can be installed with
+
+`mamba install -c bioconda piranha-polio`
+
 <br>
 <h2>Dependencies If <strong>Not</strong> Installing Using the Conda Environment</h2>
 
