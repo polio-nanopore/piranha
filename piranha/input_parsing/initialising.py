@@ -39,7 +39,8 @@ def get_defaults():
 
                     KEY_MIN_READ_LENGTH:READ_LENGTH_DEFAULT_VP1[0],
                     KEY_MAX_READ_LENGTH:READ_LENGTH_DEFAULT_VP1[1],
-                    
+                    KEY_MIN_MAP_QUALITY:VALUE_MIN_MAP_QUALITY,
+
                     KEY_MEDAKA_MODEL:VALUE_DEFAULT_MEDAKA_MODEL,
                     KEY_PRIMER_LENGTH:VALUE_PRIMER_LENGTH,
                     

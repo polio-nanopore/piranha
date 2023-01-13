@@ -59,24 +59,25 @@ def parse_line(line,padding):
     values["read_hit_start"] = int(tokens[2])+padding
     values["read_hit_end"] = int(tokens[3])-padding
     values["direction"] = tokens[4]
-    values["ref_hit"], values["ref_len"], values["coord_start"], values["coord_end"], values["matches"], values["aln_block_len"] = tokens[5:11]
+    values["ref_hit"], values["ref_len"], values["coord_start"], values["coord_end"], values["matches"], values["aln_block_len"],values["map_quality"] = tokens[5:12]
+    
     values["ref_len"] = int(values["ref_len"])
     values["aln_block_len"] = int(values["aln_block_len"])
 
     return values
 
-def add_to_hit_dict(hits, mapping,min_map_len,unmapped):
+def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
     if mapping["direction"] == "+":
         start = mapping["read_hit_start"]
         end = mapping["read_hit_end"]
-        if int(mapping["aln_block_len"]) > min_map_len:
+        if int(mapping["aln_block_len"]) > min_map_len and int(mapping["map_quality"]) > min_map_quality:
             hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
         else:
             unmapped+=1
     elif mapping["direction"] == "-":
         start = mapping["read_hit_end"]
         end = mapping["read_hit_start"]
-        if int(mapping["aln_block_len"]) > min_map_len:
+        if int(mapping["aln_block_len"]) > min_map_len and int(mapping["map_quality"]) > min_map_quality:
             hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
         else:
             unmapped+=1
@@ -86,7 +87,7 @@ def add_to_hit_dict(hits, mapping,min_map_len,unmapped):
 
 
 
-def group_hits(paf_file,padding,ref_name_map,len_filter):
+def group_hits(paf_file,padding,ref_name_map,len_filter,min_map_quality):
     total_reads= 0
     ambiguous =0
     unmapped = 0
@@ -111,7 +112,7 @@ def group_hits(paf_file,padding,ref_name_map,len_filter):
 
                     else:
 
-                        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,unmapped)
+                        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,min_map_quality,unmapped)
                         total_reads +=1
 
                     mappings = []
@@ -120,7 +121,7 @@ def group_hits(paf_file,padding,ref_name_map,len_filter):
             else:
                 last_mapping = mapping
 
-        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,unmapped)
+        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,min_map_quality,unmapped)
         total_reads +=1
     ref_hits = collections.defaultdict(list)
     not_mapped = 0
@@ -192,6 +193,7 @@ def parse_paf_file(paf_file,
                     references_sequences,
                     barcode,
                     analysis_mode,
+                    min_map_quality,
                     config):
     
     if is_non_zero_file(paf_file):
@@ -204,7 +206,7 @@ def parse_paf_file(paf_file,
         
         len_filter = 0.4*config[KEY_MIN_READ_LENGTH]
 
-        ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,padding,ref_name_map,len_filter)
+        ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,padding,ref_name_map,len_filter,min_map_quality)
         print(f"Barcode: {barcode}")
         print(green("Unmapped:"),unmapped)
         print(green("Ambiguous mapping:"),ambiguous)
