@@ -84,8 +84,17 @@ def header(v):
                    **** Automating Nanopore Haplotype Analysis ****
                 """)+green(f"""
                                         {v}""")+green("""
-                        ****************************************
-                                                                
+                        ****************************************""")+("""
+                             Developed by researchers at""")+green(f"""
+                               University of Edinburgh""")+("""
+                                in collaboration with""")+green(f"""
+                           Imperial College London & NIBSC""")+("""
+                                      Supported by:""")+green(f"""
+                    ARTIC Network Wellcome Trust Collaborators Award
+                                    (206298/Z/17/Z)
+                           Bill and Melinda Gates Foundation 
+                                    (OPP1207299)
+
 \n"""))
 
 def preamble(v):
