@@ -27,6 +27,7 @@ KEY_MIN_READ_LENGTH = "min_read_length"
 KEY_MAX_READ_LENGTH = "max_read_length"
 KEY_MIN_READS = "min_read_depth"
 KEY_MIN_PCENT = "min_read_pcent"
+KEY_MIN_MAP_QUALITY = "min_map_quality"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
 KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
@@ -106,6 +107,7 @@ VALUE_ANALYSIS_MODE_WG_2TILE = "wg_2tile"
 READ_LENGTH_DEFAULT_VP1 = [1000,1300]
 READ_LENGTH_DEFAULT_WG_2TILE = [3400,5200]
 VALUE_PRIMER_LENGTH = 30
+VALUE_MIN_MAP_QUALITY = 50
 
 VALUE_DEFAULT_MEDAKA_MODEL="r941_min_hac_variant_g507"
 

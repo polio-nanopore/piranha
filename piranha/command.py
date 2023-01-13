@@ -45,6 +45,7 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run. Options: `vp1`. Default: `{VALUE_ANALYSIS_MODE}`")
     analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
     analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
+    analysis_group.add_argument("-q","--min-map-quality",action="store",type=int,help=f"Minimum mapping quality. Default: {VALUE_MIN_MAP_QUALITY}")
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help=f"Minimum read length. Default: {READ_LENGTH_DEFAULT_VP1[0]}")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help=f"Maximum read length. Default: {READ_LENGTH_DEFAULT_VP1[1]}")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help=f"Minimum read depth required for consensus generation. Default: {VALUE_MIN_READS}")
@@ -105,7 +106,7 @@ def main(sysargs = sys.argv[1:]):
     # Sort out where the query info is coming from, csv or id string, optional fasta seqs.
     # Checks if they're real files, of the right format and that QC args sensible values.
     analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
-    analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,args.primer_length,config)
+    analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,args.primer_length,args.min_map_quality,config)
     misc.add_arg_to_config(KEY_ALL_METADATA,args.all_metadata_to_header,config)
 
     input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
