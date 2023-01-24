@@ -138,9 +138,12 @@ def parse_variant_file(var_file):
             if variants != ['']:
                 for var in variants:
                     pos,snp = var.split(":")
-                    ref,alt = snp
-
-                    var_dict[row[KEY_REFERENCE]][int(pos)] = [ref,alt]
+                    # either snp= pos:GT or indel = pos:{prefix}{len(i)}"
+                    if snp.startswith("ins") or snp.startswith("del"):
+                        var_dict[row[KEY_REFERENCE]][int(pos)] = [snp]
+                    else:
+                        ref,alt = snp
+                        var_dict[row[KEY_REFERENCE]][int(pos)] = [ref,alt]
 
     return var_dict
 
@@ -231,43 +234,42 @@ def calculate_coocc_json(var_dict,read_vars):
     binary_alts = collections.defaultdict(list)
     binary_refs = collections.defaultdict(list)
     
-    
+    coocc_header = []
     total_hq_allele = collections.Counter()
     for position in sorted(var_dict):
-        
-        ref_allele = var_dict[position][0]
-        alt_allele = var_dict[position][1]
-        
-        for read in read_vars:
-            if position in read_vars[read]:
-                total_hq_allele[position] +=1
-                variant = read_vars[read][position]
-                if variant == ref_allele:
-                    binary_refs[read].append(1)
-                    binary_alts[read].append(0)
-                elif variant == alt_allele:
-                    binary_refs[read].append(0)
-                    binary_alts[read].append(1)
-#                     print(variant,alt_allele)
-                else:
-                    #noise/sub_cns var
-#                     print(variant,alt_allele,ref_allele)
-                    binary_refs[read].append(0)
-                    binary_alts[read].append(0)
+        if len(var_dict[position]) == 2:
+            coocc_header.append(position)
+            ref_allele = var_dict[position][0]
+            alt_allele = var_dict[position][1]
             
-            else:
-                binary_refs[read].append(0)
-                binary_alts[read].append(0)
+            for read in read_vars:
+                if position in read_vars[read]:
+                    total_hq_allele[position] +=1
+                    variant = read_vars[read][position]
+                    if variant == ref_allele:
+                        binary_refs[read].append(1)
+                        binary_alts[read].append(0)
+                    elif variant == alt_allele:
+                        binary_refs[read].append(0)
+                        binary_alts[read].append(1)
+    #                     print(variant,alt_allele)
+                    else:
+                        #noise/sub_cns var
+    #                     print(variant,alt_allele,ref_allele)
+                        binary_refs[read].append(0)
+                        binary_alts[read].append(0)
+                
+                else:
+                    binary_refs[read].append(0)
+                    binary_alts[read].append(0)
+        
     
-    header = []
-    for i in var_dict:
-        header.append(i)
 
-    df_refs = pd.DataFrame.from_dict(binary_refs, orient='index',columns=header)
+    df_refs = pd.DataFrame.from_dict(binary_refs, orient='index',columns=coocc_header)
     coocc_refs= df_refs.T.dot(df_refs)
     long_refs = coocc_refs.stack().reset_index().set_axis('SNP1 SNP2 Ref'.split(), axis=1)
 
-    df_alts = pd.DataFrame.from_dict(binary_alts, orient='index',columns=header)
+    df_alts = pd.DataFrame.from_dict(binary_alts, orient='index',columns=coocc_header)
     coocc_alts= df_alts.T.dot(df_alts)
     long_alts = coocc_alts.stack().reset_index().set_axis('SNP1 SNP2 Alt'.split(), axis=1)
     
