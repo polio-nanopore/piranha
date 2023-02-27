@@ -484,7 +484,7 @@
           <table class="display nowrap" id="myTable">
             <thead>
               <tr>
-              %for col in ["Échantillon","Barcode","Groupe de référence"]:
+              %for col in ["L'échantillon","Code à barre","Groupe de référence"]:
               <th>${col}</th>
               %endfor
               </tr>

@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>${run_name} report</title>
+    <title>${run_name} sequencing report</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -414,7 +414,7 @@
         <hr>
       </header>
         
-      <h1>${run_name} report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
+      <h1>${run_name} sequencing report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
       %if config["username"]!="":
         <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       %endif
