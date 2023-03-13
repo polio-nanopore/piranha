@@ -19,6 +19,14 @@ def check_if_int(key,config):
             sys.stderr.write(cyan(f"`{key}` must be numerical.\n"))
             sys.exit(-1)
 
+def check_if_float(key,config):
+    if config[key]:
+        try:
+            config[key] = float(config[key])
+        except:
+            sys.stderr.write(cyan(f"`{key}` must be numerical.\n"))
+            sys.exit(-1)
+
 def get_available_medaka_models():
     models = []
     result = subprocess.run(["medaka", "tools", "list_models"],stdout=subprocess.PIPE)
@@ -52,8 +60,10 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     misc.add_arg_to_config(KEY_PRIMER_LENGTH,primer_length,config)
     misc.add_arg_to_config(KEY_MIN_MAP_QUALITY,min_map_quality,config)
 
-    for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_PCENT]:
+    for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS]:
         check_if_int(key,config)
+    
+    check_if_float(KEY_MIN_PCENT,config)
 
 def sample_type(sample_type_arg,config):
     # if command line arg, overwrite config value
