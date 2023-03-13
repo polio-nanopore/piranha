@@ -5,6 +5,7 @@ import sys
 import yaml
 import collections
 import csv
+from Bio import SeqIO
 
 from piranha.utils import misc
 
@@ -102,6 +103,24 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
 
     misc.add_file_to_config(KEY_REFERENCE_SEQUENCES,reference_sequences,config)
     misc.check_path_exists(config[KEY_REFERENCE_SEQUENCES])
+
+    #check they have unique identifiers
+    seq_ids = collections.Counter()
+    for record in SeqIO.parse(config[KEY_REFERENCE_SEQUENCES],"fasta"):
+        seq_ids[record.id]+=1
+    
+    more_than_once = []
+    for seq in seq_ids:
+        if seq_ids[seq]>1:
+            more_than_once.append(seq)
+    print_str = "\n - ".join(more_than_once)
+    if len(more_than_once)>0:
+        sys.stderr.write(cyan(f"\nReference fasta file contains duplicate sequence IDs:\n"))
+        sys.stderr.write(f" - ")
+        sys.stderr.write(f"{print_str}\n")
+        sys.stderr.write(cyan(f"Please remove duplicates from file and run again.\n"))
+        sys.exit(-1)
+
 
 def control_group_parsing(positive_control, negative_control, config):
     misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)

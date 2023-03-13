@@ -161,7 +161,7 @@ REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
 REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
-valid_analysis_modes = ["vp1","wg_2tile"]
+valid_analysis_modes = ["vp1","panEV","wg"]
 valid_sample_types = ["stool","environmental"]
 
 dependency_list = ["minimap2","snakemake","medaka",]
