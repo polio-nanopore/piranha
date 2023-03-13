@@ -481,7 +481,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     data_for_report[KEY_CONTROL_STATUS] = control_status
     
     # composition table header
-    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
+    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
     else:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
