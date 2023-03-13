@@ -102,10 +102,18 @@ VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","
 VALUE_SAMPLE_TYPE = "stool"
 VALUE_ANALYSIS_MODE = "vp1"
 VALUE_ANALYSIS_MODE_VP1 = "vp1"
-VALUE_ANALYSIS_MODE_WG_2TILE = "wg_2tile"
+VALUE_ANALYSIS_MODE_WG = "wg"
+VALUE_ANALYSIS_MODE_PANEV = "panev"
 
-READ_LENGTH_DEFAULT_VP1 = [1000,1300]
-READ_LENGTH_DEFAULT_WG_2TILE = [3400,5200]
+READ_LENGTH_DICT = {
+    VALUE_ANALYSIS_MODE_WG:[3400,5200],
+    VALUE_ANALYSIS_MODE_VP1: [1000,1300],
+    VALUE_ANALYSIS_MODE_PANEV:[3000,4500]
+}
+
+# READ_LENGTH_DEFAULT_VP1 = [1000,1300]
+# READ_LENGTH_DEFAULT_PANEV = [3000,4500]
+# READ_LENGTH_DEFAULT_WG = [3400,5200]
 VALUE_PRIMER_LENGTH = 30
 VALUE_MIN_MAP_QUALITY = 50
 
@@ -161,7 +169,7 @@ REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
 REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
-valid_analysis_modes = ["vp1","panEV","wg"]
+valid_analysis_modes = ["vp1","panev","wg"]
 valid_sample_types = ["stool","environmental"]
 
 dependency_list = ["minimap2","snakemake","medaka",]

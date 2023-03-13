@@ -83,13 +83,12 @@ def analysis_mode(analysis_mode_arg,config):
         sys.stderr.write(cyan(f"`{KEY_ANALYSIS_MODE}` must be one of {error_str}.\n"))
         sys.exit(-1)
 
-    # known issue with this: if these values get overwritten by an input config file, the defaults will override them
-    analysis_mode = config[KEY_ANALYSIS_MODE]
-    if analysis_mode == VALUE_ANALYSIS_MODE_WG_2TILE and (config[KEY_MIN_READ_LENGTH]==READ_LENGTH_DEFAULT_VP1[0] and config[KEY_MIN_READ_LENGTH]==READ_LENGTH_DEFAULT_VP1[1]):
-        config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DEFAULT_WG_2TILE[0]
-        config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DEFAULT_WG_2TILE[1]
+    #must do this before parsing args for min and max read len
+    if config[KEY_ANALYSIS_MODE] in READ_LENGTH_DICT:
+        config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][0]
+        config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][1]
 
-    # print(config[KEY_MIN_READ_LENGTH],config[KEY_MAX_READ_LENGTH])
+    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}")
     # if config[KEY_ANALYSIS_MODE] != "vp1":
     #     sys.stderr.write(cyan(f"Only `vp1` analysis mode currently implemented.\n"))
     #     sys.exit(-1)

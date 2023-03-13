@@ -51,13 +51,13 @@ def make_ref_display_name_map(references):
     return ref_map
 
 
-def parse_line(line,padding):
+def parse_line(line):
     values = {}
     tokens = line.rstrip("\n").split("\t")
     values["read_name"], values["read_len"] = tokens[:2]
 
-    values["read_hit_start"] = int(tokens[2])+padding
-    values["read_hit_end"] = int(tokens[3])-padding
+    values["read_hit_start"] = int(tokens[2])
+    values["read_hit_end"] = int(tokens[3])
     values["direction"] = tokens[4]
     values["ref_hit"], values["ref_len"], values["coord_start"], values["coord_end"], values["matches"], values["aln_block_len"],values["map_quality"] = tokens[5:12]
     
@@ -87,7 +87,7 @@ def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
 
 
 
-def group_hits(paf_file,padding,ref_name_map,len_filter,min_map_quality):
+def group_hits(paf_file,ref_name_map,len_filter,min_map_quality):
     total_reads= 0
     ambiguous =0
     unmapped = 0
@@ -99,7 +99,7 @@ def group_hits(paf_file,padding,ref_name_map,len_filter,min_map_quality):
     with open(paf_file, "r") as f:
         for l in f:
             
-            mapping = parse_line(l,padding)
+            mapping = parse_line(l)
             if last_mapping:
                 if mapping["read_name"] == last_mapping["read_name"]:
                     mappings.append(last_mapping)
@@ -197,16 +197,12 @@ def parse_paf_file(paf_file,
                     config):
     
     if is_non_zero_file(paf_file):
-        # this is how much of the mapped coords to mask from the sequences
-        padding = 0
-        if analysis_mode == VALUE_ANALYSIS_MODE_WG_2TILE:
-            padding = 30
-
+        
         ref_name_map = make_ref_display_name_map(references_sequences)
         
         len_filter = 0.4*config[KEY_MIN_READ_LENGTH]
 
-        ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,padding,ref_name_map,len_filter,min_map_quality)
+        ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,ref_name_map,len_filter,min_map_quality)
         print(f"Barcode: {barcode}")
         print(green("Unmapped:"),unmapped)
         print(green("Ambiguous mapping:"),ambiguous)
@@ -235,7 +231,7 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
 
     SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
 
-    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG_2TILE:
+    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
         SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
     
 
