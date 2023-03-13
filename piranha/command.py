@@ -42,7 +42,7 @@ def main(sysargs = sys.argv[1:]):
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`. Default: `{VALUE_SAMPLE_TYPE}`")
-    analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run. Options: `vp1`. Default: `{VALUE_ANALYSIS_MODE}`")
+    analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run. Options: `vp1`,`panev`, `wg`. Default: `{VALUE_ANALYSIS_MODE}`")
     analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
     analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
     analysis_group.add_argument("-q","--min-map-quality",action="store",type=int,help=f"Minimum mapping quality. Default: {VALUE_MIN_MAP_QUALITY}")

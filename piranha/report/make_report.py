@@ -167,7 +167,7 @@ def make_sample_report(report_to_generate,
         print(green("Generating: ") + f"{report_to_generate}")
         fw.write(buf.getvalue())
 
-def make_detailed_csv(data_for_report,barcodes_csv,output):
+def make_detailed_csv(data_for_report,barcodes_csv,output,detailed_header_fields):
     """
     SUMMARY TABLE
         list of: {KEY_BARCODE:record_barcode,
@@ -215,7 +215,7 @@ def make_detailed_csv(data_for_report,barcodes_csv,output):
         if i not in header_fields:
             header_fields.append(i)
 
-    for i in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS:
+    for i in detailed_header_fields:
         header_fields.append(i)
 
     with open(output,"w") as fw:
@@ -483,14 +483,17 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     # composition table header
     if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
+        config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
     else:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
+        config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
+
 
     # summary table header
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
     # detailed csv for download (1)
-    make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out)
+    make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_TABLE_HEADER])
 
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
