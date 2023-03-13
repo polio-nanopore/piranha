@@ -35,7 +35,9 @@ rule generate_consensus_sequences:
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
-        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}"),
+        variant_dir = os.path.join(config[KEY_TEMPDIR],"{barcode}","variant_calls"),
+        publish_dir = os.path.join(config[KEY_OUTDIR],"published_data","{barcode}")
     threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
     output:
@@ -53,6 +55,10 @@ rule generate_consensus_sequences:
                     "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
                     f"sample='{sample}' "
                     "--cores {threads} &> {log:q}")
+        shell(
+            """
+            cp {params.variant_dir}/*.vcf {params.publish_dir}
+            """)
 
 rule generate_variation_info:
     input:
@@ -98,6 +104,7 @@ rule generate_report:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_variation_info.output.json,
         masked_variants = rules.generate_consensus_sequences.output.masked,
+        variants = rules.generate_consensus_sequences.output.csv,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
         outdir = os.path.join(config[KEY_OUTDIR],"barcode_reports"),
