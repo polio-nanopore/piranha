@@ -38,7 +38,7 @@ def check_install(language,config):
 
     if config[KEY_ANALYSIS_MODE] == "vp1":
         package_data_check(REFERENCE_SEQUENCES_FILE_VP1,"data",KEY_REFERENCE_SEQUENCES,config)
-    elif "wg" in config[KEY_ANALYSIS_MODE]:
+    else:
         package_data_check(REFERENCE_SEQUENCES_FILE_WG,"data",KEY_REFERENCE_SEQUENCES,config)
 
 # config={}
