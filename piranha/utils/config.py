@@ -62,6 +62,7 @@ KEY_SUMMARY_TABLE="summary_table"
 KEY_COMPOSITION_TABLE="composition_table"
 KEY_COMPOSITION_TABLE_HEADER="composition_table_header"
 KEY_SUMMARY_TABLE_HEADER="summary_table_header"
+KEY_DETAILED_TABLE_HEADER = "detailed_table_header"
 KEY_CONTROL_STATUS="control_status"
 KEY_ORIENTATION="orientation"
 
@@ -102,10 +103,18 @@ VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","
 VALUE_SAMPLE_TYPE = "stool"
 VALUE_ANALYSIS_MODE = "vp1"
 VALUE_ANALYSIS_MODE_VP1 = "vp1"
-VALUE_ANALYSIS_MODE_WG_2TILE = "wg_2tile"
+VALUE_ANALYSIS_MODE_WG = "wg"
+VALUE_ANALYSIS_MODE_PANEV = "panev"
 
-READ_LENGTH_DEFAULT_VP1 = [1000,1300]
-READ_LENGTH_DEFAULT_WG_2TILE = [3400,5200]
+READ_LENGTH_DICT = {
+    VALUE_ANALYSIS_MODE_WG:[3400,5200],
+    VALUE_ANALYSIS_MODE_VP1: [1000,1300],
+    VALUE_ANALYSIS_MODE_PANEV:[3000,4500]
+}
+
+# READ_LENGTH_DEFAULT_VP1 = [1000,1300]
+# READ_LENGTH_DEFAULT_PANEV = [3000,4500]
+# READ_LENGTH_DEFAULT_WG = [3400,5200]
 VALUE_PRIMER_LENGTH = 30
 VALUE_MIN_MAP_QUALITY = 50
 
@@ -142,10 +151,20 @@ SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
                                 "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
 
-DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = [
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
                     "Sabin2-related|closest_reference","Sabin2-related|num_reads","Sabin2-related|nt_diff_from_reference","Sabin2-related|pcent_match","Sabin2-related|classification",
                     "Sabin3-related|closest_reference","Sabin3-related|num_reads","Sabin3-related|nt_diff_from_reference","Sabin3-related|pcent_match","Sabin3-related|classification",
+                    "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
+                    "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
+                    "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
+                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
+
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
+                    "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
+                    "Sabin2-related|closest_reference","Sabin2-related|num_reads","Sabin2-related|nt_diff_from_reference","Sabin2-related|pcent_match","Sabin2-related|classification",
+                    "Sabin3-related|closest_reference","Sabin3-related|num_reads","Sabin3-related|nt_diff_from_reference","Sabin3-related|pcent_match","Sabin3-related|classification",
+                    "nOPV2|closest_reference","nOPV2|num_reads","nOPV2|nt_diff_from_reference","nOPV2|pcent_match","nOPV2|classification",
                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
@@ -161,7 +180,7 @@ REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
 REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
-valid_analysis_modes = ["vp1","wg_2tile"]
+valid_analysis_modes = ["vp1","panev","wg"]
 valid_sample_types = ["stool","environmental"]
 
 dependency_list = ["minimap2","snakemake","medaka",]

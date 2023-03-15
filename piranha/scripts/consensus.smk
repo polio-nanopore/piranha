@@ -20,6 +20,7 @@ rule all:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
+        expand(os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf"), reference=REFERENCES),
         expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
 
 rule files:
@@ -37,7 +38,8 @@ rule medaka_haploid_variant:
     output:
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
         vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta")
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),
+        pub_vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
     shell:
         """
@@ -54,6 +56,7 @@ rule medaka_haploid_variant:
             touch {output.probs:q}
             touch {output.vcf:q}
         fi
+        cp {output.vcf:q} {output.pub_vcf:q}
         """
 
 rule medaka_haploid_variant_cns:

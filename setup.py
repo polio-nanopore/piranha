@@ -13,7 +13,8 @@ setup(name='piranha',
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
             "piranha/scripts/piranha_vp1.smk",
-            "piranha/scripts/piranha_wg_2tile.smk",
+            "piranha/scripts/piranha_panev.smk",
+            "piranha/scripts/piranha_wg.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/variation.smk",
             "piranha/scripts/snipit.smk"

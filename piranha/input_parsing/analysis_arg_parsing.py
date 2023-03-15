@@ -19,6 +19,14 @@ def check_if_int(key,config):
             sys.stderr.write(cyan(f"`{key}` must be numerical.\n"))
             sys.exit(-1)
 
+def check_if_float(key,config):
+    if config[key]:
+        try:
+            config[key] = float(config[key])
+        except:
+            sys.stderr.write(cyan(f"`{key}` must be numerical.\n"))
+            sys.exit(-1)
+
 def get_available_medaka_models():
     models = []
     result = subprocess.run(["medaka", "tools", "list_models"],stdout=subprocess.PIPE)
@@ -52,8 +60,10 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     misc.add_arg_to_config(KEY_PRIMER_LENGTH,primer_length,config)
     misc.add_arg_to_config(KEY_MIN_MAP_QUALITY,min_map_quality,config)
 
-    for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_PCENT]:
+    for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS]:
         check_if_int(key,config)
+    
+    check_if_float(KEY_MIN_PCENT,config)
 
 def sample_type(sample_type_arg,config):
     # if command line arg, overwrite config value
@@ -73,13 +83,12 @@ def analysis_mode(analysis_mode_arg,config):
         sys.stderr.write(cyan(f"`{KEY_ANALYSIS_MODE}` must be one of {error_str}.\n"))
         sys.exit(-1)
 
-    # known issue with this: if these values get overwritten by an input config file, the defaults will override them
-    analysis_mode = config[KEY_ANALYSIS_MODE]
-    if analysis_mode == VALUE_ANALYSIS_MODE_WG_2TILE and (config[KEY_MIN_READ_LENGTH]==READ_LENGTH_DEFAULT_VP1[0] and config[KEY_MIN_READ_LENGTH]==READ_LENGTH_DEFAULT_VP1[1]):
-        config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DEFAULT_WG_2TILE[0]
-        config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DEFAULT_WG_2TILE[1]
+    #must do this before parsing args for min and max read len
+    if config[KEY_ANALYSIS_MODE] in READ_LENGTH_DICT:
+        config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][0]
+        config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][1]
 
-    # print(config[KEY_MIN_READ_LENGTH],config[KEY_MAX_READ_LENGTH])
+    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}")
     # if config[KEY_ANALYSIS_MODE] != "vp1":
     #     sys.stderr.write(cyan(f"Only `vp1` analysis mode currently implemented.\n"))
     #     sys.exit(-1)

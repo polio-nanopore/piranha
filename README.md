@@ -1,13 +1,16 @@
 # piranha
 
-> This tool is in active development.
 
 Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis
+
+## This tool is in active development.
 
 Piranha is a tool developed to help standardise and streamline sequencing of poliovirus. It's been developed by members of the Rambaut group at the University of Edinburgh as part of the [Poliovirus Sequencing Consortium](https://www.protocols.io/workspaces/poliovirus-sequencing-consortium). Piranha runs an end-to-end read-to-report analysis that produces distributable, interactive reports alongside analysed consensus data. By default, piranha will attempt to generate consensus genomes for populations of the sam It produces an overall report, summarising the entire sequencing run, as well as a sample-specific report. Samples with virus of interest, such as VDPV are highlighted and certain quality-control flags can alert the user if there are issues with the run (such as a failed negative or positive control or identical sequences between samples that may be the result of contamination). 
 
 
 Any issues or feedback about the analysis or report please flag to this repository.
+
+## Note: piranha has been tested primarily on poliovirus VP1 sequencing data. There are alternative analysis modes in development (e.g. whole genome, panEV), but the authors recommend additional QC checks if using piranha beyond its established poliovirus VP1 pipeline.
 
 <img src="./docs/piranha.svg" width="400">
 
