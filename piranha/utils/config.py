@@ -127,7 +127,7 @@ VALUE_MIN_PCENT = 10
 
 CALL_THRESHOLD_DICT = {
     "Sabin1-related":10,
-    "Sabin2-related":8,
+    "Sabin2-related":6,
     "Sabin3-related":10
 }
 
