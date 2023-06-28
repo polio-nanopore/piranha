@@ -29,7 +29,7 @@ def main(sysargs = sys.argv[1:]):
     description=misc.preamble(__version__),
     usage='''
 \tpiranha -c <config.yaml> [options]
-\tpiranha -i input.csv [options]
+\tpiranha -b <barcodes.csv> -i <demultiplexed fastq_dir> [options]
 ''')
 
     i_group = parser.add_argument_group('Input options')
@@ -62,6 +62,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
     o_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
     o_group.add_argument('--language',action="store",help=f"Output report language. Options: English, French. Default: {VALUE_LANGUAGE}")
+    o_group.add_argument('--save-config',action="store_true",help=f"Output the config file with all parameters used")
 
     misc_group = parser.add_argument_group('Misc options')
     misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUN_NAME}")
@@ -119,6 +120,11 @@ def main(sysargs = sys.argv[1:]):
     init.set_up_verbosity(config)
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
+
+    if args.save_config:
+        out_config = os.path.join(config[KEY_OUTDIR], OUTPUT_CONFIG)
+        with open(out_config, 'w') as f:
+            yaml.dump(config, f)
 
     if config[KEY_VERBOSE]:
         print(red("\n**** CONFIG ****"))
