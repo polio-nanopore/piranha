@@ -1,6 +1,8 @@
 # start with an image with conda installed
 FROM mambaorg/micromamba:latest AS compile-image
 
+USER root
+
 # set working directory
 WORKDIR /data
 
