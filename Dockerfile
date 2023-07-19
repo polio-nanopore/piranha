@@ -1,5 +1,5 @@
 # start with an image with conda installed
-FROM continuumio/miniconda3 AS compile-image
+FROM mambaorg/micromamba:latest AS compile-image
 
 # set working directory
 WORKDIR /data
@@ -16,10 +16,8 @@ RUN git clone https://github.com/polio-nanopore/piranha.git
 # TEMP change branch
 RUN cd /data/piranha
 
-#install mamba
-RUN conda install -n base -c conda-forge mamba
-
-RUN mamba env create -f /data/piranha/environment.yml
+# install env
+RUN /opt/conda/bin/mamba env create -f /data/piranha/environment.yml
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "piranha", "/bin/bash", "-c"]
@@ -73,5 +71,4 @@ ENV PYTHONUNBUFFERED=1
 
 ENV PATH=/root/.local/bin:$PATH
 
-ENTRYPOINT   source /venv/bin/activate && \
-             piranha -b /data/run_data/analysis/barcodes.csv -i /data/run_data/basecalled --outdir /data/run_data/output/piranha_output -t ${THREADS}
+ENTRYPOINT   source /venv/bin/activate
