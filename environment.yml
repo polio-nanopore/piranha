@@ -12,6 +12,6 @@ dependencies:
   - bcftools=1.11
   - tabix=1.11
   - snakemake-minimal
-  - tensorflow
-  - tensorflow-estimator
+  - tensorflow>=2.11
+  - tensorflow-estimator>=2.11
 
