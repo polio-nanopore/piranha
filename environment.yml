@@ -13,4 +13,5 @@ dependencies:
   - tabix=1.11
   - snakemake-minimal
   - tensorflow
+  - tensorflow-estimator
 
