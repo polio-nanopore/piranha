@@ -10,7 +10,7 @@ WORKDIR /data
 RUN apt-get update -y && apt-get upgrade -y
 
 # install gcc
-RUN apt install build-essential -y --no-install-recommends
+RUN apt install build-essential -y --no-install-recommends git cat
 
 # copy in piranha
 RUN git clone https://github.com/polio-nanopore/piranha.git
