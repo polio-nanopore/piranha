@@ -17,7 +17,7 @@ RUN git clone https://github.com/polio-nanopore/piranha.git
 RUN cd /data/piranha
 
 #install mamba
-RUN conda install -n base -c conda-forge mamba
+RUN conda install mamba -n base -c conda-forge -c defaults
 
 RUN mamba env create -f /data/piranha/environment.yml
 
