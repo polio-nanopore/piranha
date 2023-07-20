@@ -24,7 +24,7 @@ RUN mamba env create -f /data/piranha/environment.yml
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "piranha", "/bin/bash", "-c"]
 RUN cd /data/piranha  && pip install .
-RUN pip uninstall -y tensorflow && mamba install -c conda-forge -c defaults tensorflow tensorflow-estimator
+RUN pip uninstall -y tensorflow tensorflow-estimator && mamba install -c conda-forge -c defaults tensorflow tensorflow-estimator
 
 # Install conda-pack:
 RUN conda install -c conda-forge conda-pack
@@ -42,8 +42,10 @@ RUN conda-pack -n piranha -o /tmp/env.tar && \
 # so now fix up paths:
 RUN /venv/bin/conda-unpack
 
-
 SHELL ["/bin/bash", "-c"]
+
+RUN conda remove -n piranha
+
 # build piranha
 WORKDIR /data/piranha
 RUN source /venv/bin/activate && pip install --user --no-cache-dir .
@@ -54,6 +56,7 @@ RUN source /venv/bin/activate && pip install --user --no-cache-dir .
 FROM debian:bullseye-slim AS runtime-image
 
 COPY --from=compile-image /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
 
 # Copy /venv from the previous stage:
 COPY --from=compile-image /venv /venv
@@ -71,8 +74,6 @@ SHELL ["/bin/bash", "-c"]
 
 # to allow streamed log output
 ENV PYTHONUNBUFFERED=1
-
-ENV PATH=/root/.local/bin:$PATH
 
 ENTRYPOINT   source /venv/bin/activate && \
              piranha -b /data/run_data/analysis/barcodes.csv -i /data/run_data/basecalled --outdir /data/run_data/output/piranha_output -t ${THREADS}
