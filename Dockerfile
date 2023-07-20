@@ -44,7 +44,7 @@ RUN /venv/bin/conda-unpack
 
 SHELL ["/bin/bash", "-c"]
 
-RUN conda remove -n piranha
+RUN conda remove --name piranha --all
 
 # build piranha
 WORKDIR /data/piranha
