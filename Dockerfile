@@ -1,7 +1,5 @@
 # start with an image with conda installed
-FROM mambaorg/micromamba:latest AS compile-image
-
-USER root
+FROM continuumio/miniconda3 AS compile-image
 
 # set working directory
 WORKDIR /data
@@ -10,7 +8,7 @@ WORKDIR /data
 RUN apt-get update -y && apt-get upgrade -y
 
 # install gcc
-RUN apt install build-essential -y --no-install-recommends git
+RUN apt install build-essential -y --no-install-recommends
 
 # copy in piranha
 RUN git clone https://github.com/polio-nanopore/piranha.git
@@ -18,12 +16,15 @@ RUN git clone https://github.com/polio-nanopore/piranha.git
 # TEMP change branch
 RUN cd /data/piranha
 
-# install env
-RUN /opt/conda/bin/mamba env create -f /data/piranha/environment.yml
+#install mamba
+RUN conda install -n base -c conda-forge mamba
+
+RUN mamba env create -f /data/piranha/environment.yml
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "piranha", "/bin/bash", "-c"]
 RUN cd /data/piranha  && pip install .
+RUN pip uninstall -y tensorflow && mamba install -c conda-forge -c defaults tensorflow tensorflow-estimator
 
 # Install conda-pack:
 RUN conda install -c conda-forge conda-pack
@@ -73,4 +74,5 @@ ENV PYTHONUNBUFFERED=1
 
 ENV PATH=/root/.local/bin:$PATH
 
-ENTRYPOINT   source /venv/bin/activate
+ENTRYPOINT   source /venv/bin/activate && \
+             piranha -b /data/run_data/analysis/barcodes.csv -i /data/run_data/basecalled --outdir /data/run_data/output/piranha_output -t ${THREADS}
