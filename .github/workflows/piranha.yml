@@ -18,7 +18,7 @@ jobs:
           environment-file: environment.yml
           activate-environment: piranha
           channels: conda-forge,bioconda,defaults
-          conda-version: "4.12.0"
+          conda-version: "*"
           mamba-version: "*"
       - name: Install piranha
         run: pip install -e .
