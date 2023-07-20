@@ -1,5 +1,5 @@
 # start with an image with conda installed
-FROM continuumio/miniconda3 AS compile-image
+FROM condaforge/mambaforge AS compile-image
 
 # set working directory
 WORKDIR /data
@@ -17,7 +17,7 @@ RUN git clone https://github.com/polio-nanopore/piranha.git
 RUN cd /data/piranha
 
 #install mamba
-RUN conda install mamba -n base -c conda-forge -c defaults
+RUN mamba install conda -n base -c conda-forge -c defaults
 
 RUN mamba env create -f /data/piranha/environment.yml
 
