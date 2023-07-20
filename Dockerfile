@@ -9,6 +9,7 @@ RUN apt-get update -y && apt-get upgrade -y
 
 # install gcc
 RUN apt install build-essential -y --no-install-recommends
+RUN apt-get clean && apt-get autoclean
 
 # copy in piranha
 RUN git clone https://github.com/polio-nanopore/piranha.git
@@ -44,6 +45,7 @@ RUN /venv/bin/conda-unpack
 
 SHELL ["/bin/bash", "-c"]
 
+RUN conda clean --all
 RUN conda remove --name piranha --all
 
 # build piranha
