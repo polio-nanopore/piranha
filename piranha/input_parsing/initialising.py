@@ -45,6 +45,7 @@ def get_defaults():
                     KEY_PRIMER_LENGTH:VALUE_PRIMER_LENGTH,
                     
                     KEY_ALL_METADATA:False,
+
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
                     KEY_LANGUAGE:VALUE_LANGUAGE,
@@ -80,6 +81,22 @@ def valid_args():
         KEY_REFERENCE_SEQUENCES,
         KEY_REFERENCES_FOR_CNS
     ]
+
+
+def ignore_args(defaults, valid):
+    r = [key for key in defaults if key not in valid]
+    r.extend([
+        KEY_BARCODE_REPORT_TEMPLATE,
+        KEY_REPORT_TEMPLATE,
+        KEY_BARCODES,
+        KEY_SAMPLES,
+        KEY_LOG_API,
+        KEY_LOG_STRING,
+        KEY_QUIET,
+        KEY_OUTPUT_REPORT
+    ])
+    return r
+
 
 def check_configfile(cwd,config_arg):
     configfile = os.path.join(cwd,config_arg)
@@ -119,8 +136,10 @@ def parse_yaml_file(configfile,configdict):
     path_to_file = os.path.abspath(os.path.dirname(configfile))
     configdict[KEY_INPUT_PATH] = path_to_file
     valid_keys = valid_args()
+    ignore_keys = ignore_args(configdict, valid_keys)
 
     invalid_keys = []
+    ignored_keys = []
     with open(configfile,"r") as f:
         input_config = load_yaml(f) # try load file else exit with msg
 
@@ -132,6 +151,9 @@ def parse_yaml_file(configfile,configdict):
                 clean_key = key.lstrip("-").replace("-","_").rstrip(" ").lstrip(" ").lower()
 
                 if clean_key not in valid_keys:
+                    if clean_key in ignore_keys:
+                        ignored_keys.append(key)
+                        continue
                     invalid_keys.append(key)
                     break
                     
@@ -140,6 +162,14 @@ def parse_yaml_file(configfile,configdict):
 
                 configdict[clean_key] = value
                 overwriting += 1
+
+    if len(ignored_keys)==1:
+        print(green(f'Warning: ignoring internal key in config file.\n') + f'\t- {ignored_keys[0]}\n')
+    elif len(ignored_keys) >1:
+        keys = ""
+        for i in ignored_keys:
+            keys += f"\t- {i}\n"
+        print(green(f'Warning: ignoring internal keys in config file.\n') + f'{keys}')
 
     if len(invalid_keys)==1:
         sys.stderr.write(cyan(f'Error: invalid key in config file.\n') + f'\t- {invalid_keys[0]}\n')

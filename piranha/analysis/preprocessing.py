@@ -6,6 +6,8 @@ from piranha.utils.config import *
 import os
 import gzip
 import io
+import re
+
 from piranha.utils.log_colours import green,cyan,red
 
 def gather_filter_reads_by_length(dir_in,barcode,reads_out,config):
@@ -49,6 +51,29 @@ def make_ref_display_name_map(references):
         ref_map[record.id] = display_name
     
     return ref_map
+
+def make_display_name_to_reference_group_map(ref_map):
+    ref_group_map = {}
+    for key in ref_map:
+        val_lower = ref_map[key].lower()
+        if "wpv" in val_lower:
+            num = re.findall(r'\d+', val_lower.split("wpv")[1])[0]
+            ref_group_map[key] = "WPV%s" % num
+        elif "nonpolio" in val_lower or "non-polio" in val_lower or "non_polio" in val_lower:
+            ref_group_map[key] = "NonPolioEV"
+        elif "polio" in val_lower and "wt" in val_lower:
+            num = re.findall(r'\d+', val_lower.split("polio")[1])[0]
+            ref_group_map[key] = "WPV%s" % num
+        elif "polio" in val_lower:
+            num = re.findall(r'\d+', val_lower.split("polio")[1])[0]
+            ref_group_map[key] = "Sabin%s-related" % num
+        elif "sabin" in val_lower:
+            num = re.findall(r'\d+', val_lower.split("sabin")[1])[0]
+            ref_group_map[key] = "Sabin%s-related" % num
+        else:
+            ref_group_map[key] = "NonPolioEV"
+    assert len(ref_map) == len(ref_group_map)
+    return ref_group_map
 
 
 def parse_line(line):
@@ -198,8 +223,9 @@ def parse_paf_file(paf_file,
     
     if is_non_zero_file(paf_file):
         
-        ref_name_map = make_ref_display_name_map(references_sequences)
-        
+        permissive_ref_name_map = make_ref_display_name_map(references_sequences)
+        ref_name_map = make_display_name_to_reference_group_map(permissive_ref_name_map)
+
         len_filter = 0.4*config[KEY_MIN_READ_LENGTH]
 
         ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,ref_name_map,len_filter,min_map_quality)
