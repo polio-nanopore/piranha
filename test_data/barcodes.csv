@@ -1,0 +1,8 @@
+barcode,sample,date,well
+barcode01,MixedTest,2022-01-01,A01
+barcode02,PureTest,2022-01-02,B01
+barcode03,WTTest,2022-01-07,C01
+barcode04,VDPVTest,2022-01-05,D05
+barcode05,negative,,D06
+barcode06,positively,,D07
+barcode07,somemixed,2022-03-01,H12
