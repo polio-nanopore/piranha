@@ -624,9 +624,9 @@
                 </script>
             <% figure_count +=1 %>
             %if "Sabin" in reference:
-              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in sample ${sample}</h3>
             %else:
-              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in ${sample}. SNPs and indels called against closest reference highlighted.</h3>
+              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in sample ${sample}. SNPs and indels called against closest reference highlighted.</h3>
             %endif
             <hr>
           
@@ -663,7 +663,7 @@
             <br>
             <div>
               <% figure_count +=1 %>
-              <h3><strong>Figure ${figure_count}</strong> | snipit plot for queries in ${reference_name}</h3>
+              <h3><strong>Figure ${figure_count}</strong> | Variant sites for sample sequences against reference ${reference_name}</h3>
               <hr>
             </div>
             <hr>
@@ -763,7 +763,12 @@
                                       .catch(console.warn);
         </script>
         <% figure_count +=1 %>
-        <h3><strong>Figure ${figure_count}</strong> | Co-occurrence matrix of Reference and Variant alleles called against ${reference_name} reference in ${sample}. This is the percentage of bases that cover those sites in the mapping file that are of a high quality (>13) and that are either the reference allele or the allele of the variant called at that site.</h3>
+        <h3>
+          <strong>Figure ${figure_count}</strong> | Co-occurrence matrices of Reference (left) and Variant (right) alleles 
+          called against ${reference_name} reference in sample '${sample}'. 
+          This is the percentage of bases that cover those sites in the mapping file that are of a high quality (>13) 
+          and that are either the reference allele or a non-reference allele at that site.
+        </h3>
         <hr>
           %endif
 

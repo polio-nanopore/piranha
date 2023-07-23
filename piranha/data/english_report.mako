@@ -700,7 +700,7 @@
                      .catch(console.warn);
      </script>
      
-     <h3><strong>Figure 1</strong> | Barcodes location on 96-well plate </h3>
+     <h3><strong>Figure 1</strong> | Barcode locations on 96-well plate </h3>
      <br>
     </div> 
 
