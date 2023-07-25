@@ -20,7 +20,7 @@ Any issues or feedback about the analysis or report please flag to this reposito
 
 
 ## Installing via ARTIFICE GUI
-- Download the release package for your machine from the [ARTIFICE respository](https://github.com/polio-nanopore/piranagui)
+- Download the release package for your machine from the [PiranhaGUI respository](https://github.com/polio-nanopore/piranhaGUI)
 
 ## Installation instructions (quick command line reference)
 
