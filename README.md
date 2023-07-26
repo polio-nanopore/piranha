@@ -479,11 +479,15 @@ Input options:
                         Sample name of negative control. Default: `negative`
 
 Analysis options:
+  -s SAMPLE_TYPE, --sample-type SAMPLE_TYPE
+                        Specify sample type. Options: `stool`, `environmental`. Default: `stool`
   -m ANALYSIS_MODE, --analysis-mode ANALYSIS_MODE
-                        Specify analysis mode to run. Options: `vp1`. Default: `vp1`
+                        Specify analysis mode to run. Options: `vp1`,`panev`, `wg`. Default: `vp1`
   --medaka-model MEDAKA_MODEL
-                        Medaka model to run analysis using. Default: r941_min_high_g360
+                        Medaka model to run analysis using. Default: r941_min_hac_variant_g507
   --medaka-list-models  List available medaka models and exit.
+  -q MIN_MAP_QUALITY, --min-map-quality MIN_MAP_QUALITY
+                        Minimum mapping quality. Default: 50
   -n MIN_READ_LENGTH, --min-read-length MIN_READ_LENGTH
                         Minimum read length. Default: 1000
   -x MAX_READ_LENGTH, --max-read-length MAX_READ_LENGTH
@@ -492,9 +496,8 @@ Analysis options:
                         Minimum read depth required for consensus generation. Default: 50
   -p MIN_READ_PCENT, --min-read-pcent MIN_READ_PCENT
                         Minimum percentage of sample required for consensus generation. Default: 10
-  --all-metadata-to-header
-                        Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the
-                        record id, so avoid these.
+  --primer-length PRIMER_LENGTH
+                        Length of primer sequences to trim off start and end of reads. Default: 30
 
 Output options:
   -o OUTDIR, --outdir OUTDIR
@@ -509,13 +512,24 @@ Output options:
   -temp TEMPDIR, --tempdir TEMPDIR
                         Specify where you want the temp stuff to go. Default: `$TMPDIR`
   --no-temp             Output all intermediate files. For development/ debugging purposes
+  --all-metadata-to-header
+                        Parse all fields from input barcode.csv file and include in the output fasta headers.
+                        Be aware spaces in metadata will disrupt
+                        the record id, so avoid these.
+  --language LANGUAGE   Output report language. Options: English, French. Default: English
+  --save-config         Output the config file with all parameters used
 
 Misc options:
-  --language LANGUAGE   Report language. Options: English, French. Default: English
-  --runname RUNNAME     Run name to appear in report. Default: Nanopore sequencing
+  --runname RUNNAME     Run name to appear in report. Default: Nanopore 
   --username USERNAME   Username to appear in report. Default: no user name
   --institute INSTITUTE
                         Institute name to appear in report. Default: no institute name
+  --orientation ORIENTATION
+                        Orientation of barcodes in wells on a 96-well plate. If `well`
+                        is supplied as a column in the barcode.csv, this default
+                        orientation will be overwritten. Default: `horizontal`.
+                        Options: `horizontal` or `vertical`. Alternatively, a `well` column will overwrite this option
+                        if provided in the barcodes csv file
   -t THREADS, --threads THREADS
                         Number of threads. Default: 1
   --verbose             Print lots of stuff to screen
