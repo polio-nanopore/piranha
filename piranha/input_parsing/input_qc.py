@@ -33,6 +33,20 @@ def parse_barcodes_csv(barcodes_csv,config):
                 sys.stderr.write(cyan(f"`{col}` must be a column name in barcode csv file.\n"))
                 sys.exit(-1)
 
+        if "well" in reader.fieldnames:
+            well_counter = collections.Counter()
+            for row in reader:
+                well_counter[row["well"]]+=1
+            duplicates = set()
+            for i in well_counter:
+                if well_counter[i] > 1:
+                    duplicates.add(i)
+            if duplicates:
+                sys.stderr.write(cyan(f"Duplicate well coordinates specified in barcodes.csv file.\n"))
+                for i in duplicates:
+                    print(f"- {i}")
+                sys.exit(-1)
+
         for row in reader:
             if row[KEY_BARCODE] and not row[KEY_SAMPLE]:
                 continue
@@ -49,6 +63,7 @@ def parse_barcodes_csv(barcodes_csv,config):
                 elif special_character in row[KEY_SAMPLE]:
                     sys.stderr.write(cyan(f"Special character `{special_character}` cannot be used in barcode or sample name. Please remove this character from sample `{row[KEY_SAMPLE]}` and restart.\n"))
                     sys.exit(-1)
+
             barcodes.append(row[KEY_BARCODE])
             samples.append(row[KEY_SAMPLE])
 
