@@ -33,20 +33,6 @@ def parse_barcodes_csv(barcodes_csv,config):
                 sys.stderr.write(cyan(f"`{col}` must be a column name in barcode csv file.\n"))
                 sys.exit(-1)
 
-        if "well" in reader.fieldnames:
-            well_counter = collections.Counter()
-            for row in reader:
-                well_counter[row["well"]]+=1
-            duplicates = set()
-            for i in well_counter:
-                if well_counter[i] > 1:
-                    duplicates.add(i)
-            if duplicates:
-                sys.stderr.write(cyan(f"Duplicate well coordinates specified in barcodes.csv file.\n"))
-                for i in duplicates:
-                    print(f"- {i}")
-                sys.exit(-1)
-
         for row in reader:
             if row[KEY_BARCODE] and not row[KEY_SAMPLE]:
                 continue
@@ -69,6 +55,22 @@ def parse_barcodes_csv(barcodes_csv,config):
 
     config[KEY_BARCODES] = barcodes
     config[KEY_SAMPLES] = samples
+
+    with open(config[KEY_BARCODES_CSV],"r") as f:
+        reader = csv.DictReader(f)
+        if "well" in reader.fieldnames:
+            well_counter = collections.Counter()
+            for row in reader:
+                well_counter[row["well"]]+=1
+            duplicates = set()
+            for i in well_counter:
+                if well_counter[i] > 1:
+                    duplicates.add(i)
+            if duplicates:
+                sys.stderr.write(cyan(f"Duplicate well coordinates specified in barcodes.csv file.\n"))
+                for i in duplicates:
+                    print(f"- {i}")
+                sys.exit(-1)
 
 
 def parse_read_dir(readdir,config):
