@@ -378,6 +378,9 @@ By default temporary files are stored in `$TMPDIR`, which then gets wiped when t
 ### Customising the report
 The output report can include some information about the sequencing run, the name of the individual running the report and the institute doing the sequencing. To give the report a specific run name (rather than the default title `Nanopore sequencing report`) supply the new name with the command line flag `--runname` or as `runname: ` in the config file. Similarly, to enable the report to display the name of the user and institute, provide `--username` and `--institute` (or within the config file). 
 
+The orientation of barcodes in the vizualisation representing a 96-well plate can be configured. By default the barcodes increment from 1 to 96 in a `vertical` orientation (down each column in turn). By using the `--orientation` flag on the command line or `orientation` key in a configuration file, either the default `vertical` or `horizontal` (which will increment the numbers from 1-96 across each row in turn) can be specified. If `well` is supplied as a column in the barcode.csv file, this default orientation will be overwritten. 
+
+
 ### Output language
 The reports are available in English (default) and in French.
 
