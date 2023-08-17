@@ -374,6 +374,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            if not row[KEY_SAMPLE]:
+                continue
             # add directly to data for report composition table (2)
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
 
