@@ -12,6 +12,18 @@ from piranha.utils import misc
 from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
 
+def define_valid_wells():
+    valid_wells = set()
+    for i in range(1,13):
+        for j in ["A","B","C","D","E","F","G","H"]:
+            if i<10:
+                well = f"{j}0{i}"
+            else:
+                well = f"{j}{i}"
+            valid_wells.add(well)
+    return valid_wells
+
+
 def parse_barcodes_csv(barcodes_csv,config):
 
     misc.add_file_to_config(KEY_BARCODES_CSV,barcodes_csv,config)
@@ -55,22 +67,38 @@ def parse_barcodes_csv(barcodes_csv,config):
 
     config[KEY_BARCODES] = barcodes
     config[KEY_SAMPLES] = samples
-
+    
+    valid_wells = define_valid_wells()
+    invalid_wells = set()
     with open(config[KEY_BARCODES_CSV],"r") as f:
         reader = csv.DictReader(f)
         if "well" in reader.fieldnames:
             well_counter = collections.Counter()
             for row in reader:
                 well_counter[row["well"]]+=1
+                if row["well"] not in valid_wells:
+                    invalid_wells.add(row["well"])
+
             duplicates = set()
             for i in well_counter:
                 if well_counter[i] > 1:
                     duplicates.add(i)
+
             if duplicates:
                 sys.stderr.write(cyan(f"Duplicate well coordinates specified in barcodes.csv file.\n"))
                 for i in duplicates:
                     print(f"- {i}")
                 sys.exit(-1)
+
+            if invalid_wells:
+                sys.stderr.write(cyan(f"Invalid well coordinates specified in barcodes.csv file.\n"))
+                for i in invalid_wells:
+                    print(f"- {i}")
+                sys.exit(-1)
+
+
+
+
 
 
 def parse_read_dir(readdir,config):
