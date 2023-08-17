@@ -34,12 +34,14 @@ def parse_barcodes_csv(barcodes_csv,config):
                 sys.exit(-1)
 
         for row in reader:
+            if row[KEY_BARCODE] and not row[KEY_SAMPLE]:
+                continue
             if row[KEY_BARCODE] in barcodes:
                 barcode = row[KEY_BARCODE]
                 sys.stderr.write(cyan(f"`{barcode}` duplicated in barcode csv file. Note: barcodes must be unique.\n"))
                 sys.exit(-1)
             if row[KEY_SAMPLE] in samples:
-                print(cyan(f"Warning: `{sample}` sample name provided for multiple barcodes."))
+                print(cyan(f"Warning: `{row[KEY_SAMPLE]}` sample name provided for multiple barcodes."))
             for special_character in ["|",","," ",";"]:
                 if special_character in row[KEY_BARCODE]:
                     sys.stderr.write(cyan(f"Special character `{special_character}` cannot be used in barcode or sample name. Please remove this character from barcode `{row[KEY_BARCODE]}` and restart.\n"))
