@@ -36,7 +36,7 @@ rule map_reads:
         paf = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.paf")
     shell:
         """
-        minimap2 -t {threads} -x map-ont --secondary=no --paf-no-hit \
+        minimap2 -t {threads} -x asm20 --secondary=no --paf-no-hit \
         {input.ref:q} \
         {input.fastq:q} -o {output:q} &> {log:q}
         """
