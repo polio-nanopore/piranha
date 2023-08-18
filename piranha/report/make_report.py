@@ -298,7 +298,7 @@ def barcode_to_well(barcode_csv,orientation):
         
 
 
-def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
+def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation,barcodes):
     
     
     barcode_well_map = barcode_to_well(barcode_csv,orientation)   
@@ -323,31 +323,39 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation):
             info = {
                 "x":i,
                 "y":j,
-                "All":"Absent"
+                "All":"N/A"
             }
             
             pos_type = ""
 
             if well in barcode_well_map:
-                
                 barcode = barcode_well_map[well]
-                info["Barcode"] = barcode
-                
-                
-                if barcode in positives_for_plate_viz:
-                    positives = positives_for_plate_viz[barcode]
+                if barcode in barcodes:
                     
-                    for i in all_positive_types:
-                        if i in positives:
-                            info["All"] = "Present"
-                            info[i] = "Present"
-                        else:
+                    info["Barcode"] = barcode
+                    
+                    
+                    if barcode in positives_for_plate_viz:
+                        positives = positives_for_plate_viz[barcode]
+                        
+                        for i in all_positive_types:
+                            if i in positives:
+                                info["All"] = "Present"
+                                info[i] = "Present"
+                            else:
+                                info[i] = "Absent"
+                    else:
+                        for i in all_positive_types:
                             info[i] = "Absent"
                 else:
+                    info["Barcode"] = ""
                     for i in all_positive_types:
-                        info[i] = "Absent"
+                        info[i] = "N/A"
             else:
                 info["Barcode"] = ""
+                for i in all_positive_types:
+                    info[i] = "N/A"
+                
                 
             wells_to_json.append(info)
             
@@ -420,7 +428,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     # to check if there are identical seqs in the run
     identical_seq_check = collections.defaultdict(list)
 
-    plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION])
+    plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION],config[KEY_BARCODES])
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         identical_seq_check[str(record.seq)].append(record.description)

@@ -697,7 +697,10 @@
                                  "labelFont":"Helvetica Neue",
                                  "labelFontSize":18
                                  }},
-                 "fill": {"field": "EV reads present"},
+                 "fill": {"field": "EV reads present",
+                          "scale": {"range": ["#e68781", "#48818d", "#b2b2b2"]},
+                          "sort": ["Present","Absent","N/A"]
+                        },
                "tooltip": [
                  {"field": "Barcode", "type": "nominal"},
                  % for t in positive_types:
