@@ -93,8 +93,8 @@ KEY_SUMMARY_HEADERS = "report_summary_headers"
 # default values for config dict
 
 VALUE_LANGUAGE = "English"
-VALUE_POSITIVE="positive"
-VALUE_NEGATIVE = "negative"
+VALUE_POSITIVE=["positive"]
+VALUE_NEGATIVE = ["negative"]
 
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]

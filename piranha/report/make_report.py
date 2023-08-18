@@ -364,14 +364,19 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation,barcodes)
 def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
     
     # which are the negative controls and positive controls
-    negative_control = config[KEY_NEGATIVE]
-    positive_control = config[KEY_POSITIVE]
+    negative_controls = config[KEY_NEGATIVE]
+    positive_controls = config[KEY_POSITIVE]
 
     # which will be flagged as high npev samples
     flagged_high_npev = []
 
-    # does it pass control or not
-    control_status = {negative_control:True,positive_control:True}
+    # does it pass control or not, set up all default true
+    control_status = {}
+    for i in negative_controls:
+        control_status[i] = True
+    for i in positive_controls:
+        control_status[i] = True
+
     #are there any controls
     show_control_table = False
     
@@ -388,20 +393,20 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
 
             # handling controls
-            if row[KEY_SAMPLE] == negative_control:
+            if row[KEY_SAMPLE] in negative_controls:
                 show_control_table = True
                 for col in row:
                     if col not in [KEY_BARCODE,KEY_SAMPLE]:
                         # if there are any reads above the min read threshold
                         # sample fails as a negative control
                         if int(row[col])>config[KEY_MIN_READS]:
-                            control_status[negative_control] = False
-            elif row[KEY_SAMPLE] == positive_control:
+                            control_status[row[KEY_SAMPLE]] = False
+            elif row[KEY_SAMPLE] in positive_controls:
                 show_control_table = True
                 # if the npev reads are below the min read threshold
                 # sample fails as a positive control
                 if int(row["NonPolioEV"])<config[KEY_MIN_READS]:
-                    control_status[positive_control] = False
+                    control_status[row[KEY_SAMPLE]] = False
             else:
                 # deciding whether to flag the npev table
                 # if there are any polio reads
