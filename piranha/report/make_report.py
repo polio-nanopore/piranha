@@ -372,10 +372,10 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
 
     # does it pass control or not, set up all default true
     control_status = {}
-        for i in negative_controls:
-            control_status[i] = True
-        for i in positive_controls:
-            control_status[i] = True
+    for i in negative_controls:
+        control_status[i] = True
+    for i in positive_controls:
+        control_status[i] = True
 
     #are there any controls
     show_control_table = False
