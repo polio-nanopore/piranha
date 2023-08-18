@@ -179,10 +179,13 @@ def control_group_parsing(positive_control, negative_control, config):
     misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)
     misc.add_arg_to_config(KEY_NEGATIVE,negative_control,config)
 
-    if config[KEY_POSITIVE] not in config[KEY_SAMPLES]:
-        print(cyan(f"Warning: cannot find positive control: {config[KEY_POSITIVE]}"))
-    if config[KEY_NEGATIVE] not in config[KEY_SAMPLES]:
-        print(cyan(f"Warning: cannot find negative control: {config[KEY_NEGATIVE]}"))
+    for pos in config[KEY_POSITIVE]:
+        if pos not in config[KEY_SAMPLES]:
+            print(cyan(f"Warning: cannot find positive control in barcode csv file: {pos}"))
+            
+    for neg in config[KEY_NEGATIVE]:
+        if neg not in config[KEY_SAMPLES]:
+            print(cyan(f"Warning: cannot find negative control in  barcode csv file: {neg}"))
 
 
 
