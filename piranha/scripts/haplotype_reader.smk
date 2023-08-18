@@ -28,7 +28,7 @@ rule minimap2:
         sam = os.path.join(config[KEY_TEMPDIR],"assess_haplotypes","{taxid}","mapped.ref.sam")
     shell:
         """
-        minimap2 -ax map-ont {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
+        minimap2 -ax asm20 {input.ref:q} {input.reads:q} -o {output.sam:q} &> {log:q}
         """
 rule sort_index:
     input:
