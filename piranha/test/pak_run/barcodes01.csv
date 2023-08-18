@@ -1,3 +1,5 @@
-barcode,sample,date
-barcode05,negative,
-barcode07,somemixed,2022-03-01
+barcode,sample,date,welsh
+barcode02,PureTest,2022-01-02,B03
+barcode03,WTTest,2022-01-07,B05
+barcode05,negative,,C04
+barcode07,somemixed,2022-03-01,E05
