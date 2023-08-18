@@ -170,6 +170,12 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
 
 
 def control_group_parsing(positive_control, negative_control, config):
+    # mod to allow multiple pos and negative samples
+    if positive_control:
+        positive_control = positive_control.split(",")
+    if negative_control:
+        negative_control = negative_control.split(",")
+        
     misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)
     misc.add_arg_to_config(KEY_NEGATIVE,negative_control,config)
 
