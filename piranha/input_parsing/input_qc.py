@@ -97,9 +97,28 @@ def parse_barcodes_csv(barcodes_csv,config):
                 sys.exit(-1)
 
 
+def phylo_group_parsing(run_phylo_arg, supplementary_sequences_arg):
 
+    misc.add_arg_to_config(KEY_RUN_PHYLO,run_phylo_arg,config)
 
+    if config[KEY_RUN_PHYLO] not in [True, False]:
+        sys.stderr.write(cyan(f"run_phylo argument must be either True/False if specified through the config file.\n"))
+        sys.exit(-1)
+    
+    if config[KEY_RUN_PHYLO]:
 
+        if supplementary_sequences_arg:
+            misc.add_file_to_config(KEY_SUPPLEMENTARY_SEQUENCES,supplementary_sequences_arg,config)
+        
+        if config[KEY_SUPPLEMENTARY_SEQUENCES]:
+            misc.check_path_exists(config[KEY_SUPPLEMENTARY_SEQUENCES])
+
+        try:
+            records = SeqIO.index(config[KEY_SUPPLEMENTARY_SEQUENCES],"fasta")
+            print(green("Supplementary sequences:"), len(records), "sequences parsed.")
+        except:
+            sys.stderr.write(cyan(f"Failed to parse supplementary sequence file, check it is in FASTA format.\n"))
+            sys.exit(-1)
 
 def parse_read_dir(readdir,config):
 
