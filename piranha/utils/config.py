@@ -46,6 +46,10 @@ KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
 
+# PHYLO KEYS
+
+KEY_RUN_PHYLO = "run_phylo"
+KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"
