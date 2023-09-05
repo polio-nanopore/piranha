@@ -52,6 +52,10 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-p","--min-read-pcent",action="store",type=float,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT}")
     analysis_group.add_argument("--primer-length",action="store",type=int,help=f"Length of primer sequences to trim off start and end of reads. Default: {VALUE_PRIMER_LENGTH}")
 
+    phylo_group = parser.add_argument_group('Phylogenetics options')
+    phylo_group.add_argument("-rp","--run-phylo",action="store_true",help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
+    phylo_group.add_argument("-ss","--supplementary-sequences",action="store",help=f"Supplementary sequence FASTA file to be incorporated into phylogenetic analysis.")
+
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
     o_group.add_argument('-pub','--publishdir', action="store",help=f"Output publish directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -112,6 +116,8 @@ def main(sysargs = sys.argv[1:]):
 
     input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
     input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
+
+    input_qc.phylo_group_parsing(args.run_phylo, args.supplementary_sequences, config)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
