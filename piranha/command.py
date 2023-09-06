@@ -9,6 +9,8 @@ from piranha.utils import data_install_checks
 from piranha.input_parsing import analysis_arg_parsing
 from piranha.input_parsing import directory_setup
 from piranha.input_parsing import input_qc
+from piranha.analysis import phylo_functions
+
 from piranha.report.make_report import make_output_report
 import piranha.utils.custom_logger as custom_logger
 from piranha.utils.log_colours import green,cyan,red
@@ -91,7 +93,7 @@ def main(sysargs = sys.argv[1:]):
             parser.print_help()
             sys.exit(0)
 
-    dependency_checks.check_dependencies(dependency_list, module_list)
+    dependency_checks.check_dependencies(DEPENDENCY_LIST, MODULE_LIST)
 
     # Initialise config dict
     config = init.setup_config_dict(cwd,args.config)
@@ -100,8 +102,9 @@ def main(sysargs = sys.argv[1:]):
     analysis_arg_parsing.sample_type(args.sample_type,config)
 
     # Checks access to package data and grabs the snakefile
-    analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
+    
     data_install_checks.check_install(args.language,config)
+    analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
     misc.add_check_valid_arg(KEY_ORIENTATION,args.orientation,VALID_ORIENTATION,config)
 
     snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
@@ -118,6 +121,8 @@ def main(sysargs = sys.argv[1:]):
     input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
 
     input_qc.phylo_group_parsing(args.run_phylo, args.supplementary_sequences, config)
+    if config[KEY_RUN_PHYLO]:
+        dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
@@ -174,6 +179,13 @@ def main(sysargs = sys.argv[1:]):
             detailed_csv = os.path.join(config[KEY_OUTDIR],"detailed_run_report.csv")
 
             make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,sample_seqs,detailed_csv,config)
+
+            if config[KEY_RUN_PHYLO]:
+                phylo_outdir = os.path.join(config[KEY_OUTDIR],"phylogenetics")
+                if not os.path.exists(phylo_outdir):
+                    os.mkdir(phylo_outdir)
+                seq_clusters = phylo_functions.get_seqs_and_clusters(sample_seqs,config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],phylo_outdir,config)
+                #run snakemake
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:
