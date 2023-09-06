@@ -136,6 +136,9 @@ CALL_THRESHOLD_DICT = {
 }
 
 
+# ref group default
+KEY_DISPLAY_NAME = "display_name"
+
 # report defaults
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
@@ -188,8 +191,10 @@ REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 valid_analysis_modes = ["vp1","panev","wg"]
 valid_sample_types = ["stool","environmental"]
 
-dependency_list = ["minimap2","snakemake","medaka",]
-module_list = ["mako","Bio"]
+DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
+MODULE_LIST = ["mako","Bio"]
+PHYLO_DEPENDENCY_LIST = ["iqtree","mafft"]
+PHYLO_MODULE_LIST = []
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
