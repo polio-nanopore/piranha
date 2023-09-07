@@ -51,6 +51,7 @@ KEY_HITS = "hits"
 KEY_RUN_PHYLO = "run_phylo"
 KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
 KEY_CLUSTERS= "clusters"
+KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"
@@ -188,6 +189,8 @@ OUTPUT_CONFIG = "all_config.yaml"
 SAMPLE_SEQS = "vp1_sequences.fasta"
 REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
 REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
+OUTGROUP_SEQUENCES_FILE_WG = "outgroups.wg.fasta"
+OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["vp1","panev","wg"]
