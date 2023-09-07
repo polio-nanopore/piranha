@@ -660,8 +660,8 @@
             });
           }
     </script>
-<div id="plateViz"></div>
-<script>
+  <div id="plateViz"></div>
+    <script>
        var vlSpec_plate = {
          "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
          "width": 450,

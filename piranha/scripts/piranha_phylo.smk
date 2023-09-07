@@ -41,6 +41,7 @@ rule iqtree:
                 -nt 1 \
                 -redo \
                 --fast \
+                -o outgroup \
                 -quiet &> {log:q}
         """
 
@@ -51,7 +52,8 @@ rule prune_outgroup:
         tree = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.tree")
     shell:
         """
-        cp {input.tree:q} {output.tree:q}
+        jclusterfunk prune  -i {input.tree:q} \
+                            -o {output.tree:q} \
+                            -t outgroup \
+                            -f newick 
         """
-
-#-o outgroup \
