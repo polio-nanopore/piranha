@@ -8,14 +8,13 @@ import os
 from piranha.utils.log_colours import green,cyan,red
 
 
-
-def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,phylo_outdir,config):
+def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,phylo_outdir,config):
     seq_clusters = collections.defaultdict(list)
     for record in SeqIO.parse(sample_seqs,"fasta"):
         for ref_group in config[KEY_REFERENCES_FOR_CNS]:
             if ref_group in record.id:
                 new_record = record
-                new_record.id = "|".join(new_record.id.split("|")[:2])
+                new_record.description = "|".join(new_record.id.split("|")[:2])
                 seq_clusters[ref_group].append(record)
 
     print(green("Reference groups for phylo pipeline:"))
@@ -32,6 +31,13 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         for ref_group in seq_clusters:
             if ref_group in record.description:
                 seq_clusters[ref_group].append(record)
+    
+    for record in SeqIO.parse(outgroup_sequences, "fasta"):
+        for ref_group in seq_clusters:
+            if ref_group in record.description:
+                new_record = record
+                new_record.description = "outgroup"
+                seq_clusters[ref_group].append(new_record)
 
     for i in seq_clusters:
         print(i, len(seq_clusters[i]))
