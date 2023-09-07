@@ -49,6 +49,7 @@ def get_defaults():
                     #phylo defaults
                     KEY_SUPPLEMENTARY_SEQUENCES:"",
                     KEY_RUN_PHYLO:False,
+                    KEY_CLUSTERS:[],
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
