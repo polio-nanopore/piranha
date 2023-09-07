@@ -50,6 +50,7 @@ KEY_HITS = "hits"
 
 KEY_RUN_PHYLO = "run_phylo"
 KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
+KEY_CLUSTERS= "clusters"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"
@@ -182,6 +183,7 @@ OUTPUT_REPORT = "report.html"
 SAMPLE_COMPOSITION = "sample_composition.csv"
 PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
 PREPROCESSING_CONFIG = "preprocessing_config.yaml"
+PHYLO_CONFIG = "phylo_config.yaml"
 OUTPUT_CONFIG = "all_config.yaml"
 SAMPLE_SEQS = "vp1_sequences.fasta"
 REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
