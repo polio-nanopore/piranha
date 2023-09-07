@@ -198,7 +198,7 @@ valid_sample_types = ["stool","environmental"]
 
 DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
 MODULE_LIST = ["mako","Bio"]
-PHYLO_DEPENDENCY_LIST = ["iqtree","mafft"]
+PHYLO_DEPENDENCY_LIST = ["iqtree","mafft","jclusterfunk"]
 PHYLO_MODULE_LIST = []
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
