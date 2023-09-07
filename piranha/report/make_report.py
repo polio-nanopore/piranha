@@ -361,6 +361,17 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation,barcodes)
             
     return json.dumps(wells_to_json), all_positive_types
 
+def get_nexus(clusters,phylo_data,config):
+    for reference_group in clusters:
+        nexus = ""
+        with open(os.path.join(config[KEY_OUTDIR],"phylogenetics",f"{reference_group}.tree"),"r") as f:
+            for l in f:
+                l = l.rstrip("\n")
+                
+                nexus+=f"{l}\n"
+        phylo_data[cluster]["nexus"] = nexus.rstrip("\n")
+
+
 def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
     
     # which are the negative controls and positive controls
@@ -510,6 +521,11 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     # detailed csv for download (1)
     make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_TABLE_HEADER])
 
+    phylo_data = {}
+    if config[KEY_RUN_PHYLO]:
+        get_nexus(config[KEY_CLUSTERS],phylo_data,config)
+
+
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
@@ -527,6 +543,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     flagged_seqs = flagged_seqs,
                     detailed_csv_out = detailed_csv_out,
                     flagged_high_npev = flagged_high_npev,
+                    phylo_data = phylo_data,
                     config=config)
 
     try:
