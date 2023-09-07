@@ -39,4 +39,5 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         with open(os.path.join(phylo_outdir, f"{i}.fasta"),"w") as fw:
             SeqIO.write(seq_clusters[i], fw, "fasta")
 
-    return seq_clusters.keys()
+    return list(seq_clusters.keys())
+
