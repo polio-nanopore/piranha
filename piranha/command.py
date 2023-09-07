@@ -151,7 +151,7 @@ def main(sysargs = sys.argv[1:]):
                 phylo_outdir = os.path.join(config[KEY_OUTDIR],"phylogenetics")
                 if not os.path.exists(phylo_outdir):
                     os.mkdir(phylo_outdir)
-
+                
                 seq_clusters = phylo_functions.get_seqs_and_clusters(sample_seqs,config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],phylo_outdir,config)
                 config[KEY_CLUSTERS] = seq_clusters
                 #run snakemake
