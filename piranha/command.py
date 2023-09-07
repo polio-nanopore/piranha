@@ -12,7 +12,6 @@ from piranha.input_parsing import input_qc
 from piranha.analysis import phylo_functions
 
 from piranha.report.make_report import make_output_report
-import piranha.utils.custom_logger as custom_logger
 from piranha.utils.log_colours import green,cyan,red
 from piranha.utils.config import *
 
@@ -20,7 +19,6 @@ import os
 import sys
 import yaml
 import argparse
-import snakemake
 
 cwd = os.getcwd()
 thisdir = os.path.abspath(os.path.dirname(__file__))
@@ -131,46 +129,35 @@ def main(sysargs = sys.argv[1:]):
     init.set_up_verbosity(config)
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
+    phylo_snakefile = data_install_checks.get_snakefile(thisdir,"phylo")
 
     if args.save_config:
         out_config = os.path.join(config[KEY_OUTDIR], OUTPUT_CONFIG)
         with open(out_config, 'w') as f:
             yaml.dump(config, f)
 
-    if config[KEY_VERBOSE]:
-        print(red("\n**** CONFIG ****"))
-        for k in sorted(config):
-            print(green(f" - {k}: ") + f"{config[k]}")
-        status = snakemake.snakemake(preprocessing_snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR], config=config, cores=config[KEY_THREADS],lock=False
-                                    )
-    else:
-        logger = custom_logger.Logger()
-        status = snakemake.snakemake(preprocessing_snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR], config=config, cores=config[KEY_THREADS],lock=False,
-                                    quiet=True,log_handler=logger.log_handler
-                                    )
+    status = misc.run_snakemake(config,preprocessing_snakefile,config)
 
     if status: # translate "success" into shell exit code of 0
         with open(os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),"r") as f:
             preprocessing_config = yaml.safe_load(f)
         
+        status = misc.run_snakemake(preprocessing_config,snakefile,config)
 
-        if config[KEY_VERBOSE]:
-
-            print(red("\n**** CONFIG ****"))
-            for k in sorted(config):
-                print(green(f" - {k}: ") + f"{config[k]}")
-            status = snakemake.snakemake(snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
-                                        workdir=config[KEY_TEMPDIR], config=preprocessing_config, cores=config[KEY_THREADS],lock=False
-                                        )
-        else:
-            logger = custom_logger.Logger()
-            status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
-                                        workdir=config[KEY_TEMPDIR], config=preprocessing_config, cores=config[KEY_THREADS],lock=False,
-                                        quiet=True,log_handler=logger.log_handler
-                                        )
         if status: 
+            
+            if config[KEY_RUN_PHYLO]:
+
+                phylo_outdir = os.path.join(config[KEY_OUTDIR],"phylogenetics")
+                if not os.path.exists(phylo_outdir):
+                    os.mkdir(phylo_outdir)
+
+                seq_clusters = phylo_functions.get_seqs_and_clusters(sample_seqs,config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],phylo_outdir,config)
+                config[KEY_CLUSTERS] = seq_clusters
+                #run snakemake
+                print(green("Initializing phylo pipeline."))
+                status = misc.run_snakemake(config,phylo_snakefile,config)
+
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
             summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
             composition_csv=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION)
@@ -180,12 +167,6 @@ def main(sysargs = sys.argv[1:]):
 
             make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,sample_seqs,detailed_csv,config)
 
-            if config[KEY_RUN_PHYLO]:
-                phylo_outdir = os.path.join(config[KEY_OUTDIR],"phylogenetics")
-                if not os.path.exists(phylo_outdir):
-                    os.mkdir(phylo_outdir)
-                seq_clusters = phylo_functions.get_seqs_and_clusters(sample_seqs,config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],phylo_outdir,config)
-                #run snakemake
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:
