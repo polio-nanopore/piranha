@@ -53,6 +53,7 @@ KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
 KEY_CLUSTERS= "clusters"
 KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 KEY_ANNOTATIONS = "annotations"
+KEY_SAMPLE_SEQS = "sample_seqs"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"

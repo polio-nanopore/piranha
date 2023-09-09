@@ -51,6 +51,7 @@ def get_defaults():
                     KEY_RUN_PHYLO:False,
                     KEY_CLUSTERS:[],
                     KEY_ANNOTATIONS:"",
+                    KEY_SAMPLE_SEQS:"",
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
