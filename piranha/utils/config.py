@@ -52,6 +52,7 @@ KEY_RUN_PHYLO = "run_phylo"
 KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
 KEY_CLUSTERS= "clusters"
 KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
+KEY_ANNOTATIONS = "annotations"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"
