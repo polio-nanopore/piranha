@@ -369,10 +369,32 @@ def get_nexus(clusters,phylo_data,config):
                 l = l.rstrip("\n")
                 
                 nexus+=f"{l}\n"
-        phylo_data[cluster]["nexus"] = nexus.rstrip("\n")
+        phylo_data[reference_group]={}
+        phylo_data[reference_group]["nexus"] = nexus.rstrip("\n")
+
+def get_background_data(metadata,config):
+    background_data = {}
+
+    with open(metadata,"r") as f:
+        reader = csv.DictReader(f)
+        background_columns = []
+        for i in ["sample","reference_group"]:
+            background_columns.append(i)
+        for row in reader:
+            data = {}
+            for i in background_columns:
+                data[i] = row[i]
+            if row["query_boolean"] == "True":
+                data["Query"] = "True"
+                background_data[row["sample"]] = data
+            else:
+                data["Query"] = "False"
+                background_data[row["sample"]] = data
+    data = json.dumps(background_data) 
+    return data
 
 
-def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
+def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
     
     # which are the negative controls and positive controls
     negative_controls = config[KEY_NEGATIVE]
@@ -525,6 +547,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     if config[KEY_RUN_PHYLO]:
         get_nexus(config[KEY_CLUSTERS],phylo_data,config)
 
+        background_data = get_background_data(annotations_file,config)
+
 
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
@@ -544,6 +568,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     detailed_csv_out = detailed_csv_out,
                     flagged_high_npev = flagged_high_npev,
                     phylo_data = phylo_data,
+                    background_data = background_data,
                     config=config)
 
     try:
