@@ -152,8 +152,10 @@ def main(sysargs = sys.argv[1:]):
                 if not os.path.exists(phylo_outdir):
                     os.mkdir(phylo_outdir)
                 
-                seq_clusters = phylo_functions.get_seqs_and_clusters(sample_seqs,config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],phylo_outdir,config)
+                sample_seqs=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
+                seq_clusters = phylo_functions.get_seqs_and_clusters(sample_seqs,config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],config[KEY_OUTGROUP_SEQUENCES],phylo_outdir,config)
                 config[KEY_CLUSTERS] = seq_clusters
+                config[KEY_ANNOTATIONS] = os.path.join(config[KEY_OUTDIR],"phylogenetics","annotations.csv")
                 #run snakemake
                 print(green("Initializing phylo pipeline."))
                 status = misc.run_snakemake(config,phylo_snakefile,config)
@@ -161,12 +163,11 @@ def main(sysargs = sys.argv[1:]):
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
             summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
             composition_csv=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION)
-            sample_seqs=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
             
+
             detailed_csv = os.path.join(config[KEY_OUTDIR],"detailed_run_report.csv")
 
-            make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,sample_seqs,detailed_csv,config)
-
+            make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,sample_seqs,detailed_csv,config[KEY_ANNOTATIONS],config)
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:
