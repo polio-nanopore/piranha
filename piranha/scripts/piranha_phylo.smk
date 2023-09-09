@@ -49,11 +49,28 @@ rule prune_outgroup:
     input:
         tree = rules.iqtree.output.tree
     output:
-        tree = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.tree")
+        tree = os.path.join(config[KEY_TEMPDIR],"phylogenetics","{reference_group}.unpruned.tree")
     shell:
         """
         jclusterfunk prune  -i {input.tree:q} \
                             -o {output.tree:q} \
                             -t outgroup \
                             -f newick 
+        """
+
+rule annotate:
+    input:
+        tree = rules.prune_outgroup.output.tree,
+        csv = os.path.join(config[KEY_OUTDIR],"phylogenetics", "{reference_group}.annotations.csv")
+    output:
+        tree = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.tree")
+    shell:
+        """
+        jclusterfunk annotate -c sample \
+                             -i {input.tree:q} \
+                             -m {input.csv:q} \
+                             --tip-attributes query_boolean reference_group \
+                             -f nexus \
+                             -o {output.tree:q} \
+                            --ignore-missing
         """
