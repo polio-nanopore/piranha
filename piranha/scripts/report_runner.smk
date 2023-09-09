@@ -19,10 +19,13 @@ rule generate_report:
         summary_csv=os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY),
         composition_csv=os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION),
         yaml = os.path.join(config[KEY_OUTDIR],PREPROCESSING_CONFIG),
-        seqs = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
+        seqs = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS),
+        background_data = os.path.join(config[KEY_OUTDIR],"phylogenetics","annotations.csv"),
+        detailed_csv = os.path.join(config[KEY_OUTDIR],"detailed_run_report.csv")
     output:
         report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
     run:
         with open(input.yaml,"r") as f:
             config_loaded = yaml.safe_load(f) 
-        make_output_report(output.report,input.summary_csv,input.composition_csv,input.seqs,config_loaded)
+        
+        make_output_report(output.report,config_loaded["barcodes_csv"],input.summary_csv,input.composition_csv,input.seqs,input.detailed_csv,input.background_data,config_loaded)
