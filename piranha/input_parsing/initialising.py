@@ -50,6 +50,7 @@ def get_defaults():
                     KEY_SUPPLEMENTARY_SEQUENCES:"",
                     KEY_RUN_PHYLO:False,
                     KEY_CLUSTERS:[],
+                    KEY_ANNOTATIONS:"",
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
