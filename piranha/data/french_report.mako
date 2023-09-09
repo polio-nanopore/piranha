@@ -368,7 +368,7 @@
     </style>
   </head>
 
-  <body>
+    <body>
     <script>
       $(document).ready(function() {
         $(window).scroll(function() {
@@ -387,18 +387,18 @@
         });
         });
     </script>
-<script>
-  function exportImageSVG(buttonID,svgID,name){
-      document.querySelector(buttonID).onclick = function(){
-          svgExport.downloadSvg(document.querySelector(svgID), name);
+    <script>
+      function exportImageSVG(buttonID,svgID,name){
+          document.querySelector(buttonID).onclick = function(){
+              svgExport.downloadSvg(document.querySelector(svgID), name);
+          };
       };
-  };
-  function exportImagePNG(buttonID,svgID,name){
-      document.querySelector(buttonID).onclick = function(){
-          svgExport.downloadPng(document.querySelector(svgID), name);
+      function exportImagePNG(buttonID,svgID,name){
+          document.querySelector(buttonID).onclick = function(){
+              svgExport.downloadPng(document.querySelector(svgID), name);
+          };
       };
-  };
-</script>
+    </script>
     <div class="container">
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
@@ -663,8 +663,8 @@
           }
     </script>
 
-<div id="plateViz"></div>
-<script>
+      <div id="plateViz"></div>
+      <script>
        var vlSpec_plate = {
          "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
          "width": 450,
