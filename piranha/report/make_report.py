@@ -544,6 +544,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_TABLE_HEADER])
 
     phylo_data = {}
+    background_data = {}
     if config[KEY_RUN_PHYLO]:
         get_nexus(config[KEY_CLUSTERS],phylo_data,config)
 
