@@ -548,7 +548,7 @@
                             .feature(
                                     figtree.scaleBar()
                                       .direction("x")
-                                      .length(1/29903)
+                                      .length(1/900)
                                       .x(-60)
                                       .y(-30)
                                       // .y(fig.svgSelection.select(function() { return this.parentNode; }).attr("height")-margins.top-margins.bottom+20)
