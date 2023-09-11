@@ -50,13 +50,18 @@ KEY_HITS = "hits"
 
 KEY_RUN_PHYLO = "run_phylo"
 KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
+KEY_SUPPLEMENTARY_METADATA = "supplementary_metadata"
+KEY_SUPPLEMENTARY_METADATA_ID_COLUMN = "supplementary_metadata_id_column"
 KEY_CLUSTERS= "clusters"
 KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 KEY_ANNOTATIONS = "annotations"
 KEY_SAMPLE_SEQS = "sample_seqs"
 KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
+KEY_BACKGROUND_METADATA_COLUMNS = "background_metadata_columns"
 
 VALUE_PHYLO_METADATA_COLUMNS = ["date","EPID"]
+VALUE_BACKGROUND_METADATA_COLUMNS = ["location","lineage"]
+VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"

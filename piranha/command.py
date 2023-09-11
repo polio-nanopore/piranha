@@ -55,6 +55,7 @@ def main(sysargs = sys.argv[1:]):
     phylo_group = parser.add_argument_group('Phylogenetics options')
     phylo_group.add_argument("-rp","--run-phylo",action="store_true",help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
     phylo_group.add_argument("-ss","--supplementary-sequences",action="store",help=f"Supplementary sequence FASTA file to be incorporated into phylogenetic analysis.")
+    phylo_group.add_argument("-sm","--supplementary-metadata",action="store",help=f"Supplementary metadata file associated with the supplementary sequence FASTA file.")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -118,7 +119,7 @@ def main(sysargs = sys.argv[1:]):
     input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
     input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
 
-    input_qc.phylo_group_parsing(args.run_phylo, args.supplementary_sequences, config)
+    input_qc.phylo_group_parsing(args.run_phylo, args.supplementary_sequences, args.supplementary_metadata, config)
     if config[KEY_RUN_PHYLO]:
         dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
 

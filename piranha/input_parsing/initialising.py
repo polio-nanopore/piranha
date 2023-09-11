@@ -48,11 +48,14 @@ def get_defaults():
 
                     #phylo defaults
                     KEY_SUPPLEMENTARY_SEQUENCES:"",
+                    KEY_SUPPLEMENTARY_METADATA:"",
                     KEY_RUN_PHYLO:False,
                     KEY_CLUSTERS:[],
                     KEY_ANNOTATIONS:"",
                     KEY_SAMPLE_SEQS:"",
                     KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
+                    KEY_BACKGROUND_METADATA_COLUMNS:VALUE_BACKGROUND_METADATA_COLUMNS,
+                    KEY_SUPPLEMENTARY_METADATA_ID_COLUMN:VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN,
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,

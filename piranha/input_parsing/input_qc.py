@@ -96,8 +96,67 @@ def parse_barcodes_csv(barcodes_csv,config):
                     print(f"- {i}")
                 sys.exit(-1)
 
+def qc_supplementary_sequence_file(supplementary_sequences):
+    misc.check_path_exists(supplementary_sequences)
+    incorrect = 0
+    total = 0
+    seq_ids = set()
+    try:
+        for record in SeqIO.parse(supplementary_sequences,"fasta"):
+            seq_ids.add(record.id)
 
-def phylo_group_parsing(run_phylo_arg, supplementary_sequences_arg,config):
+            total +=1
+            passed = False
+            for field in record.description.split(" "):
+                if field.startswith(KEY_DISPLAY_NAME):
+                    passed=True
+                    continue
+            if not passed:
+                incorrect +=1
+    except:
+        sys.stderr.write(cyan(f"Failed to parse supplementary sequence file, check it is in FASTA format.\n"))
+        sys.exit(-1)
+
+    if incorrect >= 1:
+        sys.stderr.write(cyan(f"Supplementary sequences file lacks `{KEY_DISPLAY_NAME}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
+        sys.exit(-1)
+    else:
+        print(green("Supplementary sequences:"), total, "sequences parsed.")
+    
+    return seq_ids
+
+def qc_supplementary_metadata_file(supplementary_metadata,seq_ids,config):
+    if not config[KEY_SUPPLEMENTARY_SEQUENCES]:
+            sys.stderr.write(cyan(f"Error: Supplementary metadata supplied without accompanying sequence file.\n"))
+            sys.exit(-1)
+
+        if not os.path.exists(supplementary_metadata):
+            sys.stderr.write(cyan(f"Error: Cannot find input file {supplementary_metadata}.\n"))
+            sys.exit(-1)
+
+        with open(supplementary_metadata,"r") as f:
+            reader = csv.DictReader(f)
+            if config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN] not in reader.fieldnames:
+                sys.stderr.write(cyan(f"Error: Cannot find input file {supplementary_metadata}.\n"))
+                sys.exit(-1)
+
+            in_seq_file = set()
+            for row in reader:
+                if row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] in seq_ids:
+                    in_seq_file.add(row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]])
+
+            not_in_metadata = set()
+            for seq_id in seq_ids:
+                if seq_id not in in_seq_file:
+                    not_in_metadata.add(seq_id)
+
+            if not_in_metadata:
+                sys.stderr.write(cyan(f"Error: the following {len(not_in_metadata)} supplementary sequences do not have accompanying metadata:\n"))
+                for i in seq_id:
+                    print(f"- {seq_id}")
+                sys.exit(-1)
+
+def phylo_group_parsing(run_phylo_arg, supplementary_sequences_arg,supplementary_metadata_arg,config):
 
     misc.add_arg_to_config(KEY_RUN_PHYLO,run_phylo_arg,config)
 
@@ -110,32 +169,18 @@ def phylo_group_parsing(run_phylo_arg, supplementary_sequences_arg,config):
         if supplementary_sequences_arg:
             misc.add_file_to_config(KEY_SUPPLEMENTARY_SEQUENCES,supplementary_sequences_arg,config)
         
+        seq_ids = set()
+
         if config[KEY_SUPPLEMENTARY_SEQUENCES]:
-            misc.check_path_exists(config[KEY_SUPPLEMENTARY_SEQUENCES])
-            incorrect = 0
-            total = 0
-            try:
-                for record in SeqIO.parse(config[KEY_SUPPLEMENTARY_SEQUENCES],"fasta"):
-                    total +=1
-                    passed = False
-                    for field in record.description.split(" "):
-                        if field.startswith(KEY_DISPLAY_NAME):
-                            passed=True
-                            continue
-                    if not passed:
-                        incorrect +=1
-            except:
-                sys.stderr.write(cyan(f"Failed to parse supplementary sequence file, check it is in FASTA format.\n"))
-                sys.exit(-1)
-
-            if incorrect >= 1:
-                sys.stderr.write(cyan(f"Supplementary sequences file lacks `{KEY_DISPLAY_NAME}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
-                sys.exit(-1)
-            else:
-                print(green("Supplementary sequences:"), total, "sequences parsed.")
-
+            seq_ids = qc_supplementary_sequence_file(config[KEY_SUPPLEMENTARY_SEQUENCES])
         else:
             print(cyan("Note: no supplementary sequence file provided."))
+
+        if supplementary_metadata_arg:
+            misc.add_file_to_config(KEY_SUPPLEMENTARY_METADATA,supplementary_metadata_arg,config)
+        
+        if config[KEY_SUPPLEMENTARY_METADATA]:
+            qc_supplementary_metadata_file(config[KEY_SUPPLEMENTARY_METADATA],seq_ids,config)
 
 def parse_read_dir(readdir,config):
 
