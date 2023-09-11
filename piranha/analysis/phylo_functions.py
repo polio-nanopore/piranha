@@ -8,8 +8,9 @@ import os
 from piranha.utils.log_colours import green,cyan,red
 
 
-def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,phylo_outdir,config):
+def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,barcodes_csv,phylo_outdir,config):
     
+
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
     for record in SeqIO.parse(sample_seqs,"fasta"):
@@ -57,8 +58,19 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 new_record.description = "outgroup"
                 seq_clusters[ref_group].append(new_record)
 
+    header = ["sample","query_boolean","reference_group"]
+    with open(barcodes_csv, "r") as f:
+        reader = csv.DictReader(f)
+        reader_header = reader.fieldnames
+        for col in reader_header:
+            if col in config[KEY_PHYLO_METADATA_COLUMNS]:
+                header.append(col)
+        for row in reader:
+            for col in header:
+                seq_metadata[row[KEY_SAMPLE]][col] = row[col]
+
     with open(os.path.join(phylo_outdir, f"annotations.csv"), "w") as fw0:
-        header = ["sample","query_boolean","reference_group"]
+        
         writer0 = csv.DictWriter(fw0,fieldnames=header, lineterminator='\n')
         writer0.writeheader()
 
@@ -73,6 +85,8 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                     if seq_metadata[record]["reference_group"] == i:
                         row = seq_metadata[record]
                         for col in header:
+                            if col not in row:
+                                row[col] = ""
                             new_data = row[col].replace("'","").replace(";","").replace("(","").replace(")","")
                             row[col] = new_data
                         writer.writerow(row)
