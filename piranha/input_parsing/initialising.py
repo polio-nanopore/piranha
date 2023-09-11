@@ -52,6 +52,7 @@ def get_defaults():
                     KEY_CLUSTERS:[],
                     KEY_ANNOTATIONS:"",
                     KEY_SAMPLE_SEQS:"",
+                    KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
