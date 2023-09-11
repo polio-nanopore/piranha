@@ -10,21 +10,26 @@ from piranha.utils.log_colours import green,cyan,red
 
 def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,barcodes_csv,phylo_outdir,config):
     
-
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
+
+    header = ["sample","barcode","query_boolean","reference_group"]
+
     for record in SeqIO.parse(sample_seqs,"fasta"):
         for ref_group in config[KEY_REFERENCES_FOR_CNS]:
             if ref_group in record.id:
                 new_record = record
-                new_header = "|".join(new_record.id.split("|")[:2])
-                new_record.description = new_header
-                new_record.id = new_header
+                sample = new_record.id.split("|")[0]
+                barcode = new_record.id.split("|")[1]
+
+                new_record.description = sample
+                new_record.id = sample
                 seq_clusters[ref_group].append(new_record)
 
-                seq_metadata[new_record.id]["sample"] = new_record.id
-                seq_metadata[new_record.id]["query_boolean"] = "True"
-                seq_metadata[new_record.id]["reference_group"] = ref_group
+                seq_metadata[sample]["sample"] = sample
+                seq_metadata[sample]["barcode"] = barcode
+                seq_metadata[sample]["query_boolean"] = "True"
+                seq_metadata[sample]["reference_group"] = ref_group
 
 
     print(green("Reference groups for phylo pipeline:"))
@@ -58,16 +63,18 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 new_record.description = "outgroup"
                 seq_clusters[ref_group].append(new_record)
 
-    header = ["sample","query_boolean","reference_group"]
     with open(barcodes_csv, "r") as f:
         reader = csv.DictReader(f)
         reader_header = reader.fieldnames
         for col in reader_header:
             if col in config[KEY_PHYLO_METADATA_COLUMNS]:
                 header.append(col)
+        
         for row in reader:
-            for col in header:
-                seq_metadata[row[KEY_SAMPLE]][col] = row[col]
+            if row[KEY_SAMPLE] in seq_metadata:
+                for col in header:
+                    if col in config[KEY_PHYLO_METADATA_COLUMNS]:
+                        seq_metadata[row[KEY_SAMPLE]][col] = row[col]
 
     with open(os.path.join(phylo_outdir, f"annotations.csv"), "w") as fw0:
         

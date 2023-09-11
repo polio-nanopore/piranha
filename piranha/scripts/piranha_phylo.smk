@@ -20,7 +20,7 @@ rule mafft:
         seqs = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.fasta")
     output:
         aln = os.path.join(config[KEY_TEMPDIR],"phylogenetics","{reference_group}.aln.fasta"),
-        pub_aln = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.aln.fasta")
+        pub_aln = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.alignment.fasta")
     shell:
         """
         mafft --quiet {input.seqs:q} > {output.aln:q} && cp {output.aln:q} {output.pub_aln:q}
