@@ -900,6 +900,17 @@
       <% print(reference_group) %>
       <% figure_count +=1 %>
         <button class="accordion">Tree options</button>
+        <div class="panel">
+          <div class="row">
+            <div class="column">
+              <div class="slider-block" id="slider_${reference_group}">
+                <p>Expansion</p>
+                <input class="slider" type="range" id="rangeinput_${reference_group}"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
+                <span class="highlight"></span>
+              </div>
+            </div>
+          </div>
+        </div>
       <div class="row tree-container">
         <div class="col-xs-7">
           <svg class="tree_svg" width="700" height="400" id="tree_${reference_group}"></svg>
