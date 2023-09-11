@@ -374,12 +374,10 @@ def get_nexus(clusters,phylo_data,config):
 
 def get_background_data(metadata,config):
     background_data = {}
-
+    
     with open(metadata,"r") as f:
         reader = csv.DictReader(f)
-        background_columns = []
-        for i in ["sample","reference_group"]:
-            background_columns.append(i)
+        background_columns = [i for i in reader.fieldnames if i != "query_boolean"]
         for row in reader:
             data = {}
             for i in background_columns:
