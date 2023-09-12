@@ -823,21 +823,8 @@
       %endif
       </div>
     <br>
-    <script>
-      var acc = document.getElementsByClassName("accordion");
-      var i;
-      for (i = 0; i < acc.length; i++) {
-            acc[i].addEventListener("click", function() {
-              this.classList.toggle("active");
-              var panel = this.nextElementSibling;
-              if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
-              } else {
-                panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
-              } 
-            });
-          }
-    </script>
+    
+  <div class="pagebreak"> </div>
   <div id="plateViz"></div>
     <script>
        var vlSpec_plate = {
@@ -899,6 +886,29 @@
       %for reference_group in phylo_data:
       <% print(reference_group) %>
       <% figure_count +=1 %>
+      <div class="pagebreak"> </div>
+
+      <button class="accordion">Tree options</button>
+            <div class="panel">
+              <div class="row">
+                <div class="column">
+                  <div class="slider-block" id="slider_${reference_group}">
+                    <p>Expansion</p>
+                    <input class="slider" type="range" id="rangeinput_${reference_group}"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
+                    <span class="highlight"></span>
+                  </div>
+                </div>
+                <div class="column">
+                  <div>
+                  <p>Colour by</p>
+                  <select class="colourSelect" id="colourSelect_${reference_group}">
+                    <option value="query_boolean">Query</option>
+                    % for annotation in ["query_boolean","reference_group"]:
+                      <option value="${annotation}">${annotation.title()}</option>
+                    % endfor
+                  </select>
+                  </div>
+                </div>
         <button class="accordion">Tree options</button>
         <div class="panel">
           <div class="row">
@@ -934,6 +944,68 @@
     %endfor
     %endif
 
+    <div class="pagebreak"> </div>
+    <br>
+    %if show_control_table:
+      <h3><strong>Table 5</strong> | Configuration settings </h3>
+    %else:
+    <h3><strong>Table 4</strong> | Configuration settings </h3>
+    %endif
+    <button class="accordion">Export table</button>
+      <div class="panel">
+        <div class="row">
+          <div class="col-sm-2" ><strong>Export table: </strong></div>
+          <div class="col-sm-8" id="tableExportID5"></div>
+        </div>
+      </div>
+        <table class="display nowrap" id="myTable5">
+          <thead>
+            <tr>
+              <th style="width:30%;">Configuration option</th>
+              <th style="width:70%;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            % for item in config["configuration_table_fields"]:
+              <tr>
+                <td><strong>${item}</strong></td>
+                <td>${config[item]}</td>
+            %endfor
+          </tbody>
+        </table>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              var table = $('#myTable5').DataTable({
+                select: {
+                        style: 'multi'
+                    },
+                'iDisplayLength': 100,
+                "paging": false,
+                "border-bottom":false,
+                "bInfo" : false,
+                dom: 'frtip',
+                buttons: ["copy","csv","print"]
+              });
+              table.buttons().container().appendTo( $('#tableExportID5') );
+              
+            } );
+        </script>
+      <br>
+      <script>
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+        for (i = 0; i < acc.length; i++) {
+              acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                  panel.style.maxHeight = null;
+                } else {
+                  panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
+                } 
+              });
+            }
+      </script>
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>
