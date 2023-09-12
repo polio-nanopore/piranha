@@ -81,6 +81,7 @@ KEY_SUMMARY_TABLE_HEADER="summary_table_header"
 KEY_DETAILED_TABLE_HEADER = "detailed_table_header"
 KEY_CONTROL_STATUS="control_status"
 KEY_ORIENTATION="orientation"
+KEY_CONFIGURATION_TABLE_FIELDS = "configuration_table_fields"
 
 # MISC KEYS
 KEY_USERNAME="username"
@@ -188,6 +189,11 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
                     "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
+
+VALUE_CONFIGURATION_TABLE_FIELDS = [
+                    KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,
+                    KEY_MIN_PCENT,KEY_MEDAKA_MODEL,KEY_PRIMER_LENGTH,KEY_ANALYSIS_MODE,KEY_RUN_PHYLO
+                    ]
 
 # file names
 OUTPUT_REPORT = "report.html"
