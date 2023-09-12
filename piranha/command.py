@@ -56,6 +56,9 @@ def main(sysargs = sys.argv[1:]):
     phylo_group.add_argument("-rp","--run-phylo",action="store_true",help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
     phylo_group.add_argument("-ss","--supplementary-sequences",action="store",help=f"Supplementary sequence FASTA file to be incorporated into phylogenetic analysis.")
     phylo_group.add_argument("-sm","--supplementary-metadata",action="store",help=f"Supplementary metadata file associated with the supplementary sequence FASTA file.")
+    phylo_group.add_argument("-pcol","--phylo-metadata-columns",action="store",help=f"Columns in the barcodes.csv file to annotate the phylogeny with. Default: {VALUE_PHYLO_METADATA_COLUMNS}")
+    phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata file to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
+    phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata file to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -100,90 +103,144 @@ def main(sysargs = sys.argv[1:]):
     # Check if valid sample_type
     analysis_arg_parsing.sample_type(args.sample_type,config)
 
-    # Checks access to package data and grabs the snakefile
-    
+    # Checks access to package data
     data_install_checks.check_install(args.language,config)
+
     analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
+
+    # orientation for pcr plate (for report figure)
     misc.add_check_valid_arg(KEY_ORIENTATION,args.orientation,VALID_ORIENTATION,config)
 
+    # grabs the snakefile
     snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
-    # Threads and verbosity to config
     
-
-    # Sort out where the query info is coming from, csv or id string, optional fasta seqs.
-    # Checks if they're real files, of the right format and that QC args sensible values.
+    # Checks medaka options if non default values used.
     analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
-    analysis_arg_parsing.analysis_group_parsing(args.min_read_length,args.max_read_length,args.min_read_depth,args.min_read_pcent,args.primer_length,args.min_map_quality,config)
+
+    # Configures which analysis options to run
+    analysis_arg_parsing.analysis_group_parsing(args.min_read_length,
+                                                args.max_read_length,
+                                                args.min_read_depth,
+                                                args.min_read_pcent,
+                                                args.primer_length,
+                                                args.min_map_quality,
+                                                config)
+
     misc.add_arg_to_config(KEY_ALL_METADATA,args.all_metadata_to_header,config)
 
-    input_qc.parse_input_group(args.barcodes_csv,args.readdir,args.reference_sequences,config)
-    input_qc.control_group_parsing(args.positive_control, args.negative_control, config)
+    input_qc.parse_input_group(args.barcodes_csv,
+                                args.readdir,
+                                args.reference_sequences,
+                                config)
 
-    input_qc.phylo_group_parsing(args.run_phylo, args.supplementary_sequences, args.supplementary_metadata, config)
+    input_qc.control_group_parsing(args.positive_control,
+                                    args.negative_control,
+                                    config)
+
+    # runs qc checks on the phylo input options and configures the phylo settings
+    input_qc.phylo_group_parsing(args.run_phylo, 
+                                args.supplementary_sequences, 
+                                args.supplementary_metadata,
+                                args.phylo_metadata_columns,
+                                config[KEY_BARCODES_CSV],
+                                args.supplementary_metadata_columns,
+                                args.supplementary_metadata_id_column,
+                                config)
+
     if config[KEY_RUN_PHYLO]:
+        # checks the phylo-specific dependencies
         dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
 
     # sets up the output dir, temp dir, and data output desination
-    directory_setup.output_group_parsing(args.outdir, args.output_prefix, args.overwrite, args.datestamp, args.tempdir, args.no_temp, config)
+    directory_setup.output_group_parsing(args.outdir,
+                                        args.output_prefix,
+                                        args.overwrite,
+                                        args.datestamp,
+                                        args.tempdir,
+                                        args.no_temp,
+                                        config)
+
+    init.misc_args_to_config(args.verbose,
+                            args.threads,
+                            args.username,
+                            args.institute,
+                            args.runname,
+                            config)
+
     # ready to run? either verbose snakemake or quiet mode
-    init.misc_args_to_config(args.verbose,args.threads,args.username,args.institute,args.runname,config)
     init.set_up_verbosity(config)
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
     phylo_snakefile = data_install_checks.get_snakefile(thisdir,"phylo")
 
+    # output an optional config file with post processing info
     if args.save_config:
         out_config = os.path.join(config[KEY_OUTDIR], OUTPUT_CONFIG)
         with open(out_config, 'w') as f:
             yaml.dump(config, f)
 
+    # runs the preprocessing snakemake
     status = misc.run_snakemake(config,preprocessing_snakefile,config)
 
     if status: # translate "success" into shell exit code of 0
         with open(os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),"r") as f:
             preprocessing_config = yaml.safe_load(f)
         
+        # runs the business snakemake with consensus generation
         status = misc.run_snakemake(preprocessing_config,snakefile,config)
 
         if status: 
+
             config[KEY_SAMPLE_SEQS]=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
 
+            # initiate phylo 
             if config[KEY_RUN_PHYLO]:
 
                 phylo_outdir = os.path.join(config[KEY_OUTDIR],"phylogenetics")
                 if not os.path.exists(phylo_outdir):
                     os.mkdir(phylo_outdir)
                 
-                seq_clusters = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],config[KEY_OUTGROUP_SEQUENCES],config[KEY_BARCODES_CSV],config[KEY_SUPPLEMENTARY_METADATA],phylo_outdir,config)
+                # figures out how many trees need building, and what sequences are available to go into them
+                # creates the annotations files for the phylogenies too
+                seq_clusters = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],
+                                                                    config[KEY_SUPPLEMENTARY_SEQUENCES],
+                                                                    config[KEY_REFERENCE_SEQUENCES],
+                                                                    config[KEY_OUTGROUP_SEQUENCES],
+                                                                    config[KEY_BARCODES_CSV],
+                                                                    config[KEY_SUPPLEMENTARY_METADATA],
+                                                                    phylo_outdir,
+                                                                    config)
                 config[KEY_CLUSTERS] = seq_clusters
                 config[KEY_ANNOTATIONS] = os.path.join(config[KEY_OUTDIR],"phylogenetics","annotations.csv")
-                #run snakemake
+                
+                #run phylo snakemake
                 print(green("Initializing phylo pipeline."))
                 status = misc.run_snakemake(config,phylo_snakefile,config)
 
+            # get the inputs for making the overall report
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
             summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
             composition_csv=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION)
-            
-
             detailed_csv = os.path.join(config[KEY_OUTDIR],"detailed_run_report.csv")
 
-            make_output_report(report,config[KEY_BARCODES_CSV],summary_csv,composition_csv,config[KEY_SAMPLE_SEQS],detailed_csv,config[KEY_ANNOTATIONS],config)
+            # amalgamate all info to make final html report
+            make_output_report(report,
+                                config[KEY_BARCODES_CSV],
+                                summary_csv,
+                                composition_csv,
+                                config[KEY_SAMPLE_SEQS],
+                                detailed_csv,
+                                config[KEY_ANNOTATIONS],
+                                config)
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:
-
                     if not os.path.getsize(os.path.join(r,fn)):
                         os.remove(os.path.join(r,fn))
 
-
             return 0
-        
-
         return 1
     return 1
-
-
 
 if __name__ == '__main__':
     main()
