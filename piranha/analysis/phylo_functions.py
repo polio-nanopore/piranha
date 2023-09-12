@@ -50,13 +50,13 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         with open(supplementary_metadata, "r") as f:
             reader = csv.DictReader(f)
             for col in reader.fieldnames:
-                if col in config[KEY_BACKGROUND_METADATA_COLUMNS] and col not in header:
+                if col in config[KEY_SUPPLEMENTARY_METADATA_COLUMNS] and col not in header:
                     header.append(col)
 
             for row in reader:
                 if row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] in seq_metadata:
                     sample = row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]]
-                    for col in config[KEY_BACKGROUND_METADATA_COLUMNS]:
+                    for col in config[KEY_SUPPLEMENTARY_METADATA_COLUMNS]:
                         if col in row:
                             seq_metadata[sample][col] = row[col]
 
