@@ -154,7 +154,7 @@ def main(sysargs = sys.argv[1:]):
                 if not os.path.exists(phylo_outdir):
                     os.mkdir(phylo_outdir)
                 
-                seq_clusters = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],config[KEY_OUTGROUP_SEQUENCES],config[KEY_BARCODES_CSV],phylo_outdir,config)
+                seq_clusters = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_REFERENCE_SEQUENCES],config[KEY_OUTGROUP_SEQUENCES],config[KEY_BARCODES_CSV],config[KEY_SUPPLEMENTARY_METADATA],phylo_outdir,config)
                 config[KEY_CLUSTERS] = seq_clusters
                 config[KEY_ANNOTATIONS] = os.path.join(config[KEY_OUTDIR],"phylogenetics","annotations.csv")
                 #run snakemake

@@ -8,7 +8,7 @@ import os
 from piranha.utils.log_colours import green,cyan,red
 
 
-def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,barcodes_csv,phylo_outdir,config):
+def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,barcodes_csv,supplementary_metadata,phylo_outdir,config):
     
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
@@ -46,6 +46,20 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                     seq_metadata[record.id]["query_boolean"] = "False"
                     seq_metadata[record.id]["reference_group"] = ref_group
     
+    if supplementary_metadata:
+        with open(supplementary_metadata, "r") as f:
+            reader = csv.DictReader(f)
+            for col in reader.fieldnames:
+                if col in config[KEY_BACKGROUND_METADATA_COLUMNS] and col not in header:
+                    header.append(col)
+
+            for row in reader:
+                if row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] in seq_metadata:
+                    sample = row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]]
+                    for col in config[KEY_BACKGROUND_METADATA_COLUMNS]:
+                        if col in row:
+                            seq_metadata[sample][col] = row[col]
+
     for record in SeqIO.parse(reference_sequences, "fasta"):
         for ref_group in seq_clusters:
             if ref_group in record.description:
@@ -67,7 +81,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         reader = csv.DictReader(f)
         reader_header = reader.fieldnames
         for col in reader_header:
-            if col in config[KEY_PHYLO_METADATA_COLUMNS]:
+            if col in config[KEY_PHYLO_METADATA_COLUMNS] and col not in header:
                 header.append(col)
         
         for row in reader:
