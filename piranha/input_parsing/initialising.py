@@ -68,6 +68,7 @@ def get_defaults():
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
 
+                    KEY_CONFIGURATION_TABLE_FIELDS: VALUE_CONFIGURATION_TABLE_FIELDS,
                     KEY_COLOUR_MAP: VALUE_COLOUR_MAP,
                     KEY_COLOUR_THEME: VALUE_COLOUR_THEME
 
