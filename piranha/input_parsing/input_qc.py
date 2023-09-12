@@ -127,34 +127,34 @@ def qc_supplementary_sequence_file(supplementary_sequences):
 
 def qc_supplementary_metadata_file(supplementary_metadata,seq_ids,config):
     if not config[KEY_SUPPLEMENTARY_SEQUENCES]:
-            sys.stderr.write(cyan(f"Error: Supplementary metadata supplied without accompanying sequence file.\n"))
+        sys.stderr.write(cyan(f"Error: Supplementary metadata supplied without accompanying sequence file.\n"))
+        sys.exit(-1)
+
+    if not os.path.exists(supplementary_metadata):
+        sys.stderr.write(cyan(f"Error: Cannot find input file {supplementary_metadata}.\n"))
+        sys.exit(-1)
+
+    with open(supplementary_metadata,"r") as f:
+        reader = csv.DictReader(f)
+        if config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN] not in reader.fieldnames:
+            sys.stderr.write(cyan(f"Error: {supplementary_metadata} missing id column `{config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]}`.\n"))
             sys.exit(-1)
 
-        if not os.path.exists(supplementary_metadata):
-            sys.stderr.write(cyan(f"Error: Cannot find input file {supplementary_metadata}.\n"))
+        in_seq_file = set()
+        for row in reader:
+            if row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] in seq_ids:
+                in_seq_file.add(row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]])
+
+        not_in_metadata = set()
+        for seq_id in seq_ids:
+            if seq_id not in in_seq_file:
+                not_in_metadata.add(seq_id)
+
+        if not_in_metadata:
+            sys.stderr.write(cyan(f"Error: the following {len(not_in_metadata)} supplementary sequences do not have accompanying metadata:\n"))
+            for i in seq_id:
+                print(f"- {seq_id}")
             sys.exit(-1)
-
-        with open(supplementary_metadata,"r") as f:
-            reader = csv.DictReader(f)
-            if config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN] not in reader.fieldnames:
-                sys.stderr.write(cyan(f"Error: Cannot find input file {supplementary_metadata}.\n"))
-                sys.exit(-1)
-
-            in_seq_file = set()
-            for row in reader:
-                if row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] in seq_ids:
-                    in_seq_file.add(row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]])
-
-            not_in_metadata = set()
-            for seq_id in seq_ids:
-                if seq_id not in in_seq_file:
-                    not_in_metadata.add(seq_id)
-
-            if not_in_metadata:
-                sys.stderr.write(cyan(f"Error: the following {len(not_in_metadata)} supplementary sequences do not have accompanying metadata:\n"))
-                for i in seq_id:
-                    print(f"- {seq_id}")
-                sys.exit(-1)
 
 def phylo_group_parsing(run_phylo_arg, supplementary_sequences_arg,supplementary_metadata_arg,config):
 
