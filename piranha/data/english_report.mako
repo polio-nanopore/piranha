@@ -387,6 +387,184 @@
         });
         });
     </script>
+
+
+    <!--Figtree.js-->
+    <script type="text/javascript"> 
+      const updateTableFactory = (tooltipId,metadata)=>(tipId)=>{
+              const data = metadata[tipId];
+              const tableDiv = d3.select(document.getElementById(tooltipId));
+              //Remove table
+          tableDiv.html("")
+              if (data !== undefined) {
+                  const visibleData = Object.keys(data).filter(d=>d!=='name');
+                  tableDiv.append("h3")
+                      .attr("class",'tooltip-header')
+                      .text(tipId)
+                      .append("hr");
+                  tableDiv.selectAll("p")
+                          .data(visibleData)
+                          .enter()
+                          .append("p")
+                          .attr("class","tooltip-text")
+                              .selectAll("span")
+                              .data(d=>[d,data[d]])
+                              .enter()
+                              .append("span")
+                              .attr("class",(d,i)=> i===0? "tooltip-key" :"tooltip-value")
+                              .text((d,i)=>i===0? d + " : ": d);
+              }
+      }
+      <%text>
+      function addColourEventHandler(circleNodes,legend,colourSelectID,colorCodes,fig){
+        d3.select(`#${colourSelectID}`).on("change", function(d){
+            const selectedGroup = this.value 
+            const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations[selectedGroup].values)
+            circleNodes.attr("fill",n=>colorScale(n.annotations[selectedGroup]))
+
+            legend.scale(colorScale)
+            fig.update();
+            console.log(selectedGroup);
+          })
+        }
+
+      function addTraitColorEventHandler(traits,traitLegend,barSelectID,colorCodes,fig){
+        
+        d3.select(`#${barSelectID}`).on("change", function(d){
+            const selectedGroup = this.value 
+            const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations[selectedGroup].values)
+            traits.attr("fill",n => traitColorScale(n.annotations[selectedGroup]))
+            traitLegend.scale(traitColorScale)
+            fig.update();
+            console.log(selectedGroup);
+          })
+        }
+
+
+      function addSliderEventHandler(sliderID, fig) {
+          const svg = fig.svgSelection.select(function () {
+              return this.parentNode;
+          })
+          const initialHeight = svg.attr("height");
+          const maxHeight = fig.tree().externalNodes.length * 50; // 50 pixels for each tip plus a little for margins;
+          if (maxHeight <= initialHeight) {
+              console.log(sliderID);
+              d3.select(`#${sliderID}`).select(function () {
+                  return this.parentNode;
+              })
+                  .remove();// don't need  a slider add names
+              fig.svgSelection.selectAll(".label")
+                  .classed("show", true)
+              return;
+          }
+          const heightScale = d3.scaleLinear()
+              .range([initialHeight, maxHeight])
+              .domain([0, 1])
+          if (initialHeight / fig.tree().externalNodes.length > 12) {
+              fig.svgSelection.selectAll(".label")
+                  .classed("show", true)
+          }
+          d3.select(`#${sliderID}`).on("input", function () {
+              const svgHeight = heightScale(this.value);
+              //magic number!!
+              svg.attr("height", svgHeight);
+              fig.update();
+              if (svgHeight / fig.tree().externalNodes.filter(node => !node[fig.id].ignore).length > 12) {
+                  fig.svgSelection.selectAll(".label")
+                      .classed("show", true)
+              } else {
+                  fig.svgSelection.selectAll(".label")
+                      .classed("show", false)
+              }
+          })
+      }
+      </%text>
+      
+      function buildTree(svgID, myTreeString,tooltipID,backgroundDataString,sliderID,colourSelectID,barSelectID,colorCodes) {
+          const backgroundData = JSON.parse(backgroundDataString);
+          const updateTable = updateTableFactory(tooltipID, backgroundData);
+          const margins = {top:50,bottom:60,left:100,right:250}
+          const svg = d3.select(document.getElementById(svgID))
+          svg.selectAll("g").remove();
+          const nexusString = myTreeString;
+          const tree = figtree.Tree.parseNexus(nexusString)[0];
+          const fig = new figtree.FigTree(document.getElementById(svgID),margins, tree)
+          const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query"].values)
+          const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query"].values)
+          const circleNodes = figtree.circle()
+                              .filter(n => !n.children)
+                              .attr("r", 8)
+                              .attr("fill", n => colorScale(n.annotations["query"]))
+                              .hilightOnHover(20)
+                              .onClick((node, i, n) => {
+                                  const isSelected = d3.select(n[i]).classed("selected");
+                                  fig.svgSelection.selectAll(".selected").classed("selected", false);
+                                  if(isSelected){
+                                      d3.select(n[i]).classed("selected", false);
+                                      updateTable(null);
+                                  }else{
+                                      d3.select(n[i]).classed("selected", true);
+                                      updateTable(node.name);
+                                  }
+                              });
+          const legend = figtree.legend()
+                                .scale(colorScale)
+                                .x(-100)
+                                .y(40)
+          const traitLegend = figtree.legend()
+                                .scale(traitColorScale)
+                                .x(-150)
+                                .y(40)
+          const traits = figtree.traitBar()
+                                .x(svg.style("width")+230)
+                                .width(10)
+                                .attr("fill",n => traitColorScale(n.annotations["query"]));
+          fig.layout(figtree.rectangularLayout)
+                  .nodes(circleNodes,
+                          figtree.tipLabel(v=>v.name).attr("dx",10),
+                          figtree.rectangle()
+                                  .filter(n=>n[fig.id].collapsed)
+                                  .attr("width",20)
+                                  .attr("height",20)
+                  )
+                        .nodeBackgrounds(figtree.circle()
+                                          .attr("r", 10)
+                                .filter(n=>!n.children)
+                                        )
+                        .branches(figtree.branch()
+                                    .hilightOnHover(20) 
+                                    .collapseOnClick()
+                                    .on("click",()=>{
+                                      const svgHeight = fig.svgSelection.select(function() { return this.parentNode; }).attr("height");
+                                      if(svgHeight/fig.tree().externalNodes.filter(node=>!node[fig.id].ignore).length>12){
+                                        fig.svgSelection.selectAll(".label")
+                                          .classed("show",true)
+                                      }else{
+                                        fig.svgSelection.selectAll(".label")
+                                        .classed("show",false)
+                                      }
+                                    })
+                            )
+                            .feature(
+                                    figtree.scaleBar()
+                                      .direction("x")
+                                      .length(1/900)
+                                      .x(-60)
+                                      .y(-30)
+                                      // .y(fig.svgSelection.select(function() { return this.parentNode; }).attr("height")-margins.top-margins.bottom+20)
+                                      .title({text:"~1 SNP",
+                                      yPadding:10})
+                                        )
+                            .feature(legend)
+                            // .feature(traits)
+        addSliderEventHandler(sliderID,fig);
+        addColourEventHandler(circleNodes,legend,colourSelectID,colorCodes,fig);
+        // addTraitColorEventHandler(traits,traitLegend,barSelectID,colorCodes,fig)
+      }
+    </script>
+
+
+
 <script>
   function exportImageSVG(buttonID,svgID,name){
       document.querySelector(buttonID).onclick = function(){
@@ -645,23 +823,10 @@
       %endif
       </div>
     <br>
+    
+  <div class="pagebreak"> </div>
+  <div id="plateViz"></div>
     <script>
-      var acc = document.getElementsByClassName("accordion");
-      var i;
-      for (i = 0; i < acc.length; i++) {
-            acc[i].addEventListener("click", function() {
-              this.classList.toggle("active");
-              var panel = this.nextElementSibling;
-              if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
-              } else {
-                panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
-              } 
-            });
-          }
-    </script>
-<div id="plateViz"></div>
-<script>
        var vlSpec_plate = {
          "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
          "width": 450,
@@ -714,9 +879,123 @@
      
      <h3><strong>Figure 1</strong> | Barcodes location on 96-well plate </h3>
      <br>
-    </div> 
+    
+      
+      %if config["run_phylo"]:
+      <% figure_count = 1 %>
+      %for reference_group in phylo_data:
+      <% print(reference_group) %>
+      <% figure_count +=1 %>
+      <div class="pagebreak"> </div>
 
+      <button class="accordion">Tree options</button>
+        <div class="panel">
+          <div class="row">
+            <div class="column">
+              <div class="slider-block" id="slider_${reference_group}">
+                <p>Expansion</p>
+                <input class="slider" type="range" id="rangeinput_${reference_group}"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
+                <span class="highlight"></span>
+              </div>
+            </div>
+            <div class="column">
+              <div>
+              <p>Colour by</p>
+              <select class="colourSelect" id="colourSelect_${reference_group}">
+                <option value="query">Query</option>
+                % for annotation in config["tree_annotations"]:
+                  <option value="${annotation}">${annotation.title()}</option>
+                % endfor
+              </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="row tree-container">
+        <div class="col-xs-7">
+          <svg class="tree_svg" width="700" height="400" id="tree_${reference_group}"></svg>
+        </div>
+        <div class="col-xs-4 sticky" id="tooltip_${reference_group}">
+        </div> 
+        
+        <script type="text/javascript">
+          buildTree("tree_${reference_group}", 
+                    `${phylo_data[reference_group]['nexus']}`,
+                    `tooltip_${reference_group}`,
+                    `${background_data}`,
+                    "rangeinput_${reference_group}",
+                    "colourSelect_${reference_group}",
+                    "barSelect_${reference_group}",
+                    ${colorCodes});
+        </script> 
+      </div> 
+      <h3><strong>Figure ${figure_count}</strong> | ${reference_group} phylogeny</h3>
+      <hr>
+    %endfor
+    %endif
 
+    <div class="pagebreak"> </div>
+    <br>
+    %if show_control_table:
+      <h3><strong>Table 5</strong> | Configuration settings </h3>
+    %else:
+    <h3><strong>Table 4</strong> | Configuration settings </h3>
+    %endif
+    <button class="accordion">Export table</button>
+      <div class="panel">
+        <div class="row">
+          <div class="col-sm-2" ><strong>Export table: </strong></div>
+          <div class="col-sm-8" id="tableExportID5"></div>
+        </div>
+      </div>
+        <table class="display nowrap" id="myTable5">
+          <thead>
+            <tr>
+              <th style="width:30%;">Configuration option</th>
+              <th style="width:70%;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            % for item in config["configuration_table_fields"]:
+              <tr>
+                <td><strong>${item}</strong></td>
+                <td>${config[item]}</td>
+            %endfor
+          </tbody>
+        </table>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              var table = $('#myTable5').DataTable({
+                select: {
+                        style: 'multi'
+                    },
+                'iDisplayLength': 100,
+                "paging": false,
+                "border-bottom":false,
+                "bInfo" : false,
+                dom: 'frtip',
+                buttons: ["copy","csv","print"]
+              });
+              table.buttons().container().appendTo( $('#tableExportID5') );
+              
+            } );
+        </script>
+      <br>
+      <script>
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+        for (i = 0; i < acc.length; i++) {
+              acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                  panel.style.maxHeight = null;
+                } else {
+                  panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
+                } 
+              });
+            }
+      </script>
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>

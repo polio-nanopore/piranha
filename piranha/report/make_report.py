@@ -250,6 +250,7 @@ def make_detailed_csv(data_for_report,barcodes_csv,output,detailed_header_fields
                 to_write[f"{ref_group}|classification"] = info["Sample classification"]
         
             writer.writerow(to_write)
+    
 
 def well_to_dict(barcode_well_map,j,i,c):
     if i<10:
@@ -361,7 +362,37 @@ def data_for_plate_viz(positives_for_plate_viz,barcode_csv,orientation,barcodes)
             
     return json.dumps(wells_to_json), all_positive_types
 
-def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,config):
+def get_nexus(clusters,phylo_data,config):
+    for reference_group in clusters:
+        nexus = ""
+        with open(os.path.join(config[KEY_OUTDIR],"phylogenetics",f"{reference_group}.tree"),"r") as f:
+            for l in f:
+                l = l.rstrip("\n")
+                
+                nexus+=f"{l}\n"
+        phylo_data[reference_group]={}
+        phylo_data[reference_group]["nexus"] = nexus.rstrip("\n")
+
+def get_background_data(metadata,config):
+    background_data = collections.defaultdict(dict)
+    
+    with open(metadata,"r") as f:
+        reader = csv.DictReader(f)
+        background_columns = [i for i in reader.fieldnames]
+        for row in reader:
+            data = {}
+
+            for i in background_columns:
+                
+                data[i] = row[i]
+
+            background_data[row["name"]] = data
+            
+    data = json.dumps(background_data) 
+    return data
+
+
+def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
     
     # which are the negative controls and positive controls
     negative_controls = config[KEY_NEGATIVE]
@@ -510,6 +541,14 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     # detailed csv for download (1)
     make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_TABLE_HEADER])
 
+    phylo_data = {}
+    background_data = {}
+    if config[KEY_RUN_PHYLO]:
+        get_nexus(config[KEY_CLUSTERS],phylo_data,config)
+
+        background_data = get_background_data(annotations_file,config)
+
+
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
@@ -527,6 +566,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     flagged_seqs = flagged_seqs,
                     detailed_csv_out = detailed_csv_out,
                     flagged_high_npev = flagged_high_npev,
+                    phylo_data = phylo_data,
+                    background_data = background_data,
                     config=config)
 
     try:

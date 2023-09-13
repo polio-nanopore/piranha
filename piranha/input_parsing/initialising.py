@@ -46,6 +46,18 @@ def get_defaults():
                     
                     KEY_ALL_METADATA:False,
 
+                    #phylo defaults
+                    KEY_SUPPLEMENTARY_SEQUENCES:"",
+                    KEY_SUPPLEMENTARY_METADATA:"",
+                    KEY_RUN_PHYLO:False,
+                    KEY_CLUSTERS:[],
+                    KEY_ANNOTATIONS:"",
+                    KEY_TREE_ANNOTATIONS:"query ",
+                    KEY_SAMPLE_SEQS:"",
+                    KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
+                    KEY_SUPPLEMENTARY_METADATA_COLUMNS:VALUE_SUPPLEMENTARY_METADATA_COLUMNS,
+                    KEY_SUPPLEMENTARY_METADATA_ID_COLUMN:VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN,
+
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
                     KEY_LANGUAGE:VALUE_LANGUAGE,
@@ -57,6 +69,7 @@ def get_defaults():
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
 
+                    KEY_CONFIGURATION_TABLE_FIELDS: VALUE_CONFIGURATION_TABLE_FIELDS,
                     KEY_COLOUR_MAP: VALUE_COLOUR_MAP,
                     KEY_COLOUR_THEME: VALUE_COLOUR_THEME
 

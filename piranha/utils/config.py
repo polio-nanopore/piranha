@@ -46,6 +46,24 @@ KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
 
+# PHYLO KEYS
+
+KEY_RUN_PHYLO = "run_phylo"
+KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
+KEY_SUPPLEMENTARY_METADATA = "supplementary_metadata"
+KEY_SUPPLEMENTARY_METADATA_ID_COLUMN = "supplementary_metadata_id_column"
+KEY_CLUSTERS= "clusters"
+KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
+KEY_ANNOTATIONS = "annotations"
+KEY_TREE_ANNOTATIONS = "tree_annotations"
+
+KEY_SAMPLE_SEQS = "sample_seqs"
+KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
+KEY_SUPPLEMENTARY_METADATA_COLUMNS = "supplementary_metadata_columns"
+
+VALUE_PHYLO_METADATA_COLUMNS = ["date","EPID"]
+VALUE_SUPPLEMENTARY_METADATA_COLUMNS = ["location","lineage"]
+VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
 
 # REPORT KEYS
 KEY_SNIPIT_SVG="snipit_svg"
@@ -65,6 +83,7 @@ KEY_SUMMARY_TABLE_HEADER="summary_table_header"
 KEY_DETAILED_TABLE_HEADER = "detailed_table_header"
 KEY_CONTROL_STATUS="control_status"
 KEY_ORIENTATION="orientation"
+KEY_CONFIGURATION_TABLE_FIELDS = "configuration_table_fields"
 
 # MISC KEYS
 KEY_USERNAME="username"
@@ -132,6 +151,9 @@ CALL_THRESHOLD_DICT = {
 }
 
 
+# ref group default
+KEY_DISPLAY_NAME = "display_name"
+
 # report defaults
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
@@ -170,22 +192,32 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
                     "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
 
+VALUE_CONFIGURATION_TABLE_FIELDS = [
+                    KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,
+                    KEY_MIN_PCENT,KEY_MEDAKA_MODEL,KEY_PRIMER_LENGTH,KEY_ANALYSIS_MODE,KEY_RUN_PHYLO
+                    ]
+
 # file names
 OUTPUT_REPORT = "report.html"
 SAMPLE_COMPOSITION = "sample_composition.csv"
 PREPROCESSING_SUMMARY = "preprocessing_summary.csv"
 PREPROCESSING_CONFIG = "preprocessing_config.yaml"
+PHYLO_CONFIG = "phylo_config.yaml"
 OUTPUT_CONFIG = "all_config.yaml"
 SAMPLE_SEQS = "vp1_sequences.fasta"
 REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
 REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
+OUTGROUP_SEQUENCES_FILE_WG = "outgroups.wg.fasta"
+OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 valid_analysis_modes = ["vp1","panev","wg"]
 valid_sample_types = ["stool","environmental"]
 
-dependency_list = ["minimap2","snakemake","medaka",]
-module_list = ["mako","Bio"]
+DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
+MODULE_LIST = ["mako","Bio"]
+PHYLO_DEPENDENCY_LIST = ["iqtree","mafft","jclusterfunk"]
+PHYLO_MODULE_LIST = []
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",

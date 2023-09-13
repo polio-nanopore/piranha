@@ -361,6 +361,33 @@ and piranha will check which ones you have installed with your version of medaka
 
 >```Where a version of Guppy has been used without an exactly corresponding medaka model, the medaka model with the highest version equal to or less than the guppy version should be selected.```
 
+
+## Optional phylogenetics module **\*NEW FEATURE\***
+
+Piranha allows the user to optionally run a phylogenetics module in addition to variant calling and consensus builing. There are 3 additional dependencies needed if you wish to run this module:
+- IQTREE2
+- mafft
+- jclusterfunk
+This module will cluster any consensus sequences generated during the run into `reference_group`, so either `Sabin1-related`, `Sabin2-related`, `Sabin3-related` or `WPV1` and will ultimately build one maximum-likelihood phylogeny for each reference group with consensus sequences in a given sequencing run. To annotate the phylogeny with certain metadata from the barcodes.csv file, specify columns to include with `-pcol/--phylo-metadata-columns`.
+
+Piranha then extracts any relevant reference sequences from the installed reference file (identified by having `display_name=Sabin1-related` in their sequence header, or whichever reference group the relevant phylogeny will be for). 
+
+An optional file of local sequences can be supplied to supplement the phylogenetic analysis with `-ss/--supplementary-sequences`. This file should be in FASTA format, but does not need to be aligned. To allow piranha to assign the sequences to the relevant phylogeny, this file should have the reference group annotated in the header in the format `display_name=Sabin1-related`, for example.
+
+This supplementary sequence file can be accompanied with a csv metadata file (one row per supplementary sequence) (`-sm/--supplementary-metadata`) and this metadata can be included in the final report and annotated onto the phylogenies (`-smcol/--supplementary-metadata-columns`). By default, the metadata is matched to the FASTA sequence name with a column titled `sequence_name` but this header name can be configured by specifying `-smid/--supplementary-metadata-id-column`
+
+The phylogenetic pipeline is activated by running with the flag `-rp/--run-phylo`, which then triggers the following analysis steps:
+- Amalgamate the newly generated consensus sequences for all barcodes into their respective reference groups.
+- Combine with the relevant Sabin or wild-type poliovirus references.
+- Combine in any relevant supplementary sequences provided. 
+- Add in an outgroup sequence for each reference group phylogeny.
+- Determine what metadata is provided and which columns should be used for tree annotation (this will allow the user to colour the tips in the report by certain metadata).
+- For each reference group, align the combined FASTA file using `mafft`.
+- Build a phylogeny using `IQTREE2` with a HKY substitution model and zero branches collapsed, with the specified outgroup sequence.
+- Prune off the outgroup sequences using `jclusterfunk`.
+- Annotate the tree newick files with the specified metadata (Default: just whether it's a new consensus sequence or not). 
+- Extract phylogenetic trees and embed in interactive report.
+
 ## Output options
 
 By default the output directory will be created in the current working directory and will be named `analysis-YYYY-MM-DD`, where YYYY-MM-DD is today's date. This output can be configured in a number of ways. For example, the prefix `analysis` can be overwritten by using the `-pre/--output-prefix new_prefix` flag (or `output_prefix: new_prefix` in a config file) and this will change the default behaviour to `new_prefix_YYYY-MM-DD`. It's good practice not to include spaces or special characters in your directory names. 

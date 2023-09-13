@@ -96,10 +96,127 @@ def parse_barcodes_csv(barcodes_csv,config):
                     print(f"- {i}")
                 sys.exit(-1)
 
+def qc_supplementary_sequence_file(supplementary_sequences):
+    misc.check_path_exists(supplementary_sequences)
+    incorrect = 0
+    total = 0
+    seq_ids = set()
+    try:
+        for record in SeqIO.parse(supplementary_sequences,"fasta"):
+            seq_ids.add(record.id)
 
+            total +=1
+            passed = False
+            for field in record.description.split(" "):
+                if field.startswith(KEY_DISPLAY_NAME):
+                    passed=True
+                    continue
+            if not passed:
+                incorrect +=1
+    except:
+        sys.stderr.write(cyan(f"Failed to parse supplementary sequence file, check it is in FASTA format.\n"))
+        sys.exit(-1)
 
+    if incorrect >= 1:
+        sys.stderr.write(cyan(f"Supplementary sequences file lacks `{KEY_DISPLAY_NAME}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
+        sys.exit(-1)
+    else:
+        print(green("Supplementary sequences:"), total, "sequences parsed.")
+    
+    return seq_ids
 
+def qc_supplementary_metadata_file(supplementary_metadata,seq_ids,config):
+    if not config[KEY_SUPPLEMENTARY_SEQUENCES]:
+        sys.stderr.write(cyan(f"Error: Supplementary metadata supplied without accompanying sequence file.\n"))
+        sys.exit(-1)
 
+    if not os.path.exists(supplementary_metadata):
+        sys.stderr.write(cyan(f"Error: Cannot find input file {supplementary_metadata}.\n"))
+        sys.exit(-1)
+
+    with open(supplementary_metadata,"r") as f:
+        reader = csv.DictReader(f)
+        if config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN] not in reader.fieldnames:
+            sys.stderr.write(cyan(f"Error: {supplementary_metadata} missing id column `{config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]}`.\n"))
+            sys.exit(-1)
+
+        missing = set()
+        for col in config[KEY_SUPPLEMENTARY_METADATA_COLUMNS]:
+            if col not in reader.fieldnames and col not in VALUE_SUPPLEMENTARY_METADATA_COLUMNS:
+                missing.add(col)
+        if missing:
+            sys.stderr.write(cyan(f"Error: {supplementary_metadata} missing specified columns:\n"))
+            for i in missing:
+                sys.stderr.write(cyan(f"- {i}\n"))
+            sys.exit(-1)
+
+        in_seq_file = set()
+        for row in reader:
+            if row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] in seq_ids:
+                in_seq_file.add(row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]])
+
+        not_in_metadata = set()
+        for seq_id in seq_ids:
+            if seq_id not in in_seq_file:
+                not_in_metadata.add(seq_id)
+
+        if not_in_metadata:
+            sys.stderr.write(cyan(f"Error: the following {len(not_in_metadata)} supplementary sequences do not have accompanying metadata:\n"))
+            for i in seq_id:
+                print(f"- {seq_id}")
+            sys.exit(-1)
+
+def phylo_group_parsing(run_phylo_arg,
+                        supplementary_sequences_arg,
+                        supplementary_metadata_arg,
+                        phylo_metadata_columns_arg,
+                        barcodes_csv,
+                        supplementary_metadata_columns_arg,
+                        supplementary_metadata_id_column_arg,
+                        config):
+
+    misc.add_arg_to_config(KEY_RUN_PHYLO,run_phylo_arg,config)
+
+    if config[KEY_RUN_PHYLO] not in [True, False]:
+        sys.stderr.write(cyan(f"`run_phylo` argument must be either True/False if specified through the config file.\n"))
+        sys.exit(-1)
+    
+    if config[KEY_RUN_PHYLO]:
+
+        misc.add_arg_to_config(KEY_PHYLO_METADATA_COLUMNS,phylo_metadata_columns_arg,config)
+        with open(barcodes_csv,"r") as f:
+            reader = csv.DictReader(f)
+            missing = set()
+            for col in config[KEY_PHYLO_METADATA_COLUMNS]:
+                if col not in reader.fieldnames and col not in VALUE_PHYLO_METADATA_COLUMNS:
+                    missing.add(col)
+            if missing:
+                sys.stderr.write(cyan(f"The following {KEY_PHYLO_METADATA_COLUMNS} columns are missing from the barcodes.csv file:\n"))
+                for i in missing:
+                    sys.stderr.write(cyan(f"- {i}\n"))
+                sys.exit(-1)
+
+        if supplementary_sequences_arg:
+            misc.add_file_to_config(KEY_SUPPLEMENTARY_SEQUENCES,supplementary_sequences_arg,config)
+        
+        seq_ids = set()
+
+        if config[KEY_SUPPLEMENTARY_SEQUENCES]:
+            seq_ids = qc_supplementary_sequence_file(config[KEY_SUPPLEMENTARY_SEQUENCES])
+        else:
+            print(cyan("Note: no supplementary sequence file provided."))
+
+        misc.add_file_to_config(KEY_SUPPLEMENTARY_METADATA,supplementary_metadata_arg,config)
+        
+        misc.add_arg_to_config(KEY_SUPPLEMENTARY_METADATA_COLUMNS,supplementary_metadata_columns_arg,config)
+        if not type(config[KEY_SUPPLEMENTARY_METADATA_COLUMNS])==list:
+            config[KEY_SUPPLEMENTARY_METADATA_COLUMNS] = [config[KEY_SUPPLEMENTARY_METADATA_COLUMNS]]
+        misc.add_arg_to_config(KEY_SUPPLEMENTARY_METADATA_ID_COLUMN,supplementary_metadata_id_column_arg,config)
+
+        if config[KEY_SUPPLEMENTARY_METADATA]:
+            qc_supplementary_metadata_file(config[KEY_SUPPLEMENTARY_METADATA],
+                                            seq_ids,
+                                            config)
 
 def parse_read_dir(readdir,config):
 

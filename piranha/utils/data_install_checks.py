@@ -24,6 +24,20 @@ def get_snakefile(thisdir,analysis_mode):
         sys.exit(-1)
     return snakefile
 
+def get_references(config):
+    if config[KEY_ANALYSIS_MODE] == "vp1":
+        package_data_check(REFERENCE_SEQUENCES_FILE_VP1,"data",KEY_REFERENCE_SEQUENCES,config)
+    else:
+        package_data_check(REFERENCE_SEQUENCES_FILE_WG,"data",KEY_REFERENCE_SEQUENCES,config)
+
+
+def get_outgroups(config):
+
+    if config[KEY_ANALYSIS_MODE] == "vp1":
+        package_data_check(OUTGROUP_SEQUENCES_FILE_VP1,"data",KEY_OUTGROUP_SEQUENCES,config)
+    else:
+        package_data_check(OUTGROUP_SEQUENCES_FILE_WG,"data",KEY_OUTGROUP_SEQUENCES,config)
+
 def check_install(language,config):
     misc.add_arg_to_config(KEY_LANGUAGE,language, config)
     if config[KEY_LANGUAGE] == "English":
@@ -35,11 +49,10 @@ def check_install(language,config):
     else:
         sys.stderr.write(cyan(f'Error: `{config[KEY_LANGUAGE]}`not a valid language option. Available languages are English and French.\n'))
         sys.exit(-1)
+    
+    get_references(config)
+    get_outgroups(config)
 
-    if config[KEY_ANALYSIS_MODE] == "vp1":
-        package_data_check(REFERENCE_SEQUENCES_FILE_VP1,"data",KEY_REFERENCE_SEQUENCES,config)
-    else:
-        package_data_check(REFERENCE_SEQUENCES_FILE_WG,"data",KEY_REFERENCE_SEQUENCES,config)
 
 # config={}
 # check_install()

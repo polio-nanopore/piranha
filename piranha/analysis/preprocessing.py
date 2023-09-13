@@ -46,7 +46,7 @@ def make_ref_display_name_map(references):
     for record in SeqIO.parse(references,KEY_FASTA):
         display_name = ""
         for item in str(record.description).split(" "):
-            if item.startswith("display_name"):
+            if item.startswith(KEY_DISPLAY_NAME):
                 display_name = item.split("=")[1]
         ref_map[record.id] = display_name
     
