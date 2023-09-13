@@ -362,7 +362,7 @@ and piranha will check which ones you have installed with your version of medaka
 >```Where a version of Guppy has been used without an exactly corresponding medaka model, the medaka model with the highest version equal to or less than the guppy version should be selected.```
 
 
-## Optional phylogenetics module ***NEW FEATURE***
+## Optional phylogenetics module **\*NEW FEATURE\***
 
 Piranha allows the user to optionally run a phylogenetics module in addition to variant calling and consensus builing. There are 3 additional dependencies needed if you wish to run this module:
 - IQTREE2
