@@ -397,7 +397,7 @@
               //Remove table
           tableDiv.html("")
               if (data !== undefined) {
-                  const visibleData = Object.keys(data).filter(d=>d!=='sample');
+                  const visibleData = Object.keys(data).filter(d=>d!=='name');
                   tableDiv.append("h3")
                       .attr("class",'tooltip-header')
                       .text(tipId)
@@ -489,12 +489,12 @@
           const nexusString = myTreeString;
           const tree = figtree.Tree.parseNexus(nexusString)[0];
           const fig = new figtree.FigTree(document.getElementById(svgID),margins, tree)
-          const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query_boolean"].values)
-          const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query_boolean"].values)
+          const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query"].values)
+          const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query"].values)
           const circleNodes = figtree.circle()
                               .filter(n => !n.children)
                               .attr("r", 8)
-                              .attr("fill", n => colorScale(n.annotations["query_boolean"]))
+                              .attr("fill", n => colorScale(n.annotations["query"]))
                               .hilightOnHover(20)
                               .onClick((node, i, n) => {
                                   const isSelected = d3.select(n[i]).classed("selected");
@@ -518,7 +518,7 @@
           const traits = figtree.traitBar()
                                 .x(svg.style("width")+230)
                                 .width(10)
-                                .attr("fill",n => traitColorScale(n.annotations["query_boolean"]));
+                                .attr("fill",n => traitColorScale(n.annotations["query"]));
           fig.layout(figtree.rectangularLayout)
                   .nodes(circleNodes,
                           figtree.tipLabel(v=>v.name).attr("dx",10),
@@ -889,27 +889,6 @@
       <div class="pagebreak"> </div>
 
       <button class="accordion">Tree options</button>
-            <div class="panel">
-              <div class="row">
-                <div class="column">
-                  <div class="slider-block" id="slider_${reference_group}">
-                    <p>Expansion</p>
-                    <input class="slider" type="range" id="rangeinput_${reference_group}"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
-                    <span class="highlight"></span>
-                  </div>
-                </div>
-                <div class="column">
-                  <div>
-                  <p>Colour by</p>
-                  <select class="colourSelect" id="colourSelect_${reference_group}">
-                    <option value="query_boolean">Query</option>
-                    % for annotation in ["query_boolean","reference_group"]:
-                      <option value="${annotation}">${annotation.title()}</option>
-                    % endfor
-                  </select>
-                  </div>
-                </div>
-        <button class="accordion">Tree options</button>
         <div class="panel">
           <div class="row">
             <div class="column">
@@ -917,6 +896,17 @@
                 <p>Expansion</p>
                 <input class="slider" type="range" id="rangeinput_${reference_group}"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
                 <span class="highlight"></span>
+              </div>
+            </div>
+            <div class="column">
+              <div>
+              <p>Colour by</p>
+              <select class="colourSelect" id="colourSelect_${reference_group}">
+                <option value="query">Query</option>
+                % for annotation in config["tree_annotations"]:
+                  <option value="${annotation}">${annotation.title()}</option>
+                % endfor
+              </select>
               </div>
             </div>
           </div>
