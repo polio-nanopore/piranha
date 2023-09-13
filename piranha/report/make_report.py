@@ -250,6 +250,7 @@ def make_detailed_csv(data_for_report,barcodes_csv,output,detailed_header_fields
                 to_write[f"{ref_group}|classification"] = info["Sample classification"]
         
             writer.writerow(to_write)
+    
 
 def well_to_dict(barcode_well_map,j,i,c):
     if i<10:
@@ -373,21 +374,20 @@ def get_nexus(clusters,phylo_data,config):
         phylo_data[reference_group]["nexus"] = nexus.rstrip("\n")
 
 def get_background_data(metadata,config):
-    background_data = {}
+    background_data = collections.defaultdict(dict)
     
     with open(metadata,"r") as f:
         reader = csv.DictReader(f)
-        background_columns = [i for i in reader.fieldnames if i != "query_boolean"]
+        background_columns = [i for i in reader.fieldnames]
         for row in reader:
             data = {}
+
             for i in background_columns:
+                
                 data[i] = row[i]
-            if row["query_boolean"] == "True":
-                data["Query"] = "True"
-                background_data[row["sample"]] = data
-            else:
-                data["Query"] = "False"
-                background_data[row["sample"]] = data
+
+            background_data[row["name"]] = data
+            
     data = json.dumps(background_data) 
     return data
 
