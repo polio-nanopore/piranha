@@ -13,23 +13,28 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
 
-    header = ["sample","barcode","query_boolean","reference_group"]
+    header = ["name","sample","barcode","query","reference_group"]
 
     for record in SeqIO.parse(sample_seqs,"fasta"):
         for ref_group in config[KEY_REFERENCES_FOR_CNS]:
+            num_cns = collections.Counter()
             if ref_group in record.id:
                 new_record = record
-                sample = new_record.id.split("|")[0]
-                barcode = new_record.id.split("|")[1]
+                fields = new_record.id.split("|")
+                sample = fields[0]
+                barcode = fields[1]
+                num_cns[sample]+=1
+                name = "|".join([sample,ref_group,str(num_cns[sample])])
 
-                new_record.description = sample
-                new_record.id = sample
+                new_record.description = name
+                new_record.id = name
                 seq_clusters[ref_group].append(new_record)
 
-                seq_metadata[sample]["sample"] = sample
-                seq_metadata[sample]["barcode"] = barcode
-                seq_metadata[sample]["query_boolean"] = "True"
-                seq_metadata[sample]["reference_group"] = ref_group
+                seq_metadata[name]["name"] = name
+                seq_metadata[name]["sample"] = sample
+                seq_metadata[name]["barcode"] = barcode
+                seq_metadata[name]["query"] = "True"
+                seq_metadata[name]["reference_group"] = ref_group
 
 
     print(green("Reference groups for phylo pipeline:"))
@@ -42,8 +47,9 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 if ref_group in record.description:
                     seq_clusters[ref_group].append(record)
 
+                    seq_metadata[record.id]["name"] = record.id
                     seq_metadata[record.id]["sample"] = record.id
-                    seq_metadata[record.id]["query_boolean"] = "False"
+                    seq_metadata[record.id]["query"] = "False"
                     seq_metadata[record.id]["reference_group"] = ref_group
     
     if supplementary_metadata:
@@ -65,8 +71,9 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
             if ref_group in record.description:
                 seq_clusters[ref_group].append(record)
 
+                seq_metadata[record.id]["name"] = record.id
                 seq_metadata[record.id]["sample"] = record.id
-                seq_metadata[record.id]["query_boolean"] = "False"
+                seq_metadata[record.id]["query"] = "False"
                 seq_metadata[record.id]["reference_group"] = ref_group
     
     for record in SeqIO.parse(outgroup_sequences, "fasta"):
@@ -85,10 +92,11 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 header.append(col)
         
         for row in reader:
-            if row[KEY_SAMPLE] in seq_metadata:
-                for col in header:
-                    if col in config[KEY_PHYLO_METADATA_COLUMNS]:
-                        seq_metadata[row[KEY_SAMPLE]][col] = row[col]
+            for k in seq_metadata:
+                if k.split("|")[0] ==row[KEY_SAMPLE]:
+                    for col in header:
+                        if col in config[KEY_PHYLO_METADATA_COLUMNS]:
+                            seq_metadata[k][col] = row[col]
 
     with open(os.path.join(phylo_outdir, f"annotations.csv"), "w") as fw0:
         
@@ -116,5 +124,11 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
             with open(os.path.join(phylo_outdir, f"{i}.fasta"),"w") as fw:
                 SeqIO.write(seq_clusters[i], fw, "fasta")
 
-    return list(seq_clusters.keys())
+    tree_annotations = config[KEY_TREE_ANNOTATIONS]
+    for i in header:
+        if i not in ["sample","barcode","query","name"]:
+            tree_annotations+= f"{i} "
+
+
+    return list(seq_clusters.keys()),tree_annotations
 
