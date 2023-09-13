@@ -55,6 +55,8 @@ KEY_SUPPLEMENTARY_METADATA_ID_COLUMN = "supplementary_metadata_id_column"
 KEY_CLUSTERS= "clusters"
 KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 KEY_ANNOTATIONS = "annotations"
+KEY_TREE_ANNOTATIONS = "tree_annotations"
+
 KEY_SAMPLE_SEQS = "sample_seqs"
 KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
 KEY_SUPPLEMENTARY_METADATA_COLUMNS = "supplementary_metadata_columns"
