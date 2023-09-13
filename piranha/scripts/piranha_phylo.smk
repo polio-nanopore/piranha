@@ -62,15 +62,17 @@ rule prune_outgroup:
 rule annotate:
     input:
         tree = rules.prune_outgroup.output.tree,
-        csv = os.path.join(config[KEY_OUTDIR],"phylogenetics", "{reference_group}.annotations.csv")
+        csv = os.path.join(config[KEY_OUTDIR],"phylogenetics", "annotations.csv")
+    params:
+        annotations = config[KEY_TREE_ANNOTATIONS]
     output:
         tree = os.path.join(config[KEY_OUTDIR],"phylogenetics","{reference_group}.tree")
     shell:
         """
-        jclusterfunk annotate -c sample \
+        jclusterfunk annotate -c name \
                              -i {input.tree:q} \
                              -m {input.csv:q} \
-                             --tip-attributes query_boolean reference_group \
+                             --tip-attributes {params.annotations}\
                              -f nexus \
                              -o {output.tree:q} \
                             --ignore-missing
