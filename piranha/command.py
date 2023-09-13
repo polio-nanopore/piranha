@@ -202,7 +202,7 @@ def main(sysargs = sys.argv[1:]):
                 
                 # figures out how many trees need building, and what sequences are available to go into them
                 # creates the annotations files for the phylogenies too
-                seq_clusters = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],
+                seq_clusters,tree_annotations = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],
                                                                     config[KEY_SUPPLEMENTARY_SEQUENCES],
                                                                     config[KEY_REFERENCE_SEQUENCES],
                                                                     config[KEY_OUTGROUP_SEQUENCES],
@@ -212,7 +212,8 @@ def main(sysargs = sys.argv[1:]):
                                                                     config)
                 config[KEY_CLUSTERS] = seq_clusters
                 config[KEY_ANNOTATIONS] = os.path.join(config[KEY_OUTDIR],"phylogenetics","annotations.csv")
-                
+                config[KEY_TREE_ANNOTATIONS] = tree_annotations
+
                 #run phylo snakemake
                 print(green("Initializing phylo pipeline."))
                 status = misc.run_snakemake(config,phylo_snakefile,config)
