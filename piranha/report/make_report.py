@@ -15,6 +15,7 @@ from Bio import SeqIO
 from piranha import __version__
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
+from piranha.utils.report_config import *
 
 
 def get_snipit(reference,snipit_file):
@@ -547,7 +548,10 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
         get_nexus(config[KEY_CLUSTERS],phylo_data,config)
 
         background_data = get_background_data(annotations_file,config)
-
+    
+    LANGUAGE_CONFIG = ENGLISH_CONFIG
+    if config[KEY_LANGUAGE] == "French":
+        LANGUAGE_CONFIG = FRENCH_CONFIG
 
     template_dir = os.path.abspath(os.path.dirname(config[KEY_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
@@ -568,6 +572,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     flagged_high_npev = flagged_high_npev,
                     phylo_data = phylo_data,
                     background_data = background_data,
+                    LANGUAGE_CONFIG = LANGUAGE_CONFIG,
                     config=config)
 
     try:
