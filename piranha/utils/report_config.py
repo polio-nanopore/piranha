@@ -1,0 +1,77 @@
+
+# ENGLISH REPORT
+
+ENGLISH_CONFIG = {
+    "1" : "sequencing report",
+    "2" : "Poliovirus Sequencing Consortium",
+    "3" : "Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis",
+    "4" : "Sequencing report:",
+    "5" : "User",
+    "6" : "Institute",
+    "7" : "Warning",
+    "8" : "The following samples have a significant number of NonPolioEV reads, which may lead to reduced sensitivity for poliovirus detection.",
+    "9" : "Table",
+    "10" : "Sample summary information",
+    "11" : "Export table",
+    "12" : "Download",
+    "13" : "Export detailed table",
+    "14" : ["sample","barcode","Sample classification","reference_group","Number of mutations"],
+    "15" : "Sequence",
+    "16" : "Download FASTA",
+    "17" : "Composition of samples",
+    "18" : "Sample",
+    "19" : "Unmapped",
+    "20" : "Flagged samples",
+    "21" : "Identical sequences",
+    "22" : "Sequence IDs",
+    "23" : "Controls",
+    "24" : "Pass",
+    "25" : "Figure",
+    "26" : "Barcodes location on 96-well plate",
+    "27" : "Tree options",
+    "28" : "Expansion",
+    "29" : "Colour by",
+    "30" : "phylogeny",
+    "31" : "Configuration settings",
+    "32" : "Configuration option",
+    "33" : "Value"
+}
+
+# FRENCH REPORT
+
+FRENCH_CONFIG = {
+    "1" : "sequencing report",
+    "2" : "Poliovirus Sequencing Consortium",
+    "3" : "Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis",
+    "4" : "Rapport de séquençage",
+    "5" : "Nom d'utilisateur",
+    "6" : "Institut",
+    "7" : "Attention",
+    "8" : "Les échantillons suivants ont un nombre important de reads NonPolioEV, ce qui peut entraîner une sensibilité réduite pour la détection du poliovirus.",
+    "9" : "Tableau",
+    "10" : "Informations récapitulatives sur l'échantillon",
+    "11" : "Exporter le tableau",
+    "12" : "Télécharger",
+    "13" : "Exporter le tableau détaillé",
+    "14" : ["L'échantillon","Code à barre","Classification de l'échantillon","Groupe de référence","Nombre de mutations"],
+    "15" : "Séquences",
+    "16" : "Télécharger FASTA",
+    "17" : "Composition des échantillons",
+    "18" : "L'échantillon",
+    "19" : "Non-mappée",
+    "20" : "Échantillons signalés",
+    "21" : "Séquences identiques",
+    "22" : "ID de séquence",
+    "23" : "Les contrôles",
+    "24" : "Réussir",
+    "25" : "Figure",
+    "26" : "Emplacement du code à barre sur la plaque 96 puits",
+    "27" : "Option de arbe", # google from here down
+    "28" : "Expansion",
+    "29" : "Coleur de",
+    "30" : "phylogénie",
+    "31" : "Configurisation",
+    "32" : "Option de configurisation",
+    "33" : "Value"
+    
+}
