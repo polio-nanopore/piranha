@@ -592,7 +592,7 @@
         <hr>
       </header>
         
-      <h1>${LANGUAGE_CONFIG["4"]} ${run_name}<small class="text-muted" style="color:${themeColor}">${date}</small></h1>
+      <h1>${LANGUAGE_CONFIG["4"]} ${run_name} <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
       %if config["username"]!="":
         <h3><strong>${LANGUAGE_CONFIG["5"]}</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       %endif
@@ -622,7 +622,8 @@
         <table class="display nowrap" id="myTable1">
           <thead>
             <tr>
-              %for col in ${LANGUAGE_CONFIG["14"]}:
+             <% header = LANGUAGE_CONFIG["14"] %>
+              %for col in header:
                 <th>${col.title().replace("_"," ")}</th>
               %endfor
               <th>${LANGUAGE_CONFIG["15"]} (${config["analysis_mode"].upper()})</th>
@@ -748,7 +749,7 @@
         <thead>
           <tr>
               <th style="width:30%;">${LANGUAGE_CONFIG["21"]}</th>
-              <th style="width:70%;">S${LANGUAGE_CONFIG["22"]}</th>
+              <th style="width:70%;">${LANGUAGE_CONFIG["22"]}</th>
           </tr>
         </thead>
         <tbody>
