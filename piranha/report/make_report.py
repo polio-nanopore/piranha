@@ -140,6 +140,10 @@ def make_sample_report(report_to_generate,
 
             data_for_report[reference][KEY_VARIATION_INFO] = annotated_site_data
 
+    LANGUAGE_CONFIG = ENGLISH_CONFIG
+    if config[KEY_LANGUAGE] == "French":
+        LANGUAGE_CONFIG = FRENCH_CONFIG
+
     template_dir = os.path.abspath(os.path.dirname(config[KEY_BARCODE_REPORT_TEMPLATE]))
     mylookup = TemplateLookup(directories=[template_dir]) #absolute or relative works
 
@@ -153,6 +157,7 @@ def make_sample_report(report_to_generate,
                     sample = sample,
                     data_for_report = data_for_report,
                     sequences = sequences,
+                    LANGUAGE_CONFIG = LANGUAGE_CONFIG,
                     config=config)
 
     try:
