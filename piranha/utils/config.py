@@ -228,7 +228,7 @@ ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
         RESOURCE_KEY_FILENAME:"report.mako"},
         {RESOURCE_KEY:"barcode_report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"english_barcode_report.mako"}
+        RESOURCE_KEY_FILENAME:"barcode_report.mako"}
         ]
 FRENCH_RESOURCES = [
         {RESOURCE_KEY:"report_template",
@@ -236,5 +236,5 @@ FRENCH_RESOURCES = [
         RESOURCE_KEY_FILENAME:"report.mako"},
         {RESOURCE_KEY:"barcode_report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"french_barcode_report.mako"}
+        RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]
