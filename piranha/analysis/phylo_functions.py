@@ -13,9 +13,9 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
 
-    header = ["name","sample","barcode","query","reference_group"]
+    header = VALUE_PHYLO_HEADER
 
-    for record in SeqIO.parse(sample_seqs,"fasta"):
+    for record in SeqIO.parse(sample_seqs,KEY_FASTA):
         for ref_group in config[KEY_REFERENCES_FOR_CNS]:
             num_cns = collections.Counter()
             if ref_group in record.id:
@@ -30,11 +30,11 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 new_record.id = name
                 seq_clusters[ref_group].append(new_record)
 
-                seq_metadata[name]["name"] = name
-                seq_metadata[name]["sample"] = sample
-                seq_metadata[name]["barcode"] = barcode
-                seq_metadata[name]["query"] = "True"
-                seq_metadata[name]["reference_group"] = ref_group
+                seq_metadata[name][KEY_NAME] = name
+                seq_metadata[name][KEY_SAMPLE] = sample
+                seq_metadata[name][KEY_BARCODE] = barcode
+                seq_metadata[name][KEY_SOURCE] = KEY_SAMPLE
+                seq_metadata[name][KEY_REFERENCE_GROUP] = ref_group
 
 
     print(green("Reference groups for phylo pipeline:"))
@@ -42,15 +42,15 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         print(f"- {i}")
     
     if supplementary_sequences:
-        for record in SeqIO.parse(supplementary_sequences,"fasta"):
+        for record in SeqIO.parse(supplementary_sequences,KEY_FASTA):
             for ref_group in seq_clusters:
                 if ref_group in record.description:
                     seq_clusters[ref_group].append(record)
 
-                    seq_metadata[record.id]["name"] = record.id
-                    seq_metadata[record.id]["sample"] = record.id
-                    seq_metadata[record.id]["query"] = "False"
-                    seq_metadata[record.id]["reference_group"] = ref_group
+                    seq_metadata[record.id][KEY_NAME] = record.id
+                    seq_metadata[record.id][KEY_SAMPLE] = record.id
+                    seq_metadata[record.id][KEY_SOURCE] = "Background"
+                    seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
     
     if supplementary_metadata:
         with open(supplementary_metadata, "r") as f:
@@ -66,17 +66,22 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                         if col in row:
                             seq_metadata[sample][col] = row[col]
 
-    for record in SeqIO.parse(reference_sequences, "fasta"):
+    for record in SeqIO.parse(reference_sequences, KEY_FASTA):
         for ref_group in seq_clusters:
             if ref_group in record.description:
                 seq_clusters[ref_group].append(record)
 
-                seq_metadata[record.id]["name"] = record.id
-                seq_metadata[record.id]["sample"] = record.id
-                seq_metadata[record.id]["query"] = "False"
-                seq_metadata[record.id]["reference_group"] = ref_group
+                seq_metadata[record.id][KEY_NAME] = record.id
+                seq_metadata[record.id][KEY_SAMPLE] = record.id
+                
+                seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
+
+                if "Sabin" in record.description:
+                    seq_metadata[record.id][KEY_SOURCE] = "Sabin"
+                else:
+                    seq_metadata[record.id][KEY_SOURCE] = "Reference"
     
-    for record in SeqIO.parse(outgroup_sequences, "fasta"):
+    for record in SeqIO.parse(outgroup_sequences, KEY_FASTA):
         for ref_group in seq_clusters:
             if ref_group in record.description:
                 new_record = record
@@ -111,7 +116,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 writer = csv.DictWriter(fw,fieldnames=header, lineterminator='\n')
                 writer.writeheader()
                 for record in seq_metadata:
-                    if seq_metadata[record]["reference_group"] == i:
+                    if seq_metadata[record][KEY_REFERENCE_GROUP] == i:
                         row = seq_metadata[record]
                         for col in header:
                             if col not in row:
@@ -122,11 +127,11 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                         writer0.writerow(row)
 
             with open(os.path.join(phylo_outdir, f"{i}.fasta"),"w") as fw:
-                SeqIO.write(seq_clusters[i], fw, "fasta")
+                SeqIO.write(seq_clusters[i], fw, KEY_FASTA)
 
     tree_annotations = config[KEY_TREE_ANNOTATIONS]
     for i in header:
-        if i not in ["sample","barcode","query","name"]:
+        if i not in [KEY_SAMPLE,KEY_BARCODE,KEY_SOURCE,KEY_NAME]:
             tree_annotations+= f"{i} "
 
 
