@@ -489,12 +489,12 @@
           const nexusString = myTreeString;
           const tree = figtree.Tree.parseNexus(nexusString)[0];
           const fig = new figtree.FigTree(document.getElementById(svgID),margins, tree)
-          const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query"].values)
-          const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["query"].values)
+          const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["source"].values)
+          const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["source"].values)
           const circleNodes = figtree.circle()
                               .filter(n => !n.children)
                               .attr("r", 8)
-                              .attr("fill", n => colorScale(n.annotations["query"]))
+                              .attr("fill", n => colorScale(n.annotations["source"]))
                               .hilightOnHover(20)
                               .onClick((node, i, n) => {
                                   const isSelected = d3.select(n[i]).classed("selected");
@@ -518,7 +518,7 @@
           const traits = figtree.traitBar()
                                 .x(svg.style("width")+230)
                                 .width(10)
-                                .attr("fill",n => traitColorScale(n.annotations["query"]));
+                                .attr("fill",n => traitColorScale(n.annotations["source"]));
           fig.layout(figtree.rectangularLayout)
                   .nodes(circleNodes,
                           figtree.tipLabel(v=>v.name).attr("dx",10),
@@ -592,7 +592,7 @@
         <hr>
       </header>
         
-      <h1>${run_name} sequencing report <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
+      <h1>Sequencing report of ${run_name}<small class="text-muted" style="color:${themeColor}">${date}</small></h1>
       %if config["username"]!="":
         <h3><strong>User</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       %endif
@@ -625,7 +625,7 @@
               %for col in config["summary_table_header"]:
                 <th>${col.title().replace("_"," ")}</th>
               %endfor
-              <th>${config["analysis_mode"].upper()} sequence</th>
+              <th>Sequence (${config["analysis_mode"].upper()})</th>
             </tr>
           </thead>
           <tbody>
@@ -902,7 +902,6 @@
               <div>
               <p>Colour by</p>
               <select class="colourSelect" id="colourSelect_${reference_group}">
-                <option value="query">Query</option>
                 % for annotation in config["tree_annotations"]:
                   <option value="${annotation}">${annotation.title()}</option>
                 % endfor
