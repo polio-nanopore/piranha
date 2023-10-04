@@ -52,7 +52,7 @@ def get_defaults():
                     KEY_RUN_PHYLO:False,
                     KEY_CLUSTERS:[],
                     KEY_ANNOTATIONS:"",
-                    KEY_TREE_ANNOTATIONS:"query ",
+                    KEY_TREE_ANNOTATIONS:"source ",
                     KEY_SAMPLE_SEQS:"",
                     KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
                     KEY_SUPPLEMENTARY_METADATA_COLUMNS:VALUE_SUPPLEMENTARY_METADATA_COLUMNS,
