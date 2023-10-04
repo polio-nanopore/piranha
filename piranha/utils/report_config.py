@@ -2,6 +2,7 @@
 # ENGLISH REPORT
 
 ENGLISH_CONFIG = {
+    # main report
     "1" : "sequencing report",
     "2" : "Poliovirus Sequencing Consortium",
     "3" : "Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis",
@@ -34,13 +35,33 @@ ENGLISH_CONFIG = {
     "30" : "phylogeny",
     "31" : "Configuration settings",
     "32" : "Configuration option",
-    "33" : "Value"
+    "33" : "Value",
+    # barcode report
+    "34" : "Detailed information on",
+    "35" : "Summary of sample content",
+    "36" : ["sample","barcode","reference_group"],
+    "37" : "Sequences",
+    "38" : "Variant report:",
+    "39" : "Information",
+    "40" : "Reference group",
+    "41" : "Number of mutations",
+    "42" : "Mutations",
+    "43" : "Variation (errors + mutations) across",
+    "44" : "reference in",
+    "45" : "Variation (errors + mutations) across",
+    "46" : "consensus generated in",
+    "47" : ". SNPs and indels called against closest reference highlighted.",
+    "48" : "Export image",
+    "49" : "snipit plot for queries in",
+    "50" : "Co-occurrence matrix of Reference and Variant alleles called against",
+    "51" : ". This is the percentage of bases that cover those sites in the mapping file that are of a high quality (>13) and that are either the reference allele or the allele of the variant called at that site."
 }
 
 # FRENCH REPORT
 
 FRENCH_CONFIG = {
-    "1" : "sequencing report",
+    # main report
+    "1" : "Rapport de séquençage",
     "2" : "Poliovirus Sequencing Consortium",
     "3" : "Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis",
     "4" : "Rapport de séquençage",
@@ -72,6 +93,24 @@ FRENCH_CONFIG = {
     "30" : "phylogénie",
     "31" : "Configurisation",
     "32" : "Option de configurisation",
-    "33" : "Value"
-    
-}
+    "33" : "Value",
+    # barcode report
+    "34" : "Informations sur",
+    "35" : "Résumé du contenu de l'échantillon",
+    "36" : ["L'échantillon","Code à barre","Groupe de référence"],
+    "37" : "Séquences",
+    "38" : "Rapport de variante",
+    "39" : "Les renseignements",
+    "40" : "Groupe de référence",
+    "41" : "Nombre de mutations",
+    "42" : "Mutations",
+    "43" : "Variation (erreurs + mutations) à travers la référence",
+    "44" : "dans",
+    "45" : "Variation (erreurs + mutations) à travers le consensus",
+    "46" : "consensus généré dans",
+    "47" : ". Les SNP et les indels appelés par rapport à la référence la plus proche sont mis en évidence.",
+    "48" : "Exporter une image",
+    "49" : "Graphique d'extraits pour les requêtes dans",
+    "50" : "Matrice de cooccurrence des allèles de référence et de variante appelée par rapport à la référence",
+    "51" : ". Il s'agit du pourcentage de bases qui couvrent les sites du fichier de cartographie qui sont de haute qualité (>13) et qui sont soit l'allèle de référence, soit l'allèle du variant appelé sur ce site."
+ }
