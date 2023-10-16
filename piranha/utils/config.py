@@ -34,6 +34,7 @@ KEY_PRIMER_LENGTH = "primer_length"
 
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
+KEY_NAME = "name"
 KEY_DATE="date"
 KEY_EPID="EPID"
 KEY_WELL = "well"
@@ -42,6 +43,7 @@ KEY_REFERENCE = "reference"
 KEY_NUM_READS = "num_reads"
 KEY_PERCENT = "percent_of_sample"
 KEY_REFERENCE_GROUP = "reference_group"
+KEY_SOURCE = "source"
 KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
@@ -81,6 +83,7 @@ KEY_COMPOSITION_TABLE="composition_table"
 KEY_COMPOSITION_TABLE_HEADER="composition_table_header"
 KEY_SUMMARY_TABLE_HEADER="summary_table_header"
 KEY_DETAILED_TABLE_HEADER = "detailed_table_header"
+KEY_PHYLO_HEADER = "phylo_header"
 KEY_CONTROL_STATUS="control_status"
 KEY_ORIENTATION="orientation"
 KEY_CONFIGURATION_TABLE_FIELDS = "configuration_table_fields"
@@ -118,6 +121,7 @@ VALUE_NEGATIVE = ["negative"]
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
+VALUE_PHYLO_HEADER = ["name","sample","barcode","source","reference_group"]
 
 VALUE_SAMPLE_TYPE = "stool"
 VALUE_ANALYSIS_MODE = "vp1"
@@ -221,16 +225,16 @@ PHYLO_MODULE_LIST = []
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"english_report.mako"},
+        RESOURCE_KEY_FILENAME:"report.mako"},
         {RESOURCE_KEY:"barcode_report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"english_barcode_report.mako"}
+        RESOURCE_KEY_FILENAME:"barcode_report.mako"}
         ]
 FRENCH_RESOURCES = [
         {RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"french_report.mako"},
+        RESOURCE_KEY_FILENAME:"report.mako"},
         {RESOURCE_KEY:"barcode_report_template",
         RESOURCE_KEY_DIRECTORY:"data",
-        RESOURCE_KEY_FILENAME:"french_barcode_report.mako"}
+        RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]

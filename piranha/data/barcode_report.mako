@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>Information about ${sample}</title>
+    <title>${LANGUAGE_CONFIG["34"]} ${sample}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -463,10 +463,10 @@
         <header class="piranha-header">
           <div class="col-sm-4" style="text-align: left;">
             <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
-            PoSeCo | <small class="text-muted">Poliovirus Sequencing Consortium</small>
+            PoSeCo | <small class="text-muted">${LANGUAGE_CONFIG["2"]}</small>
           </div>
           <div class="col-sm-8" style="text-align: right;">
-            piranha | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+            piranha | <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small>
           </div>
           <br>
           <hr>
@@ -474,17 +474,18 @@
         <div class="spacer">
           &nbsp;
         </div>
-        <h1>${sample} report
+        <h1>${LANGUAGE_CONFIG["34"]} ${sample}
             <small class="text-muted" style="color:${themeColor}">${date}</small>
         </h1> 
         <br>
       <% figure_count = 0 %>
       <% table_count = 1 %>
-          <h3><strong>Table ${table_count} </strong> | Summary of sample content </h3>
+          <h3><strong>${LANGUAGE_CONFIG["9"]} ${table_count} </strong> | ${LANGUAGE_CONFIG["35"]} </h3>
           <table class="display nowrap" id="myTable">
             <thead>
               <tr>
-              %for col in ["sample","barcode","reference_group"]:
+            <% header = LANGUAGE_CONFIG["36"] %>
+              %for col in header:
               <th>${col.title().replace("_"," ")}</th>
               %endfor
               </tr>
@@ -493,8 +494,8 @@
               % for reference in data_for_report:
               <% summary_data = data_for_report[reference]["summary_data"] %>
                   <tr>
-                    %for col in ["sample","barcode","reference_group"]:
-                      %if col=="reference_group":
+                    %for col in header:
+                      %if col=="reference_group" or col=="Groupe de référence":
                       <td><a href="#header_${reference}" style="color:${themeColor}">${summary_data[col]}</a></td>
                       %else:
                       <td>${summary_data[col]}</td>
@@ -506,7 +507,7 @@
             </table>
             <br>
             <hr>
-            <h2 style="color:${themeColor}"><a id="header_${barcode}"></a>${config["analysis_mode"].upper()} sequences</h2> 
+            <h2 style="color:${themeColor}"><a id="header_${barcode}"></a> ${LANGUAGE_CONFIG["37"]} (${config["analysis_mode"].upper()})</h2> 
             
             <p style="height: 200px; white-space:wrap; word-wrap:break-word; overflow:scroll; border-width:2px; border-style:solid; border-color:#e68781; padding: 1em;">
               ${sequences}
@@ -534,28 +535,28 @@
       % for reference in data_for_report:
         <% summary_data = data_for_report[reference]["summary_data"] %>
         <% reference_name = summary_data["reference_group"].replace("_"," ").title() %>
-        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${reference_name} variant report</h2> 
+        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${LANGUAGE_CONFIG["38"]} ${reference_name}</h2> 
         <% table_count += 1 %>
-        <h3><strong>Table ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
+        <h3><strong>${LANGUAGE_CONFIG["9"]} ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
         <table class="table" id="table_${table_count}">
           <thead class="thead-light">
             <tr>
               <th style="width:30%;"></th>
-              <th style="width:60%;">Information</th>
+              <th style="width:60%;">${LANGUAGE_CONFIG["39"]}</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Reference group</td>
+              <td>${LANGUAGE_CONFIG["40"]}</td>
               <td>${summary_data["reference_group"]}</td>
             </tr>
             <tr>
-              <td>Number of mutations</td>
+              <td>${LANGUAGE_CONFIG["41"]}</td>
               <td>${summary_data["Number of mutations"]}</td>
             </tr>
             % if summary_data["reference_group"].startswith("Sabin"):
             <tr>
-              <td>Mutations</td>
+              <td>${LANGUAGE_CONFIG["42"]}</td>
               <td>${"<br>".join(summary_data["Variants"].split(";"))}</td>
             </tr>
             %endif
@@ -624,13 +625,13 @@
                 </script>
             <% figure_count +=1 %>
             %if "Sabin" in reference:
-              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} reference in ${sample}</h3>
+              <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["43"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample}</h3>
             %else:
-              <h3><strong>Figure ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in ${sample}. SNPs and indels called against closest reference highlighted.</h3>
+              <h3><strong>${LANGUAGE_CONFIG["9"]} ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in ${sample}. SNPs and indels called against closest reference highlighted.</h3>
             %endif
             <hr>
           
-            <button class="accordion">Export image</button>
+            <button class="accordion">${LANGUAGE_CONFIG["48"]}</button>
             <div class="panel">
               <div class="row">
                 <div class="column">
@@ -663,7 +664,7 @@
             <br>
             <div>
               <% figure_count +=1 %>
-              <h3><strong>Figure ${figure_count}</strong> | snipit plot for queries in ${reference_name}</h3>
+              <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["49"]} ${reference_name}</h3>
               <hr>
             </div>
             <hr>
@@ -763,7 +764,7 @@
                                       .catch(console.warn);
         </script>
         <% figure_count +=1 %>
-        <h3><strong>Figure ${figure_count}</strong> | Co-occurrence matrix of Reference and Variant alleles called against ${reference_name} reference in ${sample}. This is the percentage of bases that cover those sites in the mapping file that are of a high quality (>13) and that are either the reference allele or the allele of the variant called at that site.</h3>
+        <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["50"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample}${LANGUAGE_CONFIG["51"]}</h3>
         <hr>
           %endif
 
@@ -798,7 +799,7 @@
         </div>
 
       <div class="col-sm-11" style="text-align: right;">
-        piranha ${version} | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
+        piranha ${version} | <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small> <br><small class="text-muted">GNU General Public License v3.0</small></div>
 
         <br><br>
         </p>
