@@ -914,7 +914,7 @@
               <div>
               <p>${LANGUAGE_CONFIG["29"]}</p>
               <select class="colourSelect" id="colourSelect_${reference_group}">
-                % for annotation in config["tree_annotations"]:
+                % for annotation in config["tree_annotations"].rstrip(" ").split(" "):
                   <option value="${annotation}">${annotation.title()}</option>
                 % endfor
               </select>
