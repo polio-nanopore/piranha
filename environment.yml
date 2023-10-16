@@ -12,4 +12,6 @@ dependencies:
   - bcftools=1.11
   - tabix=1.11
   - snakemake-minimal
-
+  - iqtree>=2.2
+  - mafft=7.508
+  - jclusterfunk=0.0.25
