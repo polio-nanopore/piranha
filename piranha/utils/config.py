@@ -162,7 +162,7 @@ KEY_DISPLAY_NAME = "display_name"
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
 VALUE_RUN_NAME="Nanopore"
-VALUE_COLOUR_MAP=["#e68781","#476970","#f5eece"]
+VALUE_COLOUR_MAP=["#e68781","#476970","#fbedac"]
 VALUE_COLOUR_THEME="#e68781"
 
 #file headers
