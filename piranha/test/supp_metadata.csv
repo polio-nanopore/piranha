@@ -1,0 +1,6 @@
+sequence_name,reference_group,lineage,location
+1175|VDPV,Sabin2-related,VDPV_lineageA,Lahore
+1176|VDPV,Sabin2-related,VDPV_lineageB,Lahore
+test1|VDPV,Sabin3-related,VDPV_lineageB,Islamabad
+test2|VDPV,Sabin3-related,VDPV_lineageA,Lahore
+test3|VDPV,Sabin3-related,VDPV_lineageA,Islamabad
