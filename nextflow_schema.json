@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/polio-nanopore/piranha/main/nextflow_schema.json",
+  "title": "polio-nanopore/piranha",
+  "description": "Polio investigation resource automating nanopore haplotype analysis.",
+  "url": "https://github.com/polio-nanopore/piranha",
+  "type": "object",
+  "definitions": {
+    "input_options": {
+      "title": "Input Options",
+      "type": "object",
+      "fa_icon": "fas fa-terminal",
+      "description": "Define where the pipeline should find input data and save output data.",
+      "properties": {
+        "barcodes_csv": {
+          "type": "string",
+          "format": "path",
+          "title": "BARCODES_CSV",
+          "description": "A CSV file with barcode and sample columns.",
+          "help_text": ".",
+          "demo_data": "test/pak_run/barcodes.csv"
+        },
+        "run_dir": {
+          "type": "string",
+          "format": "path",
+          "title": "RUN_DIR",
+          "description": "A directory containing a directory of fastq for a each barcode in a run.",
+          "help_text": "A directory containing subdirectories of fastq files as created by MinKNOW.",
+          "demo_data": "test/pak_run/demultiplexed"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "run_dir",
+            "barcodes_csv"
+          ]
+        }
+      ]
+    },
+    "allOf": [
+      {
+        "$ref": "#/definitions/input_options"
+      }
+    ]
+  },
+  "properties": {
+    "aws_image_prefix": {
+      "type": "string",
+      "title": "AWS image prefix",
+      "hidden": true
+    },
+    "aws_queue": {
+      "type": "string",
+      "title": "AWS queue",
+      "hidden": true
+    },
+    "monochrome_logs": {
+      "type": "boolean"
+    },
+    "validate_params": {
+      "type": "boolean",
+      "default": true
+    },
+    "show_hidden_params": {
+      "type": "boolean"
+    }
+  },
+  "docs": {
+    "intro": "\n## Introduction\n\nPiranha blah.\n\n",
+    "links": "## Useful links\n\n* [nextflow](https://www.nextflow.io/)\n* [docker](https://www.docker.com/products/docker-desktop)"
+  }
+}
