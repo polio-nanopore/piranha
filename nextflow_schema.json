@@ -18,7 +18,7 @@
           "title": "BARCODES_CSV",
           "description": "A CSV file with barcode and sample columns.",
           "help_text": ".",
-          "demo_data": "test/pak_run/barcodes.csv"
+          "demo_data": "piranha/test/pak_run/barcodes01.csv"
         },
         "run_dir": {
           "type": "string",
@@ -26,7 +26,7 @@
           "title": "RUN_DIR",
           "description": "A directory containing a directory of fastq for a each barcode in a run.",
           "help_text": "A directory containing subdirectories of fastq files as created by MinKNOW.",
-          "demo_data": "test/pak_run/demultiplexed"
+          "demo_data": "piranha/test/pak_run/demultiplexed"
         }
       },
       "oneOf": [
