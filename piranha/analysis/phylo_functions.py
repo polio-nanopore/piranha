@@ -33,7 +33,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 seq_metadata[name][KEY_NAME] = name
                 seq_metadata[name][KEY_SAMPLE] = sample
                 seq_metadata[name][KEY_BARCODE] = barcode
-                seq_metadata[name][KEY_SOURCE] = KEY_SAMPLE
+                seq_metadata[name][KEY_SOURCE] = "Sample"
                 seq_metadata[name][KEY_REFERENCE_GROUP] = ref_group
 
 
