@@ -17,24 +17,46 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
 
     for record in SeqIO.parse(sample_seqs,KEY_FASTA):
         for ref_group in config[KEY_REFERENCES_FOR_CNS]:
-            num_cns = collections.Counter()
-            if ref_group in record.id:
+
+            """
+            record header is:
+            >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
+
+            if "all_metadata" then everything else gets added to the description
+            """
+            
+            fields = record.description.split(" ")
+            record_id = fields[0]
+            record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
+
+            description_dict = {}
+            for field in fields[1:]:
+                key,value = field.split("=")
+                description_dict[key] = value
+
+            if ref_group == reference_group:
+                
                 new_record = record
-                fields = new_record.id.split("|")
-                sample = fields[0]
-                barcode = fields[1]
-                num_cns[sample]+=1
-                name = "|".join([sample,ref_group,str(num_cns[sample])])
+
+                barcode = description_dict[KEY_BARCODE]
+                name = record_id
 
                 new_record.description = name
                 new_record.id = name
+
                 seq_clusters[ref_group].append(new_record)
 
                 seq_metadata[name][KEY_NAME] = name
-                seq_metadata[name][KEY_SAMPLE] = sample
+                seq_metadata[name][KEY_SAMPLE] = record_sample
                 seq_metadata[name][KEY_BARCODE] = barcode
                 seq_metadata[name][KEY_SOURCE] = "Sample"
                 seq_metadata[name][KEY_REFERENCE_GROUP] = ref_group
+
+                var_count = description_dict[KEY_VARIANT_COUNT]
+                if var_count == "NA":
+                    seq_metadata[name][KEY_VARIANT_COUNT] = 0
+                else:
+                    seq_metadata[name][KEY_VARIANT_COUNT] = int(var_count)
 
 
     print(green("Reference groups for phylo pipeline:"))
@@ -51,6 +73,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                     seq_metadata[record.id][KEY_SAMPLE] = record.id
                     seq_metadata[record.id][KEY_SOURCE] = "Background"
                     seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
+                    seq_metadata[record.id][KEY_VARIANT_COUNT] = 0
     
     if supplementary_metadata:
         with open(supplementary_metadata, "r") as f:
@@ -75,7 +98,8 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 seq_metadata[record.id][KEY_SAMPLE] = record.id
                 
                 seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
-
+                seq_metadata[record.id][KEY_VARIANT_COUNT] = 0
+                
                 if "Sabin" in record.description:
                     seq_metadata[record.id][KEY_SOURCE] = "Sabin"
                 else:
