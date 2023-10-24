@@ -2,7 +2,7 @@ process run_piranha {
 
     publishDir "${params.out_dir}", mode: 'copy'
 
-    container "${params.wf.container}@${params.wf.container_sha}"
+    container "${params.wf.container}"
 
     input:
         path barcodes_csv

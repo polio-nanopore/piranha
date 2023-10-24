@@ -52,12 +52,20 @@ COPY --from=compile-image /venv /venv
 # create directory to mount the basecalled directory and output directory
 RUN mkdir -p /data/run_data/basecalled && mkdir -p /data/run_data/output
 
+# check for updates
+RUN apt-get update -y && \
+  apt-get upgrade -y && \
+  apt install build-essential -y --no-install-recommends && \
+  apt install -y procps && \
+  apt-get clean && apt-get autoclean
+
 WORKDIR /data/run_data/analysis
 
 SHELL ["/bin/bash", "-c"]
 
 # to allow streamed log output
 ENV PYTHONUNBUFFERED=1
+ENV PATH=/venv/bin:$PATH
 
-ENTRYPOINT   source /venv/bin/activate && \
-             piranha -b /data/run_data/analysis/barcodes.csv -i /data/run_data/basecalled --outdir /data/run_data/output/piranha_output -t ${THREADS}
+CMD   source /venv/bin/activate && \
+      piranha -b /data/run_data/analysis/barcodes.csv -i /data/run_data/basecalled --outdir /data/run_data/output/piranha_output -t ${THREADS}
