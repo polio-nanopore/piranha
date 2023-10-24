@@ -37,13 +37,13 @@
           ]
         }
       ]
-    },
-    "allOf": [
-      {
-        "$ref": "#/definitions/input_options"
-      }
-    ]
+    }
   },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_options"
+    }
+  ],
   "properties": {
     "aws_image_prefix": {
       "type": "string",
