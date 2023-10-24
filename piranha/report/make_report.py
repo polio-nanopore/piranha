@@ -41,43 +41,61 @@ def make_sample_report(report_to_generate,
         data_for_report[reference] = {}
         data_for_report[reference][KEY_SNIPIT_SVG] = get_snipit(reference,os.path.join(config[KEY_TEMPDIR],f"{barcode}","snipit",f"{reference}.svg"))
 
-    info_dict = {}
+    info_dict = {} # keyed at ref- will need to mod if integrate haplo pipeline
     sequences = ""
 
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
-            
         
-        fields = record.description.split("|")
-        
-        record_sample,record_barcode,reference_group,reference,var_count = fields[:5] ## fix header parsing if changes again
-        additional_fields = fields[6:]
+        """
+        record header is:
+        >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
 
+        if "all_metadata" then everything else gets added to the description
+        """
         
-        additional_info = {}
-        for field in additional_fields:
+        fields = record.description.split(" ")
+        record_id = fields[0]
+        record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
+
+        description_dict = {}
+        for field in fields[1:]:
             key,value = field.split("=")
-            additional_info[key]=value
-
-        if barcode == record_barcode:
+            description_dict[key] = value
+        
+        if barcode == description_dict[KEY_BARCODE]:
             
             sequences+= f">{record.description}<br>{record.seq}<br>"
             
-            sample = record_sample
-            info = {KEY_BARCODE:barcode,
-                    KEY_SAMPLE:record_sample,
+            # if plan to have more than one seq per ref group will need to modify this
+            info = {KEY_SAMPLE:record_sample,
                     KEY_REFERENCE_GROUP:reference_group,
-                    "Number of mutations": int(var_count),
-                    "Variants":var_string
+                    "CNS ID":cns_id,
+                    KEY_EPID:epid,
+                    KEY_DATE:sample_date
                     }
 
-            for key in additional_info:
-                info[key] = additional_info[key]
+            for key in description_dict:
+                if key == KEY_VARIANT_COUNT:
+                    num_var = description_dict[key]
+                    if num_var != "NA":
+                        info["Number of mutations"] = int(num_var)
+                    else:
+                        info["Number of mutations"] = description_dict[key]
+                elif key == KEY_VARIANTS:
+                    info["Variants"] = description_dict[key]
+                else:
+                    info[key] = description_dict[key]
 
+
+            # if plan to have more than one seq per ref group will need to modify this
+            reference=description_dict[KEY_REFERENCE]
             info_dict[reference] = info
 
             data_for_report[reference][KEY_SNP_SITES] = []
             data_for_report[reference][KEY_INDEL_SITES] = []
+
+            var_string = description_dict[KEY_VARIANTS]
 
             for var in var_string.split(";"):
                 site = var.split(":")[0]
@@ -89,8 +107,6 @@ def make_sample_report(report_to_generate,
                         data_for_report[reference][KEY_SNP_SITES].append(site)
                     except:
                         data_for_report[reference][KEY_SNP_SITES].append(site)
-
-    
 
     for reference in info_dict:
         data_for_report[reference][KEY_MASKED_SITES] = []
@@ -154,7 +170,7 @@ def make_sample_report(report_to_generate,
                     date = date.today(), 
                     version = __version__,
                     barcode = barcode,
-                    sample = sample,
+                    sample = record_sample,
                     data_for_report = data_for_report,
                     sequences = sequences,
                     LANGUAGE_CONFIG = LANGUAGE_CONFIG,
@@ -475,22 +491,32 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         identical_seq_check[str(record.seq)].append(record.description)
         
-        fields = record.description.split("|")
+        fields = record.description.split(" ")
+
+        """
+        record header is:
+        >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
+
+        if "all_metadata" then everything else gets added to the description
+        """
 
         # the first fields there will always be
-        record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
-        # additional fields that have been added to header
-        additional_fields = fields[6:]
+        record_sample,reference_group,cns_id,epid,sample_date = fields[0].split("|")
+
+        # additional fields that have been added to header description
+        additional_fields = fields[1:]
 
         additional_info = {}
         for field in additional_fields:
             key,value = field.split("=")
             additional_info[key]=value
         
-        length_of_seq = len(record)
+        record_barcode = additional_info[KEY_BARCODE]
+        var_count = additional_info[KEY_VARIANT_COUNT]
+        var_string = additional_info[KEY_VARIANTS]
+        reference = additional_info[KEY_REFERENCE]
 
-        prop_diff = int(var_count)/length_of_seq
-        pcent_match = round((1-prop_diff)*100, 2)
+        length_of_seq = len(record)
 
         call = reference_group
         if reference_group.startswith("Sabin"):
@@ -503,6 +529,9 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
             else:
                 call = "Sabin-like"
 
+            prop_diff = int(var_count)/length_of_seq
+            pcent_match = round((1-prop_diff)*100, 2)
+            
             info = {KEY_BARCODE:record_barcode,
                 KEY_SAMPLE:record_sample,
                 "Sample classification": call,
@@ -518,7 +547,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 KEY_REFERENCE_GROUP:reference_group,
                 KEY_REFERENCE:reference,
                 "Number of mutations": "NA",
-                KEY_PERCENT:pcent_match
+                KEY_PERCENT:"NA"
                 }
 
         data_for_report[KEY_SUMMARY_TABLE].append(info)
