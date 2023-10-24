@@ -244,6 +244,7 @@ def parse_paf_file(paf_file,
         write_out_report(ref_index,ref_name_map,csv_out,ref_hits,unmapped,total_reads,barcode)
 
         write_out_hits(ref_hits,hits_out)
+        
     else:
         print("No reads for",barcode)
         with open(csv_out,"w") as fw:
