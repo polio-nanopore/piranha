@@ -4,6 +4,7 @@
   "title": "polio-nanopore/piranha",
   "description": "Polio investigation resource automating nanopore haplotype analysis.",
   "url": "https://github.com/polio-nanopore/piranha",
+  "demo_url": "https://raw.githubusercontent.com/polio-nanopore/piranha/main/piranha/test/pak_run",
   "type": "object",
   "definitions": {
     "input_options": {
@@ -15,35 +16,89 @@
         "barcodes_csv": {
           "type": "string",
           "format": "path",
-          "title": "BARCODES_CSV",
+          "title": "Barcodes",
           "description": "A CSV file with barcode and sample columns.",
           "help_text": ".",
-          "demo_data": "piranha/test/pak_run/barcodes01.csv"
+          "demo_data": "barcodes01.csv"
         },
         "run_dir": {
           "type": "string",
           "format": "path",
-          "title": "RUN_DIR",
+          "title": "Run directory",
           "description": "A directory containing a directory of fastq for a each barcode in a run.",
           "help_text": "A directory containing subdirectories of fastq files as created by MinKNOW.",
-          "demo_data": "piranha/test/pak_run/demultiplexed"
+          "demo_data": "demultiplexed"
         }
       },
-      "oneOf": [
+      "allOf": [
         {
           "required": [
-            "run_dir",
-            "barcodes_csv"
+            "barcodes_csv",
+            "run_dir"
           ]
         }
       ]
     },
-    "allOf": [
-      {
-        "$ref": "#/definitions/input_options"
+    "output_options": {
+      "title": "Output Options",
+      "type": "object",
+      "description": "Parameters for saving and naming workflow outputs.",
+      "default": "",
+      "properties": {
+        "out_dir": {
+          "type": "string",
+          "format": "directory-path",
+          "default": "output",
+          "title": "Output folder name",
+          "description": "Directory for output of all user-facing files."
+        }
       }
-    ]
+    },
+    "advanced_options": {
+      "title": "Advanced Options",
+      "type": "object",
+      "description": "Advanced options for configuring processes inside the workflow.",
+      "default": "",
+      "properties": {
+      }
+    },
+    "miscellaneous_options": {
+      "title": "Miscellaneous Options",
+      "type": "object",
+      "fa_icon": "fas fa-file-import",
+      "description": "Everything else.",
+      "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+      "properties": {
+        "help": {
+          "type": "boolean",
+          "title": "Display help text",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true
+        },
+        "version": {
+          "type": "boolean",
+          "title": "Display version",
+          "description": "Display version and exit.",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true
+        }
+      }
+    }
   },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_options"
+    },
+    {
+      "$ref": "#/definitions/output_options"
+    },
+    {
+      "$ref": "#/definitions/advanced_options"
+    },
+    {
+      "$ref": "#/definitions/miscellaneous_options"
+    }
+  ],
   "properties": {
     "aws_image_prefix": {
       "type": "string",
