@@ -51,10 +51,12 @@ rule assess_broad_diversity:
         min_map_quality = config[KEY_MIN_MAP_QUALITY]
     output:
         csv = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"),
-        hits = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_reads.csv")
+        hits = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_reads.csv"),
+        parsing = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_filter_description.csv")
     run:
         parse_paf_file(input.map_file,
                         output.csv,
+                        output.parsing,
                         output.hits,
                         config[KEY_REFERENCE_SEQUENCES],
                         params.barcode,
