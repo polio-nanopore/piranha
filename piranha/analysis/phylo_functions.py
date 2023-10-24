@@ -53,10 +53,19 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 seq_metadata[name][KEY_REFERENCE_GROUP] = ref_group
 
                 var_count = description_dict[KEY_VARIANT_COUNT]
-                if var_count == "NA":
-                    seq_metadata[name][KEY_VARIANT_COUNT] = 0
-                else:
-                    seq_metadata[name][KEY_VARIANT_COUNT] = int(var_count)
+
+                call = ref_group
+                if ref_group.startswith("Sabin"):
+                    # configured number of mutations in sabin for the call threshold of VDPV
+                    call_threshold = CALL_THRESHOLD_DICT[ref_group]
+                    if int(var_count) > call_threshold:
+                        call = "VDPV"
+                    elif var_count == 0:
+                        call = "Sabin"
+                    else:
+                        call = "Sabin-like"
+
+                seq_metadata[name][KEY_CALL] = call
 
 
     print(green("Reference groups for phylo pipeline:"))
@@ -73,7 +82,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                     seq_metadata[record.id][KEY_SAMPLE] = record.id
                     seq_metadata[record.id][KEY_SOURCE] = "Background"
                     seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
-                    seq_metadata[record.id][KEY_VARIANT_COUNT] = 0
+                    seq_metadata[record.id][KEY_CALL] = ref_group
     
     if supplementary_metadata:
         with open(supplementary_metadata, "r") as f:
@@ -98,7 +107,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 seq_metadata[record.id][KEY_SAMPLE] = record.id
                 
                 seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
-                seq_metadata[record.id][KEY_VARIANT_COUNT] = 0
+                seq_metadata[record.id][KEY_CALL] = ref_group
 
                 if "Sabin" in record.description:
                     seq_metadata[record.id][KEY_SOURCE] = "Sabin"

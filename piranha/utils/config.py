@@ -39,6 +39,7 @@ KEY_DATE="sample_date"
 KEY_EPID="EPID"
 KEY_VARIANTS = "variants"
 KEY_VARIANT_COUNT = "variant_count"
+KEY_CALL = "call"
 KEY_WELL = "well"
 KEY_ALL_METADATA="all_metadata_to_header"
 KEY_REFERENCE = "reference"
@@ -65,7 +66,7 @@ KEY_SAMPLE_SEQS = "sample_seqs"
 KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
 KEY_SUPPLEMENTARY_METADATA_COLUMNS = "supplementary_metadata_columns"
 
-VALUE_PHYLO_METADATA_COLUMNS = [KEY_VARIANT_COUNT,KEY_DATE,KEY_EPID]
+VALUE_PHYLO_METADATA_COLUMNS = [KEY_CALL,KEY_DATE,KEY_EPID]
 VALUE_SUPPLEMENTARY_METADATA_COLUMNS = ["location","lineage"]
 VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
 
@@ -123,7 +124,7 @@ VALUE_NEGATIVE = ["negative"]
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
-VALUE_PHYLO_HEADER = ["name","sample","barcode","source","reference_group","variant_count"]
+VALUE_PHYLO_HEADER = ["name","sample","barcode","source","reference_group","call"]
 
 VALUE_SAMPLE_TYPE = "stool"
 VALUE_ANALYSIS_MODE = "vp1"
