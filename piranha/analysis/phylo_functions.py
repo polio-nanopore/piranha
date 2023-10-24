@@ -99,7 +99,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 
                 seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
                 seq_metadata[record.id][KEY_VARIANT_COUNT] = 0
-                
+
                 if "Sabin" in record.description:
                     seq_metadata[record.id][KEY_SOURCE] = "Sabin"
                 else:
@@ -123,7 +123,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         for row in reader:
             for k in seq_metadata:
                 if k.split("|")[0] ==row[KEY_SAMPLE]:
-                    for col in header:
+                    for col in reader:
                         if col in config[KEY_PHYLO_METADATA_COLUMNS]:
                             seq_metadata[k][col] = row[col]
 
@@ -145,7 +145,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                         for col in header:
                             if col not in row:
                                 row[col] = ""
-                            new_data = row[col].replace("'","").replace(";","").replace("(","").replace(")","")
+                            new_data = str(row[col]).replace("'","").replace(";","").replace("(","").replace(")","")
                             row[col] = new_data
                         writer.writerow(row)
                         writer0.writerow(row)
