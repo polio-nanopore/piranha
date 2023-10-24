@@ -92,27 +92,35 @@ def parse_line(line):
     return values
 
 def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
+    status,description = "",""
     if mapping["direction"] == "+":
         start = mapping["read_hit_start"]
         end = mapping["read_hit_end"]
-        if int(mapping["aln_block_len"]) > min_map_len and int(mapping["map_quality"]) > min_map_quality:
-            hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
-        else:
-            unmapped+=1
     elif mapping["direction"] == "-":
         start = mapping["read_hit_end"]
         end = mapping["read_hit_start"]
-        if int(mapping["aln_block_len"]) > min_map_len and int(mapping["map_quality"]) > min_map_quality:
-            hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
-        else:
-            unmapped+=1
     else:
         unmapped+=1
-    return unmapped
+        status = "unmapped"
+
+    if not status:
+        if int(mapping["aln_block_len"]) > min_map_len:
+            if int(mapping["map_quality"]) > min_map_quality:
+                hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
+                status = "mapped"
+            else:
+                unmapped+=1
+                status = "filtered"
+                description = "mapping quality too low"
+        else:
+            unmapped+=1
+            status = "filtered"
+            description = "alignment block too short"
+
+    return unmapped,status,description
 
 
-
-def group_hits(paf_file,ref_name_map,len_filter,min_map_quality):
+def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filter_file):
     total_reads= 0
     ambiguous =0
     unmapped = 0
@@ -121,48 +129,46 @@ def group_hits(paf_file,ref_name_map,len_filter,min_map_quality):
     mappings = []
 
     last_mapping = None
-    with open(paf_file, "r") as f:
-        for l in f:
-            
-            mapping = parse_line(l)
-            if last_mapping:
-                if mapping["read_name"] == last_mapping["read_name"]:
-                    mappings.append(last_mapping)
-                else:
-                    mappings.append(last_mapping)
+    with open(mapping_filter_file,"w") as fw:
+        writer = csv.DictWriter(fw, fieldnames=["read_name","status","description"],lineterminator='\n')
+        writer.writeheader()
+        with open(paf_file, "r") as f:
+            for l in f:
+                filtered_reason = ""
+                mapping = parse_line(l)
+                total_reads +=1
 
-                    if len(mappings) > 1:
-                        ambiguous +=1
-                        total_reads +=1
-
+                if last_mapping:
+                    if mapping["read_name"] == last_mapping["read_name"]:
+                        mappings.append(last_mapping)
                     else:
+                        mappings.append(last_mapping)
 
-                        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,min_map_quality,unmapped)
-                        total_reads +=1
+                        if len(mappings) > 1:
+                            ambiguous +=1
+                            filtered_reason = "ambiguous mapping"
+                            row = {"read_name":mapping["read_name"],"status":"unmapped","description":"ambiguous_mapping"}
+                            writer.writerow(row)
+                        else:
+                            unmapped,status,description = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,unmapped)
+                            row = {"read_name":mapping["read_name"],"status":status,"description":description}
+                            writer.writerow(row)
 
-                    mappings = []
+                        mappings = []
+                        last_mapping = mapping
+
+                else:
                     last_mapping = mapping
 
-            else:
-                last_mapping = mapping
-
-        unmapped = add_to_hit_dict(hits, last_mapping,len_filter,min_map_quality,unmapped)
-        total_reads +=1
-    ref_hits = collections.defaultdict(list)
-    not_mapped = 0
-    for ref in hits:
-        hit_info = hits[ref]
-        for read in hit_info:
-
-            if read[-1] > 0.6*len_filter:
-                #aln block len needs to be more than 60% of min read len
-                ref_hits[ref].append(read)
-            else:
-                unmapped +=1
-
+            unmapped,status,description = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,unmapped)
+            row = {"read_name":mapping["read_name"],"status":status,"description":description}
+            writer.writerow(row)
+            total_reads +=1
+    
     if total_reads == 0:
         return {}, 0, 0, 0
-    return ref_hits, unmapped, ambiguous, total_reads
+
+    return hits, unmapped, ambiguous, total_reads
 
 def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode):
 
@@ -214,6 +220,7 @@ def is_non_zero_file(fpath):
 
 def parse_paf_file(paf_file,
                     csv_out,
+                    mapping_filter_out,
                     hits_out,
                     references_sequences,
                     barcode,
@@ -226,9 +233,9 @@ def parse_paf_file(paf_file,
         permissive_ref_name_map = make_ref_display_name_map(references_sequences)
         ref_name_map = make_display_name_to_reference_group_map(permissive_ref_name_map)
 
-        len_filter = 0.4*config[KEY_MIN_READ_LENGTH]
+        min_aln_block = config[KEY_MIN_ALN_BLOCK]
 
-        ref_hits, unmapped,ambiguous, total_reads = group_hits(paf_file,ref_name_map,len_filter,min_map_quality)
+        ref_hits, unmapped, ambiguous, total_reads = group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filter_out)
         print(f"Barcode: {barcode}")
         print(green("Unmapped:"),unmapped)
         print(green("Ambiguous mapping:"),ambiguous)
@@ -246,6 +253,11 @@ def parse_paf_file(paf_file,
         with open(hits_out,"w") as fw:
             writer = csv.DictWriter(fw, lineterminator="\n",fieldnames=["read_name","hit","start","end","aln_block_len"])
             writer.writeheader()
+
+        with open(mapping_filter_out,"w") as fw:
+            writer = csv.DictWriter(fw, lineterminator="\n",fieldnames=["read_name","status","description"])
+            writer.writeheader()
+
 
 
 def diversity_report(input_files,csv_out,summary_out,ref_file,config):
