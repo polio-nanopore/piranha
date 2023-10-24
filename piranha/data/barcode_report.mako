@@ -642,6 +642,7 @@
                 </div>
               </div>
             </div>
+            %if not summary_data["Number of mutations"] == "NA":
             %if summary_data["Number of mutations"] >= 3 or summary_data["Number of mutations"] == 0:
               <div style="width: 90%" id="${reference}_snipit"> 
                 ${data_for_report[reference]["snipit_svg"]}
@@ -654,6 +655,7 @@
                 <div class="column" style="margin-left: 10%;"> 
                 </div>
               </div>
+            %endif
             %endif
             <script type="text/javascript">
               exportImageSVG("#${reference}_snipit_svg","#${reference}_snipit","${reference}_snipit_graph");
