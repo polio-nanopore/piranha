@@ -50,7 +50,7 @@ def make_sample_report(report_to_generate,
         
         fields = record.description.split("|")
         
-        record_sample,record_barcode,reference_group,reference,var_count,var_string = fields[:6]
+        record_sample,record_barcode,reference_group,reference,var_count = fields[:5] ## fix header parsing if changes again
         additional_fields = fields[6:]
 
         
