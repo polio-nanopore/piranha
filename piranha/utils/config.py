@@ -35,8 +35,10 @@ KEY_PRIMER_LENGTH = "primer_length"
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
 KEY_NAME = "name"
-KEY_DATE="date"
+KEY_DATE="sample_date"
 KEY_EPID="EPID"
+KEY_VARIANTS = "variants"
+KEY_VARIANT_COUNT = "variant_count"
 KEY_WELL = "well"
 KEY_ALL_METADATA="all_metadata_to_header"
 KEY_REFERENCE = "reference"
@@ -63,7 +65,7 @@ KEY_SAMPLE_SEQS = "sample_seqs"
 KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
 KEY_SUPPLEMENTARY_METADATA_COLUMNS = "supplementary_metadata_columns"
 
-VALUE_PHYLO_METADATA_COLUMNS = ["date","EPID"]
+VALUE_PHYLO_METADATA_COLUMNS = [KEY_DATE,KEY_EPID]
 VALUE_SUPPLEMENTARY_METADATA_COLUMNS = ["location","lineage"]
 VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
 
