@@ -4,6 +4,7 @@
   "title": "polio-nanopore/piranha",
   "description": "Polio investigation resource automating nanopore haplotype analysis.",
   "url": "https://github.com/polio-nanopore/piranha",
+  "demo_url": "https://raw.githubusercontent.com/polio-nanopore/piranha/main/piranha/test/pak_run",
   "type": "object",
   "definitions": {
     "input_options": {
@@ -15,20 +16,28 @@
         "barcodes_csv": {
           "type": "string",
           "format": "path",
-          "title": "BARCODES_CSV",
+          "title": "Barcodes",
           "description": "A CSV file with barcode and sample columns.",
           "help_text": ".",
-          "demo_data": "piranha/test/pak_run/barcodes01.csv"
+          "demo_data": "barcodes01.csv"
         },
         "run_dir": {
           "type": "string",
           "format": "path",
-          "title": "RUN_DIR",
+          "title": "Run directory",
           "description": "A directory containing a directory of fastq for a each barcode in a run.",
           "help_text": "A directory containing subdirectories of fastq files as created by MinKNOW.",
-          "demo_data": "piranha/test/pak_run/demultiplexed"
+          "demo_data": "demultiplexed"
         }
-      }
+      },
+      "allOf": [
+        {
+          "required": [
+            "barcodes_csv",
+            "run_dir"
+          ]
+        }
+      ]
     },
     "output_options": {
       "title": "Output Options",
@@ -51,20 +60,6 @@
       "description": "Advanced options for configuring processes inside the workflow.",
       "default": "",
       "properties": {
-        "local": {
-          "type": "boolean",
-          "default": true,
-          "title": "Use lower resources appropriate for local computer",
-          "description": "Maximum number of CPU threads to use per workflow task.",
-          "help_text": "This workflow will request HPC level resources unless this is checked."
-        },
-        "threads": {
-          "type": "integer",
-          "default": 2,
-          "title": "Maximum number of CPU threads",
-          "description": "Maximum number of CPU threads to use per workflow task.",
-          "help_text": "Several tasks in this workflow benefit from using multiple CPU threads. This option sets the number of CPU threads for all such processes. The total CPU resource used by the workflow is constrained by the executor configuration. See server threads parameter for kraken specific threads."
-        }
       }
     },
     "miscellaneous_options": {

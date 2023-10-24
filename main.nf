@@ -9,11 +9,16 @@ process run_piranha {
         path run_dir
 
     output:
-        path "piranha_output"
+        path "piranha_report.html"
+        path "barcode_reports"
+        path "detailed_run_report.csv"
+        path "published_data"
 
     script:
     """
     piranha -b ${barcodes_csv} -i ${run_dir} -o piranha_output --tempdir piranha_tmp -t ${task.cpus}
+    mv piranha_output/* .
+    mv report.html piranha_report.html
     """
 
 }
