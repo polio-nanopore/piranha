@@ -28,6 +28,7 @@ KEY_MAX_READ_LENGTH = "max_read_length"
 KEY_MIN_READS = "min_read_depth"
 KEY_MIN_PCENT = "min_read_pcent"
 KEY_MIN_MAP_QUALITY = "min_map_quality"
+KEY_MIN_ALN_BLOCK = "min_aln_block"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
 KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
@@ -143,7 +144,6 @@ READ_LENGTH_DICT = {
 # READ_LENGTH_DEFAULT_WG = [3400,5200]
 VALUE_PRIMER_LENGTH = 30
 VALUE_MIN_MAP_QUALITY = 50
-
 VALUE_DEFAULT_MEDAKA_MODEL="r941_min_hac_variant_g507"
 
 VALUE_MIN_READS = 50
