@@ -200,7 +200,7 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
 
 VALUE_CONFIGURATION_TABLE_FIELDS = [
-                    KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,
+                    KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,KEY_MIN_ALN_BLOCK,
                     KEY_MIN_PCENT,KEY_MEDAKA_MODEL,KEY_PRIMER_LENGTH,KEY_ANALYSIS_MODE,KEY_RUN_PHYLO
                     ]
 
