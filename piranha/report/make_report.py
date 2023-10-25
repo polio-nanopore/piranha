@@ -595,7 +595,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
 
     ctx = Context(buf, 
                     date = date.today(),
-                    run_name=config[KEY_RUN_NAME],
+                    run_name=config[KEY_RUNNAME],
                     version = __version__,
                     show_control_table = show_control_table,
                     plate_json = plate_json,
