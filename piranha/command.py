@@ -50,6 +50,7 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help=f"Maximum read length. Default: {READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][1]}")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help=f"Minimum read depth required for consensus generation. Default: {VALUE_MIN_READS}")
     analysis_group.add_argument("-p","--min-read-pcent",action="store",type=float,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT}")
+    analysis_group.add_argument("-a","--min-aln-block",action="store",type=float,help=f"Minimum alignment block length. Default: 0.6*MIN_READ_LENGTH")
     analysis_group.add_argument("--primer-length",action="store",type=int,help=f"Length of primer sequences to trim off start and end of reads. Default: {VALUE_PRIMER_LENGTH}")
 
     phylo_group = parser.add_argument_group('Phylogenetics options')
@@ -122,6 +123,7 @@ def main(sysargs = sys.argv[1:]):
                                                 args.max_read_length,
                                                 args.min_read_depth,
                                                 args.min_read_pcent,
+                                                args.min_aln_block,
                                                 args.primer_length,
                                                 args.min_map_quality,
                                                 config)
