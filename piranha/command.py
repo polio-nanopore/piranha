@@ -74,7 +74,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument('--save-config',action="store_true",help=f"Output the config file with all parameters used")
 
     misc_group = parser.add_argument_group('Misc options')
-    misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUN_NAME}")
+    misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUNNAME}")
     misc_group.add_argument('--username',action="store",help="Username to appear in report. Default: no user name")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report. Default: no institute name")
     misc_group.add_argument('--orientation',action="store",help="Orientation of barcodes in wells on a 96-well plate. If `well` is supplied as a column in the barcode.csv, this default orientation will be overwritten. Default: `vertical`. Options: `vertical` or `horizontal`.")
