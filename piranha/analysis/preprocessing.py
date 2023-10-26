@@ -136,14 +136,15 @@ def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filte
             for l in f:
                 filtered_reason = ""
                 mapping = parse_line(l)
-                total_reads +=1
+                
 
                 if last_mapping:
                     if mapping["read_name"] == last_mapping["read_name"]:
                         mappings.append(last_mapping)
                     else:
                         mappings.append(last_mapping)
-
+                        total_reads +=1
+                        
                         if len(mappings) > 1:
                             ambiguous +=1
                             filtered_reason = "ambiguous mapping"
@@ -244,7 +245,7 @@ def parse_paf_file(paf_file,
         write_out_report(ref_index,ref_name_map,csv_out,ref_hits,unmapped,total_reads,barcode)
 
         write_out_hits(ref_hits,hits_out)
-        
+
     else:
         print("No reads for",barcode)
         with open(csv_out,"w") as fw:
