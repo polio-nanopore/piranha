@@ -494,7 +494,7 @@
               % for reference in data_for_report:
               <% summary_data = data_for_report[reference]["summary_data"] %>
                   <tr>
-                    %for col in header:
+                    %for col in ENGLISH_CONFIG["36"]:
                       %if col=="reference_group" or col=="Groupe de référence":
                       <td><a href="#header_${reference}" style="color:${themeColor}">${summary_data[col]}</a></td>
                       %else:
@@ -671,7 +671,9 @@
             </div>
             <hr>
               %if 'cooccurrence_info' in data_for_report[reference]:
+              
               <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
+              %if len(ref_cooccurrence_info) > 1:
               <div class="row">
                 <div class="column" id="coocc1" style="width:50%"></div>
                 <div class="column" id="coocc2" style="width:50%"></div>
@@ -768,7 +770,8 @@
         <% figure_count +=1 %>
         <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["50"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample}${LANGUAGE_CONFIG["51"]}</h3>
         <hr>
-          %endif
+        %endif
+        %endif
 
         %endfor
     </div>
