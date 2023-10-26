@@ -643,13 +643,15 @@
             </tr>
           </thead>
           <tbody>
-            <% summary_bcodes = [] %>
+            <% import collections %>
+            <% summary_bcodes = collections.defaultdict(list) %>
             % for row in data_for_report["summary_table"]:
                 %for col in config["summary_table_header"]:
 
                   %if col=="sample":
                     <% this_barcode = row["barcode"] %>
-                    <% summary_bcodes.append(this_barcode) %>
+                    <% this_reference = row["reference_group"] %>
+                    <% summary_bcodes[this_barcode].append(this_reference) %>
                     <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}"><strong>${row[col]}</strong></a></td>
                   %else:
                     <td>${row[col]}</td>
@@ -704,21 +706,28 @@
             
             % for row in data_for_report["composition_table"]:
               %if row["sample"] not in [config["negative"],config["positive"]]:
-                
+              <% this_barcode = row["barcode"] %>
+              
               <tr>
                 %for col in config["composition_table_header"]:
 
                   %if col=="sample":
-                    <% this_barcode = row["barcode"] %>
+                    
                     %if this_barcode in summary_bcodes:
                     <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
                     %else:
                     <td style="color:${themeColor}">${row[col]}</td>
                     %endif
+
                   %elif col!="barcode":
 
-                    %if int(row[col])>config["min_read_depth"]:
-                      <td style="color:${themeColor}"><strong>${row[col]}</strong></td>
+                    %if this_barcode in summary_bcodes:
+                      <% these_references = summary_bcodes[this_barcode] %>
+                        %if col in these_references:
+                          <td style="color:${themeColor}"><strong>${row[col]}</strong></td>
+                        %else:
+                          <td>${row[col]}</td>
+                        %endif
                     %else:
                       <td>${row[col]}</td>
                     %endif
