@@ -173,6 +173,7 @@ def phylo_group_parsing(run_phylo_arg,
                         barcodes_csv,
                         supplementary_metadata_columns_arg,
                         supplementary_metadata_id_column_arg,
+                        update_local_database,
                         config):
 
     misc.add_arg_to_config(KEY_RUN_PHYLO,run_phylo_arg,config)
@@ -182,6 +183,8 @@ def phylo_group_parsing(run_phylo_arg,
         sys.exit(-1)
     
     if config[KEY_RUN_PHYLO]:
+
+        misc.add_arg_to_config(KEY_UPDATE_LOCAL_DATABASE,update_local_database,config)
 
         misc.add_arg_to_config(KEY_PHYLO_METADATA_COLUMNS,phylo_metadata_columns_arg,config)
         with open(barcodes_csv,"r") as f:
@@ -205,6 +208,10 @@ def phylo_group_parsing(run_phylo_arg,
             seq_ids = qc_supplementary_sequence_file(config[KEY_SUPPLEMENTARY_SEQUENCES])
         else:
             print(cyan("Note: no supplementary sequence file provided."))
+        
+            if config[KEY_UPDATE_LOCAL_DATABASE]:
+                sys.stderr.write(cyan(f"Error: Cannot update local database with new sequences as no supplementary sequences have been provided.\n"))
+                sys.exit(-1)
 
         misc.add_file_to_config(KEY_SUPPLEMENTARY_METADATA,supplementary_metadata_arg,config)
         
