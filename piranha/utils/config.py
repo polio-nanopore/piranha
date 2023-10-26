@@ -95,7 +95,7 @@ KEY_CONFIGURATION_TABLE_FIELDS = "configuration_table_fields"
 # MISC KEYS
 KEY_USERNAME="username"
 KEY_INSTITUTE="institute"
-KEY_RUN_NAME="run_name"
+KEY_RUNNAME="runname"
 KEY_VERBOSE="verbose"
 KEY_THREADS="threads"
 KEY_LOG_API="log_api"
@@ -164,9 +164,12 @@ KEY_DISPLAY_NAME = "display_name"
 # report defaults
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
-VALUE_RUN_NAME="Nanopore"
+VALUE_RUNNAME="Nanopore"
 VALUE_COLOUR_MAP=["#e68781","#476970","#fbedac"]
 VALUE_COLOUR_THEME="#e68781"
+
+# phylo defaults
+VALUE_TREE_ANNOTATIONS="source "
 
 #file headers
 VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]

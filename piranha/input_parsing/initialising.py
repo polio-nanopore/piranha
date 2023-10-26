@@ -53,7 +53,7 @@ def get_defaults():
                     KEY_RUN_PHYLO:False,
                     KEY_CLUSTERS:[],
                     KEY_ANNOTATIONS:"",
-                    KEY_TREE_ANNOTATIONS:"source ",
+                    KEY_TREE_ANNOTATIONS:VALUE_TREE_ANNOTATIONS,
                     KEY_SAMPLE_SEQS:"",
                     KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
                     KEY_SUPPLEMENTARY_METADATA_COLUMNS:VALUE_SUPPLEMENTARY_METADATA_COLUMNS,
@@ -62,7 +62,7 @@ def get_defaults():
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
                     KEY_LANGUAGE:VALUE_LANGUAGE,
-                    KEY_RUN_NAME:VALUE_RUN_NAME,
+                    KEY_RUNNAME:VALUE_RUNNAME,
                     KEY_USERNAME:"",
                     KEY_POSITIVE:VALUE_POSITIVE,
                     KEY_NEGATIVE:VALUE_NEGATIVE,
@@ -81,19 +81,53 @@ def valid_args():
     return [
         KEY_READDIR,
         KEY_BARCODES_CSV,
+
         KEY_OUTDIR,
         KEY_OUTPUT_PREFIX,
+        KEY_PUBLISHDIR,
         KEY_TEMPDIR,
         KEY_NO_TEMP,
+        KEY_DATESTAMP,
         KEY_OVERWRITE,
+
+        KEY_SAMPLE_TYPE,
+        KEY_ANALYSIS_MODE,
+
         KEY_MIN_READ_LENGTH,
         KEY_MAX_READ_LENGTH,
         KEY_MIN_READS,
         KEY_MIN_PCENT,
+        KEY_MIN_MAP_QUALITY,
+        KEY_MIN_ALN_BLOCK,
+        KEY_PRIMER_LENGTH,
+
+        KEY_OUTPUT_REPORT,
+        
+        KEY_REFERENCE_SEQUENCES,
+        KEY_REFERENCES_FOR_CNS,
+        KEY_MEDAKA_MODEL,
+
+        KEY_RUN_PHYLO,
+        KEY_SUPPLEMENTARY_SEQUENCES,
+        KEY_SUPPLEMENTARY_METADATA,
+        KEY_SUPPLEMENTARY_METADATA_ID_COLUMN,
+        KEY_TREE_ANNOTATIONS,
+        KEY_SUPPLEMENTARY_METADATA_COLUMNS,
+
+        KEY_POSITIVE,
+        KEY_NEGATIVE,
+        KEY_ORIENTATION,
+        KEY_DETAILED_TABLE_HEADER,
+
+        KEY_USERNAME,
+        KEY_INSTITUTE,
+        KEY_RUNNAME,
+
         KEY_THREADS,
         KEY_VERBOSE,
-        KEY_REFERENCE_SEQUENCES,
-        KEY_REFERENCES_FOR_CNS
+        KEY_COLOUR_MAP,
+        KEY_COLOUR_THEME,
+        KEY_LANGUAGE
     ]
 
 
@@ -137,7 +171,15 @@ def load_yaml(f):
     return input_config
 
 def return_path_keys():
-    return [KEY_READDIR,KEY_OUTDIR,KEY_TEMPDIR]
+    return [KEY_READDIR,
+            KEY_OUTDIR,
+            KEY_TEMPDIR,
+            KEY_PUBLISHDIR,
+            KEY_BARCODES_CSV,
+            KEY_REFERENCE_SEQUENCES,
+            KEY_SUPPLEMENTARY_SEQUENCES,
+            KEY_SUPPLEMENTARY_METADATA
+            ]
 
 def setup_absolute_paths(path_to_file,value):
     return os.path.join(path_to_file,value)
@@ -149,7 +191,7 @@ def parse_yaml_file(configfile,configdict):
 
     path_to_file = os.path.abspath(os.path.dirname(configfile))
     configdict[KEY_INPUT_PATH] = path_to_file
-    valid_keys = valid_args()
+    valid_keys = [k for k in globals().values() if type(k)==str]
     ignore_keys = ignore_args(configdict, valid_keys)
 
     invalid_keys = []
@@ -165,9 +207,10 @@ def parse_yaml_file(configfile,configdict):
                 clean_key = key.lstrip("-").replace("-","_").rstrip(" ").lstrip(" ").lower()
 
                 if clean_key not in valid_keys:
-                    if clean_key in ignore_keys:
-                        ignored_keys.append(key)
-                        continue
+                    print(valid_keys)
+                    # if clean_key in ignore_keys:
+                        # ignored_keys.append(key)
+                        # continue
                     invalid_keys.append(key)
                     break
                     
@@ -212,7 +255,7 @@ def misc_args_to_config(verbose,threads,username,institute,run_name,config):
     misc.add_arg_to_config(KEY_THREADS,threads,config)
     misc.add_arg_to_config(KEY_USERNAME,username,config)
     misc.add_arg_to_config(KEY_INSTITUTE,institute,config)
-    misc.add_arg_to_config(KEY_RUN_NAME,run_name,config)
+    misc.add_arg_to_config(KEY_RUNNAME,run_name,config)
 
 def set_up_verbosity(config):
     if config[KEY_VERBOSE]:

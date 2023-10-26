@@ -58,6 +58,15 @@
           padding: 10px;
           flex: 50%;
         }
+      .info_box {
+          background-color: #eee;
+          color: #444;
+          padding: 13px;
+          width: 100%;
+          border: none;
+          text-align: left;
+          outline: none;
+        }
       .accordion {
           background-color: #eee;
           color: #444;
@@ -581,24 +590,28 @@
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
       <header class="piranha-header">
-        <div class="col-sm-4" style="text-align: left;">
-          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
+        <div class="col-sm-4" style="text-align: left;"><a href="https://polionanopore.org/">
+          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img></a>
           PoSeCo | <small class="text-muted">${LANGUAGE_CONFIG["2"]}</small>
         </div>
-        <div class="col-sm-8" style="text-align: right;">
-          piranha | <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small>
+        <div class="col-sm-8" style="text-align: right;"><a href="https://github.com/polio-nanopore/piranha/">
+          <strong style="color:#000"> piranha | </strong> <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small></a>
         </div>
         <br>
         <hr>
       </header>
         
       <h1>${LANGUAGE_CONFIG["4"]} ${run_name} <small class="text-muted" style="color:${themeColor}">${date}</small></h1>
+      <br>
       %if config["username"]!="":
         <h3><strong>${LANGUAGE_CONFIG["5"]}</strong> | ${config["username"].lstrip("'").rstrip("'")}</h3>
       %endif
       %if config["institute"]!="":
         <h3><strong>${LANGUAGE_CONFIG["6"]}</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
       %endif
+      <div class="info_box">
+        <p>${LANGUAGE_CONFIG["52"]}</p>
+      </div>
       <br>
       %if flagged_high_npev and config["sample_type"]=="environmental":
       <h3><strong>${LANGUAGE_CONFIG["7"]}</strong> | ${LANGUAGE_CONFIG["8"]}</h3>
@@ -1007,6 +1020,12 @@
               });
             }
       </script>
+    <div id="citation_box" class="info_box">
+      <p>${LANGUAGE_CONFIG["53"]}</p>
+      <p>
+        <strong>O’Toole Á, Colquhoun R, Ansley C, Troman C, Maloney D, Vance Z, Akello J, Bujaki E, Majumdar M, Khurshid A, Arshad Y, Alam MM, Martin J, Shaw A, Grassly N, Rambaut A</strong> (2023) Automated detection and classification of polioviruses from nanopore sequencing reads using piranha. <i>bioRxiv</i> <a style='color:#e68781' href="https://doi.org/10.1101/2023.09.05.556319">https://doi.org/10.1101/2023.09.05.556319</a>
+      </p>
+    </div>
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>
