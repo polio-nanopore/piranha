@@ -30,6 +30,7 @@ KEY_MIN_PCENT = "min_read_pcent"
 KEY_MIN_MAP_QUALITY = "min_map_quality"
 KEY_MIN_ALN_BLOCK = "min_aln_block"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
+KEY_REFERENCE_MATCH_FIELD = "display_name"
 KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
 
