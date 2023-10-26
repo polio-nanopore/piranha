@@ -28,6 +28,7 @@ prefix-2021-XX-YY (or analysis-2021-XX-YY) will also be the name of the final an
 
 def datestamped_outdir(config):
     today = date.today()
+    
     d = today.strftime("%Y-%m-%d")
 
     if not KEY_OUTDIR in config:
@@ -112,11 +113,11 @@ def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_tem
     misc.add_path_to_config(KEY_TEMPDIR,tempdir,config)
     misc.add_arg_to_config(KEY_NO_TEMP,no_temp,config)
 
-    config[KEY_OUTDIR],d = datestamped_outdir(config)
+    config[KEY_OUTDIR],config[KEY_TODAY] = datestamped_outdir(config)
     
     set_up_tempdir(config)
 
-    config[KEY_OUTPUT_REPORT] = output_report_filename(d,config)
+    config[KEY_OUTPUT_REPORT] = output_report_filename(config[KEY_TODAY],config)
 
     clear_old_files(config)
 
