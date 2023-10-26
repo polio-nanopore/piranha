@@ -594,8 +594,8 @@
           <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img></a>
           PoSeCo | <small class="text-muted">${LANGUAGE_CONFIG["2"]}</small>
         </div>
-        <div class="col-sm-8" style="text-align: right;"><a href="https://github.com/polio-nanopore/piranha/">
-          <strong style="color:#000"> piranha | </strong> <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small></a>
+        <div class="col-sm-8" style="text-align: right;"><a style="color:#000" href="https://github.com/polio-nanopore/piranha/">
+          <strong style="color:#000"> piranha </strong> | <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small></a>
         </div>
         <br>
         <hr>
@@ -750,6 +750,7 @@
         </script>
 
     <div class="pagebreak"> </div>
+    %if flagged_seqs:
     <h3><strong>${LANGUAGE_CONFIG["9"]} 3</strong> | ${LANGUAGE_CONFIG["20"]} </h3>
     <button class="accordion">${LANGUAGE_CONFIG["11"]}</button>
       <div class="panel">
@@ -758,6 +759,7 @@
           <div class="col-sm-8" id="tableExportID3"></div>
         </div>
       </div>
+      
       <table class="display nowrap" id="myTable3">
         <thead>
           <tr>
@@ -796,7 +798,7 @@
             
           } );
       </script>
-
+      %endif
       % if show_control_table:
         <div class="pagebreak"> </div>
         <h3><strong>${LANGUAGE_CONFIG["9"]} 4</strong> | ${LANGUAGE_CONFIG["23"]} </h3>
