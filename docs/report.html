@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/piranha.svg">
 
-    <title>Nanopore sequencing report</title>
+    <title>MIN001 sequencing report</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
     <link href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css" />
@@ -57,6 +57,15 @@
         .column {
           padding: 10px;
           flex: 50%;
+        }
+      .info_box {
+          background-color: #eee;
+          color: #444;
+          padding: 13px;
+          width: 100%;
+          border: none;
+          text-align: left;
+          outline: none;
         }
       .accordion {
           background-color: #eee;
@@ -387,6 +396,184 @@
         });
         });
     </script>
+
+
+    <!--Figtree.js-->
+    <script type="text/javascript"> 
+      const updateTableFactory = (tooltipId,metadata)=>(tipId)=>{
+              const data = metadata[tipId];
+              const tableDiv = d3.select(document.getElementById(tooltipId));
+              //Remove table
+          tableDiv.html("")
+              if (data !== undefined) {
+                  const visibleData = Object.keys(data).filter(d=>d!=='name');
+                  tableDiv.append("h3")
+                      .attr("class",'tooltip-header')
+                      .text(tipId)
+                      .append("hr");
+                  tableDiv.selectAll("p")
+                          .data(visibleData)
+                          .enter()
+                          .append("p")
+                          .attr("class","tooltip-text")
+                              .selectAll("span")
+                              .data(d=>[d,data[d]])
+                              .enter()
+                              .append("span")
+                              .attr("class",(d,i)=> i===0? "tooltip-key" :"tooltip-value")
+                              .text((d,i)=>i===0? d + " : ": d);
+              }
+      }
+      
+      function addColourEventHandler(circleNodes,legend,colourSelectID,colorCodes,fig){
+        d3.select(`#${colourSelectID}`).on("change", function(d){
+            const selectedGroup = this.value 
+            const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations[selectedGroup].values)
+            circleNodes.attr("fill",n=>colorScale(n.annotations[selectedGroup]))
+
+            legend.scale(colorScale)
+            fig.update();
+            console.log(selectedGroup);
+          })
+        }
+
+      function addTraitColorEventHandler(traits,traitLegend,barSelectID,colorCodes,fig){
+        
+        d3.select(`#${barSelectID}`).on("change", function(d){
+            const selectedGroup = this.value 
+            const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations[selectedGroup].values)
+            traits.attr("fill",n => traitColorScale(n.annotations[selectedGroup]))
+            traitLegend.scale(traitColorScale)
+            fig.update();
+            console.log(selectedGroup);
+          })
+        }
+
+
+      function addSliderEventHandler(sliderID, fig) {
+          const svg = fig.svgSelection.select(function () {
+              return this.parentNode;
+          })
+          const initialHeight = svg.attr("height");
+          const maxHeight = fig.tree().externalNodes.length * 50; // 50 pixels for each tip plus a little for margins;
+          if (maxHeight <= initialHeight) {
+              console.log(sliderID);
+              d3.select(`#${sliderID}`).select(function () {
+                  return this.parentNode;
+              })
+                  .remove();// don't need  a slider add names
+              fig.svgSelection.selectAll(".label")
+                  .classed("show", true)
+              return;
+          }
+          const heightScale = d3.scaleLinear()
+              .range([initialHeight, maxHeight])
+              .domain([0, 1])
+          if (initialHeight / fig.tree().externalNodes.length > 12) {
+              fig.svgSelection.selectAll(".label")
+                  .classed("show", true)
+          }
+          d3.select(`#${sliderID}`).on("input", function () {
+              const svgHeight = heightScale(this.value);
+              //magic number!!
+              svg.attr("height", svgHeight);
+              fig.update();
+              if (svgHeight / fig.tree().externalNodes.filter(node => !node[fig.id].ignore).length > 12) {
+                  fig.svgSelection.selectAll(".label")
+                      .classed("show", true)
+              } else {
+                  fig.svgSelection.selectAll(".label")
+                      .classed("show", false)
+              }
+          })
+      }
+      
+      
+      function buildTree(svgID, myTreeString,tooltipID,backgroundDataString,sliderID,colourSelectID,barSelectID,colorCodes) {
+          const backgroundData = JSON.parse(backgroundDataString);
+          const updateTable = updateTableFactory(tooltipID, backgroundData);
+          const margins = {top:50,bottom:60,left:100,right:250}
+          const svg = d3.select(document.getElementById(svgID))
+          svg.selectAll("g").remove();
+          const nexusString = myTreeString;
+          const tree = figtree.Tree.parseNexus(nexusString)[0];
+          const fig = new figtree.FigTree(document.getElementById(svgID),margins, tree)
+          const colorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["source"].values)
+          const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["source"].values)
+          const circleNodes = figtree.circle()
+                              .filter(n => !n.children)
+                              .attr("r", 8)
+                              .attr("fill", n => colorScale(n.annotations["source"]))
+                              .hilightOnHover(20)
+                              .onClick((node, i, n) => {
+                                  const isSelected = d3.select(n[i]).classed("selected");
+                                  fig.svgSelection.selectAll(".selected").classed("selected", false);
+                                  if(isSelected){
+                                      d3.select(n[i]).classed("selected", false);
+                                      updateTable(null);
+                                  }else{
+                                      d3.select(n[i]).classed("selected", true);
+                                      updateTable(node.name);
+                                  }
+                              });
+          const legend = figtree.legend()
+                                .scale(colorScale)
+                                .x(-100)
+                                .y(40)
+          const traitLegend = figtree.legend()
+                                .scale(traitColorScale)
+                                .x(-150)
+                                .y(40)
+          const traits = figtree.traitBar()
+                                .x(svg.style("width")+230)
+                                .width(10)
+                                .attr("fill",n => traitColorScale(n.annotations["source"]));
+          fig.layout(figtree.rectangularLayout)
+                  .nodes(circleNodes,
+                          figtree.tipLabel(v=>v.name).attr("dx",10),
+                          figtree.rectangle()
+                                  .filter(n=>n[fig.id].collapsed)
+                                  .attr("width",20)
+                                  .attr("height",20)
+                  )
+                        .nodeBackgrounds(figtree.circle()
+                                          .attr("r", 10)
+                                .filter(n=>!n.children)
+                                        )
+                        .branches(figtree.branch()
+                                    .hilightOnHover(20) 
+                                    .collapseOnClick()
+                                    .on("click",()=>{
+                                      const svgHeight = fig.svgSelection.select(function() { return this.parentNode; }).attr("height");
+                                      if(svgHeight/fig.tree().externalNodes.filter(node=>!node[fig.id].ignore).length>12){
+                                        fig.svgSelection.selectAll(".label")
+                                          .classed("show",true)
+                                      }else{
+                                        fig.svgSelection.selectAll(".label")
+                                        .classed("show",false)
+                                      }
+                                    })
+                            )
+                            .feature(
+                                    figtree.scaleBar()
+                                      .direction("x")
+                                      .length(1/900)
+                                      .x(-60)
+                                      .y(-30)
+                                      // .y(fig.svgSelection.select(function() { return this.parentNode; }).attr("height")-margins.top-margins.bottom+20)
+                                      .title({text:"~1 SNP",
+                                      yPadding:10})
+                                        )
+                            .feature(legend)
+                            // .feature(traits)
+        addSliderEventHandler(sliderID,fig);
+        addColourEventHandler(circleNodes,legend,colourSelectID,colorCodes,fig);
+        // addTraitColorEventHandler(traits,traitLegend,barSelectID,colorCodes,fig)
+      }
+    </script>
+
+
+
 <script>
   function exportImageSVG(buttonID,svgID,name){
       document.querySelector(buttonID).onclick = function(){
@@ -403,18 +590,24 @@
       <a href="#" id="toTopBtn" class="cd-top text-replace js-cd-top cd-top--is-visible cd-top--fade-out" data-abc="true"></a>
       <div>
       <header class="piranha-header">
-        <div class="col-sm-4" style="text-align: left;">
-          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img>
+        <div class="col-sm-4" style="text-align: left;"><a href="https://polionanopore.org/">
+          <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img></a>
           PoSeCo | <small class="text-muted">Poliovirus Sequencing Consortium</small>
         </div>
-        <div class="col-sm-8" style="text-align: right;">
-          piranha | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small>
+        <div class="col-sm-8" style="text-align: right;"><a style="color:#000" href="https://github.com/polio-nanopore/piranha/">
+          <strong style="color:#000"> piranha </strong> | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small></a>
         </div>
         <br>
         <hr>
       </header>
         
-      <h1>Nanopore sequencing report <small class="text-muted" style="color:#e68781">2023-09-05</small></h1>
+      <h1>Sequencing report: MIN001 <small class="text-muted" style="color:#e68781">2023-10-30</small></h1>
+      <br>
+        <h3><strong>User</strong> | Áine O'Toole</h3>
+        <h3><strong>Institute</strong> | Institute of Ecology and Evolution</h3>
+      <div class="info_box">
+        <p>This report is generated by <strong>piranha</strong>, a software tool developed to help standardise and streamline the analysis of poliovirus sequencing reads. It has been developed by members of the Rambaut group at the University of Edinburgh as part of the Poliovirus Sequencing Consortium. If you have used piranha in your work, please <a href='#citation_box' style='color:#e68781'><strong>cite</strong></a> the software.</p>
+      </div>
       <br>
       <br>
       <h3><strong>Table 1</strong> | Sample summary information </h3>
@@ -424,26 +617,29 @@
             <div class="col-sm-2" ><strong>Export table: </strong></div>
             <div class="col-sm-4" id="tableExportID1"></div>
             <div class="col-sm-3" ><strong>Export detailed table: </strong></div>
-            <div class="col-sm-2" ><button><a href="/Users/s1680070/repositories/piranha/analysis_2023-09-05/detailed_run_report.csv" download="detailed_run_report.csv">Download</a></button></div>
+            <div class="col-sm-2" ><button><a href="/Users/s1680070/repositories/piranha/analysis_2023-10-30/detailed_run_report.csv" download="detailed_run_report.csv">Download</a></button></div>
           </div>
         </div>
         <table class="display nowrap" id="myTable1">
           <thead>
             <tr>
+             
                 <th>Sample</th>
                 <th>Barcode</th>
                 <th>Sample Classification</th>
                 <th>Reference Group</th>
                 <th>Number Of Mutations</th>
-              <th>VP1 sequence</th>
+              <th>Sequence (VP1)</th>
             </tr>
           </thead>
           <tbody>
             
+            
 
                     
                     
-                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781"><strong>MixedTest</strong></a></td>
+                    
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781"><strong>Sample01</strong></a></td>
 
                     <td>barcode01</td>
 
@@ -457,7 +653,8 @@
 
                     
                     
-                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781"><strong>MixedTest</strong></a></td>
+                    
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781"><strong>Sample01</strong></a></td>
 
                     <td>barcode01</td>
 
@@ -471,7 +668,8 @@
 
                     
                     
-                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781"><strong>PureTest</strong></a></td>
+                    
+                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781"><strong>Sample02</strong></a></td>
 
                     <td>barcode02</td>
 
@@ -485,7 +683,8 @@
 
                     
                     
-                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781"><strong>VDPVTest</strong></a></td>
+                    
+                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781"><strong>Sample04</strong></a></td>
 
                     <td>barcode04</td>
 
@@ -499,7 +698,8 @@
 
                     
                     
-                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>somemixed</strong></a></td>
+                    
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>Sample05</strong></a></td>
 
                     <td>barcode07</td>
 
@@ -507,13 +707,14 @@
 
                     <td>Sabin2-related</td>
 
-                    <td>0</td>
+                    <td>1</td>
                 <td><a download href="published_data/barcode07/barcode07.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
 
                     
                     
-                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>somemixed</strong></a></td>
+                    
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781"><strong>Sample05</strong></a></td>
 
                     <td>barcode07</td>
 
@@ -521,8 +722,23 @@
 
                     <td>Sabin3-related</td>
 
-                    <td>2</td>
+                    <td>1</td>
                 <td><a download href="published_data/barcode07/barcode07.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
+              </tr>
+
+                    
+                    
+                    
+                    <td><a href="./barcode_reports/barcode09_report.html" target="_blank" style="color:#e68781"><strong>Sample06</strong></a></td>
+
+                    <td>barcode09</td>
+
+                    <td>VDPV</td>
+
+                    <td>Sabin1-related</td>
+
+                    <td>50</td>
+                <td><a download href="published_data/barcode09/barcode09.consensus.fasta" style="color:#e68781"><strong>Download FASTA</strong></a></td>
               </tr>
           </tbody>
         </table>
@@ -555,128 +771,147 @@
         <table class="display nowrap" id="myTable2">
           <thead>
             <tr>
-                <th style="width:10%;">sample</th>
-                <th style="width:10%;">barcode</th>
-                <th style="width:10%;">Sabin1-related</th>
-                <th style="width:10%;">Sabin2-related</th>
-                <th style="width:10%;">Sabin3-related</th>
-                <th style="width:10%;">WPV1</th>
-                <th style="width:10%;">WPV2</th>
-                <th style="width:10%;">WPV3</th>
-                <th style="width:10%;">NonPolioEV</th>
-                <th style="width:10%;">unmapped</th>
+                <th style="width:10%;">Sample</th>
+                <th style="width:10%;">Barcode</th>
+                <th style="width:10%;">Sabin1-Related</th>
+                <th style="width:10%;">Sabin2-Related</th>
+                <th style="width:10%;">Sabin3-Related</th>
+                <th style="width:10%;">Wpv1</th>
+                <th style="width:10%;">Wpv2</th>
+                <th style="width:10%;">Wpv3</th>
+                <th style="width:10%;">Nonpolioev</th>
+                <th style="width:10%;">Unmapped</th>
             </tr>
           </thead>
           <tbody>
             
-                
+              
               
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">MixedTest</a></td>
+                    <td><a href="./barcode_reports/barcode01_report.html" target="_blank" style="color:#e68781">Sample01</a></td>
+
 
 
                     <td>barcode01</td>
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td style="color:#e68781"><strong>246</strong></td>
+                      
+                          <td style="color:#e68781"><strong>245</strong></td>
 
 
 
 
-                      <td style="color:#e68781"><strong>247</strong></td>
+                      
+                          <td style="color:#e68781"><strong>238</strong></td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>4</td>
+                      
+                          <td>14</td>
 
 
               </tr>
-                
+              
               
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">PureTest</a></td>
+                    <td><a href="./barcode_reports/barcode02_report.html" target="_blank" style="color:#e68781">Sample02</a></td>
+
 
 
                     <td>barcode02</td>
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td style="color:#e68781"><strong>709</strong></td>
+                      
+                          <td style="color:#e68781"><strong>707</strong></td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>37</td>
+                      
+                          <td>39</td>
 
 
               </tr>
-                
+              
               
               <tr>
 
                     
-                    <td style="color:#e68781">WTTest</td>
+                    <td style="color:#e68781">Sample03</td>
+
 
 
                     <td>barcode03</td>
@@ -698,7 +933,7 @@
 
 
 
-                      <td>19</td>
+                      <td>17</td>
 
 
 
@@ -718,262 +953,187 @@
 
 
 
-                      <td style="color:#e68781"><strong>173</strong></td>
+                      <td>175</td>
 
 
               </tr>
-                
+              
               
               <tr>
 
                     
-                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">VDPVTest</a></td>
+                    <td><a href="./barcode_reports/barcode04_report.html" target="_blank" style="color:#e68781">Sample04</a></td>
+
 
 
                     <td>barcode04</td>
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td style="color:#e68781"><strong>247</strong></td>
+                      
+                          <td style="color:#e68781"><strong>238</strong></td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>3</td>
+                      
+                          <td>12</td>
 
 
               </tr>
-                
+              
               
               <tr>
 
                     
-                    <td style="color:#e68781">negative1</td>
+                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781">Sample05</a></td>
 
-
-                    <td>barcode05</td>
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>5</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-              </tr>
-                
-              
-              <tr>
-
-                    
-                    <td style="color:#e68781">positive</td>
-
-
-                    <td>barcode06</td>
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>5</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-
-
-                      <td>0</td>
-
-
-              </tr>
-                
-              
-              <tr>
-
-                    
-                    <td><a href="./barcode_reports/barcode07_report.html" target="_blank" style="color:#e68781">somemixed</a></td>
 
 
                     <td>barcode07</td>
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td style="color:#e68781"><strong>137</strong></td>
+                      
+                          <td style="color:#e68781"><strong>137</strong></td>
 
 
 
 
-                      <td style="color:#e68781"><strong>338</strong></td>
+                      
+                          <td style="color:#e68781"><strong>338</strong></td>
 
 
 
 
-                      <td>1</td>
+                      
+                          <td>1</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>35</td>
+                      
+                          <td>34</td>
 
 
 
 
-                      <td style="color:#e68781"><strong>121</strong></td>
+                      
+                          <td>122</td>
 
 
               </tr>
-                
+              
               
               <tr>
 
                     
-                    <td style="color:#e68781">negative2</td>
-
-
-                    <td>barcode30</td>
+                    <td><a href="./barcode_reports/barcode09_report.html" target="_blank" style="color:#e68781">Sample06</a></td>
 
 
 
-                      <td>0</td>
+                    <td>barcode09</td>
 
 
 
-
-                      <td>0</td>
+                      
+                          <td style="color:#e68781"><strong>1164</strong></td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
 
 
 
 
-                      <td>0</td>
+                      
+                          <td>0</td>
+
+
+
+
+                      
+                          <td>2350</td>
 
 
               </tr>
@@ -1004,6 +1164,7 @@
           <div class="col-sm-8" id="tableExportID3"></div>
         </div>
       </div>
+      
       <table class="display nowrap" id="myTable3">
         <thead>
           <tr>
@@ -1017,8 +1178,17 @@
             <tr>
               <td>1</td>
               <td style="overflow:scroll;">
-                  MixedTest|barcode01|Sabin3-related|Poliovirus3-Sabin_AY184221|8|17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA|date=2022-01-01<br>
-                  VDPVTest|barcode04|Sabin3-related|Poliovirus3-Sabin_AY184221|8|17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA|date=2022-01-05<br>
+                  Sample01|Sabin3-related|CNS1|EDI001|2022-01-01 barcode=barcode01 reference=Poliovirus3-Sabin_AY184221 display_name=Sabin3-related runname=MIN001 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA<br>
+                  Sample04|Sabin3-related|CNS1|LON002|2022-01-05 barcode=barcode04 reference=Poliovirus3-Sabin_AY184221 display_name=Sabin3-related runname=MIN001 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA<br>
+              </td>
+            </tr>
+
+            
+            <tr>
+              <td>2</td>
+              <td style="overflow:scroll;">
+                  Sample01|Sabin2-related|CNS1|EDI001|2022-01-01 barcode=barcode01 reference=Poliovirus2-Sabin_AY184220 display_name=Sabin2-related runname=MIN001 variant_count=1 variants=428:TC<br>
+                  Sample05|Sabin2-related|CNS1|EDI003|2022-03-01 barcode=barcode07 reference=Poliovirus2-Sabin_AY184220 display_name=Sabin2-related runname=MIN001 variant_count=1 variants=428:TC<br>
               </td>
             </tr>
 
@@ -1039,23 +1209,22 @@
             
           } );
       </script>
-
         <div class="pagebreak"> </div>
         <h3><strong>Table 4</strong> | Controls </h3>
           <table class="table">
             <thead class="thead-light">
               <tr>
                 <th>Pass</th>
-                  <th>Sample</th>
-                  <th>Barcode</th>
-                  <th>Sabin1-Related</th>
-                  <th>Sabin2-Related</th>
-                  <th>Sabin3-Related</th>
-                  <th>Wpv1</th>
-                  <th>Wpv2</th>
-                  <th>Wpv3</th>
-                  <th>Nonpolioev</th>
-                  <th>Unmapped</th>
+                    <th style="width:10%;">Sample</th>
+                    <th style="width:10%;">Barcode</th>
+                    <th style="width:10%;">Sabin1-Related</th>
+                    <th style="width:10%;">Sabin2-Related</th>
+                    <th style="width:10%;">Sabin3-Related</th>
+                    <th style="width:10%;">Wpv1</th>
+                    <th style="width:10%;">Wpv2</th>
+                    <th style="width:10%;">Wpv3</th>
+                    <th style="width:10%;">Nonpolioev</th>
+                    <th style="width:10%;">Unmapped</th>
               </tr>
             </thead>
             <tbody>
@@ -1116,7 +1285,7 @@
                     </td>
                           <td>negative2</td>
                         
-                          <td>barcode30</td>
+                          <td>barcode08</td>
                         
                             <td>0</td>
                         
@@ -1139,34 +1308,21 @@
           </table>
       </div>
     <br>
+    
+  <div class="pagebreak"> </div>
+  <div id="plateViz"></div>
     <script>
-      var acc = document.getElementsByClassName("accordion");
-      var i;
-      for (i = 0; i < acc.length; i++) {
-            acc[i].addEventListener("click", function() {
-              this.classList.toggle("active");
-              var panel = this.nextElementSibling;
-              if (panel.style.maxHeight) {
-                panel.style.maxHeight = null;
-              } else {
-                panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
-              } 
-            });
-          }
-    </script>
-<div id="plateViz"></div>
-<script>
        var vlSpec_plate = {
          "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
          "width": 450,
          "height": 350,
-         "data": {"values": [{"x": 1, "y": "A", "All": "Present", "Barcode": "barcode01", "Sabin2-related": "Present", "Sabin3-related": "Present", "unmapped": "Absent"}, {"x": 2, "y": "A", "All": "Absent", "Barcode": "barcode30", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 3, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "A", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "B", "All": "Present", "Barcode": "barcode02", "Sabin2-related": "Present", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 2, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "B", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "C", "All": "Present", "Barcode": "barcode03", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Present"}, {"x": 2, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "C", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "D", "All": "Present", "Barcode": "barcode04", "Sabin2-related": "Absent", "Sabin3-related": "Present", "unmapped": "Absent"}, {"x": 2, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "D", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "E", "All": "Absent", "Barcode": "barcode05", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 2, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "E", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "F", "All": "Absent", "Barcode": "barcode06", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 2, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "F", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "G", "All": "Present", "Barcode": "barcode07", "Sabin2-related": "Present", "Sabin3-related": "Present", "unmapped": "Present"}, {"x": 2, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "G", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 2, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "H", "All": "N/A", "Barcode": "", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}]},
+         "data": {"values": [{"x": 1, "y": "A", "All": "Present", "Barcode": "barcode01", "Sabin1-related": "Absent", "Sabin2-related": "Present", "Sabin3-related": "Present", "unmapped": "Absent"}, {"x": 2, "y": "A", "All": "Absent", "Barcode": "barcode08", "Sabin1-related": "Absent", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 3, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "A", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "B", "All": "Present", "Barcode": "barcode02", "Sabin1-related": "Absent", "Sabin2-related": "Present", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 2, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "B", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "C", "All": "Present", "Barcode": "barcode03", "Sabin1-related": "Absent", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Present"}, {"x": 2, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "C", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "D", "All": "Present", "Barcode": "barcode04", "Sabin1-related": "Absent", "Sabin2-related": "Absent", "Sabin3-related": "Present", "unmapped": "Absent"}, {"x": 2, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "D", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "E", "All": "Present", "Barcode": "barcode07", "Sabin1-related": "Absent", "Sabin2-related": "Present", "Sabin3-related": "Present", "unmapped": "Present"}, {"x": 2, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "E", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "F", "All": "Absent", "Barcode": "barcode05", "Sabin1-related": "Absent", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 2, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "F", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "G", "All": "Absent", "Barcode": "barcode06", "Sabin1-related": "Absent", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Absent"}, {"x": 2, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "G", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 1, "y": "H", "All": "Present", "Barcode": "barcode09", "Sabin1-related": "Present", "Sabin2-related": "Absent", "Sabin3-related": "Absent", "unmapped": "Present"}, {"x": 2, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 3, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 4, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 5, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 6, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 7, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 8, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 9, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 10, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 11, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}, {"x": 12, "y": "H", "All": "N/A", "Barcode": "", "Sabin1-related": "N/A", "Sabin2-related": "N/A", "Sabin3-related": "N/A", "unmapped": "N/A"}]},
        "params": [
            {"name":"filterBy",
              "value":"All",
              "bind":{"input":"select",
-                     "options":['All', 'Sabin2-related', 'Sabin3-related', 'unmapped'],
-                     "labels":['All', 'Sabin2-related', 'Sabin3-related', 'unmapped'],
+                     "options":['All', 'Sabin1-related', 'Sabin2-related', 'Sabin3-related', 'unmapped'],
+                     "labels":['All', 'Sabin1-related', 'Sabin2-related', 'Sabin3-related', 'unmapped'],
                      "name":"Filter by: "
                     }}
          ],
@@ -1195,6 +1351,7 @@
                "tooltip": [
                  {"field": "Barcode", "type": "nominal"},
                    {"field": "All", "type": "nominal"},
+                   {"field": "Sabin1-related", "type": "nominal"},
                    {"field": "Sabin2-related", "type": "nominal"},
                    {"field": "Sabin3-related", "type": "nominal"},
                    {"field": "unmapped", "type": "nominal"},
@@ -1207,11 +1364,260 @@
                      .catch(console.warn);
      </script>
      
-     <h3><strong>Figure 1</strong> | Barcodes location on 96-well plate </h3>
+     <h3><strong>Figure 1</strong> | Barcodes location on 96-well plate</h3>
      <br>
-    </div> 
+    
+      
+      
+      
+      
+      <div class="pagebreak"> </div>
 
+      <button class="accordion">Tree options</button>
+        <div class="panel">
+          <div class="row">
+            <div class="column">
+              <div class="slider-block" id="slider_Sabin3-related">
+                <p>Expansion</p>
+                <input class="slider" type="range" id="rangeinput_Sabin3-related"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
+                <span class="highlight"></span>
+              </div>
+            </div>
+            <div class="column">
+              <div>
+              <p>Colour by</p>
+              <select class="colourSelect" id="colourSelect_Sabin3-related">
+                  <option value="source">Source</option>
+                  <option value="reference_group">Reference_Group</option>
+                  <option value="call">Call</option>
+                  <option value="lineage">Lineage</option>
+                  <option value="location">Location</option>
+                  <option value="sample_date">Sample_Date</option>
+                  <option value="EPID">Epid</option>
+              </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="row tree-container">
+        <div class="col-xs-7">
+          <svg class="tree_svg" width="700" height="400" id="tree_Sabin3-related"></svg>
+        </div>
+        <div class="col-xs-4 sticky" id="tooltip_Sabin3-related">
+        </div> 
+        
+        <script type="text/javascript">
+          buildTree("tree_Sabin3-related", 
+                    `#NEXUS
+begin trees;
+	tree tree_1 = [&R] ((('Sample01|Sabin3-related|CNS1|EDI001|2022-01-01'[&source="Sample",reference_group="Sabin3-related",call="Sabin-like"]:1.00000e-10,'Sample04|Sabin3-related|CNS1|LON002|2022-01-05'[&source="Sample",reference_group="Sabin3-related",call="Sabin-like"]:1.00000e-10,('1177|VDPV'[&source="Background",reference_group="Sabin3-related",call="Sabin3-related",lineage="VDPV_lineageB",location="Islamabad"]:1.00000e-10,'1178|VDPV'[&source="Background",reference_group="Sabin3-related",call="Sabin3-related",lineage="VDPV_lineageA",location="Lahore"]:0.00335114,'1179|VDPV'[&source="Background",reference_group="Sabin3-related",call="Sabin3-related",lineage="VDPV_lineageA",location="Islamabad"]:0.00111404):0.00671388):0.00782426,'Sample05|Sabin3-related|CNS1|EDI003|2022-03-01'[&source="Sample",reference_group="Sabin3-related",call="Sabin-like"]:1.00000e-10):0.00111321,Poliovirus3-Sabin_AY184221[&source="Sabin",reference_group="Sabin3-related",call="Sabin3-related"]:1.00000e-10);
+end;`,
+                    `tooltip_Sabin3-related`,
+                    `{"Sample01|Sabin3-related|CNS1|EDI001|2022-01-01": {"name": "Sample01|Sabin3-related|CNS1|EDI001|2022-01-01", "sample": "Sample01", "barcode": "barcode01", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample04|Sabin3-related|CNS1|LON002|2022-01-05": {"name": "Sample04|Sabin3-related|CNS1|LON002|2022-01-05", "sample": "Sample04", "barcode": "barcode04", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample05|Sabin3-related|CNS1|EDI003|2022-03-01": {"name": "Sample05|Sabin3-related|CNS1|EDI003|2022-03-01", "sample": "Sample05", "barcode": "barcode07", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "1177|VDPV": {"name": "1177|VDPV", "sample": "1177|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageB", "location": "Islamabad", "sample_date": "", "EPID": ""}, "1178|VDPV": {"name": "1178|VDPV", "sample": "1178|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageA", "location": "Lahore", "sample_date": "", "EPID": ""}, "1179|VDPV": {"name": "1179|VDPV", "sample": "1179|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageA", "location": "Islamabad", "sample_date": "", "EPID": ""}, "Poliovirus3-Sabin_AY184221": {"name": "Poliovirus3-Sabin_AY184221", "sample": "Poliovirus3-Sabin_AY184221", "barcode": "", "source": "Sabin", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample01|Sabin2-related|CNS1|EDI001|2022-01-01": {"name": "Sample01|Sabin2-related|CNS1|EDI001|2022-01-01", "sample": "Sample01", "barcode": "barcode01", "source": "Sample", "reference_group": "Sabin2-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample02|Sabin2-related|CNS1|EDI002|2022-01-02": {"name": "Sample02|Sabin2-related|CNS1|EDI002|2022-01-02", "sample": "Sample02", "barcode": "barcode02", "source": "Sample", "reference_group": "Sabin2-related", "call": "VDPV", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample05|Sabin2-related|CNS1|EDI003|2022-03-01": {"name": "Sample05|Sabin2-related|CNS1|EDI003|2022-03-01", "sample": "Sample05", "barcode": "barcode07", "source": "Sample", "reference_group": "Sabin2-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "1175|VDPV": {"name": "1175|VDPV", "sample": "1175|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "VDPV_lineageA", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "1176|VDPV": {"name": "1176|VDPV", "sample": "1176|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "VDPV_lineageB", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "1180|VDPV": {"name": "1180|VDPV", "sample": "1180|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "Poliovirus2-Sabin_AY184220": {"name": "Poliovirus2-Sabin_AY184220", "sample": "Poliovirus2-Sabin_AY184220", "barcode": "", "source": "Sabin", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample06|Sabin1-related|CNS1|EDI004|2022-05-01": {"name": "Sample06|Sabin1-related|CNS1|EDI004|2022-05-01", "sample": "Sample06", "barcode": "barcode09", "source": "Sample", "reference_group": "Sabin1-related", "call": "VDPV", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Poliovirus1-Sabin_AY184219": {"name": "Poliovirus1-Sabin_AY184219", "sample": "Poliovirus1-Sabin_AY184219", "barcode": "", "source": "Sabin", "reference_group": "Sabin1-related", "call": "Sabin1-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}}`,
+                    "rangeinput_Sabin3-related",
+                    "colourSelect_Sabin3-related",
+                    "barSelect_Sabin3-related",
+                    ['#e68781', '#476970', '#fbedac']);
+        </script> 
+      </div> 
+      <h3><strong>Figure 2</strong> | Sabin3-related phylogeny</h3>
+      <hr>
+      
+      
+      <div class="pagebreak"> </div>
 
+      <button class="accordion">Tree options</button>
+        <div class="panel">
+          <div class="row">
+            <div class="column">
+              <div class="slider-block" id="slider_Sabin2-related">
+                <p>Expansion</p>
+                <input class="slider" type="range" id="rangeinput_Sabin2-related"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
+                <span class="highlight"></span>
+              </div>
+            </div>
+            <div class="column">
+              <div>
+              <p>Colour by</p>
+              <select class="colourSelect" id="colourSelect_Sabin2-related">
+                  <option value="source">Source</option>
+                  <option value="reference_group">Reference_Group</option>
+                  <option value="call">Call</option>
+                  <option value="lineage">Lineage</option>
+                  <option value="location">Location</option>
+                  <option value="sample_date">Sample_Date</option>
+                  <option value="EPID">Epid</option>
+              </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="row tree-container">
+        <div class="col-xs-7">
+          <svg class="tree_svg" width="700" height="400" id="tree_Sabin2-related"></svg>
+        </div>
+        <div class="col-xs-4 sticky" id="tooltip_Sabin2-related">
+        </div> 
+        
+        <script type="text/javascript">
+          buildTree("tree_Sabin2-related", 
+                    `#NEXUS
+begin trees;
+	tree tree_1 = [&R] (('Sample01|Sabin2-related|CNS1|EDI001|2022-01-01'[&source="Sample",reference_group="Sabin2-related",call="Sabin-like"]:1.00000e-10,(('Sample02|Sabin2-related|CNS1|EDI002|2022-01-02'[&source="Sample",reference_group="Sabin2-related",call="VDPV"]:1.00000e-10,'1180|VDPV'[&source="Background",reference_group="Sabin2-related",call="Sabin2-related",location="Edinburgh"]:1.00000e-10):0.00916591,('1175|VDPV'[&source="Background",reference_group="Sabin2-related",call="Sabin2-related",lineage="VDPV_lineageA",location="Edinburgh"]:1.00000e-10,'1176|VDPV'[&source="Background",reference_group="Sabin2-related",call="Sabin2-related",lineage="VDPV_lineageB",location="Edinburgh"]:0.00111078):0.0275788):0.000900059,'Sample05|Sabin2-related|CNS1|EDI003|2022-03-01'[&source="Sample",reference_group="Sabin2-related",call="Sabin-like"]:1.00000e-10):0.00110863,Poliovirus2-Sabin_AY184220[&source="Sabin",reference_group="Sabin2-related",call="Sabin2-related"]:1.00000e-10);
+end;`,
+                    `tooltip_Sabin2-related`,
+                    `{"Sample01|Sabin3-related|CNS1|EDI001|2022-01-01": {"name": "Sample01|Sabin3-related|CNS1|EDI001|2022-01-01", "sample": "Sample01", "barcode": "barcode01", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample04|Sabin3-related|CNS1|LON002|2022-01-05": {"name": "Sample04|Sabin3-related|CNS1|LON002|2022-01-05", "sample": "Sample04", "barcode": "barcode04", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample05|Sabin3-related|CNS1|EDI003|2022-03-01": {"name": "Sample05|Sabin3-related|CNS1|EDI003|2022-03-01", "sample": "Sample05", "barcode": "barcode07", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "1177|VDPV": {"name": "1177|VDPV", "sample": "1177|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageB", "location": "Islamabad", "sample_date": "", "EPID": ""}, "1178|VDPV": {"name": "1178|VDPV", "sample": "1178|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageA", "location": "Lahore", "sample_date": "", "EPID": ""}, "1179|VDPV": {"name": "1179|VDPV", "sample": "1179|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageA", "location": "Islamabad", "sample_date": "", "EPID": ""}, "Poliovirus3-Sabin_AY184221": {"name": "Poliovirus3-Sabin_AY184221", "sample": "Poliovirus3-Sabin_AY184221", "barcode": "", "source": "Sabin", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample01|Sabin2-related|CNS1|EDI001|2022-01-01": {"name": "Sample01|Sabin2-related|CNS1|EDI001|2022-01-01", "sample": "Sample01", "barcode": "barcode01", "source": "Sample", "reference_group": "Sabin2-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample02|Sabin2-related|CNS1|EDI002|2022-01-02": {"name": "Sample02|Sabin2-related|CNS1|EDI002|2022-01-02", "sample": "Sample02", "barcode": "barcode02", "source": "Sample", "reference_group": "Sabin2-related", "call": "VDPV", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample05|Sabin2-related|CNS1|EDI003|2022-03-01": {"name": "Sample05|Sabin2-related|CNS1|EDI003|2022-03-01", "sample": "Sample05", "barcode": "barcode07", "source": "Sample", "reference_group": "Sabin2-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "1175|VDPV": {"name": "1175|VDPV", "sample": "1175|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "VDPV_lineageA", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "1176|VDPV": {"name": "1176|VDPV", "sample": "1176|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "VDPV_lineageB", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "1180|VDPV": {"name": "1180|VDPV", "sample": "1180|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "Poliovirus2-Sabin_AY184220": {"name": "Poliovirus2-Sabin_AY184220", "sample": "Poliovirus2-Sabin_AY184220", "barcode": "", "source": "Sabin", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample06|Sabin1-related|CNS1|EDI004|2022-05-01": {"name": "Sample06|Sabin1-related|CNS1|EDI004|2022-05-01", "sample": "Sample06", "barcode": "barcode09", "source": "Sample", "reference_group": "Sabin1-related", "call": "VDPV", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Poliovirus1-Sabin_AY184219": {"name": "Poliovirus1-Sabin_AY184219", "sample": "Poliovirus1-Sabin_AY184219", "barcode": "", "source": "Sabin", "reference_group": "Sabin1-related", "call": "Sabin1-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}}`,
+                    "rangeinput_Sabin2-related",
+                    "colourSelect_Sabin2-related",
+                    "barSelect_Sabin2-related",
+                    ['#e68781', '#476970', '#fbedac']);
+        </script> 
+      </div> 
+      <h3><strong>Figure 3</strong> | Sabin2-related phylogeny</h3>
+      <hr>
+      
+      
+      <div class="pagebreak"> </div>
+
+      <button class="accordion">Tree options</button>
+        <div class="panel">
+          <div class="row">
+            <div class="column">
+              <div class="slider-block" id="slider_Sabin1-related">
+                <p>Expansion</p>
+                <input class="slider" type="range" id="rangeinput_Sabin1-related"  min="0" max="1" style="width: 100px" step="0.01" value="0" />
+                <span class="highlight"></span>
+              </div>
+            </div>
+            <div class="column">
+              <div>
+              <p>Colour by</p>
+              <select class="colourSelect" id="colourSelect_Sabin1-related">
+                  <option value="source">Source</option>
+                  <option value="reference_group">Reference_Group</option>
+                  <option value="call">Call</option>
+                  <option value="lineage">Lineage</option>
+                  <option value="location">Location</option>
+                  <option value="sample_date">Sample_Date</option>
+                  <option value="EPID">Epid</option>
+              </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="row tree-container">
+        <div class="col-xs-7">
+          <svg class="tree_svg" width="700" height="400" id="tree_Sabin1-related"></svg>
+        </div>
+        <div class="col-xs-4 sticky" id="tooltip_Sabin1-related">
+        </div> 
+        
+        <script type="text/javascript">
+          buildTree("tree_Sabin1-related", 
+                    `#NEXUS
+begin trees;
+	tree tree_1 = [&R] ('Sample06|Sabin1-related|CNS1|EDI004|2022-05-01'[&source="Sample",reference_group="Sabin1-related",call="VDPV"]:0.0583531,Poliovirus1-Sabin_AY184219[&source="Sabin",reference_group="Sabin1-related",call="Sabin1-related"]:1.00000e-10);
+end;`,
+                    `tooltip_Sabin1-related`,
+                    `{"Sample01|Sabin3-related|CNS1|EDI001|2022-01-01": {"name": "Sample01|Sabin3-related|CNS1|EDI001|2022-01-01", "sample": "Sample01", "barcode": "barcode01", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample04|Sabin3-related|CNS1|LON002|2022-01-05": {"name": "Sample04|Sabin3-related|CNS1|LON002|2022-01-05", "sample": "Sample04", "barcode": "barcode04", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample05|Sabin3-related|CNS1|EDI003|2022-03-01": {"name": "Sample05|Sabin3-related|CNS1|EDI003|2022-03-01", "sample": "Sample05", "barcode": "barcode07", "source": "Sample", "reference_group": "Sabin3-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "1177|VDPV": {"name": "1177|VDPV", "sample": "1177|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageB", "location": "Islamabad", "sample_date": "", "EPID": ""}, "1178|VDPV": {"name": "1178|VDPV", "sample": "1178|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageA", "location": "Lahore", "sample_date": "", "EPID": ""}, "1179|VDPV": {"name": "1179|VDPV", "sample": "1179|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "VDPV_lineageA", "location": "Islamabad", "sample_date": "", "EPID": ""}, "Poliovirus3-Sabin_AY184221": {"name": "Poliovirus3-Sabin_AY184221", "sample": "Poliovirus3-Sabin_AY184221", "barcode": "", "source": "Sabin", "reference_group": "Sabin3-related", "call": "Sabin3-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample01|Sabin2-related|CNS1|EDI001|2022-01-01": {"name": "Sample01|Sabin2-related|CNS1|EDI001|2022-01-01", "sample": "Sample01", "barcode": "barcode01", "source": "Sample", "reference_group": "Sabin2-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample02|Sabin2-related|CNS1|EDI002|2022-01-02": {"name": "Sample02|Sabin2-related|CNS1|EDI002|2022-01-02", "sample": "Sample02", "barcode": "barcode02", "source": "Sample", "reference_group": "Sabin2-related", "call": "VDPV", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample05|Sabin2-related|CNS1|EDI003|2022-03-01": {"name": "Sample05|Sabin2-related|CNS1|EDI003|2022-03-01", "sample": "Sample05", "barcode": "barcode07", "source": "Sample", "reference_group": "Sabin2-related", "call": "Sabin-like", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "1175|VDPV": {"name": "1175|VDPV", "sample": "1175|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "VDPV_lineageA", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "1176|VDPV": {"name": "1176|VDPV", "sample": "1176|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "VDPV_lineageB", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "1180|VDPV": {"name": "1180|VDPV", "sample": "1180|VDPV", "barcode": "", "source": "Background", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "", "location": "Edinburgh", "sample_date": "", "EPID": ""}, "Poliovirus2-Sabin_AY184220": {"name": "Poliovirus2-Sabin_AY184220", "sample": "Poliovirus2-Sabin_AY184220", "barcode": "", "source": "Sabin", "reference_group": "Sabin2-related", "call": "Sabin2-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Sample06|Sabin1-related|CNS1|EDI004|2022-05-01": {"name": "Sample06|Sabin1-related|CNS1|EDI004|2022-05-01", "sample": "Sample06", "barcode": "barcode09", "source": "Sample", "reference_group": "Sabin1-related", "call": "VDPV", "lineage": "", "location": "", "sample_date": "", "EPID": ""}, "Poliovirus1-Sabin_AY184219": {"name": "Poliovirus1-Sabin_AY184219", "sample": "Poliovirus1-Sabin_AY184219", "barcode": "", "source": "Sabin", "reference_group": "Sabin1-related", "call": "Sabin1-related", "lineage": "", "location": "", "sample_date": "", "EPID": ""}}`,
+                    "rangeinput_Sabin1-related",
+                    "colourSelect_Sabin1-related",
+                    "barSelect_Sabin1-related",
+                    ['#e68781', '#476970', '#fbedac']);
+        </script> 
+      </div> 
+      <h3><strong>Figure 4</strong> | Sabin1-related phylogeny</h3>
+      <hr>
+
+    <div class="pagebreak"> </div>
+    <br>
+      <h3><strong>Table 5</strong> | Configuration settings </h3>
+    <button class="accordion">Export table</button>
+      <div class="panel">
+        <div class="row">
+          <div class="col-sm-2" ><strong>Export table: </strong></div>
+          <div class="col-sm-8" id="tableExportID5"></div>
+        </div>
+      </div>
+        <table class="display nowrap" id="myTable5">
+          <thead>
+            <tr>
+              <th style="width:30%;">Configuration option</th>
+              <th style="width:70%;">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr>
+                <td><strong>min_read_length</strong></td>
+                <td>1000</td>
+              <tr>
+                <td><strong>max_read_length</strong></td>
+                <td>1300</td>
+              <tr>
+                <td><strong>min_map_quality</strong></td>
+                <td>50</td>
+              <tr>
+                <td><strong>min_read_depth</strong></td>
+                <td>50</td>
+              <tr>
+                <td><strong>min_aln_block</strong></td>
+                <td>600</td>
+              <tr>
+                <td><strong>min_read_pcent</strong></td>
+                <td>10.0</td>
+              <tr>
+                <td><strong>medaka_model</strong></td>
+                <td>r941_min_hac_variant_g507</td>
+              <tr>
+                <td><strong>primer_length</strong></td>
+                <td>30</td>
+              <tr>
+                <td><strong>analysis_mode</strong></td>
+                <td>vp1</td>
+              <tr>
+                <td><strong>run_phylo</strong></td>
+                <td>True</td>
+          </tbody>
+        </table>
+        <script type="text/javascript">
+          $(document).ready( function () {
+              var table = $('#myTable5').DataTable({
+                select: {
+                        style: 'multi'
+                    },
+                'iDisplayLength': 100,
+                "paging": false,
+                "border-bottom":false,
+                "bInfo" : false,
+                dom: 'frtip',
+                buttons: ["copy","csv","print"]
+              });
+              table.buttons().container().appendTo( $('#tableExportID5') );
+              
+            } );
+        </script>
+      <br>
+      <script>
+        var acc = document.getElementsByClassName("accordion");
+        var i;
+        for (i = 0; i < acc.length; i++) {
+              acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                  panel.style.maxHeight = null;
+                } else {
+                  panel.style.maxHeight = panel.scrollHeight*1.2 + "px";
+                } 
+              });
+            }
+      </script>
+    <div id="citation_box" class="info_box">
+      <p>General citation for Piranha</p>
+      <p>
+        <strong>O’Toole Á, Colquhoun R, Ansley C, Troman C, Maloney D, Vance Z, Akello J, Bujaki E, Majumdar M, Khurshid A, Arshad Y, Alam MM, Martin J, Shaw A, Grassly N, Rambaut A</strong> (2023) Automated detection and classification of polioviruses from nanopore sequencing reads using piranha. <i>bioRxiv</i> <a style='color:#e68781' href="https://doi.org/10.1101/2023.09.05.556319">https://doi.org/10.1101/2023.09.05.556319</a>
+      </p>
+    </div>
     <footer class="page-footer">
       <div class="container-fluid text-right text-md-right">
         <hr>
@@ -1222,7 +1628,7 @@
             <p>
           </div>
           <div class="col-sm-11" style="text-align: right;">
-            piranha 1.0.13 | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small>
+            piranha 1.1.1 | <small class="text-muted">Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis</small> <br><small class="text-muted">GNU General Public License v3.0</small>
           </div>
         <br><br>
         </p>
