@@ -705,7 +705,7 @@
           <tbody>
             
             % for row in data_for_report["composition_table"]:
-              %if row["sample"] not in [config["negative"],config["positive"]]:
+              %if row["sample"] not in config["negative_control"] and row["sample"] not in config["positive_control"]:
               <% this_barcode = row["barcode"] %>
               
               <tr>
