@@ -132,9 +132,11 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
         for row in reader:
             for k in seq_metadata:
                 if k.split("|")[0] ==row[KEY_SAMPLE]:
-                    for col in reader:
-                        if col in config[KEY_PHYLO_METADATA_COLUMNS]:
+                    print(k, row[KEY_SAMPLE])
+                    for col in header:
+                        if col in reader_header and col not in [KEY_SAMPLE,KEY_BARCODE,KEY_SOURCE,KEY_NAME]:
                             seq_metadata[k][col] = row[col]
+                    print(seq_metadata[k])
 
     with open(os.path.join(phylo_outdir, f"annotations.csv"), "w") as fw0:
         
