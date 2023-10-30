@@ -490,7 +490,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION],config[KEY_BARCODES])
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
-        identical_seq_check[str(record.seq)].append(record.description)
+        identical_seq_check[str(record.seq)].append(record.id)
         
         fields = record.description.split(" ")
 
