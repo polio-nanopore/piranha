@@ -594,8 +594,8 @@
           <img class="piranha-logo" src="https://raw.githubusercontent.com/aineniamh/piranha/main/docs/poseco.svg" vertical-align="left" width="30" height="30"></img></a>
           PoSeCo | <small class="text-muted">${LANGUAGE_CONFIG["2"]}</small>
         </div>
-        <div class="col-sm-8" style="text-align: right;"><a href="https://github.com/polio-nanopore/piranha/">
-          <strong style="color:#000"> piranha | </strong> <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small></a>
+        <div class="col-sm-8" style="text-align: right;"><a style="color:#000" href="https://github.com/polio-nanopore/piranha/">
+          <strong style="color:#000"> piranha </strong> | <small class="text-muted">${LANGUAGE_CONFIG["3"]}</small></a>
         </div>
         <br>
         <hr>
@@ -643,13 +643,15 @@
             </tr>
           </thead>
           <tbody>
-            <% summary_bcodes = [] %>
+            <% import collections %>
+            <% summary_bcodes = collections.defaultdict(list) %>
             % for row in data_for_report["summary_table"]:
                 %for col in config["summary_table_header"]:
 
                   %if col=="sample":
                     <% this_barcode = row["barcode"] %>
-                    <% summary_bcodes.append(this_barcode) %>
+                    <% this_reference = row["reference_group"] %>
+                    <% summary_bcodes[this_barcode].append(this_reference) %>
                     <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}"><strong>${row[col]}</strong></a></td>
                   %else:
                     <td>${row[col]}</td>
@@ -704,21 +706,28 @@
             
             % for row in data_for_report["composition_table"]:
               %if row["sample"] not in [config["negative"],config["positive"]]:
-                
+              <% this_barcode = row["barcode"] %>
+              
               <tr>
                 %for col in config["composition_table_header"]:
 
                   %if col=="sample":
-                    <% this_barcode = row["barcode"] %>
+                    
                     %if this_barcode in summary_bcodes:
                     <td><a href="./barcode_reports/${this_barcode}_report.html" target="_blank" style="color:${themeColor}">${row[col]}</a></td>
                     %else:
                     <td style="color:${themeColor}">${row[col]}</td>
                     %endif
+
                   %elif col!="barcode":
 
-                    %if int(row[col])>config["min_read_depth"]:
-                      <td style="color:${themeColor}"><strong>${row[col]}</strong></td>
+                    %if this_barcode in summary_bcodes:
+                      <% these_references = summary_bcodes[this_barcode] %>
+                        %if col in these_references:
+                          <td style="color:${themeColor}"><strong>${row[col]}</strong></td>
+                        %else:
+                          <td>${row[col]}</td>
+                        %endif
                     %else:
                       <td>${row[col]}</td>
                     %endif
@@ -750,6 +759,7 @@
         </script>
 
     <div class="pagebreak"> </div>
+    %if flagged_seqs:
     <h3><strong>${LANGUAGE_CONFIG["9"]} 3</strong> | ${LANGUAGE_CONFIG["20"]} </h3>
     <button class="accordion">${LANGUAGE_CONFIG["11"]}</button>
       <div class="panel">
@@ -758,6 +768,7 @@
           <div class="col-sm-8" id="tableExportID3"></div>
         </div>
       </div>
+      
       <table class="display nowrap" id="myTable3">
         <thead>
           <tr>
@@ -796,7 +807,7 @@
             
           } );
       </script>
-
+      %endif
       % if show_control_table:
         <div class="pagebreak"> </div>
         <h3><strong>${LANGUAGE_CONFIG["9"]} 4</strong> | ${LANGUAGE_CONFIG["23"]} </h3>

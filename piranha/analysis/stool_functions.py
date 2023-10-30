@@ -6,7 +6,7 @@ import csv
 
 from piranha.utils.config import *
 
-def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata, output_file,publish_dir):
+def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,runname, output_file,publish_dir):
     if not os.path.exists(publish_dir):
         os.mkdir(publish_dir)
     
@@ -60,6 +60,10 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata, o
 
                 record_id += f" {KEY_BARCODE}={barcode}"
                 record_id += f" {KEY_REFERENCE}={ref}"
+                record_id += f" {KEY_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
+
+                if runname:
+                    record_id += f" {KEY_RUNNAME}={runname}"
 
                 if "Sabin" in ref:
                     record_id += f" {KEY_VARIANT_COUNT}={var_count}"

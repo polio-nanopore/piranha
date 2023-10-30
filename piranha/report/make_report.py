@@ -174,6 +174,7 @@ def make_sample_report(report_to_generate,
                     data_for_report = data_for_report,
                     sequences = sequences,
                     LANGUAGE_CONFIG = LANGUAGE_CONFIG,
+                    ENGLISH_CONFIG = ENGLISH_CONFIG,
                     config=config)
 
     try:
@@ -607,6 +608,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     phylo_data = phylo_data,
                     background_data = background_data,
                     LANGUAGE_CONFIG = LANGUAGE_CONFIG,
+                    ENGLISH_CONFIG = ENGLISH_CONFIG,
                     config=config)
 
     try:

@@ -170,3 +170,22 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
 
     return list(seq_clusters.keys()),tree_annotations
 
+def update_local_database(supplementary_sequences,sample_sequences,output_file):
+    with open(output_file,"w") as fw:
+        countall = 0
+        countnew = 0
+        for record in SeqIO.parse(supplementary_sequences, "fasta"):
+            SeqIO.write(record, fw, "fasta")
+            countall+=1
+
+        for record in SeqIO.parse(sample_sequences, "fasta"):
+            new_record = record
+            desc_list = new_record.description.split(" ")
+            new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
+            new_record.description = " ".join(new_desc_list)
+            SeqIO.write(new_record, fw, "fasta")
+            countall+=1
+            countnew+=1
+
+    print(green(f"Local database updated with ")+ f"{countnew}"+ green(" newly generated records."))
+    print(green(f"Total records in local database:"), countall)

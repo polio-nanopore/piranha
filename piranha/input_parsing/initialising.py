@@ -58,6 +58,7 @@ def get_defaults():
                     KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
                     KEY_SUPPLEMENTARY_METADATA_COLUMNS:VALUE_SUPPLEMENTARY_METADATA_COLUMNS,
                     KEY_SUPPLEMENTARY_METADATA_ID_COLUMN:VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN,
+                    KEY_UPDATE_LOCAL_DATABASE:False,
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
@@ -76,59 +77,6 @@ def get_defaults():
 
                     }
     return default_dict
-
-def valid_args():
-    return [
-        KEY_READDIR,
-        KEY_BARCODES_CSV,
-
-        KEY_OUTDIR,
-        KEY_OUTPUT_PREFIX,
-        KEY_PUBLISHDIR,
-        KEY_TEMPDIR,
-        KEY_NO_TEMP,
-        KEY_DATESTAMP,
-        KEY_OVERWRITE,
-
-        KEY_SAMPLE_TYPE,
-        KEY_ANALYSIS_MODE,
-
-        KEY_MIN_READ_LENGTH,
-        KEY_MAX_READ_LENGTH,
-        KEY_MIN_READS,
-        KEY_MIN_PCENT,
-        KEY_MIN_MAP_QUALITY,
-        KEY_MIN_ALN_BLOCK,
-        KEY_PRIMER_LENGTH,
-
-        KEY_OUTPUT_REPORT,
-        
-        KEY_REFERENCE_SEQUENCES,
-        KEY_REFERENCES_FOR_CNS,
-        KEY_MEDAKA_MODEL,
-
-        KEY_RUN_PHYLO,
-        KEY_SUPPLEMENTARY_SEQUENCES,
-        KEY_SUPPLEMENTARY_METADATA,
-        KEY_SUPPLEMENTARY_METADATA_ID_COLUMN,
-        KEY_TREE_ANNOTATIONS,
-        KEY_SUPPLEMENTARY_METADATA_COLUMNS,
-
-        KEY_POSITIVE,
-        KEY_NEGATIVE,
-        KEY_ORIENTATION,
-        KEY_DETAILED_TABLE_HEADER,
-
-        KEY_USERNAME,
-        KEY_INSTITUTE,
-        KEY_RUNNAME,
-
-        KEY_THREADS,
-        KEY_VERBOSE,
-        KEY_COLOUR_MAP,
-        KEY_COLOUR_THEME,
-        KEY_LANGUAGE
-    ]
 
 
 def ignore_args(defaults, valid):
