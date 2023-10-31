@@ -44,8 +44,8 @@ def parseVCFCalls(vcfFileList):
 
                     elif len(ref) > 1:
                         #MNP with no del, split
-                        for pos2, ref2, alt2 in zip(pos,ref,alt):
-                            haps[i].append((pos2,alt2))
+                        haps[i].append((pos,alt[0]))
+                        haps[i].append((str(int(pos)+1),alt[1]))
 
                     else:
                         #just a normal SNP
