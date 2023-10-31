@@ -1,6 +1,6 @@
 import os
 from piranha.analysis.lengthFilter import gather_filter_reads_by_length 
-from piranha.analysis.parseHaplos import makeHaploFasta, parseVCFCalls
+from piranha.analysis.haplotyping_functions import *
 runName = "Pak_ES_Run18"
 readSource = './test_data/Pakistan_ES/Run18/'
 referenceFile = "references/references.vp1.fasta"
@@ -112,11 +112,9 @@ rule variantCall:
         alleleFreq = 0.07 #another thing that user should be able to specify
     log:
         stderr = os.path.join("logs","variantCalling",runName,"{barcode}_{refSeq}.err")
-    shell:
-        """
-        freebayes -f {input.ref} -F {params.alleleFreq} --pooled-continuous --no-indels --no-mnps --no-complex {input.bam} > {output.int_vcf} 2> {log.stderr}
-        python write_contig_headers_vcf.py {output.int_vcf} {output.vcf} 2>> {log.stderr}
-        """
+    run:
+        shell("freebayes -f {input.ref} -F {params.alleleFreq} --pooled-continuous --no-indels --no-mnps --no-complex {input.bam} > {output.int_vcf} 2> {log.stderr}")
+        write_contig_headers_vcf(output.int_vcf,output.vcf)
 
 
 rule callHaplos:
@@ -152,14 +150,12 @@ checkpoint createReadPartition:
         partBamDir = directory(os.path.join("partitionedBams",runName,"{barcode}","{refSeq}"))
     params:
         outPrefix = os.path.join("partitionedBams",runName,"{barcode}","{refSeq}","haplotype")
-    shell:
+    run:
         #want to put this script into a function and just import
         #also mod to ignore unmapped
-        """
-            mkdir {output.partBamDir}
-            python ~/flopp/scripts/get_bam_partition.py {input.partFile} {input.bam} {params.outPrefix}
-            rm {params.outPrefix}-not_mapped*
-        """
+            shell("mkdir {output.partBamDir}")
+            get_bam_partition(input.partFile,input.bam,params.outPrefix)
+            shell("rm {params.outPrefix}-not_mapped*")
 
 rule createFastqs:
     input:
