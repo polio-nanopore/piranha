@@ -42,8 +42,8 @@
     "output_options": {
       "title": "Output Options",
       "type": "object",
+      "fa_icon": "fas fa-terminal",
       "description": "Parameters for saving and naming workflow outputs.",
-      "default": "",
       "properties": {
         "out_dir": {
           "type": "string",
@@ -51,15 +51,72 @@
           "default": "output",
           "title": "Output folder name",
           "description": "Directory for output of all user-facing files."
+        },
+        "output_intermediates": {
+          "type": "boolean",
+          "title": "Output intermediate files"
         }
       }
     },
-    "advanced_options": {
-      "title": "Advanced Options",
+    "analysis_options": {
+      "title": "Analysis Options",
       "type": "object",
-      "description": "Advanced options for configuring processes inside the workflow.",
-      "default": "",
+      "fa_icon": "fas fa-terminal",
+      "description": "Define the thresholds for filtering and assembly.",
       "properties": {
+        "config": {
+          "type": "string",
+          "format": "path",
+          "title": "Config file",
+          "description": "A config file with parameters for piranha."
+        },
+        "min_map_quality": {
+          "type": "integer",
+          "title": "Minimum mapping quality"
+        },
+        "min_read_length": {
+          "type": "integer",
+          "title": "Minimum read length"
+        },
+        "max_read_length": {
+          "type": "integer",
+          "title": "Maximum read length"
+        },
+        "min_read_depth": {
+          "type": "integer",
+          "title": "Minimum read depth required for consensus generation"
+        },
+        "min_read_pcent": {
+          "type": "number",
+          "title": "Minimum percentage of sample required for consensus generation"
+        },
+        "primer_length": {
+          "type": "integer",
+          "title": "Length of primer sequences to trim off start and end of reads"
+        }
+      }
+    },
+    "phylo_options": {
+      "title": "Phylogenetic Options",
+      "type": "object",
+      "description": "Options for running the phylogenetics module.",
+      "properties": {
+        "run_phylo": {
+          "type": "boolean",
+          "title": "Run phylogenetics pipeline"
+        },
+        "supplementary_sequences": {
+          "type": "string",
+          "format": "path",
+          "title": "Supplementary sequences",
+          "description": "Supplementary sequence FASTA file to be incorporated into phylogenetic analysis"
+        },
+        "supplementary_metadata": {
+          "type": "string",
+          "format": "path",
+          "title": "Supplementary metadata",
+          "description": " Supplementary metadata file associated with the supplementary sequence FASTA file"
+        }
       }
     },
     "miscellaneous_options": {
@@ -93,7 +150,10 @@
       "$ref": "#/definitions/output_options"
     },
     {
-      "$ref": "#/definitions/advanced_options"
+      "$ref": "#/definitions/analysis_options"
+    },
+    {
+      "$ref": "#/definitions/phylo_options"
     },
     {
       "$ref": "#/definitions/miscellaneous_options"
