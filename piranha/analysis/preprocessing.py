@@ -124,6 +124,7 @@ def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filte
     total_reads= 0
     ambiguous =0
     unmapped = 0
+    filtered = 0
     hits = collections.defaultdict(set)
     
     mappings = []
@@ -144,14 +145,14 @@ def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filte
                     else:
                         mappings.append(last_mapping)
                         total_reads +=1
-                        
+
                         if len(mappings) > 1:
                             ambiguous +=1
                             filtered_reason = "ambiguous mapping"
                             row = {"read_name":mapping["read_name"],"status":"unmapped","description":"ambiguous_mapping"}
                             writer.writerow(row)
                         else:
-                            unmapped,status,description = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,unmapped)
+                            unmapped,status,description,filtered = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,filtered,unmapped)
                             row = {"read_name":mapping["read_name"],"status":status,"description":description}
                             writer.writerow(row)
 
@@ -167,9 +168,9 @@ def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filte
             total_reads +=1
     
     if total_reads == 0:
-        return {}, 0, 0, 0
+        return {}, 0, 0, 0, 0
 
-    return hits, unmapped, ambiguous, total_reads
+    return hits, unmapped, ambiguous,filtered, total_reads
 
 def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode):
 
@@ -236,7 +237,7 @@ def parse_paf_file(paf_file,
 
         min_aln_block = config[KEY_MIN_ALN_BLOCK]
 
-        ref_hits, unmapped, ambiguous, total_reads = group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filter_out)
+        ref_hits, unmapped, ambiguous,filtered, total_reads = group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filter_out)
         print(f"Barcode: {barcode}")
         print(green("Unmapped:"),unmapped)
         print(green("Ambiguous mapping:"),ambiguous)
