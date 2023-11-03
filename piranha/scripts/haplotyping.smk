@@ -1,8 +1,8 @@
 import os
 from piranha.analysis.lengthFilter import gather_filter_reads_by_length 
-from piranha.analysis.haplotyping_functions import *
+from piranha.analysis.parseHaplos import makeHaploFasta, parseVCFCalls
 runName = "Pak_ES_Run18"
-readSource = './test_data/Pakistan_ES/Run18/'
+readSource = './test_data/pak_run'
 referenceFile = "references/references.vp1.fasta"
 barcodes = []
 for filename in os.listdir(readSource):
@@ -13,7 +13,7 @@ for filename in os.listdir(readSource):
 
 rule all:
   input: 
-    expand(os.path.join(runName,"{barcode}.txt"),barcode=barcodes)
+    expand(os.path.join(runName,"{barcode}.txt"),barcode=config[KEY_BARCODES])
 
 rule filterLength:
     input: 
@@ -24,7 +24,8 @@ rule filterLength:
     run:
         #slight mods from the function in piranha 
         gather_filter_reads_by_length(params.readDir,output.filtered)
-
+        # so this already happens in preprocessing- 
+        #is there much difference to fxnality here? - A
 
 rule mapReadsAndGatherRefs:
     input:
@@ -51,6 +52,7 @@ rule mapReadsAndGatherRefs:
         samtools index mappedReads/{params.runName}/{params.barcode}/mapped_reads.bam mappedReads/{params.runName}/{params.barcode}/mapped_reads.bai 2>> {log.samtoolsErr}
         samtools idxstats {output.mapped_reads} | awk '{{if($3>={params.minReads}) print $0}}' > {output.referencesFound} 2>> {log.samtoolsErr}
         """)
+        # We already do this with specific refs etc- do you neeed the idxstats output? - A
 
 checkpoint splitBambyRef:
     input:
@@ -83,6 +85,7 @@ checkpoint splitBambyRef:
         samtools index {output.refBamDir}/${{reference}}.bam {output.refBamDir}/${{reference}}.bai >> {log.stdout} 2>> {log.stderr}
         done
         """
+        # I *think* this is all covered too- do you just need to have the right ref and fq file?- A
 
 rule downSampleBam:
     input:
@@ -99,7 +102,7 @@ rule downSampleBam:
         #I have just written an entire script to make my life easier
         #there is probably a less convoluted way of doing this
         "bash createDownsample.sh {input.bam} {params.read_limit} {output.ds_bam} > {log.stdout} 2> {log.stderr}"
-
+        #^^ think you still need to push this! - A
 rule variantCall:
     input:
         bam = rules.downSampleBam.output.ds_bam,
@@ -112,9 +115,13 @@ rule variantCall:
         alleleFreq = 0.07 #another thing that user should be able to specify
     log:
         stderr = os.path.join("logs","variantCalling",runName,"{barcode}_{refSeq}.err")
-    run:
-        shell("freebayes -f {input.ref} -F {params.alleleFreq} --pooled-continuous --no-indels --no-mnps --no-complex {input.bam} > {output.int_vcf} 2> {log.stderr}")
-        write_contig_headers_vcf(output.int_vcf,output.vcf)
+    shell:
+        """
+        freebayes -f {input.ref} -F {params.alleleFreq} --pooled-continuous --no-indels --no-mnps --no-complex {input.bam} > {output.int_vcf} 2> {log.stderr}
+        python write_contig_headers_vcf.py {output.int_vcf} {output.vcf} 2>> {log.stderr}
+        """
+        # we could have this python script as an imported module for consistency with rest of piranha
+        # do you have tests on how freebayes compares to medaka and it being alright for use on nanopore data? -A
 
 
 rule callHaplos:
@@ -141,21 +148,27 @@ rule callHaplos:
             echo "No variants called - single reference haplotype" > {output.flopp}
         fi
         """
+        # the ploidy thing- could it try different ploidies and see what fits best with the data?
+        # are there likelihood stats on the output/ quality scores? 
+        # could take those and compare between ploidy settings.
+        # i think it's unlikely the user is going to be able to pick a ploidy
 
 checkpoint createReadPartition:
     input:
         partFile = rules.callHaplos.output.partFile,
         bam = rules.downSampleBam.output.ds_bam
     output:
-        partBamDir = directory(os.path.join("partitionedBams",runName,"{barcode}","{refSeq}"))
+        partBamDir = directory(os.path.join("partitionedBams",runName,"{barcode}","{refSeq}")) #snakemake might want a file here rather than dir? -A 
     params:
         outPrefix = os.path.join("partitionedBams",runName,"{barcode}","{refSeq}","haplotype")
-    run:
+    shell:
         #want to put this script into a function and just import
         #also mod to ignore unmapped
-            shell("mkdir {output.partBamDir}")
-            get_bam_partition(input.partFile,input.bam,params.outPrefix)
-            shell("rm {params.outPrefix}-not_mapped*")
+        """
+            mkdir {output.partBamDir}
+            python ~/flopp/scripts/get_bam_partition.py {input.partFile} {input.bam} {params.outPrefix}
+            rm {params.outPrefix}-not_mapped*
+        """
 
 rule createFastqs:
     input:
@@ -218,6 +231,7 @@ rule generateSnipit:
         svg = os.path.join("snipits",runName,"{barcode}","{refSeq}","snp_plot.svg")
     shell:
         "snipit {input.alignment} -r {params.ref} -f svg -d {params.outDir}"
+        
 
 def aggregate_input_for_report(wildcards):
     #combining into one output per barcode
