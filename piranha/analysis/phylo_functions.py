@@ -172,13 +172,11 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
 
     return list(seq_clusters.keys()),tree_annotations
 
-def update_local_database(supplementary_sequences,sample_sequences,output_file):
+def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metadata,config):
+    
+    record_ids = {}
     with open(output_file,"w") as fw:
-        countall = 0
         countnew = 0
-        for record in SeqIO.parse(supplementary_sequences, "fasta"):
-            SeqIO.write(record, fw, "fasta")
-            countall+=1
 
         for record in SeqIO.parse(sample_sequences, "fasta"):
             new_record = record
@@ -186,8 +184,27 @@ def update_local_database(supplementary_sequences,sample_sequences,output_file):
             new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
             new_record.description = " ".join(new_desc_list)
             SeqIO.write(new_record, fw, "fasta")
-            countall+=1
             countnew+=1
+            sample = record.id.split("|")[0]
+            record_ids[record.id] = sample
+
+    with open(new_db_metadata,"w") as fw:
+        with open(detailed_csv,"r") as f:
+            reader = csv.DictReader(f)
+            header = reader.fieldnames
+            header.append(config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN])
+
+            writer = csv.DictWriter(fw, fieldnames=header, lineterminator="\n")
+            writer.writeheader()
+            sample_data = {}
+            for row in reader:
+                sample = row[KEY_SAMPLE]
+                sample_data[sample] = row
+
+            for record in record_ids:
+                sample = record_ids[record.id]
+                row = sample_data[sample]
+                row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] = record.id
+                writer.writerow(row)
 
     print(green(f"Local database updated with ")+ f"{countnew}"+ green(" newly generated records."))
-    print(green(f"Total records in local database:"), countall)
