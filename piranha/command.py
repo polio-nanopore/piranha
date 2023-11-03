@@ -221,10 +221,6 @@ def main(sysargs = sys.argv[1:]):
                 print(green("Initializing phylo pipeline."))
                 status = misc.run_snakemake(config,phylo_snakefile,config)
                 
-                if config[KEY_UPDATE_LOCAL_DATABASE]:
-                    output_db = os.path.join(config[KEY_OUTDIR],"published_data",f"updated_database.{config[KEY_TODAY]}.fasta")
-                    phylo_functions.update_local_database(config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_SAMPLE_SEQS],output_db)
-
             # get the inputs for making the overall report
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
             summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
@@ -240,6 +236,11 @@ def main(sysargs = sys.argv[1:]):
                                 detailed_csv,
                                 config[KEY_ANNOTATIONS],
                                 config)
+
+            if config[KEY_UPDATE_LOCAL_DATABASE]:
+                new_db_seqs = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.fasta")
+                new_db_metadata = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.csv")
+                phylo_functions.update_local_database(config[KEY_SAMPLE_SEQS],detailed_csv,new_db_seqs,new_db_metadata,config)
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:
