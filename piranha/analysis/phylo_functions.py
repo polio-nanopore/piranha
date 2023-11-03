@@ -175,7 +175,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
 def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metadata,config):
     
     record_ids = {}
-    with open(output_file,"w") as fw:
+    with open(new_db_seqs,"w") as fw:
         countnew = 0
 
         for record in SeqIO.parse(sample_sequences, "fasta"):
@@ -201,10 +201,10 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
                 sample = row[KEY_SAMPLE]
                 sample_data[sample] = row
 
-            for record in record_ids:
-                sample = record_ids[record.id]
+            for record_id in record_ids:
+                sample = record_ids[record_id]
                 row = sample_data[sample]
-                row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] = record.id
+                row[config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN]] = record_id
                 writer.writerow(row)
 
     print(green(f"Local database updated with ")+ f"{countnew}"+ green(" newly generated records."))
