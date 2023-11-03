@@ -125,13 +125,13 @@ def parse_barcodes_csv(barcodes_csv,config):
     
 #     return seq_ids
 
-def qc_supplementary_metadata_file(supplementary_metadata,seq_ids,config):
+def qc_supplementary_metadata_file(supplementary_metadata,config):
 
     with open(supplementary_metadata,"r") as f:
         reader = csv.DictReader(f)
-
         missing = set()
         for col in config[KEY_SUPPLEMENTARY_METADATA_COLUMNS]:
+            
             if col not in reader.fieldnames and col not in VALUE_SUPPLEMENTARY_METADATA_COLUMNS:
                 missing.add(col)
         if missing:
@@ -152,7 +152,7 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
         if ref_group not in config[KEY_REFERENCES_FOR_CNS]:
             no_reference_group.add(record.id)
         else:
-            total_seqs[reference_group]+=1
+            total_seqs[ref_group]+=1
             seq_records.append(record)
             seq_info[record.id]= {}
 
@@ -210,7 +210,7 @@ def gather_supplementary_data(supplementary_datadir,supplementary_sequences,supp
                 for col in row:
                     supplementary_metadata_header.add(col)
 
-        with open(supplementary_metadata,"w") as f:
+        with open(supplementary_metadata,"w") as fw:
             writer = csv.DictWriter(fw, fieldnames=supplementary_metadata_header,lineterminator="\n")
             writer.writeheader()
             for seq_id in seq_info:
@@ -261,8 +261,6 @@ def phylo_group_parsing(run_phylo_arg,
             config[KEY_SUPPLEMENTARY_METADATA] = os.path.join(config[KEY_TEMPDIR],"local_db","supp_metadata.csv")
             
             gather_supplementary_data(config[KEY_SUPPLEMENTARY_DATADIR],config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_SUPPLEMENTARY_METADATA],config[KEY_SUPPLEMENTARY_METADATA_ID_COLUMN],config)
-
-        seq_ids = set()
         
         misc.add_arg_to_config(KEY_SUPPLEMENTARY_METADATA_COLUMNS,supplementary_metadata_columns_arg,config)
         if not type(config[KEY_SUPPLEMENTARY_METADATA_COLUMNS])==list:
@@ -270,7 +268,6 @@ def phylo_group_parsing(run_phylo_arg,
 
         if config[KEY_SUPPLEMENTARY_METADATA]:
             qc_supplementary_metadata_file(config[KEY_SUPPLEMENTARY_METADATA],
-                                            seq_ids,
                                             config)
 
         misc.add_arg_to_config(KEY_PHYLO_METADATA_COLUMNS,phylo_metadata_columns_arg,config)
