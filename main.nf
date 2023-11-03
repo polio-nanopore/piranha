@@ -1,6 +1,6 @@
 process run_piranha {
 
-    publishDir "${params.out_dir}", mode: 'copy'
+    publishDir "${params.out_dir}", mode: 'copy', saveAs: {  fn -> fn.replace("piranha_output/", "")}
 
     container "${params.wf.container}:${workflow.manifest.version}"
 
@@ -9,10 +9,7 @@ process run_piranha {
         path run_dir
 
     output:
-        path "piranha_report.html"
-        path "barcode_reports"
-        path "detailed_run_report.csv"
-        path "published_data"
+        path "piranha_output/*"
 
     script:
     extra = ""
@@ -36,13 +33,11 @@ process run_piranha {
         extra += " --run-phylo"
     if ( params.supplementary_sequences )
         extra += " --supplementary-sequences ${params.supplementary_sequences}"
-     if ( params.supplementary_metadata )
-            extra += " --supplementary-metadata ${params.supplementary_metadata}"
+    if ( params.supplementary_metadata )
+        extra += " --supplementary-metadata ${params.supplementary_metadata}"
     """
     piranha -b ${barcodes_csv} -i ${run_dir} -o piranha_output --tempdir piranha_tmp -t ${task.cpus} ${extra}
-    mv piranha_output/* .
-    rm -rf piranha_output
-    mv report.html piranha_report.html
+    mv piranha_output/report.html piranha_output/piranha_report.html
     """
 
 }
