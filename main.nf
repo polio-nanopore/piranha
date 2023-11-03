@@ -2,7 +2,7 @@ process run_piranha {
 
     publishDir "${params.out_dir}", mode: 'copy'
 
-    container "${params.wf.container}"
+    container "${params.wf.container}:${workflow.manifest.version}"
 
     input:
         path barcodes_csv

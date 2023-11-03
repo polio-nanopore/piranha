@@ -4,7 +4,7 @@
   "title": "polio-nanopore/piranha",
   "description": "Polio investigation resource automating nanopore haplotype analysis.",
   "url": "https://github.com/polio-nanopore/piranha",
-  "demo_url": "https://raw.githubusercontent.com/polio-nanopore/piranha/main/piranha/test/pak_run",
+  "demo_url": "https://raw.githubusercontent.com/polio-nanopore/piranha/main/piranha/test/pak_run.tar.gz",
   "type": "object",
   "definitions": {
     "input_options": {
