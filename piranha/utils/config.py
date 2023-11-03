@@ -172,7 +172,7 @@ KEY_DISPLAY_NAME = "display_name"
 # report defaults
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
-VALUE_RUNNAME="Nanopore"
+VALUE_RUNNAME="polioDDNS"
 VALUE_COLOUR_MAP=["#e68781","#476970","#fbedac"]
 VALUE_COLOUR_THEME="#e68781"
 
