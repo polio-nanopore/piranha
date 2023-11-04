@@ -14,7 +14,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
     seq_clusters = collections.defaultdict(list)
 
     header = VALUE_PHYLO_HEADER
-
+    written = {}
     for record in SeqIO.parse(sample_seqs,KEY_FASTA):
         for ref_group in config[KEY_REFERENCES_FOR_CNS]:
 
@@ -26,8 +26,8 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
             """
             
             fields = record.description.split(" ")
-            record_id = fields[0]
-            record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
+            
+            record_sample,reference_group,cns_id,epid,sample_date = record.id.split("|")
 
             description_dict = {}
             for field in fields[1:]:
@@ -39,12 +39,12 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 new_record = record
 
                 barcode = description_dict[KEY_BARCODE]
-                name = record_id
+                name = new_record.id
 
-                new_record.description = name
+                new_record.description = ""
                 new_record.id = name
 
-                seq_clusters[ref_group].append(new_record)
+                
 
                 seq_metadata[name][KEY_NAME] = name
                 seq_metadata[name][KEY_SAMPLE] = record_sample
@@ -66,6 +66,8 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                         call = "Sabin-like"
 
                 seq_metadata[name][KEY_CALL] = call
+                seq_clusters[ref_group].append(new_record)
+                continue
 
 
     print(green("Reference groups for phylo pipeline:"))
@@ -74,15 +76,20 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
     
     if supplementary_sequences:
         for record in SeqIO.parse(supplementary_sequences,KEY_FASTA):
-            for ref_group in seq_clusters:
-                if ref_group in record.description:
-                    seq_clusters[ref_group].append(record)
+            if record:
+                for ref_group in seq_clusters:
+                    if ref_group in record.description:
+                        
 
-                    seq_metadata[record.id][KEY_NAME] = record.id
-                    seq_metadata[record.id][KEY_SAMPLE] = record.id
-                    seq_metadata[record.id][KEY_SOURCE] = "Background"
-                    seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
-                    seq_metadata[record.id][KEY_CALL] = ref_group
+                        seq_metadata[record.id][KEY_NAME] = record.id
+                        seq_metadata[record.id][KEY_SAMPLE] = record.id
+                        seq_metadata[record.id][KEY_SOURCE] = "Background"
+                        seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
+                        seq_metadata[record.id][KEY_CALL] = ref_group
+
+                        new_record = record
+                        new_record.description = ""
+                        seq_clusters[ref_group].append(new_record)
     
     if supplementary_metadata:
         with open(supplementary_metadata, "r") as f:
@@ -99,27 +106,29 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                             seq_metadata[sample][col] = row[col]
 
     for record in SeqIO.parse(reference_sequences, KEY_FASTA):
-        for ref_group in seq_clusters:
-            if ref_group in record.description:
-                seq_clusters[ref_group].append(record)
+        if record:
+            for ref_group in seq_clusters:
+                if ref_group in record.description:
+                    seq_clusters[ref_group].append(record)
 
-                seq_metadata[record.id][KEY_NAME] = record.id
-                seq_metadata[record.id][KEY_SAMPLE] = record.id
-                
-                seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
-                seq_metadata[record.id][KEY_CALL] = ref_group
+                    seq_metadata[record.id][KEY_NAME] = record.id
+                    seq_metadata[record.id][KEY_SAMPLE] = record.id
+                    
+                    seq_metadata[record.id][KEY_REFERENCE_GROUP] = ref_group
+                    seq_metadata[record.id][KEY_CALL] = ref_group
 
-                if "Sabin" in record.description:
-                    seq_metadata[record.id][KEY_SOURCE] = "Sabin"
-                else:
-                    seq_metadata[record.id][KEY_SOURCE] = "Reference"
+                    if "Sabin" in record.description:
+                        seq_metadata[record.id][KEY_SOURCE] = "Sabin"
+                    else:
+                        seq_metadata[record.id][KEY_SOURCE] = "Reference"
     
     for record in SeqIO.parse(outgroup_sequences, KEY_FASTA):
         for ref_group in seq_clusters:
             if ref_group in record.description:
                 new_record = record
+                new_record.description = ""
                 new_record.id = "outgroup"
-                new_record.description = "outgroup"
+                
                 seq_clusters[ref_group].append(new_record)
 
     with open(barcodes_csv, "r") as f:
@@ -162,7 +171,12 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                         writer0.writerow(row)
 
             with open(os.path.join(phylo_outdir, f"{i}.fasta"),"w") as fw:
-                SeqIO.write(seq_clusters[i], fw, KEY_FASTA)
+                records = seq_clusters[i]
+                record_dict = {}
+                for record in records:
+                    record_dict[record.id] = record
+                unique_records = [r for r in record_dict.values()]
+                SeqIO.write(unique_records, fw, KEY_FASTA)
 
     tree_annotations = config[KEY_TREE_ANNOTATIONS]
     for i in header:
@@ -183,6 +197,7 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
             desc_list = new_record.description.split(" ")
             new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
             new_record.description = " ".join(new_desc_list)
+            
             SeqIO.write(new_record, fw, "fasta")
             countnew+=1
             sample = record.id.split("|")[0]
