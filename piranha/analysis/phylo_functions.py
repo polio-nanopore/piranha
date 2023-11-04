@@ -37,14 +37,12 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
             if ref_group == reference_group:
                 
                 new_record = record
+                new_record.description = ""
+                new_record.id = record.id
 
                 barcode = description_dict[KEY_BARCODE]
                 name = new_record.id
 
-                new_record.description = ""
-                new_record.id = name
-
-                
 
                 seq_metadata[name][KEY_NAME] = name
                 seq_metadata[name][KEY_SAMPLE] = record_sample
