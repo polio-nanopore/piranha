@@ -396,6 +396,12 @@ The phylogenetic pipeline is activated by running with the flag `-rp/--run-phylo
 
 If you supply a path to the `-sd,--supplementary-datadir` for the phylogenetics module, you have the option of updating this data directory with the new consesnsus sequences generated during the piranaha analysis. If you run with the `-ud,--update-local-database` flag, piranha will write out the new sequences and any accompanying metadata supplied into the directory provided.
 
+The files written out will be in the format `runname.today.fasta` and `runname.today.csv`. For example, if your runname supplied is `MIN001` and today's date is `2023-11-05`, the files written will be:
+- `MIN001.2023-11-05.fasta`
+- `MIN001.2023-11-05.csv`
+with the newly generated consensus sequences and accompanying metadata from that run.
+
+> *Note:* if supplying the supplementary directory to piranha on a subsequent run, your updated local database will be included in the phylogenetics. However, piranha will ignore any files with identical `runname.today` patterns to the active run. So, if your current run would produce files called `MIN001.2023-11-05.fasta` and `MIN001.2023-11-05.csv`, if those files already exist in the supplementary data directory, they will be ignored. This is to avoid conflicts if piranha is run multiple times on the same data. 
 
 ## Output options
 
