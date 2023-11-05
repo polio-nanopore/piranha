@@ -184,7 +184,10 @@ def gather_supplementary_data(supplementary_datadir,supplementary_sequences,supp
         for r,d,f in os.walk(supplementary_datadir):
             for supp_file in f:
                 if supp_file.endswith(".fasta") or supp_file.endswith(".fa"):
-                    parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_group,total_seqs,seq_info,config)
+
+                    today_data = f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.fasta"
+                    if supp_file != today_data:
+                        parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_group,total_seqs,seq_info,config)
                 
                 elif supp_file.endswith("csv"):
                     with open(os.path.join(supplementary_datadir,supp_file),"r")  as f:
