@@ -1,5 +1,5 @@
 _program = "piranha"
-__version__ = "1.1.1"
+__version__ = "1.2"
 
 __all__ = [
     "input_parsing",
