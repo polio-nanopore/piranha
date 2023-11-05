@@ -193,13 +193,22 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
         for record in SeqIO.parse(sample_sequences, "fasta"):
             new_record = record
             desc_list = new_record.description.split(" ")
-            new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
-            new_record.description = " ".join(new_desc_list)
+            write_record = True
+
+            for i in desc_list:
+                if i.startswith("variant_count"):
+                    count = int(i.split("=")[1])
+                    if count < 6:
+                        write_record = False
             
-            SeqIO.write(new_record, fw, "fasta")
-            countnew+=1
-            sample = record.id.split("|")[0]
-            record_ids[record.id] = sample
+            if write_record:
+                new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
+                new_record.description = " ".join(new_desc_list)
+                
+                SeqIO.write(new_record, fw, "fasta")
+                countnew+=1
+                sample = record.id.split("|")[0]
+                record_ids[record.id] = sample
 
     with open(new_db_metadata,"w") as fw:
         with open(detailed_csv,"r") as f:
