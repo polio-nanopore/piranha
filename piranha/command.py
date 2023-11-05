@@ -55,12 +55,11 @@ def main(sysargs = sys.argv[1:]):
 
     phylo_group = parser.add_argument_group('Phylogenetics options')
     phylo_group.add_argument("-rp","--run-phylo",action="store_true",help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
-    phylo_group.add_argument("-ss","--supplementary-sequences",action="store",help=f"Supplementary sequence FASTA file to be incorporated into phylogenetic analysis.")
-    phylo_group.add_argument("-sm","--supplementary-metadata",action="store",help=f"Supplementary metadata file associated with the supplementary sequence FASTA file.")
+    phylo_group.add_argument("-sd","--supplementary-datadir",action="store",help=f"Path to directory containing supplementary sequence FASTA file and optional metadata to be incorporated into phylogenetic analysis.")
     phylo_group.add_argument("-pcol","--phylo-metadata-columns",action="store",help=f"Columns in the barcodes.csv file to annotate the phylogeny with. Default: {VALUE_PHYLO_METADATA_COLUMNS}")
-    phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata file to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
-    phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata file to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
-    phylo_group.add_argument("-db","--update-local-database",action="store_true",help=f"Amalgamate newly generated consensus sequences with the supplied supplementary sequence FASTA file and write to file.")
+    phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
+    phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata files to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
+    phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Amalgamate newly generated consensus sequences with the supplied supplementary sequence FASTA file and write to file.")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -140,21 +139,6 @@ def main(sysargs = sys.argv[1:]):
                                     args.negative_control,
                                     config)
 
-    # runs qc checks on the phylo input options and configures the phylo settings
-    input_qc.phylo_group_parsing(args.run_phylo, 
-                                args.supplementary_sequences, 
-                                args.supplementary_metadata,
-                                args.phylo_metadata_columns,
-                                config[KEY_BARCODES_CSV],
-                                args.supplementary_metadata_columns,
-                                args.supplementary_metadata_id_column,
-                                args.update_local_database,
-                                config)
-
-    if config[KEY_RUN_PHYLO]:
-        # checks the phylo-specific dependencies
-        dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
-
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir,
                                         args.output_prefix,
@@ -165,11 +149,26 @@ def main(sysargs = sys.argv[1:]):
                                         config)
 
     init.misc_args_to_config(args.verbose,
-                            args.threads,
-                            args.username,
-                            args.institute,
-                            args.runname,
-                            config)
+                                args.threads,
+                                args.username,
+                                args.institute,
+                                args.runname,
+                                config)
+    # runs qc checks on the phylo input options and configures the phylo settings
+    # now need tempdir for this parsing, so run after directory_setup
+    # also needs runname to not add runname.today.fasta to the db
+    input_qc.phylo_group_parsing(args.run_phylo, 
+                                args.update_local_database,
+                                args.supplementary_datadir,
+                                args.phylo_metadata_columns,
+                                config[KEY_BARCODES_CSV],
+                                args.supplementary_metadata_columns,
+                                args.supplementary_metadata_id_column,
+                                config)
+
+    if config[KEY_RUN_PHYLO]:
+        # checks the phylo-specific dependencies
+        dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
 
     # ready to run? either verbose snakemake or quiet mode
     init.set_up_verbosity(config)
@@ -222,10 +221,6 @@ def main(sysargs = sys.argv[1:]):
                 print(green("Initializing phylo pipeline."))
                 status = misc.run_snakemake(config,phylo_snakefile,config)
                 
-                if config[KEY_UPDATE_LOCAL_DATABASE]:
-                    output_db = os.path.join(config[KEY_OUTDIR],"published_data",f"updated_database.{config[KEY_TODAY]}.fasta")
-                    phylo_functions.update_local_database(config[KEY_SUPPLEMENTARY_SEQUENCES],config[KEY_SAMPLE_SEQS],output_db)
-
             # get the inputs for making the overall report
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
             summary_csv=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
@@ -241,6 +236,11 @@ def main(sysargs = sys.argv[1:]):
                                 detailed_csv,
                                 config[KEY_ANNOTATIONS],
                                 config)
+
+            if config[KEY_UPDATE_LOCAL_DATABASE]:
+                new_db_seqs = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.fasta")
+                new_db_metadata = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.csv")
+                phylo_functions.update_local_database(config[KEY_SAMPLE_SEQS],detailed_csv,new_db_seqs,new_db_metadata,config)
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:
