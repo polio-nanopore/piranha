@@ -148,8 +148,15 @@ def main(sysargs = sys.argv[1:]):
                                         args.no_temp,
                                         config)
 
+    init.misc_args_to_config(args.verbose,
+                                args.threads,
+                                args.username,
+                                args.institute,
+                                args.runname,
+                                config)
     # runs qc checks on the phylo input options and configures the phylo settings
     # now need tempdir for this parsing, so run after directory_setup
+    # also needs runname to not add runname.today.fasta to the db
     input_qc.phylo_group_parsing(args.run_phylo, 
                                 args.update_local_database,
                                 args.supplementary_datadir,
@@ -162,13 +169,6 @@ def main(sysargs = sys.argv[1:]):
     if config[KEY_RUN_PHYLO]:
         # checks the phylo-specific dependencies
         dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
-
-    init.misc_args_to_config(args.verbose,
-                            args.threads,
-                            args.username,
-                            args.institute,
-                            args.runname,
-                            config)
 
     # ready to run? either verbose snakemake or quiet mode
     init.set_up_verbosity(config)
