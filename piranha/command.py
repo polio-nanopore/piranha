@@ -192,6 +192,7 @@ def main(sysargs = sys.argv[1:]):
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
     phylo_snakefile = data_install_checks.get_snakefile(thisdir,"phylo")
+    haplo_snakefile = data_install_checks.get_snakefile(thisdir,"haplotype")
 
     # output an optional config file with post processing info
     if args.save_config:
@@ -206,7 +207,6 @@ def main(sysargs = sys.argv[1:]):
         with open(os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),"r") as f:
             preprocessing_config = yaml.safe_load(f)
         
-        # runs the business snakemake with consensus generation
         status = misc.run_snakemake(preprocessing_config,snakefile,config)
 
         if status: 
