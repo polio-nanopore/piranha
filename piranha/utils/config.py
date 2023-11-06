@@ -56,6 +56,8 @@ KEY_HITS = "hits"
 # PHYLO KEYS
 
 KEY_RUN_PHYLO = "run_phylo"
+KEY_UPDATE_LOCAL_DATABASE = "update_local_database"
+KEY_SUPPLEMENTARY_DATADIR = "supplementary_datadir"
 KEY_SUPPLEMENTARY_SEQUENCES = "supplementary_sequences"
 KEY_SUPPLEMENTARY_METADATA = "supplementary_metadata"
 KEY_SUPPLEMENTARY_METADATA_ID_COLUMN = "supplementary_metadata_id_column"
@@ -63,7 +65,6 @@ KEY_CLUSTERS= "clusters"
 KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 KEY_ANNOTATIONS = "annotations"
 KEY_TREE_ANNOTATIONS = "tree_annotations"
-KEY_UPDATE_LOCAL_DATABASE = "update_local_database"
 KEY_LOCATION = "location"
 
 KEY_SAMPLE_SEQS = "sample_seqs"
@@ -183,7 +184,7 @@ KEY_DISPLAY_NAME = "display_name"
 # report defaults
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
-VALUE_RUNNAME="Nanopore"
+VALUE_RUNNAME="polioDDNS"
 VALUE_COLOUR_MAP=["#e68781","#476970","#fbedac"]
 VALUE_COLOUR_THEME="#e68781"
 

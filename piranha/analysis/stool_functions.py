@@ -33,58 +33,59 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
         cns_counter = collections.Counter()
         for cns_file in input_cns_list:
             for record in SeqIO.parse(cns_file, KEY_FASTA):
-                cns_info= record.description.split(" ")
-                ref,barcode,var_count,var_string=cns_info[0].split("|")
-                
-                info = []
-                for row in analysis_info[barcode]:
-                    if row[KEY_REFERENCE] == ref:
-                        info = row
-
-                metadata = input_metadata[barcode]
-
-                record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
-                cns_counter[record_id] += 1
-
-                record_id += f"|CNS{cns_counter[record_id]}"
-
-                if KEY_EPID in metadata:
-                    record_id += f"|{metadata[KEY_EPID]}"
-                else:
-                    record_id += "|"
-
-                if KEY_DATE in metadata:
-                    record_id += f"|{metadata[KEY_DATE]}"
-                else:
-                    record_id += "|"
-
-                record_id += f" {KEY_BARCODE}={barcode}"
-                record_id += f" {KEY_REFERENCE}={ref}"
-                record_id += f" {KEY_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
-
-                if runname:
-                    record_id += f" {KEY_RUNNAME}={runname}"
-
-                if "Sabin" in ref:
-                    record_id += f" {KEY_VARIANT_COUNT}={var_count}"
-                    record_id += f" {KEY_VARIANTS}={var_string}"
-                else:
-                    record_id += f" {KEY_VARIANT_COUNT}=NA"
-                    record_id += f" {KEY_VARIANTS}=NA"
-
-                if all_metdata:
+                if record:
+                    cns_info= record.description.split(" ")
+                    ref,barcode,var_count,var_string=cns_info[0].split("|")
                     
-                    for col in metadata:
-                        if col != KEY_SAMPLE and col != KEY_BARCODE:
-                            record_id += f" {col}={metadata[col]}"
-                """
-                record header is:
-                >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
+                    info = []
+                    for row in analysis_info[barcode]:
+                        if row[KEY_REFERENCE] == ref:
+                            info = row
 
-                if "all_metadata" then everything else gets added to the description
-                """
-                fw.write(f">{record_id}\n{record.seq}\n")
-                handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
+                    metadata = input_metadata[barcode]
+
+                    record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
+                    cns_counter[record_id] += 1
+
+                    record_id += f"|CNS{cns_counter[record_id]}"
+
+                    if KEY_EPID in metadata:
+                        record_id += f"|{metadata[KEY_EPID]}"
+                    else:
+                        record_id += "|"
+
+                    if KEY_DATE in metadata:
+                        record_id += f"|{metadata[KEY_DATE]}"
+                    else:
+                        record_id += "|"
+
+                    record_id += f" {KEY_BARCODE}={barcode}"
+                    record_id += f" {KEY_REFERENCE}={ref}"
+                    record_id += f" {KEY_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
+
+                    if runname:
+                        record_id += f" {KEY_RUNNAME}={runname}"
+
+                    if "Sabin" in ref:
+                        record_id += f" {KEY_VARIANT_COUNT}={var_count}"
+                        record_id += f" {KEY_VARIANTS}={var_string}"
+                    else:
+                        record_id += f" {KEY_VARIANT_COUNT}=NA"
+                        record_id += f" {KEY_VARIANTS}=NA"
+
+                    if all_metdata:
+                        
+                        for col in metadata:
+                            if col != KEY_SAMPLE and col != KEY_BARCODE:
+                                record_id += f" {col}={metadata[col]}"
+                    """
+                    record header is:
+                    >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
+
+                    if "all_metadata" then everything else gets added to the description
+                    """
+                    fw.write(f">{record_id}\n{record.seq}\n")
+                    handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
     
     for handle in handle_dict:
         handle_dict[handle].close()

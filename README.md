@@ -22,6 +22,9 @@ Any issues or feedback about the analysis or report please flag to this reposito
 ## Installing via ARTIFICE GUI
 - Download the release package for your machine from the [PiranhaGUI respository](https://github.com/polio-nanopore/piranhaGUI)
 
+## Installing within EPI2ME
+- Piranha is also compatible with the [EPI2ME](https://labs.epi2me.io/downloads/) workflow desktop application. This mode of running does not provide the same level of input checking and configurability as either the ARTIFICE GUI or the command line, but is provided as an alternative interactive interface. Once EPI2ME and docker have been downloaded, follow the instructions to [download a custom workflow](https://labs.epi2me.io/quickstart/) using the github path `https://github.com/polio-nanopore/piranha`.
+
 ## Installation instructions (quick command line reference)
 
 >You need to have Git, a version of conda (link to Miniconda [here](https://docs.conda.io/en/latest/miniconda.html)) and mamba installed to run the following commands. 
@@ -364,17 +367,21 @@ and piranha will check which ones you have installed with your version of medaka
 
 ## Optional phylogenetics module **\*NEW FEATURE\***
 
-Piranha allows the user to optionally run a phylogenetics module in addition to variant calling and consensus builing. There are 3 additional dependencies needed if you wish to run this module:
+Piranha allows the user to optionally run a phylogenetics module in addition to variant calling and consensus builing. If you have previously installed piranha, are 3 additional dependencies needed if you wish to run this module:
 - IQTREE2
 - mafft
 - jclusterfunk
+The latest environment file contains this dependencies, so to install you can just update your environment (`conda env update -f environment.yml`) or run using the latest image for piranha GUI.
+
 This module will cluster any consensus sequences generated during the run into `reference_group`, so either `Sabin1-related`, `Sabin2-related`, `Sabin3-related` or `WPV1` and will ultimately build one maximum-likelihood phylogeny for each reference group with consensus sequences in a given sequencing run. To annotate the phylogeny with certain metadata from the barcodes.csv file, specify columns to include with `-pcol/--phylo-metadata-columns`.
 
 Piranha then extracts any relevant reference sequences from the installed reference file (identified by having `display_name=Sabin1-related` in their sequence header, or whichever reference group the relevant phylogeny will be for). 
 
-An optional file of local sequences can be supplied to supplement the phylogenetic analysis with `-ss/--supplementary-sequences`. This file should be in FASTA format, but does not need to be aligned. To allow piranha to assign the sequences to the relevant phylogeny, this file should have the reference group annotated in the header in the format `display_name=Sabin1-related`, for example.
+An optional set of local sequences can be supplied to supplement the phylogenetic analysis. To supply them to piranha, point to the correct directory using `-sd,--supplementary-datadir`. The sequence files should be in FASTA format, but do not need to be aligned. To allow piranha to assign the sequences to the relevant phylogeny, the sequence files should have the reference group annotated in the header in the format `display_name=Sabin1-related`, for example.
 
-This supplementary sequence file can be accompanied with a csv metadata file (one row per supplementary sequence) (`-sm/--supplementary-metadata`) and this metadata can be included in the final report and annotated onto the phylogenies (`-smcol/--supplementary-metadata-columns`). By default, the metadata is matched to the FASTA sequence name with a column titled `sequence_name` but this header name can be configured by specifying `-smid/--supplementary-metadata-id-column`
+This supplementary sequence files can be accompanied with csv metadata files (one row per supplementary sequence) and this metadata can be included in the final report and annotated onto the phylogenies (`-smcol/--supplementary-metadata-columns`). By default, the metadata is matched to the FASTA sequence name with a column titled `sequence_name` but this header name can be configured by specifying `-smid/--supplementary-metadata-id-column`. 
+
+Piranha will iterate accross the directory supplied and amalgamate the FASTA files, retaining any sequences with `display_name=X` in the header description, where X can be one of `Sabin1-related`, `Sabin2-related`, `Sabin3-related` or `WPV1`. It then will read in every csv file it detects in this directory and attempts to match any metadata to the gathered fasta records. These will be added to the relevant phylogenies.
 
 The phylogenetic pipeline is activated by running with the flag `-rp/--run-phylo`, which then triggers the following analysis steps:
 - Amalgamate the newly generated consensus sequences for all barcodes into their respective reference groups.
@@ -387,6 +394,17 @@ The phylogenetic pipeline is activated by running with the flag `-rp/--run-phylo
 - Prune off the outgroup sequences using `jclusterfunk`.
 - Annotate the tree newick files with the specified metadata (Default: just whether it's a new consensus sequence or not). 
 - Extract phylogenetic trees and embed in interactive report.
+
+## Update local database  **\*NEW FEATURE\***
+
+If you supply a path to the `-sd,--supplementary-datadir` for the phylogenetics module, you have the option of updating this data directory with the new consesnsus sequences generated during the piranaha analysis. If you run with the `-ud,--update-local-database` flag, piranha will write out the new sequences and any accompanying metadata supplied into the directory provided.
+
+The files written out will be in the format `runname.today.fasta` and `runname.today.csv`. For example, if your runname supplied is `MIN001` and today's date is `2023-11-05`, the files written will be:
+- `MIN001.2023-11-05.fasta`
+- `MIN001.2023-11-05.csv`
+with the newly generated consensus sequences and accompanying metadata from that run.
+
+> *Note:* if supplying the supplementary directory to piranha on a subsequent run, your updated local database will be included in the phylogenetics. However, piranha will ignore any files with identical `runname.today` patterns to the active run. So, if your current run would produce files called `MIN001.2023-11-05.fasta` and `MIN001.2023-11-05.csv`, if those files already exist in the supplementary data directory, they will be ignored. This is to avoid conflicts if piranha is run multiple times on the same data. 
 
 ## Output options
 
