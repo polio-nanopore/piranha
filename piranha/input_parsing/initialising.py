@@ -48,6 +48,7 @@ def get_defaults():
                     KEY_ALL_METADATA:False,
 
                     # haplo options
+                    KEY_RUN_HAPLOTYPING:False,
                     KEY_HAPLOTYPE_SAMPLE_SIZE:VALUE_HAPLOTYPE_SAMPLE_SIZE,
                     KEY_MIN_ALLELE_FREQUENCY:VALUE_MIN_ALLELE_FREQUENCY,
                     KEY_MAX_HAPLOTYPES:VALUE_MAX_HAPLOTYPES,
