@@ -105,17 +105,11 @@
           "type": "boolean",
           "title": "Run phylogenetics pipeline"
         },
-        "supplementary_sequences": {
+        "supplementary_datadir": {
           "type": "string",
           "format": "path",
-          "title": "Supplementary sequences",
-          "description": "Supplementary sequence FASTA file to be incorporated into phylogenetic analysis"
-        },
-        "supplementary_metadata": {
-          "type": "string",
-          "format": "path",
-          "title": "Supplementary metadata",
-          "description": " Supplementary metadata file associated with the supplementary sequence FASTA file"
+          "title": "Supplementary data",
+          "description": "Path to directory containing supplementary sequence FASTA file and optional metadata to be incorporated into phylogenetic analysis."
         }
       }
     },
