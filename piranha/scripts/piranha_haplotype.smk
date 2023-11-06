@@ -35,7 +35,7 @@ rule rasusa:
     params:
         depth = config[KEY_HAPLOTYPE_SAMPLE_SIZE]
     output:
-        reads_ds= os.path.join(config[KEY_TEMPDIR],"haplotyping","{reference}_ds.fastq")
+        fastq= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","downsample.fastq")
     script:
         ref_len = 0
         for record in SeqIO.parse(input.ref,"fasta"):
@@ -43,7 +43,20 @@ rule rasusa:
         shell("rasusa -i {input.reads:q} -c {params.depth:q} " + f"-g {ref_len}b" + " -o {output.reads_ds:q}")
 
 
-
+rule minimap_for_bam:
+    input:
+        ref=rules.files.params.ref,
+        fastq = rules.rasusa.output.fastq
+    threads: workflow.cores
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_for_bam.log")
+    output:
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","downsample.bam")
+    shell:
+        """
+        minimap2 -t {threads} -ax asm20 --secondary=no  \
+        {input.ref:q} \
+        {input.fastq:q} | samtools sort -@ {threads} -O bam -o {output:q} &> {log:q}
+        """
 
 rule minimap_for_bam:
     input:
