@@ -17,11 +17,7 @@ REFERENCES = config[BARCODE]
 
 rule all:
     input:
-        os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
-        os.path.join(config[KEY_TEMPDIR],"variants.csv"),
-        os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
-        expand(os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf"), reference=REFERENCES),
-        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","flopp_output.flopp"), reference=REFERENCES),
 
 rule files:
     params:
@@ -132,3 +128,19 @@ rule haplotype_qc:
         #generate partition read files
         #need a file with list of haplotypes generated 
         #(i.e. name of read files produced)
+        """
+
+        seq_index = SeqIO.index(input.reads, "fastq")
+
+        handle_dict = {}
+        haplo_id = 0
+        for haplotype in to_write:
+            handle_dict[haplotype] =  open(os.path.join(outdir,f"{haplotype}.fastq"),"w")
+
+        read partition file, qc check, write reads
+
+        for haplotype in handle_dict:
+            handle_dict[haplotype].close()
+            
+        return to_write
+        """
