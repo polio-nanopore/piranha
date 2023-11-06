@@ -93,3 +93,26 @@ def analysis_mode(analysis_mode_arg,config):
     # if config[KEY_ANALYSIS_MODE] != "vp1":
     #     sys.stderr.write(cyan(f"Only `vp1` analysis mode currently implemented.\n"))
     #     sys.exit(-1)
+
+
+
+def haplo_group_parsing(run_haplotyping,
+                        haplotype_sample_size,
+                        min_allele_frequency,
+                        max_haplotypes,
+                        min_haplotype_distance,
+                        min_haplotype_depth,
+                        config):
+
+    # if command line arg, overwrite config value
+    misc.add_arg_to_config(KEY_RUN_HAPLOTYPING,run_haplotyping,config)
+    misc.add_arg_to_config(KEY_HAPLOTYPE_SAMPLE_SIZE,haplotype_sample_size,config)
+    misc.add_arg_to_config(KEY_MIN_ALLELE_FREQUENCY,min_allele_frequency,config)
+    misc.add_arg_to_config(KEY_MAX_HAPLOTYPES,max_haplotypes,config)
+    misc.add_arg_to_config(KEY_MIN_HAPLOTYPE_DISTANCE,min_haplotype_distance,config)
+    misc.add_arg_to_config(KEY_MIN_HAPLOTYPE_DEPTH,min_haplotype_depth,config)
+
+    for key in [KEY_HAPLOTYPE_SAMPLE_SIZE,KEY_MAX_HAPLOTYPES,KEY_MIN_HAPLOTYPE_DISTANCE,KEY_MIN_HAPLOTYPE_DEPTH]:
+        check_if_int(key,config)
+    
+    check_if_float(KEY_MIN_ALLELE_FREQUENCY,config)
