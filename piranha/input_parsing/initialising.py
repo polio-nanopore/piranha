@@ -47,14 +47,14 @@ def get_defaults():
                     
                     KEY_ALL_METADATA:False,
 
-                    #haplo defaults
+                    # haplo options
                     KEY_HAPLOTYPE_SAMPLE_SIZE:VALUE_HAPLOTYPE_SAMPLE_SIZE,
                     KEY_MIN_ALLELE_FREQUENCY:VALUE_MIN_ALLELE_FREQUENCY,
                     KEY_MAX_HAPLOTYPES:VALUE_MAX_HAPLOTYPES,
                     KEY_MIN_HAPLOTYPE_DISTANCE:VALUE_MIN_HAPLOTYPE_DISTANCE,
                     KEY_MIN_HAPLOTYPE_DEPTH:VALUE_MIN_HAPLOTYPE_DEPTH,
 
-                    #phylo defaults
+                    # phylo options
                     KEY_SUPPLEMENTARY_SEQUENCES:"",
                     KEY_SUPPLEMENTARY_METADATA:"",
                     KEY_RUN_PHYLO:False,
