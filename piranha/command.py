@@ -137,6 +137,15 @@ def main(sysargs = sys.argv[1:]):
                                                 args.min_map_quality,
                                                 config)
 
+    # Configures which haplotype defaults and whether to run haplo calling
+    analysis_arg_parsing.haplo_group_parsing(args.run_haplotyping,
+                        args.haplotype_sample_size,
+                        args.min_allele_frequency,
+                        args.max_haplotypes,
+                        args.min_haplotype_distance,
+                        args.min_haplotype_depth,
+                        config)
+
     misc.add_arg_to_config(KEY_ALL_METADATA,args.all_metadata_to_header,config)
 
     input_qc.parse_input_group(args.barcodes_csv,
