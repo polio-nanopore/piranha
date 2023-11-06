@@ -242,7 +242,8 @@ def phylo_group_parsing(run_phylo_arg,
     if config[KEY_RUN_PHYLO]:
 
         misc.add_path_to_config(KEY_SUPPLEMENTARY_DATADIR,supplementary_datadir,config)
-        misc.check_path_exists(config[KEY_SUPPLEMENTARY_DATADIR])
+        if config[KEY_SUPPLEMENTARY_DATADIR]:
+            misc.check_path_exists(config[KEY_SUPPLEMENTARY_DATADIR])
 
         misc.add_arg_to_config(KEY_UPDATE_LOCAL_DATABASE,update_local_database,config)
         if config[KEY_UPDATE_LOCAL_DATABASE] not in [True, False]:
