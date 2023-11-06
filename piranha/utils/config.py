@@ -75,6 +75,7 @@ VALUE_SUPPLEMENTARY_METADATA_COLUMNS = [KEY_LOCATION,"lineage"]
 VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
 
 # HAPLO KEYS
+KEY_RUN_HAPLOTYPING = "run_haplotyping"
 KEY_HAPLOTYPE_SAMPLE_SIZE = "haplotype_sample_size"
 KEY_MIN_ALLELE_FREQUENCY = "min_allele_frequency"
 KEY_MAX_HAPLOTYPES = "max_haplotypes"
