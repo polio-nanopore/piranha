@@ -31,10 +31,8 @@ process run_piranha {
         extra += " --primer-length ${params.primer_length}"
     if ( params.run_phylo )
         extra += " --run-phylo"
-    if ( params.supplementary_sequences )
-        extra += " --supplementary-sequences ${params.supplementary_sequences}"
-    if ( params.supplementary_metadata )
-        extra += " --supplementary-metadata ${params.supplementary_metadata}"
+    if ( params.supplementary_datadir )
+        extra += " --supplementary-datadir ${params.supplementary_datadir}"
     """
     piranha -b ${barcodes_csv} -i ${run_dir} -o piranha_output --tempdir piranha_tmp -t ${task.cpus} ${extra}
     mv piranha_output/report.html piranha_output/piranha_report.html
