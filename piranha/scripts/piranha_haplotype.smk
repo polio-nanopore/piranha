@@ -9,7 +9,7 @@ from piranha.analysis.clean_gaps import *
 import piranha.analysis.haplotyping_functions as hf
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
-
+ 
 
 BARCODE = config[KEY_BARCODE]
 SAMPLE = str(config[KEY_SAMPLE])
@@ -110,16 +110,6 @@ rule flopp:
         fi
         """
 
-rule merge_close_haplo:
-    input:
-        flopp = rules.flopp.output.flopp
-    params:
-        min_distance = config[KEY_MIN_HAPLOTYPE_DISTANCE]
-    output:
-        flopp = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","merged.flopp")
-    run:
-        ## merge haplotypes accross flopp file if within x snps
-
 rule haplotype_qc:
     input:
         flopp = rules.flopp.output.flopp,
@@ -133,6 +123,7 @@ rule haplotype_qc:
     run:
         ## qc steps
         """
+        merge close haplotypes
         evenness statistic, standard deviation
         how many reads includued
         minimum reads for the haplotype to be used
