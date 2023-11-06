@@ -27,10 +27,44 @@ rule files:
         summary=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
 
 
+rule estimate_haplotypes:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"piranha_haplotype.smk"),
+        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),
+        prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt")
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}"),
+        publish_dir = os.path.join(config[KEY_OUTDIR],"published_data","{barcode}")
+    threads: workflow.cores
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_haplotype.smk.log")
+    output:
+        yaml = os.path.join(config[KEY_TEMPDIR],"{barcode}",HAPLOTYPING_CONFIG),
+        prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","haplotyping","prompt.txt")
+    run:
+        if config[KEY_RUN_HAPLOTYPING]:
+            sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
+            print(green(f"Calculating haplotypes for {sample} ({params.barcode})"))
+            shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                        "--forceall "
+                        "--rerun-incomplete "
+                        "{config[log_string]} "
+                        "--configfile {input.yaml:q} "
+                        "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+                        f"sample='{sample}' "
+                        "--cores {threads} &> {log:q}")
+        else:
+            shell(
+                """
+                cp {input.yaml:q} {output.yaml:q}
+                touch {output.prompt:q}
+                """)
+
 rule generate_consensus_sequences:
     input:
         snakefile = os.path.join(workflow.current_basedir,"consensus.smk"),
-        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),
+        yaml = rules.estimate_haplotypes.output.yaml,
         prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt")
     params:
         barcode = "{barcode}",
