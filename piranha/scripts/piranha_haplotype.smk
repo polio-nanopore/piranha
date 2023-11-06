@@ -6,7 +6,7 @@ from Bio import SeqIO
 import yaml
 
 from piranha.analysis.clean_gaps import *
-from piranha.analysis.haplotyping_functions import *
+import piranha.analysis.haplotyping_functions as hf
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
@@ -58,93 +58,86 @@ rule minimap_for_bam:
         {input.fastq:q} | samtools sort -@ {threads} -O bam -o {output:q} &> {log:q}
         """
 
-rule minimap_for_bam:
-    input:
-    output:
-    shell:
-
 rule freebayes:
     input:
+        bam = rules.minimap_for_bam.output.bam,
+        ref = rules.files.params.ref
     output:
-    shell:
+        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","freebayes.vcf"),
+        int_vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","freebayes_int.vcf")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.freebayes.log")
+    params:
+        allele_freq = config[KEY_MIN_ALLELE_FREQUENCY]
+    run:
+        shell("""
+        freebayes -f {input.ref:q} \
+                -F {params.alleleFreq} \
+                --pooled-continuous \
+                --no-indels \
+                --no-mnps \
+                --no-complex \
+                {input.bam:q} > {output.int_vcf:q} 2> {log:q}
+        """)
+        
+        hf.write_contig_headers_vcf(output.int_vcf,output.vcf)
 
 rule flopp:
     input:
+        bam = rules.minimap_for_bam.output.bam,
+        vcf = rules.freebayes.output.vcf
+    threads: workflow.cores
+    params:
+        ploidy = config[KEY_MAX_HAPLOTYPES],
+        os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","flopp_partitions")
     output:
+        flopp = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","flopp_output.flopp"),
+        partition = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","flopp_partitions","partition.txt")
     shell:
+        """
+        VARIANTS=$(grep -v '#' {input.vcf} | wc -l)
+        if [[ $VARIANTS -gt 0 ]]
+        then
+            flopp -b {input.bam:q} \
+            -c {input.vcf:q} \
+            -p {params.ploidy} -m \
+            -o {output.flopp:q} \
+            -t {threads} \
+            -P {params.partitionPath} 
+        else
+            echo "No variants called - single reference haplotype"
+            touch {output.flopp:q}
+            touch {output.partition:q}
+        fi
+        """
 
 rule merge_close_haplo:
     input:
-    output:
-    shell:
-
-rule haplo_qc:
-    input:
-    output:
-    shell:
-
-rule generate_partition_files:
-    input:
-    output:
-    shell:
-
-
-rule medaka_haploid_variant:
-    input:
-        reads=rules.files.params.reads,
-        ref=rules.files.params.ref
+        flopp = rules.flopp.output.flopp
     params:
-        model = config[KEY_MEDAKA_MODEL],
-        outdir =  os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
+        min_distance = config[KEY_MIN_HAPLOTYPE_DISTANCE]
     output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),
-        pub_vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
-    shell:
+        flopp = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","merged.flopp")
+    run:
+        ## merge haplotypes accross flopp file if within x snps
+
+rule haplotype_qc:
+    input:
+        flopp = rules.flopp.output.flopp,
+        partition = rules.flopp.output.partition,
+        reads = rules.files.params.reads
+    params:
+        min_distance = config[KEY_MIN_HAPLOTYPE_DISTANCE],
+        min_reads = config[KEY_MIN_HAPLOTYPE_DEPTH]
+    output:
+        haplotypes = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","curated_haplotypes.txt")
+    run:
+        ## qc steps
         """
-        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-        if [ -s {input.ref:q} ]
-        then
-            medaka_haploid_variant -i {input.reads:q} \
-                                -r {input.ref:q} \
-                                -o {params.outdir:q} \
-                                -f -x && \
-            medaka stitch {output.probs:q} {input.ref:q} {output.cns:q}
-        else
-            touch {output.cns:q}
-            touch {output.probs:q}
-            touch {output.vcf:q}
-        fi
-        cp {output.vcf:q} {output.pub_vcf:q}
+        evenness statistic, standard deviation
+        how many reads includued
+        minimum reads for the haplotype to be used
         """
 
-rule medaka_haploid_variant_cns:
-    input:
-        reads=rules.files.params.reads,
-        ref=rules.medaka_haploid_variant.output.cns
-    params:
-        model = config[KEY_MEDAKA_MODEL],
-        outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns")
-    output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}_cns.hapoid_variant.log")
-    shell:
-        """
-        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-        if [ -s {input.ref:q} ]
-        then
-            medaka_haploid_variant -i {input.reads:q} \
-                                -r {input.ref:q} \
-                                -o {params.outdir} \
-                                -f -x && \
-            medaka stitch {output.probs} {input.ref} {output.cns}
-        else
-            touch {output.cns:q}
-            touch {output.probs:q}
-            touch {output.vcf:q}
-        fi
-        """
+        #generate partition read files
+        #need a file with list of haplotypes generated 
+        #(i.e. name of read files produced)

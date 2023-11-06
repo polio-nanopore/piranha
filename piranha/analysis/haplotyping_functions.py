@@ -1,5 +1,11 @@
 import pysam
+import os
 import subprocess
+import csv
+
+from piranha.utils.log_colours import green,cyan,yellow
+from piranha.utils.config import *
+
 #get_bam_partition and write_contig_headers_vcf based on scripts from flopp 
 def get_bam_partition(read_part_file,bam_file,pref_nam):
     # read_part_file = sys.argv[1]
