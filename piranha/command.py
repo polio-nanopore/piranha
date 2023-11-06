@@ -53,6 +53,14 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-a","--min-aln-block",action="store",type=float,help=f"Minimum alignment block length. Default: 0.6*MIN_READ_LENGTH")
     analysis_group.add_argument("--primer-length",action="store",type=int,help=f"Length of primer sequences to trim off start and end of reads. Default: {VALUE_PRIMER_LENGTH}")
 
+    haplo_group = parser.add_argument_group('Haplotyping options')
+    haplo_group.add_argument("-rh","--run-haplotyping",action="store_true",help=f"Trigger the optional haplotyping module. Additional dependencies may need to be installed.")
+    haplo_group.add_argument("-hs","--haplotype-sample-size",action="store",type=int,help=f"Number of reads to downsample to for haplotype calling. Default: {VALUE_HAPLOTYPE_SAMPLE_SIZE}")
+    haplo_group.add_argument("-hf","--min-allele-frequency",action="store",type=float,help=f"Minimum allele frequency to call. Note: setting this below 0.07 may significantly increase run time. Default: {VALUE_MIN_ALLELE_FREQUENCY}")
+    haplo_group.add_argument("-hx","--max-haplotypes",action="store",type=int,help=f"Maximum number of haplotypes callable within reference group. Default: {VALUE_MAX_HAPLOTYPES}")
+    haplo_group.add_argument("-hdist","--min-haplotype-distance",action="store",type=int,help=f"Minimum number of SNPs between haplotypes. Default: {VALUE_MIN_HAPLOTYPE_DISTANCE}")
+    haplo_group.add_argument("-hd","--min-haplotype-depth",action="store",type=int,help=f"Minimum number of reads in a given haplotype. Default: {VALUE_MIN_HAPLOTYPE_DEPTH}")
+
     phylo_group = parser.add_argument_group('Phylogenetics options')
     phylo_group.add_argument("-rp","--run-phylo",action="store_true",help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
     phylo_group.add_argument("-ss","--supplementary-sequences",action="store",help=f"Supplementary sequence FASTA file to be incorporated into phylogenetic analysis.")
