@@ -6,8 +6,8 @@ from Bio import SeqIO
 import yaml
 
 from piranha.analysis.clean_gaps import *
-import piranha.analysis.haplotyping_functions as hf
-from piranha.utils.log_colours import green,cyan
+from piranha.analysis.haplo_functions import *
+from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
  
 
@@ -104,12 +104,15 @@ rule flopp:
 rule haplotype_qc:
     input:
         partition = rules.flopp.output.partition,
-        reads = rules.files.params.reads
+        reads = rules.files.params.reads,
+        ref = rules.files.params.ref
     params:
+        reference = "{reference}",
         min_distance = config[KEY_MIN_HAPLOTYPE_DISTANCE],
-        min_reads = config[KEY_MIN_HAPLOTYPE_DEPTH]
+        min_reads = config[KEY_MIN_HAPLOTYPE_DEPTH],
+        haplodir = os.path.join(config[KEY_TEMPDIR],"reference_groups")
     output:
-        ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","haplo_out","{reference}.prompt.txt")
+        txt=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.haplotypes.txt")
     run:
         ## qc steps
         """
@@ -118,31 +121,49 @@ rule haplotype_qc:
         how many reads includued
         minimum reads for the haplotype to be used
         """
-
-        #generate partition read files
-        #need a file with list of haplotypes generated 
-        #(i.e. name of read files produced)
-        """
-
+        partitions = parse_partition_file(input.partition)
         seq_index = SeqIO.index(input.reads, "fastq")
 
-        handle_dict = {}
-        haplo_id = 0
-        for haplotype in to_write:
-            handle_dict[haplotype] =  open(os.path.join(outdir,f"{haplotype}.fastq"),"w")
+        with open(output.txt,"w") as fhaplo:
+            for part in partitions:
+                reads = partitions[part]
+                print(green(f"Haplotype {part}:"), len(reads))
 
-        read partition file, qc check, write reads
+                if len(reads) > params.min_reads:
+                    haplotype = f"{params.reference}.HAP0{part}"
+                    with open(os.path.join(params.haplodir,f"{haplotype}.fastq"),"w") as fw:
+                        records = []
+                        for read in reads:
+                            record = seq_index[read]
+                            records.append(record)
 
-        for haplotype in handle_dict:
-            handle_dict[haplotype].close()
-            
-        return to_write
-        """
+                        SeqIO.write(records,fw,"fastq")
+
+                    haplo_ref = os.path.join(params.haplodir,f"{haplotype}.reference.fasta")
+                    shell(f"cp {input.ref} {haplo_ref}")
+        
+                    fhaplo.write(f"{haplotype}\n")
+
 
 rule write_yaml:
     input:
-        expand(rules.haplotype_qc.output.ref, reference=REFERENCES)
+        expand(rules.haplotype_qc.output.txt, reference=REFERENCES)
     output:
         yaml = os.path.join(config[KEY_TEMPDIR],HAPLOTYPING_CONFIG)
-    shell:
-        "touch {output.yaml}"
+    run:
+        haplotypes = []
+        for haplo_file in input:
+            with open(haplo_file, "r") as f:
+                for l in f:
+                    l = l.rstrip("\n")
+                    haplotypes.append(l)
+        barcode_config = config
+        barcode_config[BARCODE] = haplotypes
+        with open(output.yaml, 'w') as fw:
+            yaml.dump(barcode_config, fw) 
+
+        print(green(f"Haplotypes for {BARCODE}:"))
+        for h in haplotypes:
+            print(f"- {h}")
+        print(yellow("-----------------------"))
+

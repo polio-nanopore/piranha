@@ -40,8 +40,7 @@ rule estimate_haplotypes:
     threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_haplotype.smk.log")
     output:
-        yaml = os.path.join(config[KEY_TEMPDIR],"{barcode}",HAPLOTYPING_CONFIG),
-        prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","haplotyping","prompt.txt")
+        yaml = os.path.join(config[KEY_TEMPDIR],"{barcode}",HAPLOTYPING_CONFIG)
     run:
         if config[KEY_RUN_HAPLOTYPING]:
             sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
@@ -58,14 +57,12 @@ rule estimate_haplotypes:
             shell(
                 """
                 cp {input.yaml:q} {output.yaml:q}
-                touch {output.prompt:q}
                 """)
 
 rule generate_consensus_sequences:
     input:
         snakefile = os.path.join(workflow.current_basedir,"consensus.smk"),
-        yaml = rules.estimate_haplotypes.output.yaml,
-        prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt")
+        yaml = rules.estimate_haplotypes.output.yaml
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
@@ -98,7 +95,7 @@ rule generate_variation_info:
     input:
         snakefile = os.path.join(workflow.current_basedir,"variation.smk"),
         fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
-        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
+        yaml = rules.estimate_haplotypes.output.yaml
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
