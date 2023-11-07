@@ -3,6 +3,8 @@ import os
 import subprocess
 import csv
 from scipy.stats import chisquare
+import numpy as np
+
 
 from piranha.utils.log_colours import green,cyan,yellow
 from piranha.utils.config import *
@@ -279,11 +281,13 @@ def sumBaseSupport(dict1,dict2):
     return outDict
 
 
-def collapseClose(parsedFlopp,distanceCutoff,vcfFile):
+def collapseClose(floppFile,distanceCutoff,vcfFile):
     haploPos = 0
     collapsed = []
     output = []
+    finalHaplos = []
     vcf = parseVCF(vcfFile)
+    parsedFlopp = parseFloppReads(floppFile)
     for h in parsedFlopp:
         collapseIntoCurrent = [haploPos]
         if haploPos in collapsed:
@@ -328,8 +332,26 @@ def collapseClose(parsedFlopp,distanceCutoff,vcfFile):
 
         if not foundOthers:
             newH = h
+        
+        #need these merged versions of parsed flopp output to generate even-ness, maybe make one do-all function
+        finalHaplos.append(newH)
         haploPos += 1
         output.append(collapseIntoCurrent)
-        # outputHaplos.append(newH)
-    #change to return which haplos are to be merged 
+        
     return output
+
+def calcSD(haplotypes):
+    haploCount = 1
+    evenDict = {}
+    for h in haplotypes:
+        #get list of read support vals
+        agreeReads = []
+        for pos in h:
+            reads = h[pos]['base support counts'][h[pos]['assigned allele']]
+            agreeReads.append(reads)
+
+        mean = np.mean(agreeReads)
+        norm = [x/mean for x in agreeReads]
+        evenDict[haploCount] = np.std(norm)
+        haploCount += 1
+    return evenDict
