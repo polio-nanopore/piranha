@@ -15,12 +15,9 @@ setup(name='piranha',
             "piranha/scripts/piranha_vp1.smk",
             "piranha/scripts/piranha_phylo.smk",
             "piranha/scripts/piranha_haplotype.smk",
-            "piranha/scripts/piranha_panev.smk",
-            "piranha/scripts/piranha_wg.smk",
             "piranha/scripts/consensus.smk",
             "piranha/scripts/piranha_curate.smk",
-            "piranha/scripts/variation.smk",
-            "piranha/scripts/snipit.smk"
+            "piranha/scripts/variation.smk"
             ],
       package_data={"piranha":["data/*"]},
       install_requires=[
