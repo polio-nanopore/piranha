@@ -18,6 +18,7 @@ setup(name='piranha',
             "piranha/scripts/piranha_panev.smk",
             "piranha/scripts/piranha_wg.smk",
             "piranha/scripts/consensus.smk",
+            "piranha/scripts/piranha_curate.smk",
             "piranha/scripts/variation.smk",
             "piranha/scripts/snipit.smk"
             ],
