@@ -66,18 +66,45 @@ rule generate_consensus_sequences:
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
+        tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}")
+    threads: workflow.cores
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus.merged.fasta"),
+        yaml = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_config.yaml")
+    run:
+        sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
+        print(green(f"Calculating consensus sequences for {sample} ({params.barcode})"))
+        shell("snakemake --nolock --snakefile {input.snakefile:q} "
+                    "--forceall "
+                    "--rerun-incomplete "
+                    "{config[log_string]} "
+                    "--configfile {input.yaml:q} "
+                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+                    f"sample='{sample}' "
+                    "--cores {threads} &> {log:q}")
+
+
+rule curate_sequences:
+    input:
+        snakefile = os.path.join(workflow.current_basedir,"piranha_curate.smk"),
+        yaml = rules.generate_consensus_sequences.output.yaml,
+        fasta = rules.generate_consensus_sequences.output.fasta
+    params:
+        barcode = "{barcode}",
+        outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
         tempdir = os.path.join(config[KEY_TEMPDIR],"{barcode}"),
         variant_dir = os.path.join(config[KEY_TEMPDIR],"{barcode}","variant_calls"),
         publish_dir = os.path.join(config[KEY_OUTDIR],"published_data","{barcode}")
     threads: workflow.cores
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
+    log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_curate.smk.log")
     output:
         fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
         csv= os.path.join(config[KEY_TEMPDIR],"{barcode}","variants.csv"),
         masked =  os.path.join(config[KEY_TEMPDIR],"{barcode}","masked_variants.csv")
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
-        print(green(f"Calculating consensus sequences for {sample} ({params.barcode})"))
+        print(green(f"Curating consensus sequences & variants for {sample} ({params.barcode})"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
                     "--forceall "
                     "--rerun-incomplete "
@@ -105,6 +132,7 @@ rule generate_variation_info:
     output:
         json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json")
     run:
+        # decide if we want 1 per haplotyde or 1 per ref group, will need mods either way
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Gathering variation info for {sample} ({params.barcode})"))
         shell("snakemake --nolock --snakefile {input.snakefile:q} "
@@ -126,7 +154,9 @@ rule gather_consensus_sequences:
         fasta = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
     run:
         print(green("Gathering fasta files"))
-        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA],config[KEY_RUNNAME], output[0],params.publish_dir)
+        # needs mod for checking & merging identical cns within ref group
+        # also header now needs hap parsing & hap->CNS mapping
+        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA],config[KEY_RUNNAME], output[0],params.publish_dir,config)
 
 
 
@@ -134,8 +164,8 @@ rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_variation_info.output.json,
-        masked_variants = rules.generate_consensus_sequences.output.masked,
-        variants = rules.generate_consensus_sequences.output.csv,
+        masked_variants = rules.curate_sequences.output.masked,
+        variants = rules.curate_sequences.output.csv,
         yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
         outdir = os.path.join(config[KEY_OUTDIR],"barcode_reports"),
