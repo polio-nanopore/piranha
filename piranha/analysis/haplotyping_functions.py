@@ -298,9 +298,6 @@ def collapseClose(floppFile,distanceCutoff,vcfFile):
         foundOthers = False
         
         #for each haplo, check if any others are identical/within distance cutoff, collapse in and combine reads if so, remove collapsed haplo from further consideration
-        #TODO add in merge for haplos not sig different from each other
-        #check multiple merges will work correctly
-        #I'm so dumb, literally all positions are parsed now so it's not an issue for the collapsing
         haploPos2 = haploPos +1
         for h2 in parsedFlopp[haploPos2:]:
             distance = getHaploDist(h,h2,vcf)
