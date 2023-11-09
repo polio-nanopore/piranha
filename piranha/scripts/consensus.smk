@@ -18,7 +18,6 @@ REFERENCES = config[BARCODE]
 
 rule all:
     input:
-        os.path.join(config[KEY_TEMPDIR],"reference_analysis","consensus.merged.fasta"),
         os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
 
 rule files:
@@ -96,10 +95,10 @@ rule medaka_haploid_variant_cns:
 
 rule gather_merge_cns:
     input:
-        cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),reference=REFERENCES),
-        cns_cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta"),reference=REFERENCES)
+        ref=expand(rules.files.params.ref,reference=REFERENCES),
+        cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),reference=REFERENCES)
+        # cns_cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta"),reference=REFERENCES)
     output:
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","consensus.merged.fasta"),
         yaml = os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
     run:
         sequences = collections.defaultdict(set)
@@ -108,18 +107,27 @@ rule gather_merge_cns:
                 print(record.id)
                 sequences[str(record.seq)] = record.id
         
+        ref_file_dict = {}
+        for ref_file in input.ref:
+            for record in SeqIO.parse(ref_file,"fasta"):
+                ref_file_dict[record.id] = ref_file
+
         for seq in sequences:
             print(seq[:5],"...",sequences[seq])
         
         ref_count = collections.Counter()
         ref_cns = []
-        with open(output.cns, "w") as fw:
-            for seq in sequences:
-                ref = sequences[seq]
-                ref_count[ref] +=1
-                record_id = f"{sequences[seq]}|CNS00{ref_count[ref]}"
-                ref_cns.append(record_id)
-                fw.write(f">{record_id}\n{seq}\n")
+        for seq in sequences:
+            ref = sequences[seq]
+            ref_count[ref] +=1
+            record_id = f"{sequences[seq]}.CNS00{ref_count[ref]}"
+            ref_cns.append(record_id)
+
+            with open(os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.fasta"),"w") as fseq:
+                fseq.write(f">{record_id}\n{seq}\n")
+
+            cns_ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.ref.fasta")
+            shell(f"cp '{ref_file_dict[ref]}' '{cns_ref}'")
 
         new_config = config
         new_config[BARCODE] = ref_cns
