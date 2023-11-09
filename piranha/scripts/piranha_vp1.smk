@@ -70,7 +70,6 @@ rule generate_consensus_sequences:
     threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_consensus.smk.log")
     output:
-        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus.merged.fasta"),
         yaml = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_config.yaml")
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
@@ -88,8 +87,7 @@ rule generate_consensus_sequences:
 rule curate_sequences:
     input:
         snakefile = os.path.join(workflow.current_basedir,"piranha_curate.smk"),
-        yaml = rules.generate_consensus_sequences.output.yaml,
-        fasta = rules.generate_consensus_sequences.output.fasta
+        yaml = rules.generate_consensus_sequences.output.yaml
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
@@ -121,8 +119,8 @@ rule curate_sequences:
 rule generate_variation_info:
     input:
         snakefile = os.path.join(workflow.current_basedir,"variation.smk"),
-        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"),
-        yaml = rules.estimate_haplotypes.output.yaml
+        fasta = rules.curate_sequences.output.fasta,
+        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
@@ -147,7 +145,7 @@ rule generate_variation_info:
 rule gather_consensus_sequences:
     input:
         composition = rules.files.params.composition,
-        fasta = expand(rules.generate_consensus_sequences.output.fasta, barcode=config[KEY_BARCODES])
+        fasta = expand(rules.curate_sequences.output.fasta, barcode=config[KEY_BARCODES])
     params:
         publish_dir = os.path.join(config[KEY_OUTDIR],"published_data")
     output:
@@ -162,7 +160,7 @@ rule gather_consensus_sequences:
 
 rule generate_report:
     input:
-        consensus_seqs = rules.gather_consensus_sequences.output.fasta,
+        consensus_seqs = rules.curate_sequences.output.fasta,
         variation_info = rules.generate_variation_info.output.json,
         masked_variants = rules.curate_sequences.output.masked,
         variants = rules.curate_sequences.output.csv,
