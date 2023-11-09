@@ -6,7 +6,7 @@ import csv
 
 from piranha.utils.config import *
 
-def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,runname, output_file,publish_dir):
+def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,runname, output_file,publish_dir,config):
     if not os.path.exists(publish_dir):
         os.mkdir(publish_dir)
     
@@ -35,8 +35,16 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
             for record in SeqIO.parse(cns_file, KEY_FASTA):
                 if record:
                     cns_info= record.description.split(" ")
-                    ref,barcode,var_count,var_string=cns_info[0].split("|")
+                    ref_hap,barcode,var_count,var_string=cns_info[0].split("|")
                     
+                    # for parsing haplotypes
+                    if config[KEY_RUN_HAPLOTYPING]:
+                        ref_list = ref_hap.split(".")
+                        ref = ".".join(ref_list[:-1])
+                        hap = ref_list[-1]
+                    else: 
+                        ref = ref_hap
+                        hap = "HAP01"
                     info = []
                     for row in analysis_info[barcode]:
                         if row[KEY_REFERENCE] == ref:
