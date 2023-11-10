@@ -105,7 +105,9 @@ rule haplotype_qc:
     input:
         partition = rules.flopp.output.partition,
         reads = rules.files.params.reads,
-        ref = rules.files.params.ref
+        ref = rules.files.params.ref,
+        flopp = rules.flopp.output.flopp,
+        vcf = rules.freebayes.output.vcf
     params:
         reference = "{reference}",
         min_distance = config[KEY_MIN_HAPLOTYPE_DISTANCE],
@@ -123,14 +125,16 @@ rule haplotype_qc:
         """
         partitions = parse_partition_file(input.partition)
         seq_index = SeqIO.index(input.reads, "fastq")
-        merge_info = collapseClose(rules.flopp.output.flopp,config[KEY_MIN_HAPLOTYPE_DISTANCE],rules.freebayes.output.vcf)
+        merge_info = collapse_close(input.flopp,config[KEY_MIN_HAPLOTYPE_DISTANCE],input.vcf)
 
         with open(output.txt,"w") as fhaplo:
             merged_haplo_count = 0
             for subset in merge_info:
-                reads = []
+                reads = set()
                 for part in subset:
-                    reads.append(partitions[part])
+                    part_reads = partitions[part]
+                    for read in part_reads:
+                        reads.add(read)
                 print(green(f"Haplotype {merged_haplo_count}:"), len(reads))
 
                 if len(reads) > params.min_reads:
