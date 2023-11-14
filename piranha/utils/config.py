@@ -52,6 +52,7 @@ KEY_SOURCE = "source"
 KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
+KEY_READ_COUNT = "read_count"
 
 # PHYLO KEYS
 
