@@ -59,6 +59,7 @@ def make_sample_report(report_to_generate,
         record_id = fields[0]
         record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
 
+        
         description_dict = {}
         for field in fields[1:]:
             key,value = field.split("=")
@@ -91,46 +92,48 @@ def make_sample_report(report_to_generate,
 
             # if plan to have more than one seq per ref group will need to modify this
             reference=description_dict[KEY_REFERENCE]
-            info_dict[reference] = info
+            cns_key = f"{reference}.{cns_id}"
+            info_dict[cns_key] = info
 
-            data_for_report[reference][KEY_SNP_SITES] = []
-            data_for_report[reference][KEY_INDEL_SITES] = []
+            data_for_report[cns_key][KEY_SNP_SITES] = []
+            data_for_report[cns_key][KEY_INDEL_SITES] = []
 
             var_string = description_dict[KEY_VARIANTS]
 
             for var in var_string.split(";"):
                 site = var.split(":")[0]
                 if "ins" in var or "del" in var:
-                    data_for_report[reference][KEY_INDEL_SITES].append(int(site))
+                    data_for_report[cns_key][KEY_INDEL_SITES].append(int(site))
                 else:
                     try:
                         site = int(site)
-                        data_for_report[reference][KEY_SNP_SITES].append(site)
+                        data_for_report[cns_key][KEY_SNP_SITES].append(site)
                     except:
-                        data_for_report[reference][KEY_SNP_SITES].append(site)
+                        data_for_report[cns_key][KEY_SNP_SITES].append(site)
 
-    for reference in info_dict:
-        data_for_report[reference][KEY_MASKED_SITES] = []
-        data_for_report[reference][KEY_SUMMARY_DATA] = info_dict[reference]
+    for cns_key in info_dict:
+        data_for_report[cns_key][KEY_MASKED_SITES] = []
+        data_for_report[cns_key][KEY_SUMMARY_DATA] = info_dict[cns_key]
 
     with open(masked_variants,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            #check if this breaks
             data_for_report[row[KEY_REFERENCE]][KEY_MASKED_SITES].append(int(row[KEY_SITE]))
     
     with open(variation_file,"r") as f:
         variation_json = json.load(f)
-        for reference in variation_json:
+        for cns_key in variation_json:
 
-            all_sites_data = variation_json[reference]["variation"]
+            all_sites_data = variation_json[cns_key]["variation"]
             
-            coocc_data = variation_json[reference]["coocc"]
-            if coocc_data and "Sabin" in reference:
-                data_for_report[reference][KEY_COOCCURRENCE_INFO] = coocc_data
+            coocc_data = variation_json[cns_key]["coocc"]
+            if coocc_data and "Sabin" in cns_key:
+                data_for_report[cns_key][KEY_COOCCURRENCE_INFO] = coocc_data
 
-            snp_sites = data_for_report[reference][KEY_SNP_SITES]
-            masked_sites = data_for_report[reference][KEY_MASKED_SITES]
-            indel_sites = data_for_report[reference][KEY_INDEL_SITES]
+            snp_sites = data_for_report[cns_key][KEY_SNP_SITES]
+            masked_sites = data_for_report[cns_key][KEY_MASKED_SITES]
+            indel_sites = data_for_report[cns_key][KEY_INDEL_SITES]
 
             
 
@@ -155,7 +158,7 @@ def make_sample_report(report_to_generate,
 
                 annotated_site_data.append(site_data)
 
-            data_for_report[reference][KEY_VARIATION_INFO] = annotated_site_data
+            data_for_report[cns_key][KEY_VARIATION_INFO] = annotated_site_data
 
     LANGUAGE_CONFIG = ENGLISH_CONFIG
     if config[KEY_LANGUAGE] == "French":
