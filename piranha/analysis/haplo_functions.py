@@ -103,7 +103,11 @@ def parse_VCF(vcf_file):
                 vcf_info[pos]['0'] = ref
                 if ',' in alt:
                     #multiallelic SNP
-                    vcf_info[pos]['1'], vcf_info[pos]['2'] = alt.split(',')
+                    alt_list = alt.split(',')
+                    alt_num = 1
+                    for multi_alt in alt_list:
+                        vcf_info[pos][str(alt_num)] = multi_alt
+                        alt_num += 1
                 else:
                     vcf_info[pos]['1'] = alt 
                 vcf_info[pos]['read_counts'] = {}
@@ -113,8 +117,8 @@ def parse_VCF(vcf_file):
                 vcf_info[pos]['read_counts']['0'] = float(ref_reads)
                 if ',' in alt_reads:
                     counts = [float(x) for x in alt_reads.split(',')]
-                    vcf_info[pos]['read_counts']['1'] = counts[0]
-                    vcf_info[pos]['read_counts']['2'] = counts[1]
+                    for i in range(1,len(counts)+1):
+                        vcf_info[pos]['read_counts'][str(i)] = counts[i-1]
                 else:
                     vcf_info[pos]['read_counts']['1'] = float(alt_reads)
                 vcf_info[pos]['frequencies'] = {}
