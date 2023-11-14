@@ -93,7 +93,9 @@ def make_sample_report(report_to_generate,
             # if plan to have more than one seq per ref group will need to modify this
             reference=description_dict[KEY_REFERENCE]
             cns_key = f"{reference}.{cns_id}"
+
             info_dict[cns_key] = info
+            info_dict[cns_key][KEY_READ_COUNT] = cns_config[cns_key]
 
             data_for_report[cns_key][KEY_SNP_SITES] = []
             data_for_report[cns_key][KEY_INDEL_SITES] = []
