@@ -31,9 +31,10 @@ def make_sample_report(report_to_generate,
                         consensus_seqs,
                         masked_variants,
                         barcode,
+                        cns_config,
                         config):
 
-    references = config[barcode]
+    references = cns_config[barcode]
     
     data_for_report = {}
 
