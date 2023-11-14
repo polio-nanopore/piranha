@@ -39,7 +39,7 @@ ENGLISH_CONFIG = {
     # barcode report
     "34" : "Detailed information on",
     "35" : "Summary of sample content",
-    "36" : ["sample","barcode","reference_group"],
+    "36" : ["sample","barcode","reference_group","consensus_id"],
     "37" : "Sequences",
     "38" : "Variant report:",
     "39" : "Information",
@@ -99,7 +99,7 @@ FRENCH_CONFIG = {
     # barcode report
     "34" : "Informations sur",
     "35" : "Résumé du contenu de l'échantillon",
-    "36" : ["L'échantillon","Code à barre","Groupe de référence"],
+    "36" : ["L'échantillon","Code à barre","Groupe de référence", "ID de consensus"],
     "37" : "Séquences",
     "38" : "Rapport de variante",
     "39" : "Les renseignements",

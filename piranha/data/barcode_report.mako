@@ -492,11 +492,14 @@
             </thead>
             <tbody>
               % for reference in data_for_report:
+              <% cns_id = reference.split(".")[-1] %>
               <% summary_data = data_for_report[reference]["summary_data"] %>
                   <tr>
                     %for col in ENGLISH_CONFIG["36"]:
                       %if col=="reference_group" or col=="Groupe de référence":
                       <td><a href="#header_${reference}" style="color:${themeColor}">${summary_data[col]}</a></td>
+                      %elif col == "consensus_id":
+                      <td>${cns_id}</td>
                       %else:
                       <td>${summary_data[col]}</td>
                       %endif
@@ -533,11 +536,12 @@
                 } );
             </script>
       % for reference in data_for_report:
+        <% cns_id = reference.split(".")[-1] %>
         <% summary_data = data_for_report[reference]["summary_data"] %>
         <% reference_name = summary_data["reference_group"].replace("_"," ").title() %>
-        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${LANGUAGE_CONFIG["38"]} ${reference_name}</h2> 
+        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${LANGUAGE_CONFIG["38"]} ${reference_name} ${cns_id}</h2> 
         <% table_count += 1 %>
-        <h3><strong>${LANGUAGE_CONFIG["9"]} ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
+        <h3><strong>${LANGUAGE_CONFIG["9"]} ${table_count} </strong> | ${summary_data["reference_group"]} ${cns_id} </h3>
         <table class="table" id="table_${table_count}">
           <thead class="thead-light">
             <tr>
@@ -569,7 +573,8 @@
         <% indel_sites = data_for_report[reference]["indel_sites"] %>
         <% masked_sites = data_for_report[reference]["masked_sites"] %>
         <br>
-        <div id="var_scatter_${reference}" style="width:100%"></div>
+        <% scatter_id = reference.replace(".","_") %>
+        <div id="var_scatter_${scatter_id}" style="width:100%"></div>
             <script>
               var vlSpec_scatter = {
                 "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
@@ -619,7 +624,8 @@
                             },
                     "config":{"legend":{"title":false}}
                   };          
-                vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
+                
+                vegaEmbed('#var_scatter_${scatter_id}', vlSpec_scatter, {renderer: "svg"})
                       .then(result => console.log(result))
                       .catch(console.warn);
                 </script>
