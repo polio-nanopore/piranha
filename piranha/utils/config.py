@@ -53,6 +53,7 @@ KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
 KEY_READ_COUNT = "read_count"
+KEY_CNS_ID = "consensus_id"
 
 # PHYLO KEYS
 
@@ -194,7 +195,7 @@ VALUE_TREE_ANNOTATIONS="source "
 
 #file headers
 VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]
-SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification","reference_group","Number of mutations"]
+SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification","reference_group","consensus_id","Number of mutations"]
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
