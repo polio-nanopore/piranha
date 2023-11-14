@@ -5,7 +5,7 @@ import yaml
 
 from piranha.analysis.clean_gaps import *
 
-from piranha.analysis.consensus_functions import *
+from piranha.analysis.variation_functions import *
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
@@ -33,7 +33,6 @@ rule get_variation_info:
     output:
         json = os.path.join(config[KEY_TEMPDIR],"variation_info.json")
     run:
-        # split this by ref group, but merge cns info per ref group
         variation_dict = {}
         all_var_dict = parse_variant_file(input.variant_file)
 

@@ -119,7 +119,7 @@ rule curate_sequences:
 
 rule generate_variation_info:
     input:
-        snakefile = os.path.join(workflow.current_basedir,"variation.smk"),
+        snakefile = os.path.join(workflow.current_basedir,"piranha_variation.smk"),
         fasta = rules.curate_sequences.output.fasta,
         yaml = rules.generate_consensus_sequences.output.yaml
     params:
