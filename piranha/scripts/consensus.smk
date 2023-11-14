@@ -102,10 +102,14 @@ rule gather_merge_cns:
         yaml = os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
     run:
         sequences = collections.defaultdict(set)
+        ref_seqs = {}
         for cns_file in input.cns:
+            haplodir = "/".join(cns_file.split("/")[:-1])
+            haplo_bam = os.path.join(haplodir, "calls_to_ref.bam")
             for record in SeqIO.parse(cns_file, "fasta"):
                 print(record.id)
-                sequences[str(record.seq)] = record.id
+                sequences[str(record.seq)].add(haplo_bam)
+                ref_seqs[str(record.seq)] = record.id
         
         ref_file_dict = {}
         for ref_file in input.ref:
@@ -118,9 +122,9 @@ rule gather_merge_cns:
         ref_count = collections.Counter()
         ref_cns = []
         for seq in sequences:
-            ref = sequences[seq]
+            ref = ref_seqs[seq]
             ref_count[ref] +=1
-            record_id = f"{sequences[seq]}.CNS00{ref_count[ref]}"
+            record_id = f"{ref_seqs[seq]}.CNS00{ref_count[ref]}"
             ref_cns.append(record_id)
 
             with open(os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.fasta"),"w") as fseq:
@@ -128,6 +132,15 @@ rule gather_merge_cns:
 
             cns_ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.ref.fasta")
             shell(f"cp '{ref_file_dict[ref]}' '{cns_ref}'")
+            
+            haplo_bams = ""
+            for i in sequences[seq]:
+                haplo_bams += f"'{i}' "
+
+            out_bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.bam")
+            shell(f"samtools merge -f '{out_bam}' {haplo_bams} && samtools index '{out_bam}'")
+
+            #merge bams here too? 
 
         new_config = config
         new_config[BARCODE] = ref_cns
