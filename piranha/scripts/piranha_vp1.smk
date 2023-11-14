@@ -24,13 +24,14 @@ rule all:
 rule files:
     params:
         composition=os.path.join(config[KEY_TEMPDIR],SAMPLE_COMPOSITION),
-        summary=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY)
+        summary=os.path.join(config[KEY_TEMPDIR],PREPROCESSING_SUMMARY),
+        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
 
 
 rule estimate_haplotypes:
     input:
         snakefile = os.path.join(workflow.current_basedir,"piranha_haplotype.smk"),
-        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),
+        yaml = rules.files.params.yaml,
         prompt = os.path.join(config[KEY_TEMPDIR],"{barcode}","reference_groups","prompt.txt")
     params:
         barcode = "{barcode}",
@@ -120,7 +121,7 @@ rule generate_variation_info:
     input:
         snakefile = os.path.join(workflow.current_basedir,"variation.smk"),
         fasta = rules.curate_sequences.output.fasta,
-        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
+        yaml = rules.generate_consensus_sequences.output.yaml
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
@@ -164,7 +165,8 @@ rule generate_report:
         variation_info = rules.generate_variation_info.output.json,
         masked_variants = rules.curate_sequences.output.masked,
         variants = rules.curate_sequences.output.csv,
-        yaml = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
+        cns_yaml = rules.generate_consensus_sequences.output.yaml,
+        yaml = rules.files.params.yaml
     params:
         outdir = os.path.join(config[KEY_OUTDIR],"barcode_reports"),
         barcode = "{barcode}",
@@ -173,12 +175,14 @@ rule generate_report:
     run:
         with open(input.yaml, 'r') as f:
             config_loaded = yaml.safe_load(f)
-
+        with open(input.cns_yaml, 'r') as f:
+            cns_config_loaded = yaml.safe_load(f)
         make_sample_report(output.html,
                             input.variation_info,
                             input.consensus_seqs,
                             input.masked_variants,
                             params.barcode,
+                            cns_config_loaded,
                             config_loaded)
 
 
