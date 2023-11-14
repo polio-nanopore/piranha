@@ -121,28 +121,35 @@ rule gather_merge_cns:
         
         ref_count = collections.Counter()
         ref_cns = []
+        new_config = config
+
         for seq in sequences:
             ref = ref_seqs[seq]
             ref_count[ref] +=1
             record_id = f"{ref_seqs[seq]}.CNS00{ref_count[ref]}"
             ref_cns.append(record_id)
 
-            with open(os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.fasta"),"w") as fseq:
-                fseq.write(f">{record_id}\n{seq}\n")
-
-            cns_ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.ref.fasta")
-            shell(f"cp '{ref_file_dict[ref]}' '{cns_ref}'")
-            
             haplo_bams = ""
             for i in sequences[seq]:
                 haplo_bams += f"'{i}' "
 
             out_bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.bam")
+            read_count_out = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.read_count.txt")
             shell(f"samtools merge -f '{out_bam}' {haplo_bams} && samtools index '{out_bam}'")
+            shell(f"samtools view -F 0x904 -c '{out_bam}' > {read_count_out}")
 
-            #merge bams here too? 
+            with open(read_count_out,"r") as f:
+                for l in f:
+                    read_count = l.rstrip()
+                    new_config[record_id] = read_count
 
-        new_config = config
+            with open(os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.fasta"),"w") as fseq:
+                fseq.write(f">{record_id} read_count={read_count}\n{seq}\n")
+
+            cns_ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.ref.fasta")
+            shell(f"cp '{ref_file_dict[ref]}' '{cns_ref}'")
+            
+            
         new_config[BARCODE] = ref_cns
 
         with open(output.yaml, 'w') as fw:
