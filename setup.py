@@ -26,7 +26,8 @@ setup(name='piranha',
             "snipit",
             "biopython",
             "medaka>=1.7.1",
-            "numpy<=1.23.5"
+            "numpy<=1.23.5",
+            "scipy~=1.11"
       ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
       url='https://github.com/aineniamh/piranha',
