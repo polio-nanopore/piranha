@@ -47,6 +47,9 @@ def collapse_close(flopp_file,distance_cutoff,vcf_file):
         #for each haplo, check if any others are identical/within distance cutoff, collapse in and combine reads if so, remove collapsed haplo from further consideration
         haplo_pos2 = haplo_pos +1
         for h2 in parsed_flopp[haplo_pos2:]:
+            if haplo_pos2 in collapsed:
+                #already assigned to a merge group
+                continue
             distance = get_haplo_dist(h,h2,vcf)
             if distance <= distance_cutoff and new_h == {}:
                 #collapse values and create new haplo 
