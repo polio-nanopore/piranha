@@ -161,7 +161,7 @@ rule gather_consensus_sequences:
 
 rule generate_report:
     input:
-        consensus_seqs = rules.curate_sequences.output.fasta,
+        consensus_seqs = rules.gather_consensus_sequences.output.fasta,
         variation_info = rules.generate_variation_info.output.json,
         masked_variants = rules.curate_sequences.output.masked,
         variants = rules.curate_sequences.output.csv,
