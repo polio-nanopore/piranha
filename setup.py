@@ -13,11 +13,11 @@ setup(name='piranha',
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
             "piranha/scripts/piranha_vp1.smk",
-            "piranha/scripts/piranha_phylo.smk",
             "piranha/scripts/piranha_haplotype.smk",
             "piranha/scripts/piranha_consensus.smk",
             "piranha/scripts/piranha_curate.smk",
-            "piranha/scripts/variation.smk"
+            "piranha/scripts/piranha_variation.smk",
+            "piranha/scripts/piranha_phylo.smk"
             ],
       package_data={"piranha":["data/*"]},
       install_requires=[
