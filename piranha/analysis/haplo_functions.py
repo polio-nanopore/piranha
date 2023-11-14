@@ -71,7 +71,7 @@ def collapse_close(flopp_file,distance_cutoff,vcf_file):
                     new_h[pos]['assigned allele'] = max(new_h[pos]['base support counts'],key=lambda x:new_h[pos]['base support counts'][x])
                         
                 collapsed.append(haplo_pos2)
-                collapseIntoCurrent.append(haplo_pos2)
+                collapse_into_current.append(haplo_pos2)
                 
             haplo_pos2 += 1
 
