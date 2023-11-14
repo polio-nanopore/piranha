@@ -10,7 +10,7 @@ import json
 # from cigar import Cigar
 
 from piranha.utils.config import *
-
+ 
 def id_reference_cns(aln):
     ref_seq = False
     for record in SeqIO.parse(aln, KEY_FASTA):

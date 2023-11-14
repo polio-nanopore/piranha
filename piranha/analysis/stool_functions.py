@@ -30,7 +30,6 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                 handle_dict[barcode] = open(os.path.join(publish_dir, f"{barcode}",f"{barcode}.consensus.fasta"),"w")
 
     with open(output_file,"w") as fw:
-        cns_counter = collections.Counter()
         for cns_file in input_cns_list:
             for record in SeqIO.parse(cns_file, KEY_FASTA):
                 if record:
@@ -44,7 +43,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                         hap = ref_list[-1]
                     else: 
                         ref = ref_hap
-                        hap = "HAP01"
+                        hap = "CNS01"
                     info = []
                     for row in analysis_info[barcode]:
                         if row[KEY_REFERENCE] == ref:
@@ -53,9 +52,8 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     metadata = input_metadata[barcode]
 
                     record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
-                    cns_counter[record_id] += 1
 
-                    record_id += f"|CNS{cns_counter[record_id]}"
+                    record_id += f"|{hap}"
 
                     if KEY_EPID in metadata:
                         record_id += f"|{metadata[KEY_EPID]}"
