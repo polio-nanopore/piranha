@@ -40,7 +40,6 @@ def collapse_close(flopp_file,distance_cutoff,vcf_file):
         if haplo_pos in collapsed:
             #don't consider haplotypes already merged into another
             haplo_pos += 1
-            print(haplo_pos, collapse_into_current, collapse)
             continue
         new_h = {}
         found_others = False
