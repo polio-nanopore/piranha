@@ -21,31 +21,32 @@ rule all:
 
 rule files:
     params:
-        ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
-        reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
+        ref=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.ref.fasta"),
+        cns=os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta"),
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.bam")
 
 rule get_variation_info:
     input:
         variant_file = os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         ref = expand(rules.files.params.ref, reference=REFERENCES),
-        bams = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","calls_to_ref.bam"), reference=REFERENCES)
+        bams = expand(rules.files.params.bam, reference=REFERENCES)
     output:
         json = os.path.join(config[KEY_TEMPDIR],"variation_info.json")
     run:
-        # this is for making a figure
+        # split this by ref group, but merge cns info per ref group
         variation_dict = {}
         all_var_dict = parse_variant_file(input.variant_file)
-
 
         for reference in REFERENCES:
 
             variation_dict[reference] = {"variation":[],"coocc":[]}
             if "Sabin" in reference:
-                ref = os.path.join(config[KEY_TEMPDIR],"reference_groups",f"{reference}.reference.fasta")
-                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","calls_to_ref.bam")
+                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.ref.fasta")
+                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.merged_cns.bam")
             else:
-                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant","consensus.fasta")
-                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}","medaka_haploid_variant_cns","calls_to_ref.bam")
+                #not the ref, should be cns
+                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.ref.fasta")
+                bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.merged_cns.bam")
             shell(f"samtools faidx {ref}")
 
             ref_dict = ref_dict_maker(ref)
