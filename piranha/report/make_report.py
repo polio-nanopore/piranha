@@ -420,7 +420,7 @@ def get_background_data(metadata,config):
     data = json.dumps(background_data) 
     return data
 
-
+ 
 def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
     
     # which are the negative controls and positive controls
@@ -543,6 +543,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 KEY_SAMPLE:record_sample,
                 "Sample classification": call,
                 KEY_REFERENCE_GROUP:reference_group,
+                KEY_CNS_ID:cns_id,
                 KEY_REFERENCE:reference,
                 "Number of mutations": int(var_count),
                 KEY_PERCENT:pcent_match
@@ -552,6 +553,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 KEY_SAMPLE:record_sample,
                 "Sample classification": call,
                 KEY_REFERENCE_GROUP:reference_group,
+                KEY_CNS_ID:cns_id,
                 KEY_REFERENCE:reference,
                 "Number of mutations": "NA",
                 KEY_PERCENT:"NA"
