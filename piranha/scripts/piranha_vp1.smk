@@ -62,7 +62,7 @@ rule estimate_haplotypes:
 
 rule generate_consensus_sequences:
     input:
-        snakefile = os.path.join(workflow.current_basedir,"consensus.smk"),
+        snakefile = os.path.join(workflow.current_basedir,"piranha_consensus.smk"),
         yaml = rules.estimate_haplotypes.output.yaml
     params:
         barcode = "{barcode}",
