@@ -1,0 +1,15 @@
+username: "Áine O'Toole"
+institute: "Institute of Ecology and Evolution"
+runname: "MIN003"
+
+barcodes_csv: "piranha/test/MIN003/barcodes.csv"
+readdir: "piranha/test/MIN003/demultiplexed"
+
+threads: 1
+
+negative_control: "negative1,negative2"
+positive_control: "positive"
+
+run_haplo: True
+
+
