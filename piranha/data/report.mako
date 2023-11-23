@@ -502,9 +502,9 @@
           const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["source"].values)
           const circleNodes = figtree.circle()
                               .filter(n => !n.children)
-                              .attr("r", 8)
+                              .attr("r", 4)
                               .attr("fill", n => colorScale(n.annotations["source"]))
-                              .hilightOnHover(20)
+                              .hilightOnHover(10)
                               .onClick((node, i, n) => {
                                   const isSelected = d3.select(n[i]).classed("selected");
                                   fig.svgSelection.selectAll(".selected").classed("selected", false);
