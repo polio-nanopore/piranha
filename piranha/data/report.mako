@@ -537,7 +537,7 @@
                                   .attr("height",20)
                   )
                         .nodeBackgrounds(figtree.circle()
-                                          .attr("r", 10)
+                                          .attr("r", 5)
                                 .filter(n=>!n.children)
                                         )
                         .branches(figtree.branch()
