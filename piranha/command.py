@@ -78,6 +78,7 @@ def main(sysargs = sys.argv[1:]):
     misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUNNAME}")
     misc_group.add_argument('--username',action="store",help="Username to appear in report. Default: no user name")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report. Default: no institute name")
+    misc_group.add_argument('--notes',action="store",help="Miscellaneous notes to appear at top of report. Default: no notes")
     misc_group.add_argument('--orientation',action="store",help="Orientation of barcodes in wells on a 96-well plate. If `well` is supplied as a column in the barcode.csv, this default orientation will be overwritten. Default: `vertical`. Options: `vertical` or `horizontal`.")
     misc_group.add_argument('-t', '--threads', action='store',dest="threads",type=int,help="Number of threads. Default: 1")
     misc_group.add_argument("--verbose",action="store_true",help="Print lots of stuff to screen")
@@ -154,6 +155,7 @@ def main(sysargs = sys.argv[1:]):
                                 args.username,
                                 args.institute,
                                 args.runname,
+                                args.notes,
                                 config)
     # runs qc checks on the phylo input options and configures the phylo settings
     # now need tempdir for this parsing, so run after directory_setup

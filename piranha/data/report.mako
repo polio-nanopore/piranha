@@ -609,6 +609,11 @@
       %if config["institute"]!="":
         <h3><strong>${LANGUAGE_CONFIG["6"]}</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
       %endif
+      %if config["notes"]!="":
+        <hr>
+        <p>${config["notes"].lstrip("'").rstrip("'")}</p>
+        <hr>
+      %endif
       <div class="info_box">
         <p>${LANGUAGE_CONFIG["52"]}</p>
       </div>
