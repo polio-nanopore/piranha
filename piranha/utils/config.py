@@ -129,6 +129,7 @@ RESOURCE_KEY_DIRECTORY="directory"
 RESOURCE_KEY="KEY"
 
 KEY_SUMMARY_HEADERS = "report_summary_headers"
+KEY_COMPOSITION_NOT_DETECTED = "composition_not_detected"
 
 # default values for config dict
 

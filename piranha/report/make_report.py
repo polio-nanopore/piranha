@@ -437,7 +437,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     # collate data for tables in the report
     data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     positives_for_plate_viz = collections.defaultdict(dict)
-
+    composition_table_header_dict =  collections.Counter()
+    
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -445,6 +446,9 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 continue
             # add directly to data for report composition table (2)
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
+            for col in row:
+                if col not in [KEY_BARCODE,KEY_SAMPLE]:
+                    composition_table_header_dict[col] += int(row[col])
 
             # handling controls
             if row[KEY_SAMPLE] in negative_controls:
@@ -483,6 +487,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     proportion_npev = 100*(int(row["NonPolioEV"])/total_reads)
                     if proportion_npev > config[KEY_MIN_PCENT]:
                         flagged_high_npev.append(row[KEY_SAMPLE])
+
 
     # to check if there are identical seqs in the run
     identical_seq_check = collections.defaultdict(list)
@@ -563,6 +568,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     data_for_report[KEY_CONTROL_STATUS] = control_status
     
     # composition table header
+    
+    
     if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
         config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
@@ -570,6 +577,20 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
         config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
 
+    report_composition_table_header = []
+    not_detected = []
+    for field in config[KEY_COMPOSITION_TABLE_HEADER]:
+        if field in [KEY_SAMPLE, KEY_BARCODE]:
+            report_composition_table_header.append(field)
+        elif field in composition_table_header_dict:
+            if composition_table_header_dict[field] > 0:
+                report_composition_table_header.append(field)
+            else:
+                not_detected.append(field)
+        else:
+            not_detected.append(field)
+    config[KEY_COMPOSITION_TABLE_HEADER] = report_composition_table_header
+    config[KEY_COMPOSITION_NOT_DETECTED] = ", ".join(not_detected)
 
     # summary table header
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
