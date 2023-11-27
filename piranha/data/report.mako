@@ -748,7 +748,7 @@
           </tbody>
         </table>
         <br>
-        <p>*Groups not detected in sequencing run: ${config["composition_not_detected"]}</p>
+        <p>*${LANGUAGE_CONFIG["54"]} ${config["composition_not_detected"]}</p>
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable2').DataTable({
