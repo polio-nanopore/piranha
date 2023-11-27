@@ -69,6 +69,7 @@ KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 KEY_ANNOTATIONS = "annotations"
 KEY_TREE_ANNOTATIONS = "tree_annotations"
 KEY_LOCATION = "location"
+KEY_LOCAL_DATABASE_THRESHOLD = "local_database_threshold"
 
 KEY_SAMPLE_SEQS = "sample_seqs"
 KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
@@ -77,6 +78,7 @@ KEY_SUPPLEMENTARY_METADATA_COLUMNS = "supplementary_metadata_columns"
 VALUE_PHYLO_METADATA_COLUMNS = [KEY_CALL,KEY_DATE,KEY_EPID]
 VALUE_SUPPLEMENTARY_METADATA_COLUMNS = [KEY_LOCATION,"lineage"]
 VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
+VALUE_LOCAL_DATABASE_THRESHOLD = 6
 
 # HAPLO KEYS
 KEY_HAPLOTYPE_SAMPLE_SIZE = "haplotype_sample_size"
@@ -130,8 +132,8 @@ KEY_SUMMARY_HEADERS = "report_summary_headers"
 # default values for config dict
 
 VALUE_LANGUAGE = "English"
-VALUE_POSITIVE=["positive"]
-VALUE_NEGATIVE = ["negative"]
+VALUE_POSITIVE="positive"
+VALUE_NEGATIVE = "negative"
 
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]

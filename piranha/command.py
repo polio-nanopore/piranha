@@ -59,7 +59,8 @@ def main(sysargs = sys.argv[1:]):
     phylo_group.add_argument("-pcol","--phylo-metadata-columns",action="store",help=f"Columns in the barcodes.csv file to annotate the phylogeny with. Default: {VALUE_PHYLO_METADATA_COLUMNS}")
     phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
     phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata files to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
-    phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Amalgamate newly generated consensus sequences with the supplied supplementary sequence FASTA file and write to file.")
+    phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Add newly generated consensus sequences (with a distance greater than a threshold (--local-database-threshold) away from Sabin, if Sabin-related) and associated metadata to the supplementary data directory.")
+    phylo_group.add_argument("-dt","--local-database-threshold",action="store_true",help=f"The threshold beyond which Sabin-related sequences are added to the supplementary data directory if update local database flag used. Default: {VALUE_LOCAL_DATABASE_THRESHOLD}")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -164,6 +165,7 @@ def main(sysargs = sys.argv[1:]):
                                 config[KEY_BARCODES_CSV],
                                 args.supplementary_metadata_columns,
                                 args.supplementary_metadata_id_column,
+                                args.local_database_threshold,
                                 config)
 
     if config[KEY_RUN_PHYLO]:
