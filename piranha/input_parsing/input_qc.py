@@ -231,9 +231,11 @@ def phylo_group_parsing(run_phylo_arg,
                         barcodes_csv,
                         supplementary_metadata_columns_arg,
                         supplementary_metadata_id_column_arg,
+                        local_database_threshold,
                         config):
 
     misc.add_arg_to_config(KEY_RUN_PHYLO,run_phylo_arg,config)
+    misc.add_arg_to_config(KEY_LOCAL_DATABASE_THRESHOLD,local_database_threshold,config)
 
     if config[KEY_RUN_PHYLO] not in [True, False]:
         sys.stderr.write(cyan(f"`{KEY_RUN_PHYLO}` argument must be either True/False if specified through the config file.\n"))
@@ -253,6 +255,13 @@ def phylo_group_parsing(run_phylo_arg,
         if config[KEY_UPDATE_LOCAL_DATABASE] and not config[KEY_SUPPLEMENTARY_DATADIR]:
             sys.stderr.write(cyan(f"Error: Cannot update local database with new sequences as no supplementary database has been provided.\n"))
             sys.exit(-1)
+        
+        if config[KEY_UPDATE_LOCAL_DATABASE]:
+            try:
+                config[KEY_LOCAL_DATABASE_THRESHOLD] = int(config[KEY_LOCAL_DATABASE_THRESHOLD])
+            except:
+                sys.stderr.write(cyan(f"Error: Local database threshold must be an integer.\n"))
+                sys.exit(-1)
 
         misc.add_arg_to_config(KEY_SUPPLEMENTARY_METADATA_ID_COLUMN,supplementary_metadata_id_column_arg,config)
         
