@@ -356,24 +356,43 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
         sys.exit(-1)
 
 
+def pattern_match_for_controls(samples,pattern):
+    control_samples = []
+    if not type(pattern) == list:
+        for sample in samples:
+            if pattern in sample:
+                
+                control_samples.append(sample)
+    return control_samples
+
+
 def control_group_parsing(positive_control, negative_control, config):
     # mod to allow multiple pos and negative samples
 
     misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)
     misc.add_arg_to_config(KEY_NEGATIVE,negative_control,config)
 
+    config[KEY_POSITIVE] = pattern_match_for_controls(config[KEY_SAMPLES],config[KEY_POSITIVE])
+    config[KEY_NEGATIVE] = pattern_match_for_controls(config[KEY_SAMPLES],config[KEY_NEGATIVE])
+
     if config[KEY_POSITIVE] and not type(config[KEY_POSITIVE]) == list:
         config[KEY_POSITIVE] = config[KEY_POSITIVE].split(",")
     if config[KEY_NEGATIVE] and not type(config[KEY_NEGATIVE]) == list:
         config[KEY_NEGATIVE] = config[KEY_NEGATIVE].split(",")
-
+    
+    print(green("Positive control samples:"))
     for pos in config[KEY_POSITIVE]:
         if pos not in config[KEY_SAMPLES]:
             print(cyan(f"Warning: cannot find positive control in barcode csv file: {pos}"))
-            
+        else:
+            print(f"- {pos}")
+    
+    print(green("Negative control samples:"))
     for neg in config[KEY_NEGATIVE]:
         if neg not in config[KEY_SAMPLES]:
             print(cyan(f"Warning: cannot find negative control in  barcode csv file: {neg}"))
+        else:
+            print(f"- {neg}")
 
 
 
