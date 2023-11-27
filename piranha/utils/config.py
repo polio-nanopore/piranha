@@ -53,6 +53,9 @@ KEY_VIRUS_PRESENT = "virus_present"
 KEY_TAXA_OUTDIR = "taxa_outdir"
 KEY_HITS = "hits"
 
+KEY_CNS_STEM = "CNS_ID"
+VALUE_CNS_STEM = "SEQ"
+
 # PHYLO KEYS
 
 KEY_RUN_PHYLO = "run_phylo"

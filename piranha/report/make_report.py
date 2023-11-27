@@ -70,7 +70,7 @@ def make_sample_report(report_to_generate,
             # if plan to have more than one seq per ref group will need to modify this
             info = {KEY_SAMPLE:record_sample,
                     KEY_REFERENCE_GROUP:reference_group,
-                    "CNS ID":cns_id,
+                    "SEQ ID":cns_id,
                     KEY_EPID:epid,
                     KEY_DATE:sample_date
                     }

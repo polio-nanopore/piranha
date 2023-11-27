@@ -29,6 +29,8 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     os.mkdir(os.path.join(publish_dir, f"{barcode}"))
                 handle_dict[barcode] = open(os.path.join(publish_dir, f"{barcode}",f"{barcode}.consensus.fasta"),"w")
 
+
+
     with open(output_file,"w") as fw:
         cns_counter = collections.Counter()
         for cns_file in input_cns_list:
@@ -47,7 +49,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
                     cns_counter[record_id] += 1
 
-                    record_id += f"|CNS{cns_counter[record_id]}"
+                    record_id += f"|{VALUE_CNS_STEM}{cns_counter[record_id]}"
 
                     if KEY_EPID in metadata:
                         record_id += f"|{metadata[KEY_EPID]}"
