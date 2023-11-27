@@ -198,7 +198,7 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
             for i in desc_list:
                 if i.startswith("variant_count"):
                     count = int(i.split("=")[1])
-                    if count < 6:
+                    if count < config[KEY_LOCAL_DATABASE_THRESHOLD]:
                         write_record = False
             
             if write_record:
