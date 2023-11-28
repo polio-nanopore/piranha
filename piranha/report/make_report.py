@@ -495,7 +495,6 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION],config[KEY_BARCODES])
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
-        identical_seq_check[str(record.seq)].append(record.id)
         
         fields = record.description.split(" ")
 
@@ -525,6 +524,9 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
         length_of_seq = len(record)
 
         call = reference_group
+        
+        identical_seq_check[str(record.seq)].append(f"{record.id} ({record_barcode})")
+        
         if reference_group.startswith("Sabin"):
             # configured number of mutations in sabin for the call threshold of VDPV
             call_threshold = CALL_THRESHOLD_DICT[reference_group]
