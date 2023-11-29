@@ -37,8 +37,9 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument('-i','--readdir',help="Path to the directory containing fastq read files",dest="readdir")
     i_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
     i_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
-    i_group.add_argument("-pc","--positive-control",action="store",help=f"Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02`. Default: `{VALUE_POSITIVE[0]}`")
     i_group.add_argument("-nc","--negative-control",action="store",help=f"Sample name of negative control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02` Default: `{VALUE_NEGATIVE[0]}`")
+    i_group.add_argument("-pc","--positive-control",action="store",help=f"Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02`. Default: `{VALUE_POSITIVE[0]}`")
+    i_group.add_argument("-pr","--positive-references",action="store",help=f"Comma separated string of sequences in the reference file to class as positive control sequences.")
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`. Default: `{VALUE_SAMPLE_TYPE}`")
@@ -139,6 +140,7 @@ def main(sysargs = sys.argv[1:]):
 
     input_qc.control_group_parsing(args.positive_control,
                                     args.negative_control,
+                                    args.positive_references,
                                     config)
 
     # sets up the output dir, temp dir, and data output desination
