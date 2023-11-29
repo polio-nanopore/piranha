@@ -370,16 +370,16 @@ def pattern_match_for_controls(samples,pattern):
     if not type(pattern) == list:
         for sample in samples:
             if pattern in sample:
-                
                 control_samples.append(sample)
     return control_samples
 
 
-def control_group_parsing(positive_control, negative_control, config):
+def control_group_parsing(positive_control, negative_control, positive_references,config):
     # mod to allow multiple pos and negative samples
 
     misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)
     misc.add_arg_to_config(KEY_NEGATIVE,negative_control,config)
+    misc.add_arg_to_config(KEY_POSITIVE_REFERENCES,positive_references,config)
 
     config[KEY_POSITIVE] = pattern_match_for_controls(config[KEY_SAMPLES],config[KEY_POSITIVE])
     config[KEY_NEGATIVE] = pattern_match_for_controls(config[KEY_SAMPLES],config[KEY_NEGATIVE])
@@ -389,11 +389,15 @@ def control_group_parsing(positive_control, negative_control, config):
     if config[KEY_NEGATIVE] and not type(config[KEY_NEGATIVE]) == list:
         config[KEY_NEGATIVE] = config[KEY_NEGATIVE].split(",")
     
+    if not type(config[KEY_POSITIVE_REFERENCES]) == list:
+        config[KEY_POSITIVE_REFERENCES] = config[KEY_POSITIVE_REFERENCES].split(",")
+
     print(green("Positive control samples:"))
     for pos in config[KEY_POSITIVE]:
         if pos not in config[KEY_SAMPLES]:
             print(cyan(f"Warning: cannot find positive control in barcode csv file: {pos}"))
         else:
+            config[KEY_INCLUDE_POSITIVE_REFERENCES] = True
             print(f"- {pos}")
     
     print(green("Negative control samples:"))
@@ -402,6 +406,18 @@ def control_group_parsing(positive_control, negative_control, config):
             print(cyan(f"Warning: cannot find negative control in  barcode csv file: {neg}"))
         else:
             print(f"- {neg}")
+
+    if config[KEY_INCLUDE_POSITIVE_REFERENCES]:
+        refs = SeqIO.index(config[KEY_REFERENCE_SEQUENCES],"fasta")
+        not_in = set()
+        for ref in config[KEY_POSITIVE_REFERENCES]:
+            if ref not in refs:
+                not_in.add(ref)
+        if not_in:
+            sys.stderr.write(cyan(f"Error: The following positive control record(s) not in reference FASTA file, please include in file and run again.\n"))
+            for ref in not_in:
+                sys.stderr.write(cyan(f"- {ref}\n"))
+            sys.exit(-1)
 
 
 
