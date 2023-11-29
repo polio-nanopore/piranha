@@ -63,7 +63,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
 
                     record_id += f" {KEY_BARCODE}={barcode}"
                     record_id += f" {KEY_REFERENCE}={ref}"
-                    record_id += f" {KEY_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
+                    record_id += f" {VALUE_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
 
                     if runname:
                         record_id += f" {KEY_RUNNAME}={runname}"

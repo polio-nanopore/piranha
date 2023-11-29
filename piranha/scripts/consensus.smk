@@ -101,12 +101,12 @@ rule join_cns_ref:
     run:
         with open(output[0],"w") as fw:
             for record in SeqIO.parse(input.ref,KEY_FASTA):
-                display_name = ""
+                match_field = ""
                 for field in record.description.split(" "):
-                    if field.startswith("display_name"):
-                        display_name = field.split("=")[1]
+                    if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+                        match_field = field.split("=")[1]
 
-                fw.write(f">{display_name} {record.description}\n{record.seq}\n")
+                fw.write(f">{match_field} {record.description}\n{record.seq}\n")
             if "Sabin" in params.reference:
                 for record in SeqIO.parse(input.medaka_cns,KEY_FASTA):
                     record_name = str(SAMPLE).replace(" ","_")
@@ -166,12 +166,12 @@ rule join_clean_cns_ref:
     run:
         with open(output[0],"w") as fw:
             for record in SeqIO.parse(input.ref,KEY_FASTA):
-                display_name = ""
+                match_field = ""
                 for field in record.description.split(" "):
-                    if field.startswith("display_name"):
-                        display_name = field.split("=")[1]
+                    if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+                        match_field = field.split("=")[1]
 
-                fw.write(f">{display_name} {record.description}\n{record.seq}\n")
+                fw.write(f">{match_field} {record.description}\n{record.seq}\n")
             for record in SeqIO.parse(input.cns,KEY_FASTA):
                 record_name = SAMPLE.replace(" ","_")
                 fw.write(f">{record_name}\n{record.seq}\n")
