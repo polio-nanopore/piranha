@@ -827,7 +827,7 @@
                     %elif col=="unmapped":
                     <th style="width:10%;">${LANGUAGE_CONFIG["19"]}</th>
                     %else:
-                    <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                    <th style="width:10%;">${col.replace("_"," ")}</th>
                     %endif
                 %endfor
               </tr>
