@@ -69,6 +69,8 @@ def get_defaults():
                     KEY_USERNAME:"",
                     KEY_POSITIVE:VALUE_POSITIVE,
                     KEY_NEGATIVE:VALUE_NEGATIVE,
+                    KEY_POSITIVE_REFERENCES:VALUE_POSITIVE_REFERENCES,
+                    KEY_INCLUDE_POSITIVE_REFERENCES:False,
                     KEY_INSTITUTE:"",
                     KEY_NOTES:"",
                     KEY_THREADS:1,
