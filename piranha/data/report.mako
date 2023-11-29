@@ -699,10 +699,12 @@
               %for col in config["composition_table_header"]:
                 %if col=="sample":
                 <th style="width:10%;">${LANGUAGE_CONFIG["18"]}</th>
+                %elif col=="barcode":
+                <th style="width:10%;">${LANGUAGE_CONFIG["55"]}</th>
                 %elif col=="unmapped":
                 <th style="width:10%;">${LANGUAGE_CONFIG["19"]}</th>
                 %else:
-                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                <th style="width:10%;">${col.replace("_"," ")}</th>
                 %endif
               %endfor
             </tr>
@@ -820,14 +822,16 @@
           <table class="table">
             <thead class="thead-light">
               <tr>
-                <th>${LANGUAGE_CONFIG["24"]}</th>
+                <th style="width:8%;">${LANGUAGE_CONFIG["24"]}</th>
                 %for col in config["composition_table_header"]:
                     %if col=="sample":
-                    <th style="width:10%;">${LANGUAGE_CONFIG["18"]}</th>
+                    <th>${LANGUAGE_CONFIG["18"]}</th>
+                    %elif col=="barcode":
+                    <th>${LANGUAGE_CONFIG["55"]}</th>
                     %elif col=="unmapped":
-                    <th style="width:10%;">${LANGUAGE_CONFIG["19"]}</th>
+                    <th>${LANGUAGE_CONFIG["19"]}</th>
                     %else:
-                    <th style="width:10%;">${col.replace("_"," ")}</th>
+                    <th>${col.replace("_"," ")}</th>
                     %endif
                 %endfor
               </tr>
