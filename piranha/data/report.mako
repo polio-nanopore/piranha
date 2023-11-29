@@ -1004,7 +1004,12 @@
             % for item in config["configuration_table_fields"]:
               <tr>
                 <td><strong>${item}</strong></td>
+                %if type(config[item]) == list:
+                <% new_item = ", ".join(config[item]) %>
+                <td>${new_item}</td>
+                %else:
                 <td>${config[item]}</td>
+                %endif
             %endfor
           </tbody>
         </table>
