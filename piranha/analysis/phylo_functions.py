@@ -197,9 +197,15 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
 
             for i in desc_list:
                 if i.startswith("variant_count"):
-                    count = int(i.split("=")[1])
-                    if count < config[KEY_LOCAL_DATABASE_THRESHOLD]:
-                        write_record = False
+                    count = i.split("=")[1]
+                elif i.startswith(KEY_DISPLAY_NAME):
+                    display_name = i.split("=")[1]
+
+            if "Sabin" in display_name:
+                if int(count) < config[KEY_LOCAL_DATABASE_THRESHOLD]:
+                    write_record = False
+            elif display_name == "PositiveControl":
+                write_record = False
             
             if write_record:
                 new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
