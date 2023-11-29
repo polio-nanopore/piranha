@@ -94,6 +94,8 @@ KEY_VARIATION_INFO="variation_info"
 KEY_COOCCURRENCE_INFO="cooccurrence_info"
 KEY_POSITIVE="positive_control"
 KEY_NEGATIVE = "negative_control"
+KEY_POSITIVE_REFERENCES = "positive_references"
+KEY_INCLUDE_POSITIVE_REFERENCES = "include_positive_references"
 KEY_SUMMARY_TABLE="summary_table"
 KEY_COMPOSITION_TABLE="composition_table"
 KEY_COMPOSITION_TABLE_HEADER="composition_table_header"
@@ -136,6 +138,7 @@ KEY_COMPOSITION_NOT_DETECTED = "composition_not_detected"
 VALUE_LANGUAGE = "English"
 VALUE_POSITIVE="positive"
 VALUE_NEGATIVE = "negative"
+VALUE_POSITIVE_REFERENCES=["CoxsackievirusA20_AF499642"]
 
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
@@ -192,11 +195,11 @@ SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification"
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
-                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+                                "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
 
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
-                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+                                "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
 
 DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
@@ -205,7 +208,9 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
+                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
+                    "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
+                    "comments"]
 
 DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
@@ -215,7 +220,9 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
+                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
+                    "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
+                    "comments"]
 
 VALUE_CONFIGURATION_TABLE_FIELDS = [
                     KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,KEY_MIN_ALN_BLOCK,
