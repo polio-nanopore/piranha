@@ -59,7 +59,7 @@ ENGLISH_CONFIG = {
     "53" : "General citation for Piranha",
     "54" : "Read count",
     "55" : "Note: only nucelotide bases with quality scores above 13 are included in this figure.",
-    "56" : "SNPs and indels called against closest reference highlighted."
+    "56" : "SNPs and indels called against closest reference highlighted.",
     "57" : "Groups not detected in sequencing run:",
     "58" : "Barcode"
 }
@@ -124,7 +124,7 @@ FRENCH_CONFIG = {
     "53" : "Citation générale pour Piranha",
     "54" : "Nombre de reads",
     "55" : "Remarque: seules les bases nucléotidiques ayant des scores de qualité supérieurs à 13 sont incluses dans cette figure.",
-    "56" : "SNP et indels appelés par rapport à la référence la plus proche mise en évidence."
+    "56" : "SNP et indels appelés par rapport à la référence la plus proche mise en évidence.",
     "57" : "Groupes non détectés dans le séquençage:",
     "58" : "Barcode"
     }
