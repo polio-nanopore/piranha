@@ -68,6 +68,7 @@ def get_defaults():
                     KEY_SUPPLEMENTARY_METADATA_COLUMNS:VALUE_SUPPLEMENTARY_METADATA_COLUMNS,
                     KEY_SUPPLEMENTARY_METADATA_ID_COLUMN:VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN,
                     KEY_UPDATE_LOCAL_DATABASE:False,
+                    KEY_LOCAL_DATABASE_THRESHOLD:VALUE_LOCAL_DATABASE_THRESHOLD,
 
                     # misc defaults
                     KEY_ORIENTATION:VALUE_ORIENTATION,
@@ -76,10 +77,13 @@ def get_defaults():
                     KEY_USERNAME:"",
                     KEY_POSITIVE:VALUE_POSITIVE,
                     KEY_NEGATIVE:VALUE_NEGATIVE,
+                    KEY_POSITIVE_REFERENCES:VALUE_POSITIVE_REFERENCES,
+                    KEY_INCLUDE_POSITIVE_REFERENCES:False,
                     KEY_INSTITUTE:"",
+                    KEY_NOTES:"",
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
-
+                    
                     KEY_CONFIGURATION_TABLE_FIELDS: VALUE_CONFIGURATION_TABLE_FIELDS,
                     KEY_COLOUR_MAP: VALUE_COLOUR_MAP,
                     KEY_COLOUR_THEME: VALUE_COLOUR_THEME
@@ -207,12 +211,13 @@ def setup_config_dict(cwd,config_arg):
         config[KEY_INPUT_PATH] = cwd
     return config
 
-def misc_args_to_config(verbose,threads,username,institute,run_name,config):
+def misc_args_to_config(verbose,threads,username,institute,run_name,notes,config):
     misc.add_arg_to_config(KEY_VERBOSE,verbose,config)
     misc.add_arg_to_config(KEY_THREADS,threads,config)
     misc.add_arg_to_config(KEY_USERNAME,username,config)
     misc.add_arg_to_config(KEY_INSTITUTE,institute,config)
     misc.add_arg_to_config(KEY_RUNNAME,run_name,config)
+    misc.add_arg_to_config(KEY_NOTES,notes,config)
 
 def set_up_verbosity(config):
     if config[KEY_VERBOSE]:

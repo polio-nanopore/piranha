@@ -30,7 +30,7 @@ KEY_MIN_PCENT = "min_read_pcent"
 KEY_MIN_MAP_QUALITY = "min_map_quality"
 KEY_MIN_ALN_BLOCK = "min_aln_block"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
-KEY_REFERENCE_MATCH_FIELD = "display_name"
+KEY_REFERENCE_MATCH_FIELD = "reference_match_field"
 KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
 
@@ -55,6 +55,9 @@ KEY_HITS = "hits"
 KEY_READ_COUNT = "read_count"
 KEY_CNS_ID = "consensus_id"
 
+KEY_CNS_STEM = "CNS_ID"
+VALUE_CNS_STEM = "SEQ"
+
 # PHYLO KEYS
 
 KEY_RUN_PHYLO = "run_phylo"
@@ -68,6 +71,7 @@ KEY_OUTGROUP_SEQUENCES = "outgroup_sequences"
 KEY_ANNOTATIONS = "annotations"
 KEY_TREE_ANNOTATIONS = "tree_annotations"
 KEY_LOCATION = "location"
+KEY_LOCAL_DATABASE_THRESHOLD = "local_database_threshold"
 
 KEY_SAMPLE_SEQS = "sample_seqs"
 KEY_PHYLO_METADATA_COLUMNS = "phylo_metadata_columns"
@@ -76,6 +80,7 @@ KEY_SUPPLEMENTARY_METADATA_COLUMNS = "supplementary_metadata_columns"
 VALUE_PHYLO_METADATA_COLUMNS = [KEY_CALL,KEY_DATE,KEY_EPID]
 VALUE_SUPPLEMENTARY_METADATA_COLUMNS = [KEY_LOCATION,"lineage"]
 VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN = "sequence_name"
+VALUE_LOCAL_DATABASE_THRESHOLD = 6
 
 # HAPLO KEYS
 KEY_RUN_HAPLOTYPING = "run_haplotyping"
@@ -103,6 +108,8 @@ KEY_VARIATION_INFO="variation_info"
 KEY_COOCCURRENCE_INFO="cooccurrence_info"
 KEY_POSITIVE="positive_control"
 KEY_NEGATIVE = "negative_control"
+KEY_POSITIVE_REFERENCES = "positive_references"
+KEY_INCLUDE_POSITIVE_REFERENCES = "include_positive_references"
 KEY_SUMMARY_TABLE="summary_table"
 KEY_COMPOSITION_TABLE="composition_table"
 KEY_COMPOSITION_TABLE_HEADER="composition_table_header"
@@ -117,6 +124,7 @@ KEY_CONFIGURATION_TABLE_FIELDS = "configuration_table_fields"
 KEY_USERNAME="username"
 KEY_INSTITUTE="institute"
 KEY_RUNNAME="runname"
+KEY_NOTES="notes"
 KEY_VERBOSE="verbose"
 KEY_THREADS="threads"
 KEY_LOG_API="log_api"
@@ -137,12 +145,14 @@ RESOURCE_KEY_DIRECTORY="directory"
 RESOURCE_KEY="KEY"
 
 KEY_SUMMARY_HEADERS = "report_summary_headers"
+KEY_COMPOSITION_NOT_DETECTED = "composition_not_detected"
 
 # default values for config dict
 
 VALUE_LANGUAGE = "English"
-VALUE_POSITIVE=["positive"]
-VALUE_NEGATIVE = ["negative"]
+VALUE_POSITIVE="positive"
+VALUE_NEGATIVE = "negative"
+VALUE_POSITIVE_REFERENCES=["CoxsackievirusA20_AF499642"]
 
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
@@ -169,7 +179,7 @@ VALUE_MIN_MAP_QUALITY = 50
 VALUE_DEFAULT_MEDAKA_MODEL="r941_min_hac_variant_g507"
 
 VALUE_MIN_READS = 50
-VALUE_MIN_PCENT = 10
+VALUE_MIN_PCENT = 2
 
 # vdpv call thresholds
 
@@ -181,7 +191,7 @@ CALL_THRESHOLD_DICT = {
 
 
 # ref group default
-KEY_DISPLAY_NAME = "display_name"
+VALUE_REFERENCE_MATCH_FIELD = "ddns_group"
 
 # report defaults
 VALUE_ORIENTATION="vertical"
@@ -199,11 +209,11 @@ SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification"
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
-                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+                                "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
 
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
-                                "WPV1","WPV2","WPV3","NonPolioEV","unmapped"]
+                                "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
 
 DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
@@ -212,7 +222,9 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
+                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
+                    "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
+                    "comments"]
 
 DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
@@ -222,11 +234,14 @@ DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification","comments"]
+                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
+                    "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
+                    "comments"]
 
 VALUE_CONFIGURATION_TABLE_FIELDS = [
                     KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,KEY_MIN_ALN_BLOCK,
-                    KEY_MIN_PCENT,KEY_MEDAKA_MODEL,KEY_PRIMER_LENGTH,KEY_ANALYSIS_MODE,KEY_RUN_PHYLO
+                    KEY_MIN_PCENT,KEY_MEDAKA_MODEL,KEY_PRIMER_LENGTH,KEY_ANALYSIS_MODE,KEY_RUN_PHYLO,
+                    KEY_READDIR,KEY_POSITIVE_REFERENCES
                     ]
 
 # file names

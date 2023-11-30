@@ -29,6 +29,8 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     os.mkdir(os.path.join(publish_dir, f"{barcode}"))
                 handle_dict[barcode] = open(os.path.join(publish_dir, f"{barcode}",f"{barcode}.consensus.fasta"),"w")
 
+
+
     with open(output_file,"w") as fw:
         for cns_file in input_cns_list:
             for record in SeqIO.parse(cns_file, KEY_FASTA):
@@ -64,7 +66,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
 
                     record_id += f" {KEY_BARCODE}={barcode}"
                     record_id += f" {KEY_REFERENCE}={ref}"
-                    record_id += f" {KEY_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
+                    record_id += f" {VALUE_REFERENCE_MATCH_FIELD}={info[KEY_REFERENCE_GROUP]}"
 
                     if runname:
                         record_id += f" {KEY_RUNNAME}={runname}"

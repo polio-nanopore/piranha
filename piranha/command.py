@@ -37,8 +37,9 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument('-i','--readdir',help="Path to the directory containing fastq read files",dest="readdir")
     i_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
     i_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
-    i_group.add_argument("-pc","--positive-control",action="store",help=f"Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02`. Default: `{VALUE_POSITIVE[0]}`")
     i_group.add_argument("-nc","--negative-control",action="store",help=f"Sample name of negative control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02` Default: `{VALUE_NEGATIVE[0]}`")
+    i_group.add_argument("-pc","--positive-control",action="store",help=f"Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02`. Default: `{VALUE_POSITIVE[0]}`")
+    i_group.add_argument("-pr","--positive-references",action="store",help=f"Comma separated string of sequences in the reference file to class as positive control sequences.")
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`. Default: `{VALUE_SAMPLE_TYPE}`")
@@ -67,7 +68,8 @@ def main(sysargs = sys.argv[1:]):
     phylo_group.add_argument("-pcol","--phylo-metadata-columns",action="store",help=f"Columns in the barcodes.csv file to annotate the phylogeny with. Default: {VALUE_PHYLO_METADATA_COLUMNS}")
     phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
     phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata files to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
-    phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Amalgamate newly generated consensus sequences with the supplied supplementary sequence FASTA file and write to file.")
+    phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Add newly generated consensus sequences (with a distance greater than a threshold (--local-database-threshold) away from Sabin, if Sabin-related) and associated metadata to the supplementary data directory.")
+    phylo_group.add_argument("-dt","--local-database-threshold",action="store_true",help=f"The threshold beyond which Sabin-related sequences are added to the supplementary data directory if update local database flag used. Default: {VALUE_LOCAL_DATABASE_THRESHOLD}")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
@@ -85,6 +87,7 @@ def main(sysargs = sys.argv[1:]):
     misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUNNAME}")
     misc_group.add_argument('--username',action="store",help="Username to appear in report. Default: no user name")
     misc_group.add_argument('--institute',action="store",help="Institute name to appear in report. Default: no institute name")
+    misc_group.add_argument('--notes',action="store",help="Miscellaneous notes to appear at top of report. Default: no notes")
     misc_group.add_argument('--orientation',action="store",help="Orientation of barcodes in wells on a 96-well plate. If `well` is supplied as a column in the barcode.csv, this default orientation will be overwritten. Default: `vertical`. Options: `vertical` or `horizontal`.")
     misc_group.add_argument('-t', '--threads', action='store',dest="threads",type=int,help="Number of threads. Default: 1")
     misc_group.add_argument("--verbose",action="store_true",help="Print lots of stuff to screen")
@@ -154,6 +157,7 @@ def main(sysargs = sys.argv[1:]):
 
     input_qc.control_group_parsing(args.positive_control,
                                     args.negative_control,
+                                    args.positive_references,
                                     config)
 
     # sets up the output dir, temp dir, and data output desination
@@ -170,6 +174,7 @@ def main(sysargs = sys.argv[1:]):
                                 args.username,
                                 args.institute,
                                 args.runname,
+                                args.notes,
                                 config)
     # runs qc checks on the phylo input options and configures the phylo settings
     # now need tempdir for this parsing, so run after directory_setup
@@ -181,6 +186,7 @@ def main(sysargs = sys.argv[1:]):
                                 config[KEY_BARCODES_CSV],
                                 args.supplementary_metadata_columns,
                                 args.supplementary_metadata_id_column,
+                                args.local_database_threshold,
                                 config)
 
     if config[KEY_RUN_PHYLO]:
@@ -255,8 +261,8 @@ def main(sysargs = sys.argv[1:]):
                                 config)
 
             if config[KEY_UPDATE_LOCAL_DATABASE]:
-                new_db_seqs = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.fasta")
-                new_db_metadata = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.{config[KEY_TODAY]}.csv")
+                new_db_seqs = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.fasta")
+                new_db_metadata = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.csv")
                 phylo_functions.update_local_database(config[KEY_SAMPLE_SEQS],detailed_csv,new_db_seqs,new_db_metadata,config)
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):

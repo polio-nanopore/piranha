@@ -502,9 +502,9 @@
           const traitColorScale = d3.scaleOrdinal(colorCodes).domain(fig.tree().annotations["source"].values)
           const circleNodes = figtree.circle()
                               .filter(n => !n.children)
-                              .attr("r", 8)
+                              .attr("r", 4)
                               .attr("fill", n => colorScale(n.annotations["source"]))
-                              .hilightOnHover(20)
+                              .hilightOnHover(10)
                               .onClick((node, i, n) => {
                                   const isSelected = d3.select(n[i]).classed("selected");
                                   fig.svgSelection.selectAll(".selected").classed("selected", false);
@@ -537,7 +537,7 @@
                                   .attr("height",20)
                   )
                         .nodeBackgrounds(figtree.circle()
-                                          .attr("r", 10)
+                                          .attr("r", 5)
                                 .filter(n=>!n.children)
                                         )
                         .branches(figtree.branch()
@@ -608,6 +608,11 @@
       %endif
       %if config["institute"]!="":
         <h3><strong>${LANGUAGE_CONFIG["6"]}</strong> | ${config["institute"].lstrip("'").rstrip("'")}</h3>
+      %endif
+      %if config["notes"]!="":
+        <hr>
+        <p>${config["notes"].lstrip("'").rstrip("'")}</p>
+        <hr>
       %endif
       <div class="info_box">
         <p>${LANGUAGE_CONFIG["52"]}</p>
@@ -694,10 +699,12 @@
               %for col in config["composition_table_header"]:
                 %if col=="sample":
                 <th style="width:10%;">${LANGUAGE_CONFIG["18"]}</th>
+                %elif col=="barcode":
+                <th style="width:10%;">${LANGUAGE_CONFIG["58"]}</th>
                 %elif col=="unmapped":
                 <th style="width:10%;">${LANGUAGE_CONFIG["19"]}</th>
                 %else:
-                <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                <th style="width:10%;">${col.replace("_"," ")}</th>
                 %endif
               %endfor
             </tr>
@@ -743,6 +750,7 @@
           </tbody>
         </table>
         <br>
+        <p>*${LANGUAGE_CONFIG["57"]} ${config["composition_not_detected"]}</p>
         <script type="text/javascript">
           $(document).ready( function () {
               var table = $('#myTable2').DataTable({
@@ -814,14 +822,16 @@
           <table class="table">
             <thead class="thead-light">
               <tr>
-                <th>${LANGUAGE_CONFIG["24"]}</th>
+                <th style="width:8%;">${LANGUAGE_CONFIG["24"]}</th>
                 %for col in config["composition_table_header"]:
                     %if col=="sample":
-                    <th style="width:10%;">${LANGUAGE_CONFIG["18"]}</th>
+                    <th>${LANGUAGE_CONFIG["18"]}</th>
+                    %elif col=="barcode":
+                    <th>${LANGUAGE_CONFIG["58"]}</th>
                     %elif col=="unmapped":
-                    <th style="width:10%;">${LANGUAGE_CONFIG["19"]}</th>
+                    <th>${LANGUAGE_CONFIG["19"]}</th>
                     %else:
-                    <th style="width:10%;">${col.title().replace("_"," ")}</th>
+                    <th>${col.replace("_"," ")}</th>
                     %endif
                 %endfor
               </tr>
@@ -994,7 +1004,12 @@
             % for item in config["configuration_table_fields"]:
               <tr>
                 <td><strong>${item}</strong></td>
+                %if type(config[item]) == list:
+                <% new_item = ", ".join(config[item]) %>
+                <td>${new_item}</td>
+                %else:
                 <td>${config[item]}</td>
+                %endif
             %endfor
           </tbody>
         </table>

@@ -295,7 +295,7 @@ These parameters set the minimum number of reads hitting a particular reference 
 
 ### How many reads should I count as a signal? 
 
-We have set the minimum read depth to be 50 reads in order to attempt to make a consensus. Within piranha, we run minimap2 to map reads against the background reference panel (in a similar manner to [RAMPART](https://github.com/artic-network/rampart)). The top hit within the background reference panel is reported, by default showing the "display_name" field. The categories displayed are:
+We have set the minimum read depth to be 50 reads in order to attempt to make a consensus. Within piranha, we run minimap2 to map reads against the background reference panel (in a similar manner to [RAMPART](https://github.com/artic-network/rampart)). The top hit within the background reference panel is reported, by default showing the "ddns_group" field. The categories displayed are:
 
 - Sabin1-Related
 - Sabin2-Related
@@ -317,13 +317,13 @@ Users can specify their own reference file or by default piranha will access the
 The reference file must be in fasta format and, within that file, the first field must be the reference ID (without spaces). This reference file can include additional information in the following format:
 
 ```
->Poliovirus3-wt_JN812657 display_name=WPV3 species=Poliovirus3-wt cluster=Poliovirus3-wt
+>Poliovirus3-wt_JN812657 ddns_group=WPV3 species=Poliovirus3-wt cluster=Poliovirus3-wt
 GGGGTGGACGATCTGATAACAGAA...
->Poliovirus3-Sabin_AY184221 display_name=Sabin3-related species=Sabin3-related cluster=Sabin3-related
+>Poliovirus3-Sabin_AY184221 ddns_group=Sabin3-related species=Sabin3-related cluster=Sabin3-related
 GGTATTGAAGATTTGACTTCTGAA...
 ```
 
-Notably, `display_name` allows multiple references to be aggregated together/ anonymised within the final report. Current compatibility within piranha allows `display_name` fields to include: `WPV1`,`WPV2`,`WPV3`,`Sabin1-related`,`Sabin2-related`,`Sabin3-related` and `NonPolioEV`.
+Notably, `ddns_group` allows multiple references to be aggregated together/ anonymised within the final report. Current compatibility within piranha allows `ddns_group` fields to include: `WPV1`,`WPV2`,`WPV3`,`Sabin1-related`,`Sabin2-related`,`Sabin3-related` and `NonPolioEV`.
 
 ## Initial processing pipeline
 
@@ -375,13 +375,13 @@ The latest environment file contains this dependencies, so to install you can ju
 
 This module will cluster any consensus sequences generated during the run into `reference_group`, so either `Sabin1-related`, `Sabin2-related`, `Sabin3-related` or `WPV1` and will ultimately build one maximum-likelihood phylogeny for each reference group with consensus sequences in a given sequencing run. To annotate the phylogeny with certain metadata from the barcodes.csv file, specify columns to include with `-pcol/--phylo-metadata-columns`.
 
-Piranha then extracts any relevant reference sequences from the installed reference file (identified by having `display_name=Sabin1-related` in their sequence header, or whichever reference group the relevant phylogeny will be for). 
+Piranha then extracts any relevant reference sequences from the installed reference file (identified by having `ddns_group=Sabin1-related` in their sequence header, or whichever reference group the relevant phylogeny will be for). 
 
-An optional set of local sequences can be supplied to supplement the phylogenetic analysis. To supply them to piranha, point to the correct directory using `-sd,--supplementary-datadir`. The sequence files should be in FASTA format, but do not need to be aligned. To allow piranha to assign the sequences to the relevant phylogeny, the sequence files should have the reference group annotated in the header in the format `display_name=Sabin1-related`, for example.
+An optional set of local sequences can be supplied to supplement the phylogenetic analysis. To supply them to piranha, point to the correct directory using `-sd,--supplementary-datadir`. The sequence files should be in FASTA format, but do not need to be aligned. To allow piranha to assign the sequences to the relevant phylogeny, the sequence files should have the reference group annotated in the header in the format `ddns_group=Sabin1-related`, for example.
 
 This supplementary sequence files can be accompanied with csv metadata files (one row per supplementary sequence) and this metadata can be included in the final report and annotated onto the phylogenies (`-smcol/--supplementary-metadata-columns`). By default, the metadata is matched to the FASTA sequence name with a column titled `sequence_name` but this header name can be configured by specifying `-smid/--supplementary-metadata-id-column`. 
 
-Piranha will iterate accross the directory supplied and amalgamate the FASTA files, retaining any sequences with `display_name=X` in the header description, where X can be one of `Sabin1-related`, `Sabin2-related`, `Sabin3-related` or `WPV1`. It then will read in every csv file it detects in this directory and attempts to match any metadata to the gathered fasta records. These will be added to the relevant phylogenies.
+Piranha will iterate accross the directory supplied and amalgamate the FASTA files, retaining any sequences with `ddns_group=X` in the header description, where X can be one of `Sabin1-related`, `Sabin2-related`, `Sabin3-related` or `WPV1`. It then will read in every csv file it detects in this directory and attempts to match any metadata to the gathered fasta records. These will be added to the relevant phylogenies.
 
 The phylogenetic pipeline is activated by running with the flag `-rp/--run-phylo`, which then triggers the following analysis steps:
 - Amalgamate the newly generated consensus sequences for all barcodes into their respective reference groups.

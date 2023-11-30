@@ -108,7 +108,7 @@ def parse_barcodes_csv(barcodes_csv,config):
 #             total +=1
 #             passed = False
 #             for field in record.description.split(" "):
-#                 if field.startswith(KEY_DISPLAY_NAME):
+#                 if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
 #                     passed=True
 #                     continue
 #             if not passed:
@@ -118,7 +118,7 @@ def parse_barcodes_csv(barcodes_csv,config):
 #         sys.exit(-1)
 
 #     if incorrect >= 1:
-#         sys.stderr.write(cyan(f"Supplementary sequences file lacks `{KEY_DISPLAY_NAME}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
+#         sys.stderr.write(cyan(f"Supplementary sequences file lacks `{VALUE_REFERENCE_MATCH_FIELD}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
 #         sys.exit(-1)
 #     else:
 #         print(green("Supplementary sequences:"), total, "sequences parsed.")
@@ -146,7 +146,7 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
         total_seqs["total"] +=1
         ref_group = ""
         for field in record.description.split(" "):
-            if field.startswith(KEY_DISPLAY_NAME):
+            if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
                 ref_group = field.split("=")[1]
         
         if ref_group not in config[KEY_REFERENCES_FOR_CNS]:
@@ -159,7 +159,7 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
 def check_there_are_seqs(total_seqs,supplementary_datadir,no_reference_group,config):
     if total_seqs["total"]==0:
         sys.stderr.write(cyan(f"Error: No sequence files matched in `{supplementary_datadir}`.\nEnsure the directory provided contains FASTA files with appropriate annotations in the header.\n"))
-        sys.stderr.write(cyan(f"Header must specify one of {config[KEY_REFERENCES_FOR_CNS]} under {KEY_DISPLAY_NAME}=X, where X is the appropriate group to be included in phylo pipeline.\n"))
+        sys.stderr.write(cyan(f"Header must specify one of {config[KEY_REFERENCES_FOR_CNS]} under {VALUE_REFERENCE_MATCH_FIELD}=X, where X is the appropriate group to be included in phylo pipeline.\n"))
         sys.exit(-1)
 
     elif no_reference_group:
@@ -231,9 +231,11 @@ def phylo_group_parsing(run_phylo_arg,
                         barcodes_csv,
                         supplementary_metadata_columns_arg,
                         supplementary_metadata_id_column_arg,
+                        local_database_threshold,
                         config):
 
     misc.add_arg_to_config(KEY_RUN_PHYLO,run_phylo_arg,config)
+    misc.add_arg_to_config(KEY_LOCAL_DATABASE_THRESHOLD,local_database_threshold,config)
 
     if config[KEY_RUN_PHYLO] not in [True, False]:
         sys.stderr.write(cyan(f"`{KEY_RUN_PHYLO}` argument must be either True/False if specified through the config file.\n"))
@@ -253,6 +255,13 @@ def phylo_group_parsing(run_phylo_arg,
         if config[KEY_UPDATE_LOCAL_DATABASE] and not config[KEY_SUPPLEMENTARY_DATADIR]:
             sys.stderr.write(cyan(f"Error: Cannot update local database with new sequences as no supplementary database has been provided.\n"))
             sys.exit(-1)
+        
+        if config[KEY_UPDATE_LOCAL_DATABASE]:
+            try:
+                config[KEY_LOCAL_DATABASE_THRESHOLD] = int(config[KEY_LOCAL_DATABASE_THRESHOLD])
+            except:
+                sys.stderr.write(cyan(f"Error: Local database threshold must be an integer.\n"))
+                sys.exit(-1)
 
         misc.add_arg_to_config(KEY_SUPPLEMENTARY_METADATA_ID_COLUMN,supplementary_metadata_id_column_arg,config)
         
@@ -356,24 +365,59 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
         sys.exit(-1)
 
 
-def control_group_parsing(positive_control, negative_control, config):
+def pattern_match_for_controls(samples,pattern):
+    control_samples = []
+    if not type(pattern) == list:
+        for sample in samples:
+            if pattern in sample:
+                control_samples.append(sample)
+    return control_samples
+
+
+def control_group_parsing(positive_control, negative_control, positive_references,config):
     # mod to allow multiple pos and negative samples
 
     misc.add_arg_to_config(KEY_POSITIVE,positive_control,config)
     misc.add_arg_to_config(KEY_NEGATIVE,negative_control,config)
+    misc.add_arg_to_config(KEY_POSITIVE_REFERENCES,positive_references,config)
+
+    config[KEY_POSITIVE] = pattern_match_for_controls(config[KEY_SAMPLES],config[KEY_POSITIVE])
+    config[KEY_NEGATIVE] = pattern_match_for_controls(config[KEY_SAMPLES],config[KEY_NEGATIVE])
 
     if config[KEY_POSITIVE] and not type(config[KEY_POSITIVE]) == list:
         config[KEY_POSITIVE] = config[KEY_POSITIVE].split(",")
     if config[KEY_NEGATIVE] and not type(config[KEY_NEGATIVE]) == list:
         config[KEY_NEGATIVE] = config[KEY_NEGATIVE].split(",")
+    
+    if not type(config[KEY_POSITIVE_REFERENCES]) == list:
+        config[KEY_POSITIVE_REFERENCES] = config[KEY_POSITIVE_REFERENCES].split(",")
 
+    print(green("Positive control samples:"))
     for pos in config[KEY_POSITIVE]:
         if pos not in config[KEY_SAMPLES]:
             print(cyan(f"Warning: cannot find positive control in barcode csv file: {pos}"))
-            
+        else:
+            config[KEY_INCLUDE_POSITIVE_REFERENCES] = True
+            print(f"- {pos}")
+    
+    print(green("Negative control samples:"))
     for neg in config[KEY_NEGATIVE]:
         if neg not in config[KEY_SAMPLES]:
             print(cyan(f"Warning: cannot find negative control in  barcode csv file: {neg}"))
+        else:
+            print(f"- {neg}")
+
+    if config[KEY_INCLUDE_POSITIVE_REFERENCES]:
+        refs = SeqIO.index(config[KEY_REFERENCE_SEQUENCES],"fasta")
+        not_in = set()
+        for ref in config[KEY_POSITIVE_REFERENCES]:
+            if ref not in refs:
+                not_in.add(ref)
+        if not_in:
+            sys.stderr.write(cyan(f"Error: The following positive control record(s) not in reference FASTA file, please include in file and run again.\n"))
+            for ref in not_in:
+                sys.stderr.write(cyan(f"- {ref}\n"))
+            sys.exit(-1)
 
 
 
