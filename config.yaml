@@ -1,0 +1,19 @@
+username: "Áine O'Toole"
+institute: "Institute of Ecology and Evolution"
+runname: "MIN003"
+
+barcodes_csv: "piranha/test/pak_run/barcodes01.csv"
+readdir: "piranha/test/pak_run/demultiplexed"
+
+threads: 1
+
+negative_control: "negative1"
+positive_control: "positive"
+
+# run_phylo: True
+supplementary_datadir: "piranha/test/supp_data"
+# update_local_database: True
+local_database_threshold: 5
+
+overwrite: True
+no_temp: True
