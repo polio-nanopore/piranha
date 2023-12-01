@@ -54,6 +54,7 @@ def get_defaults():
                     KEY_MAX_HAPLOTYPES:VALUE_MAX_HAPLOTYPES,
                     KEY_MIN_HAPLOTYPE_DISTANCE:VALUE_MIN_HAPLOTYPE_DISTANCE,
                     KEY_MIN_HAPLOTYPE_DEPTH:VALUE_MIN_HAPLOTYPE_DEPTH,
+                    KEY_CNS_STEM:VALUE_CNS_STEM,
 
                     # phylo options
                     KEY_SUPPLEMENTARY_SEQUENCES:"",

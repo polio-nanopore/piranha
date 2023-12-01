@@ -137,7 +137,7 @@ rule gather_merge_cns:
         for seq in sequences:
             ref = ref_seqs[seq]
             ref_count[ref] +=1
-            record_id = f"{ref_seqs[seq]}.CNS00{ref_count[ref]}"
+            record_id = f"{ref_seqs[seq]}.{config[KEY_CNS_STEM]}0{ref_count[ref]}"
             ref_cns.append(record_id)
 
             haplo_bams = ""
