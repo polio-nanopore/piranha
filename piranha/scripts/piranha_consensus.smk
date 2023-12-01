@@ -96,15 +96,20 @@ rule medaka_haploid_variant_cns:
 rule gather_merge_cns:
     input:
         ref=expand(rules.files.params.ref,reference=REFERENCES),
-        cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),reference=REFERENCES)
-        # cns_cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta"),reference=REFERENCES)
+        cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),reference=REFERENCES),
+        cns_cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta"),reference=REFERENCES)
     output:
         yaml = os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
     run:
         sequences = collections.defaultdict(set)
         ref_seqs = {}
+
         for cns_file in input.cns:
-            haplodir = "/".join(cns_file.split("/")[:-1])
+            if "Sabin" in cns_file:
+                haplodir = "/".join(cns_file.split("/")[:-1])
+            else:
+                haplodir = "/".join(cns_file.split("/")[:-1])+"_cns"
+
             haplo_bam = os.path.join(haplodir, "calls_to_ref.bam")
             for record in SeqIO.parse(cns_file, "fasta"):
                 print(record.id)
@@ -115,7 +120,13 @@ rule gather_merge_cns:
         for ref_file in input.ref:
             for record in SeqIO.parse(ref_file,"fasta"):
                 ref_file_dict[record.id] = ref_file
-
+        # print(ref_file_dict)
+        cns_file_dict = {}
+        for cns_file in input.cns_cns:
+            for record in SeqIO.parse(cns_file,"fasta"):
+                cns_file_dict[record.id] = cns_file
+        # print(cns_file_dict)
+            
         for seq in sequences:
             print(seq[:5],"...",sequences[seq])
         
@@ -135,6 +146,7 @@ rule gather_merge_cns:
 
             out_bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.bam")
             read_count_out = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.read_count.txt")
+
             shell(f"samtools merge -f '{out_bam}' {haplo_bams} && samtools index '{out_bam}'")
             shell(f"samtools view -F 0x904 -c '{out_bam}' > {read_count_out}")
 
@@ -147,8 +159,11 @@ rule gather_merge_cns:
                 fseq.write(f">{record_id} read_count={read_count}\n{seq}\n")
 
             cns_ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.ref.fasta")
+            cns_cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.cns_ref.fasta")
+            # print(cns_cns)
             shell(f"cp '{ref_file_dict[ref]}' '{cns_ref}'")
-            
+            if ref in cns_file_dict:
+                shell(f"cp '{cns_file_dict[ref]}' '{cns_cns}'")
             
         new_config[BARCODE] = ref_cns
 
