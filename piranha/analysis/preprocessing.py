@@ -41,18 +41,26 @@ def gather_filter_reads_by_length(dir_in,barcode,reads_out,config):
         print(green(f"Total passed reads {barcode}:"),len(fastq_records))
         SeqIO.write(fastq_records,fw, "fastq")
 
-def make_ref_display_name_map(references):
+def parse_match_field(description):
+    for item in str(description).split(" "):
+        if item.startswith(VALUE_REFERENCE_MATCH_FIELD):
+            match_field = item.split("=")[1]
+            return match_field
+
+def make_ref_match_field_map(references,positive_references,include_positive_references):
     ref_map = {}
     for record in SeqIO.parse(references,KEY_FASTA):
-        display_name = ""
-        for item in str(record.description).split(" "):
-            if item.startswith(KEY_DISPLAY_NAME):
-                display_name = item.split("=")[1]
-        ref_map[record.id] = display_name
-    
+        match_field = ""
+        if include_positive_references:
+            if record.id in positive_references:
+                ref_map[record.id] = "p" #quicker for parsing below
+            else:
+                ref_map[record.id] = parse_match_field(record.description)
+        else:
+            ref_map[record.id] = parse_match_field(record.description)
     return ref_map
 
-def make_display_name_to_reference_group_map(ref_map):
+def make_match_field_to_reference_group_map(ref_map):
     ref_group_map = {}
     for key in ref_map:
         val_lower = ref_map[key].lower()
@@ -70,6 +78,8 @@ def make_display_name_to_reference_group_map(ref_map):
         elif "sabin" in val_lower:
             num = re.findall(r'\d+', val_lower.split("sabin")[1])[0]
             ref_group_map[key] = "Sabin%s-related" % num
+        elif val_lower == "p":
+            ref_group_map[key] = "PositiveControl" #restoring useful label
         else:
             ref_group_map[key] = "NonPolioEV"
     assert len(ref_map) == len(ref_group_map)
@@ -224,6 +234,8 @@ def parse_paf_file(paf_file,
                     mapping_filter_out,
                     hits_out,
                     references_sequences,
+                    positive_references,
+                    include_positive_references,
                     barcode,
                     analysis_mode,
                     min_map_quality,
@@ -231,8 +243,8 @@ def parse_paf_file(paf_file,
     
     if is_non_zero_file(paf_file):
         
-        permissive_ref_name_map = make_ref_display_name_map(references_sequences)
-        ref_name_map = make_display_name_to_reference_group_map(permissive_ref_name_map)
+        permissive_ref_name_map = make_ref_match_field_map(references_sequences,positive_references,include_positive_references)
+        ref_name_map = make_match_field_to_reference_group_map(permissive_ref_name_map)
 
         min_aln_block = config[KEY_MIN_ALN_BLOCK]
 

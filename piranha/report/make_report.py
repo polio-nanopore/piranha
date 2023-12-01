@@ -31,9 +31,10 @@ def make_sample_report(report_to_generate,
                         consensus_seqs,
                         masked_variants,
                         barcode,
+                        cns_config,
                         config):
 
-    references = config[barcode]
+    references = cns_config[barcode]
     
     data_for_report = {}
 
@@ -43,8 +44,7 @@ def make_sample_report(report_to_generate,
 
     info_dict = {} # keyed at ref- will need to mod if integrate haplo pipeline
     sequences = ""
-
-
+    barcode_sample = ""
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
         """
@@ -58,19 +58,20 @@ def make_sample_report(report_to_generate,
         record_id = fields[0]
         record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
 
+        
         description_dict = {}
         for field in fields[1:]:
             key,value = field.split("=")
             description_dict[key] = value
         
         if barcode == description_dict[KEY_BARCODE]:
-            
+            barcode_sample = record_sample
             sequences+= f">{record.description}<br>{record.seq}<br>"
             
             # if plan to have more than one seq per ref group will need to modify this
             info = {KEY_SAMPLE:record_sample,
                     KEY_REFERENCE_GROUP:reference_group,
-                    "CNS ID":cns_id,
+                    "SEQ ID":cns_id,
                     KEY_EPID:epid,
                     KEY_DATE:sample_date
                     }
@@ -90,46 +91,50 @@ def make_sample_report(report_to_generate,
 
             # if plan to have more than one seq per ref group will need to modify this
             reference=description_dict[KEY_REFERENCE]
-            info_dict[reference] = info
+            cns_key = f"{reference}.{cns_id}"
 
-            data_for_report[reference][KEY_SNP_SITES] = []
-            data_for_report[reference][KEY_INDEL_SITES] = []
+            info_dict[cns_key] = info
+            info_dict[cns_key][KEY_READ_COUNT] = cns_config[cns_key]
+
+            data_for_report[cns_key][KEY_SNP_SITES] = []
+            data_for_report[cns_key][KEY_INDEL_SITES] = []
 
             var_string = description_dict[KEY_VARIANTS]
 
             for var in var_string.split(";"):
                 site = var.split(":")[0]
                 if "ins" in var or "del" in var:
-                    data_for_report[reference][KEY_INDEL_SITES].append(int(site))
+                    data_for_report[cns_key][KEY_INDEL_SITES].append(int(site))
                 else:
                     try:
                         site = int(site)
-                        data_for_report[reference][KEY_SNP_SITES].append(site)
+                        data_for_report[cns_key][KEY_SNP_SITES].append(site)
                     except:
-                        data_for_report[reference][KEY_SNP_SITES].append(site)
+                        data_for_report[cns_key][KEY_SNP_SITES].append(site)
 
-    for reference in info_dict:
-        data_for_report[reference][KEY_MASKED_SITES] = []
-        data_for_report[reference][KEY_SUMMARY_DATA] = info_dict[reference]
+    for cns_key in info_dict:
+        data_for_report[cns_key][KEY_MASKED_SITES] = []
+        data_for_report[cns_key][KEY_SUMMARY_DATA] = info_dict[cns_key]
 
     with open(masked_variants,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            #check if this breaks
             data_for_report[row[KEY_REFERENCE]][KEY_MASKED_SITES].append(int(row[KEY_SITE]))
     
     with open(variation_file,"r") as f:
         variation_json = json.load(f)
-        for reference in variation_json:
+        for cns_key in variation_json:
 
-            all_sites_data = variation_json[reference]["variation"]
+            all_sites_data = variation_json[cns_key]["variation"]
             
-            coocc_data = variation_json[reference]["coocc"]
-            if coocc_data and "Sabin" in reference:
-                data_for_report[reference][KEY_COOCCURRENCE_INFO] = coocc_data
+            coocc_data = variation_json[cns_key]["coocc"]
+            if coocc_data and "Sabin" in cns_key:
+                data_for_report[cns_key][KEY_COOCCURRENCE_INFO] = coocc_data
 
-            snp_sites = data_for_report[reference][KEY_SNP_SITES]
-            masked_sites = data_for_report[reference][KEY_MASKED_SITES]
-            indel_sites = data_for_report[reference][KEY_INDEL_SITES]
+            snp_sites = data_for_report[cns_key][KEY_SNP_SITES]
+            masked_sites = data_for_report[cns_key][KEY_MASKED_SITES]
+            indel_sites = data_for_report[cns_key][KEY_INDEL_SITES]
 
             
 
@@ -154,7 +159,7 @@ def make_sample_report(report_to_generate,
 
                 annotated_site_data.append(site_data)
 
-            data_for_report[reference][KEY_VARIATION_INFO] = annotated_site_data
+            data_for_report[cns_key][KEY_VARIATION_INFO] = annotated_site_data
 
     LANGUAGE_CONFIG = ENGLISH_CONFIG
     if config[KEY_LANGUAGE] == "French":
@@ -170,7 +175,7 @@ def make_sample_report(report_to_generate,
                     date = date.today(), 
                     version = __version__,
                     barcode = barcode,
-                    sample = record_sample,
+                    sample = barcode_sample,
                     data_for_report = data_for_report,
                     sequences = sequences,
                     LANGUAGE_CONFIG = LANGUAGE_CONFIG,
@@ -414,7 +419,7 @@ def get_background_data(metadata,config):
     data = json.dumps(background_data) 
     return data
 
-
+ 
 def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
     
     # which are the negative controls and positive controls
@@ -437,7 +442,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     # collate data for tables in the report
     data_for_report = {KEY_SUMMARY_TABLE:[],KEY_COMPOSITION_TABLE:[]}
     positives_for_plate_viz = collections.defaultdict(dict)
-
+    composition_table_header_dict =  collections.Counter()
+    
     with open(preprocessing_summary,"r") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -445,6 +451,9 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 continue
             # add directly to data for report composition table (2)
             data_for_report[KEY_COMPOSITION_TABLE].append(row)
+            for col in row:
+                if col not in [KEY_BARCODE,KEY_SAMPLE]:
+                    composition_table_header_dict[col] += int(row[col])
 
             # handling controls
             if row[KEY_SAMPLE] in negative_controls:
@@ -484,13 +493,13 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                     if proportion_npev > config[KEY_MIN_PCENT]:
                         flagged_high_npev.append(row[KEY_SAMPLE])
 
+
     # to check if there are identical seqs in the run
     identical_seq_check = collections.defaultdict(list)
 
     plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION],config[KEY_BARCODES])
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
-        identical_seq_check[str(record.seq)].append(record.id)
         
         fields = record.description.split(" ")
 
@@ -520,6 +529,9 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
         length_of_seq = len(record)
 
         call = reference_group
+        
+        identical_seq_check[str(record.seq)].append(f"{record.id} ({record_barcode})")
+        
         if reference_group.startswith("Sabin"):
             # configured number of mutations in sabin for the call threshold of VDPV
             call_threshold = CALL_THRESHOLD_DICT[reference_group]
@@ -537,6 +549,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 KEY_SAMPLE:record_sample,
                 "Sample classification": call,
                 KEY_REFERENCE_GROUP:reference_group,
+                KEY_CNS_ID:cns_id,
                 KEY_REFERENCE:reference,
                 "Number of mutations": int(var_count),
                 KEY_PERCENT:pcent_match
@@ -546,6 +559,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
                 KEY_SAMPLE:record_sample,
                 "Sample classification": call,
                 KEY_REFERENCE_GROUP:reference_group,
+                KEY_CNS_ID:cns_id,
                 KEY_REFERENCE:reference,
                 "Number of mutations": "NA",
                 KEY_PERCENT:"NA"
@@ -563,6 +577,8 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     data_for_report[KEY_CONTROL_STATUS] = control_status
     
     # composition table header
+    
+    
     if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
         config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
@@ -570,6 +586,20 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
         config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
         config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
 
+    report_composition_table_header = []
+    not_detected = []
+    for field in config[KEY_COMPOSITION_TABLE_HEADER]:
+        if field in [KEY_SAMPLE, KEY_BARCODE]:
+            report_composition_table_header.append(field)
+        elif field in composition_table_header_dict:
+            if composition_table_header_dict[field] > 0:
+                report_composition_table_header.append(field)
+            else:
+                not_detected.append(field)
+        else:
+            not_detected.append(field)
+    config[KEY_COMPOSITION_TABLE_HEADER] = report_composition_table_header
+    config[KEY_COMPOSITION_NOT_DETECTED] = ", ".join(not_detected)
 
     # summary table header
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS

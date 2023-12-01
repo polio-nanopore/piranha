@@ -492,11 +492,15 @@
             </thead>
             <tbody>
               % for reference in data_for_report:
+              <% ref_id = reference.replace(".","_") %>
+              <% cns_id = reference.split(".")[-1] %>
               <% summary_data = data_for_report[reference]["summary_data"] %>
                   <tr>
                     %for col in ENGLISH_CONFIG["36"]:
-                      %if col=="reference_group" or col=="Groupe de référence":
-                      <td><a href="#header_${reference}" style="color:${themeColor}">${summary_data[col]}</a></td>
+                      %if col=="reference_group":
+                      <td><a href="#header_${ref_id}" style="color:${themeColor}">${summary_data[col]}</a></td>
+                      %elif col=="consensus_id":
+                      <td>${cns_id}</td>
                       %else:
                       <td>${summary_data[col]}</td>
                       %endif
@@ -533,11 +537,13 @@
                 } );
             </script>
       % for reference in data_for_report:
+        <% cns_id = reference.split(".")[-1] %>
+        <% ref_id = reference.replace(".","_") %>
         <% summary_data = data_for_report[reference]["summary_data"] %>
         <% reference_name = summary_data["reference_group"].replace("_"," ").title() %>
-        <h2 style="color:${themeColor}"><a id="header_${reference}"></a>${LANGUAGE_CONFIG["38"]} ${reference_name}</h2> 
+        <h2 style="color:${themeColor}"><a id="header_${ref_id}"></a>${LANGUAGE_CONFIG["38"]} ${reference_name} ${cns_id}</h2> 
         <% table_count += 1 %>
-        <h3><strong>${LANGUAGE_CONFIG["9"]} ${table_count} </strong> | ${summary_data["reference_group"]} </h3>
+        <h3><strong>${LANGUAGE_CONFIG["9"]} ${table_count} </strong> | ${summary_data["reference_group"]} ${cns_id} </h3>
         <table class="table" id="table_${table_count}">
           <thead class="thead-light">
             <tr>
@@ -549,6 +555,10 @@
             <tr>
               <td>${LANGUAGE_CONFIG["40"]}</td>
               <td>${summary_data["reference_group"]}</td>
+            </tr>
+            <tr>
+              <td>${LANGUAGE_CONFIG["54"]}</td>
+              <td>${summary_data["read_count"]}</td>
             </tr>
             <tr>
               <td>${LANGUAGE_CONFIG["41"]}</td>
@@ -569,7 +579,8 @@
         <% indel_sites = data_for_report[reference]["indel_sites"] %>
         <% masked_sites = data_for_report[reference]["masked_sites"] %>
         <br>
-        <div id="var_scatter_${reference}" style="width:100%"></div>
+        <% scatter_id = reference.replace(".","_") %>
+        <div id="var_scatter_${scatter_id}" style="width:100%"></div>
             <script>
               var vlSpec_scatter = {
                 "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
@@ -619,15 +630,16 @@
                             },
                     "config":{"legend":{"title":false}}
                   };          
-                vegaEmbed('#var_scatter_${reference}', vlSpec_scatter, {renderer: "svg"})
+                
+                vegaEmbed('#var_scatter_${scatter_id}', vlSpec_scatter, {renderer: "svg"})
                       .then(result => console.log(result))
                       .catch(console.warn);
                 </script>
             <% figure_count +=1 %>
             %if "Sabin" in reference:
-              <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["43"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample}</h3>
+              <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["43"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample} ${cns_id}. ${LANGUAGE_CONFIG["55"]}</h3>
             %else:
-              <h3><strong>${LANGUAGE_CONFIG["9"]} ${figure_count}</strong> | Variation (errors + mutations) across ${reference_name} consensus generated in ${sample}. SNPs and indels called against closest reference highlighted.</h3>
+              <h3><strong>${LANGUAGE_CONFIG["9"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["43"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample} ${cns_id}. ${LANGUAGE_CONFIG["56"]} ${LANGUAGE_CONFIG["55"]} </h3>
             %endif
             <hr>
           
@@ -666,10 +678,9 @@
             <br>
             <div>
               <% figure_count +=1 %>
-              <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["49"]} ${reference_name}</h3>
+              <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["49"]} ${reference_name} ${cns_id}</h3>
               <hr>
             </div>
-            <hr>
               %if 'cooccurrence_info' in data_for_report[reference]:
               
               <% ref_cooccurrence_info = data_for_report[reference]['cooccurrence_info'] %>
@@ -768,7 +779,7 @@
                                       .catch(console.warn);
         </script>
         <% figure_count +=1 %>
-        <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["50"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample}${LANGUAGE_CONFIG["51"]}</h3>
+        <h3><strong>${LANGUAGE_CONFIG["25"]} ${figure_count}</strong> | ${LANGUAGE_CONFIG["50"]} ${reference_name} ${LANGUAGE_CONFIG["44"]} ${sample} ${cns_id} ${LANGUAGE_CONFIG["51"]}</h3>
         <hr>
         %endif
         %endif

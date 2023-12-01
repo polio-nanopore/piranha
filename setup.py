@@ -13,21 +13,21 @@ setup(name='piranha',
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
             "piranha/scripts/piranha_vp1.smk",
-            "piranha/scripts/piranha_phylo.smk",
-            "piranha/scripts/piranha_panev.smk",
-            "piranha/scripts/piranha_wg.smk",
-            "piranha/scripts/consensus.smk",
-            "piranha/scripts/variation.smk",
-            "piranha/scripts/snipit.smk"
+            "piranha/scripts/piranha_haplotype.smk",
+            "piranha/scripts/piranha_consensus.smk",
+            "piranha/scripts/piranha_curate.smk",
+            "piranha/scripts/piranha_variation.smk",
+            "piranha/scripts/piranha_phylo.smk"
             ],
       package_data={"piranha":["data/*"]},
       install_requires=[
             "mako==1.2",
             "pandas~=1.5",
-            "snipit",
+            "snipit>=1.2",
             "biopython",
             "medaka>=1.7.1",
-            "numpy<=1.23.5"
+            "numpy<=1.23.5",
+            "scipy~=1.11"
       ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
       url='https://github.com/aineniamh/piranha',

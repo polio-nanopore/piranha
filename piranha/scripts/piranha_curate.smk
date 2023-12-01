@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 
 import os
 import collections
@@ -11,6 +11,7 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
 
+
 BARCODE = config[KEY_BARCODE]
 SAMPLE = str(config[KEY_SAMPLE])
 REFERENCES = config[BARCODE]
@@ -20,80 +21,21 @@ rule all:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
-        expand(os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf"), reference=REFERENCES),
-        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES)
+
+
+# do this per  cns
 
 rule files:
     params:
-        ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
-        reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
-
-rule medaka_haploid_variant:
-    input:
-        reads=rules.files.params.reads,
-        ref=rules.files.params.ref
-    params:
-        model = config[KEY_MEDAKA_MODEL],
-        outdir =  os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
-    output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),
-        pub_vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
-    shell:
-        """
-        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-        if [ -s {input.ref:q} ]
-        then
-            medaka_haploid_variant -i {input.reads:q} \
-                                -r {input.ref:q} \
-                                -o {params.outdir:q} \
-                                -f -x && \
-            medaka stitch {output.probs:q} {input.ref:q} {output.cns:q}
-        else
-            touch {output.cns:q}
-            touch {output.probs:q}
-            touch {output.vcf:q}
-        fi
-        cp {output.vcf:q} {output.pub_vcf:q}
-        """
-
-rule medaka_haploid_variant_cns:
-    input:
-        reads=rules.files.params.reads,
-        ref=rules.medaka_haploid_variant.output.cns
-    params:
-        model = config[KEY_MEDAKA_MODEL],
-        outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns")
-    output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}_cns.hapoid_variant.log")
-    shell:
-        """
-        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-        if [ -s {input.ref:q} ]
-        then
-            medaka_haploid_variant -i {input.reads:q} \
-                                -r {input.ref:q} \
-                                -o {params.outdir} \
-                                -f -x && \
-            medaka stitch {output.probs} {input.ref} {output.cns}
-        else
-            touch {output.cns:q}
-            touch {output.probs:q}
-            touch {output.vcf:q}
-        fi
-        """
-
+        ref= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.ref.fasta"),
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta")
+        
 
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
-        medaka_cns=rules.medaka_haploid_variant.output.cns,
-        cns_cns=rules.medaka_haploid_variant_cns.output.cns
+        cns = rules.files.params.cns
     params:
         reference = "{reference}"
     output:
@@ -101,18 +43,21 @@ rule join_cns_ref:
     run:
         with open(output[0],"w") as fw:
             for record in SeqIO.parse(input.ref,KEY_FASTA):
-                display_name = ""
+                match_field = ""
                 for field in record.description.split(" "):
-                    if field.startswith("display_name"):
-                        display_name = field.split("=")[1]
+                    if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+                        match_field = field.split("=")[1]
 
-                fw.write(f">{display_name} {record.description}\n{record.seq}\n")
+                fw.write(f">{match_field} {record.description}\n{record.seq}\n")
             if "Sabin" in params.reference:
-                for record in SeqIO.parse(input.medaka_cns,KEY_FASTA):
+                for record in SeqIO.parse(input.cns,KEY_FASTA):
+                    cns = record.id.split(".")[-1]
                     record_name = str(SAMPLE).replace(" ","_")
+                    record_name += f"|{cns}"
                     fw.write(f">{record_name}\n{record.seq}\n")
             else:
-                for record in SeqIO.parse(input.cns_cns,KEY_FASTA):
+                # need to check up on this
+                for record in SeqIO.parse(input.cns,KEY_FASTA):
                     record_name = str(SAMPLE).replace(" ","_")
                     fw.write(f">{record_name}\n{record.seq}\n")
 
@@ -126,7 +71,8 @@ rule align_cns_ref:
         """
         mafft {input:q} > {output:q}
         """
-
+        
+# this step might lead to some sequences now being identical
 rule curate_variants:
     input:
         aln = rules.align_cns_ref.output.aln
@@ -166,12 +112,12 @@ rule join_clean_cns_ref:
     run:
         with open(output[0],"w") as fw:
             for record in SeqIO.parse(input.ref,KEY_FASTA):
-                display_name = ""
+                match_field = ""
                 for field in record.description.split(" "):
-                    if field.startswith("display_name"):
-                        display_name = field.split("=")[1]
+                    if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+                        match_field = field.split("=")[1]
 
-                fw.write(f">{display_name} {record.description}\n{record.seq}\n")
+                fw.write(f">{match_field} {record.description}\n{record.seq}\n")
             for record in SeqIO.parse(input.cns,KEY_FASTA):
                 record_name = SAMPLE.replace(" ","_")
                 fw.write(f">{record_name}\n{record.seq}\n")
@@ -208,7 +154,7 @@ rule assess_variants:
         csv = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.csv")
     run:
         parse_variants(input[0],output.csv,BARCODE,params.reference)
-
+ 
 rule gather_variants:
     input:
         expand(rules.assess_variants.output.csv, reference=REFERENCES)

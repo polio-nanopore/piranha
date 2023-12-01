@@ -59,6 +59,8 @@ rule assess_broad_diversity:
                         output.parsing,
                         output.hits,
                         config[KEY_REFERENCE_SEQUENCES],
+                        config[KEY_POSITIVE_REFERENCES],
+                        config[KEY_INCLUDE_POSITIVE_REFERENCES],
                         params.barcode,
                         config[KEY_ANALYSIS_MODE],
                         params.min_map_quality,
