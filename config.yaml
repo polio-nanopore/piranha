@@ -7,7 +7,7 @@ readdir: "piranha/test/pak_run/demultiplexed"
 
 threads: 1
 
-negative_control: "negative1"
+negative_control: "negative"
 positive_control: "positive"
 
 # run_phylo: True
