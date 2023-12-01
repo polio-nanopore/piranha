@@ -44,7 +44,7 @@ rule get_variation_info:
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.merged_cns.bam")
             else:
                 #not the ref, should be cns
-                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.ref.fasta")
+                ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.cns_ref.fasta")
                 bamfile = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{reference}.merged_cns.bam")
             shell(f"samtools faidx {ref}")
 
