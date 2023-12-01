@@ -44,8 +44,7 @@ def make_sample_report(report_to_generate,
 
     info_dict = {} # keyed at ref- will need to mod if integrate haplo pipeline
     sequences = ""
-
-
+    barcode_sample = ""
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
         """
@@ -66,7 +65,7 @@ def make_sample_report(report_to_generate,
             description_dict[key] = value
         
         if barcode == description_dict[KEY_BARCODE]:
-            
+            barcode_sample = record_sample
             sequences+= f">{record.description}<br>{record.seq}<br>"
             
             # if plan to have more than one seq per ref group will need to modify this
@@ -176,7 +175,7 @@ def make_sample_report(report_to_generate,
                     date = date.today(), 
                     version = __version__,
                     barcode = barcode,
-                    sample = record_sample,
+                    sample = barcode_sample,
                     data_for_report = data_for_report,
                     sequences = sequences,
                     LANGUAGE_CONFIG = LANGUAGE_CONFIG,
