@@ -383,6 +383,12 @@ and piranha will check which ones you have installed with your version of medaka
 >```Where a version of Guppy has been used without an exactly corresponding medaka model, the medaka model with the highest version equal to or less than the guppy version should be selected.```
 
 
+## Experimental haplotype calling pipeline
+
+There is now an experimental haplotype calling pipeline that uses freebayes for initial variant calling and flopp for read phasing with the called variants. It has a number internal QC steps for merging identical haplotypes. This pipeline requires further validation, but can theoretically produce multiple consensus sequences for each poliovirus population present within a sample. The pipeline has mostly be tested on VDPVs of two mixtures, but will be further assessed.
+
+To try out the novel haplotype calling pipeline use the `--run-haplotyping` flag.
+
 ## Optional phylogenetics module **\*NEW FEATURE\***
 
 Piranha allows the user to optionally run a phylogenetics module in addition to variant calling and consensus builing. If you have previously installed piranha, are 3 additional dependencies needed if you wish to run this module:
@@ -440,6 +446,8 @@ By default temporary files are stored in `$TMPDIR`, which then gets wiped when t
 
 ### Customising the report
 The output report can include some information about the sequencing run, the name of the individual running the report and the institute doing the sequencing. To give the report a specific run name (rather than the default title `Nanopore sequencing report`) supply the new name with the command line flag `--runname` or as `runname: ` in the config file. Similarly, to enable the report to display the name of the user and institute, provide `--username` and `--institute` (or within the config file). 
+
+A free-text `--notes` field can be supplied that will get embedded into the top of the html report. 
 
 The orientation of barcodes in the vizualisation representing a 96-well plate can be configured. By default the barcodes increment from 1 to 96 in a `vertical` orientation (down each column in turn). By using the `--orientation` flag on the command line or `orientation` key in a configuration file, either the default `vertical` or `horizontal` (which will increment the numbers from 1-96 across each row in turn) can be specified. If `well` is supplied as a column in the barcode.csv file, this default orientation will be overwritten. Format for well specification is as a standard 96-well plate: A01 to H12.
 
@@ -527,7 +535,7 @@ This plot calculates the percentage of reads that share the variants called agai
 ```
 usage: 
 	piranha -c <config.yaml> [options]
-	piranha -i input.csv [options]
+	piranha -b <barcodes.csv> -i <demultiplexed fastq_dir> [options]
 
 Input options:
   -c CONFIG, --config CONFIG
@@ -538,10 +546,14 @@ Input options:
                         CSV file describing which barcodes were used on which sample
   -r REFERENCE_SEQUENCES, --reference-sequences REFERENCE_SEQUENCES
                         Custom reference sequences file.
-  -pc POSITIVE_CONTROL, --positive-control POSITIVE_CONTROL
-                        Sample name of positive control. Default: `positive`
   -nc NEGATIVE_CONTROL, --negative-control NEGATIVE_CONTROL
-                        Sample name of negative control. Default: `negative`
+                        Sample name of negative control. If multiple samples, supply as comma-separated string of sample names. E.g.
+                        `sample01,sample02` Default: `n`
+  -pc POSITIVE_CONTROL, --positive-control POSITIVE_CONTROL
+                        Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g.
+                        `sample01,sample02`. Default: `p`
+  -pr POSITIVE_REFERENCES, --positive-references POSITIVE_REFERENCES
+                        Comma separated string of sequences in the reference file to class as positive control sequences.
 
 Analysis options:
   -s SAMPLE_TYPE, --sample-type SAMPLE_TYPE
@@ -552,7 +564,7 @@ Analysis options:
                         Medaka model to run analysis using. Default: r941_min_hac_variant_g507
   --medaka-list-models  List available medaka models and exit.
   -q MIN_MAP_QUALITY, --min-map-quality MIN_MAP_QUALITY
-                        Minimum mapping quality. Default: 50
+                        Minimum mapping quality. Default: 15
   -n MIN_READ_LENGTH, --min-read-length MIN_READ_LENGTH
                         Minimum read length. Default: 1000
   -x MAX_READ_LENGTH, --max-read-length MAX_READ_LENGTH
@@ -560,9 +572,43 @@ Analysis options:
   -d MIN_READ_DEPTH, --min-read-depth MIN_READ_DEPTH
                         Minimum read depth required for consensus generation. Default: 50
   -p MIN_READ_PCENT, --min-read-pcent MIN_READ_PCENT
-                        Minimum percentage of sample required for consensus generation. Default: 10
+                        Minimum percentage of sample required for consensus generation. Default: 2
+  -a MIN_ALN_BLOCK, --min-aln-block MIN_ALN_BLOCK
+                        Minimum alignment block length. Default: 0.6*MIN_READ_LENGTH
   --primer-length PRIMER_LENGTH
                         Length of primer sequences to trim off start and end of reads. Default: 30
+
+Haplotyping options:
+  -rh, --run-haplotyping
+                        Trigger the optional haplotyping module. Additional dependencies may need to be installed.
+  -hs HAPLOTYPE_SAMPLE_SIZE, --haplotype-sample-size HAPLOTYPE_SAMPLE_SIZE
+                        Number of reads to downsample to for haplotype calling. Default: 3000
+  -hf MIN_ALLELE_FREQUENCY, --min-allele-frequency MIN_ALLELE_FREQUENCY
+                        Minimum allele frequency to call. Note: setting this below 0.07 may significantly increase run time. Default: 0.07
+  -hx MAX_HAPLOTYPES, --max-haplotypes MAX_HAPLOTYPES
+                        Maximum number of haplotypes callable within reference group. Default: 4
+  -hdist MIN_HAPLOTYPE_DISTANCE, --min-haplotype-distance MIN_HAPLOTYPE_DISTANCE
+                        Minimum number of SNPs between haplotypes. Default: 2
+  -hd MIN_HAPLOTYPE_DEPTH, --min-haplotype-depth MIN_HAPLOTYPE_DEPTH
+                        Minimum number of reads in a given haplotype. Default: 20
+
+Phylogenetics options:
+  -rp, --run-phylo      Trigger the optional phylogenetics module. Additional dependencies may need to be installed.
+  -sd SUPPLEMENTARY_DATADIR, --supplementary-datadir SUPPLEMENTARY_DATADIR
+                        Path to directory containing supplementary sequence FASTA file and optional metadata to be incorporated into phylogenetic
+                        analysis.
+  -pcol PHYLO_METADATA_COLUMNS, --phylo-metadata-columns PHYLO_METADATA_COLUMNS
+                        Columns in the barcodes.csv file to annotate the phylogeny with. Default: ['call', 'sample_date', 'EPID']
+  -smcol SUPPLEMENTARY_METADATA_COLUMNS, --supplementary-metadata-columns SUPPLEMENTARY_METADATA_COLUMNS
+                        Columns in the supplementary metadata to annotate the phylogeny with. Default: ['location', 'lineage']
+  -smid SUPPLEMENTARY_METADATA_ID_COLUMN, --supplementary-metadata-id-column SUPPLEMENTARY_METADATA_ID_COLUMN
+                        Column in the supplementary metadata files to match with the supplementary sequences. Default: sequence_name
+  -ud, --update-local-database
+                        Add newly generated consensus sequences (with a distance greater than a threshold (--local-database-threshold) away from
+                        Sabin, if Sabin-related) and associated metadata to the supplementary data directory.
+  -dt, --local-database-threshold
+                        The threshold beyond which Sabin-related sequences are added to the supplementary data directory if update local database
+                        flag used. Default: 6
 
 Output options:
   -o OUTDIR, --outdir OUTDIR
@@ -578,23 +624,20 @@ Output options:
                         Specify where you want the temp stuff to go. Default: `$TMPDIR`
   --no-temp             Output all intermediate files. For development/ debugging purposes
   --all-metadata-to-header
-                        Parse all fields from input barcode.csv file and include in the output fasta headers.
-                        Be aware spaces in metadata will disrupt
-                        the record id, so avoid these.
+                        Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will
+                        disrupt the record id, so avoid these.
   --language LANGUAGE   Output report language. Options: English, French. Default: English
   --save-config         Output the config file with all parameters used
 
 Misc options:
-  --runname RUNNAME     Run name to appear in report. Default: Nanopore 
+  --runname RUNNAME     Run name to appear in report. Default: polioDDNS
   --username USERNAME   Username to appear in report. Default: no user name
   --institute INSTITUTE
                         Institute name to appear in report. Default: no institute name
+  --notes NOTES         Miscellaneous notes to appear at top of report. Default: no notes
   --orientation ORIENTATION
-                        Orientation of barcodes in wells on a 96-well plate. If `well`
-                        is supplied as a column in the barcode.csv, this default
-                        orientation will be overwritten. Default: `horizontal`.
-                        Options: `horizontal` or `vertical`. Alternatively, a `well` column will overwrite this option
-                        if provided in the barcodes csv file
+                        Orientation of barcodes in wells on a 96-well plate. If `well` is supplied as a column in the barcode.csv, this default
+                        orientation will be overwritten. Default: `vertical`. Options: `vertical` or `horizontal`.
   -t THREADS, --threads THREADS
                         Number of threads. Default: 1
   --verbose             Print lots of stuff to screen
