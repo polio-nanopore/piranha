@@ -175,9 +175,9 @@ barcode04,negative
 barcode05,positive
 ```
 
-You can also include additional information in your barcode.csv. If you include a `date` column or an `EPID` column they'll automatically be included in the fasta header output too. Dates should always be in ISO format (YYYY-MM-DD) for metadata best practice. Piranha has a flag `--all-metadata-to-header` that will take any metadata fields in your barcodes.csv and append them to the final output file (separated by a `|` pipe symbol). Be aware any odd characters or spaces in these fields will also get added to the fasta header and can interfere with downstream phylogenetics you might want to run (e.g. `:`,`;`) can cause issues with some tree-building or reading software). 
+You can also include additional information in your barcode.csv. If you include a `date` column or an `EPID` column they'll automatically be included in the fasta header output too. Dates should always be in ISO format (YYYY-MM-DD) for metadata best practice. Piranha has a flag `--all-metadata-to-header` that will take any metadata fields in your barcodes.csv and append them to the final output file (separated by a `|` pipe symbol). Be aware any odd characters or spaces in these fields will also get added to the fasta header and can interfere with downstream phylogenetics you might want to run (e.g. `:`,`;`) can cause issues with some tree-building or reading software. 
 
-### Example with extra information:
+### Ideal example:
 ```
 barcode,sample,EPID,date
 barcode01,EDI001,EPI111,2022-10-10
@@ -221,7 +221,7 @@ This is what piranha will look for. Point the software to the directory containi
 
 ## Input configuration
 
-Piranha has been preconfigured with defaults specific to the VP1 protocol developed by the [Polio Sequencing Consortium](https://www.protocols.io/workspaces/poliovirus-sequencing-consortium). All command line arguments (full list below) can be configured either as command line flags when running piranha, or as snake case arguments in a yaml config file (which can then be supplied with the `-c` flag).
+Piranha has been preconfigured with defaults specific to the VP1 protocol developed by the [Polio Sequencing Consortium](https://www.protocols.io/workspaces/poliovirus-sequencing-consortium). All command line arguments (full list below) can be configured either as command line flags when running piranha, or as snakecase arguments in a yaml config file (which can then be supplied with the `-c` flag). Snakecase formatting separates works with an underscore, i.e. `my_argument`.
 
 For example, you can supply a custom references file (piranha has a default one supplied, which you can access [here](https://github.com/polio-nanopore/piranha/blob/main/piranha/data/references.vp1.fasta)) using the `-r` flag, or by pointing to it within the config file.
 
@@ -248,23 +248,31 @@ Then to run piranha you can simply run the command below, and all the informatio
 
 ## Flag which samples are controls
 
-Piranha allows you to specify which samples are controls (positive or negative). If the sample name is `negative` or `positive` within the barcode csv file, piranha will automatically detect that these are your controls. See minimal example above for format. 
+Piranha allows you to specify which samples are controls (positive or negative). By default, if the sample name contains `negative` or `positive` within the barcode csv file, piranha will automatically detect that these are control samples. See minimal example above for format. 
 
 You can overwrite this if you would rather call your controls something else (like `nc`, `my_fave_control` etc) with the flags `-pc,--positive-control` or `-nc,--negative-control`. 
 
+You can have one or more positive and negative controls. If specifying more than one sample they can be supplied as a comma-separated string on the command line, or as a list or comma-separated string in the config file.
+
+
 Example:
 
-```piranha -i path/to/fastq_pass -b barcodes.csv -pc Positive1 -nc "my negative control"```
+```piranha -i path/to/fastq_pass -b barcodes.csv -pc "Pos1,P2" -nc "my negative control"```
 
 Alternatively you can supply this in a config file with the fields:
 ```
-positive_control: Positive1
+positive_control: "Pos1,P2"
 negative_control: Negative1
 ```
 
-But you need to make sure that the fields match within barcodes.csv. Also note that above because I've put spaces in sample names for my command line example negative control, this command will need quotes around the full name or else the terminal won't interpret it as a single field. ALSO, it's in general better to avoid having spaces in sample names because if you get a consensus sequence out of piranha as a fasta file, record ids are defined as the field up to the first space, so you can lose information in downstream analysis software if you're not careful. Best to just avoid spaces (and also special characters like `:`, `;` and `|`) in general when dealing with this kind of data that might have phylogenetics run on it.
+It is important to make sure that the fields match within barcodes.csv. Also note that above because there are spaces in sample names for the command line example negative control, this command will need quotes around the full name or else the terminal won't interpret it as a single field. ALSO, it's in general better to avoid having spaces in sample names because if you get a consensus sequence out of piranha as a fasta file, record ids are defined as the field up to the first space, so you can lose information in downstream analysis software if you're not careful. Best to just avoid spaces (and also special characters like `:`, `;` and `|`) in general when dealing with this kind of data that might have phylogenetics run on it.
 
-Samples flagged as controls will appear in the report at the end in a separate table as well and will be flagged as either passing (row in table coloured green and a tick appears) or not passing (row in rable coloured red and no tick appears). Piranha's behaviour treats negative controls as passing if there are fewer than the configured minimum number of reads in the sample (Default: 50 reads) and positive controls as passing if there is more than the minimum number of reads in the sample for non-polio enterovirus (Default: 50 reads). 
+Samples flagged as controls will appear in the report at the end in a separate table as well and will be flagged as either passing (row in table coloured green and a tick appears) or not passing (row in rable coloured red and no tick appears). Piranha's behaviour treats negative controls as passing if there are fewer than the configured minimum number of reads in the sample (Default: 50 reads) and positive controls as passing if there is more than the minimum number of reads in the sample for the positive reference (Default: 50 reads). 
+
+## Positive control reference
+The positive control sequence can be configured. By default it is set to a a CoxsackievirusA20 reference sequence present in the references FASTA file supplied with piranha (`CoxsackievirusA20_AF499642`). The Poliovirus Sequencing Consortium has developed a positive CoxA20 control, which can be supplied to user labs upon request. If a different positive control is being used within the sequencing run, this can be configured with the`--positive-references` flag. The user can specify one or more references to match as a positive control, however they must be present in the references file supplied to piranha. A custom references file can be supplied alongside the run if the positive control used doesn't have a close match in the piranha reference database. Note however, that if your positive control is supplied within the file and *does* have an existing close match within the supplied piranha reference file, the existence of two very close sequences within a FASTA file may lead to competition for minimap2, and result in a reduced mapping quality score. 
+
+If you have a reference positive control sequence that is *not* closely matched with anything already existing in the piranha database and can share the sequence, we would be happy to include it in the distributed file. In this way, piranha could match this sequence for the positive control without the need to supply a custom reference file. 
 
 
 ## Matching reads against the reference file
@@ -291,11 +299,20 @@ The default read length range filters accepts reads between 1000 and 1300 nucleo
 -p, --min-read-pcent
 ```
 
-These parameters set the minimum number of reads hitting a particular reference in the reference file (and the minimum percentage of reads within the sample) that are necessary to create a binned read group and attempt to make a consensus sequence for that particular sample. By default a minimum of 50 reads are necessary to build a consensus sequence and a minimum of 10% of the sample is required to be represented by that particular reference before it will attempt to create a consensus for this. 
+These parameters set the minimum number of reads hitting a particular reference in the reference file (and the minimum percentage of reads within the sample) that are necessary to create a binned read group and attempt to make a consensus sequence for that particular sample. By default a minimum of 50 reads are necessary to build a consensus sequence and a minimum of 2% of the sample is required to be represented by that particular reference before it will attempt to create a consensus for this. 
+
+Similarly, mapping quality and alignment block length are used as quality filters within piranha to minimise the risk of any false positive results. By default, the minimum mapping quality is set to 15, on a phred scale of 0 to 60. Note that if you are using a non-default references FASTA file, having identical or near-identical sequences in the references file this may superficially decrease the mapping quality as there is no clear individual hit in the file. It is for this reason we only include a single Sabin reference for individual poliovirus types and no additional VDPVs. 
+
+The length of the alignment block is also used to filter out sporadic, incorrect hits. The minimum block length is 0.6 (or 60%) of the minimum read length by default, so an alignment block length of 600 or more.
+
+```
+-q, --min-mapping-quality
+-a, --min-aln-block
+```
 
 ### How many reads should I count as a signal? 
 
-We have set the minimum read depth to be 50 reads in order to attempt to make a consensus. Within piranha, we run minimap2 to map reads against the background reference panel (in a similar manner to [RAMPART](https://github.com/artic-network/rampart)). The top hit within the background reference panel is reported, by default showing the "ddns_group" field. The categories displayed are:
+We have set the minimum read depth to be 50 reads in order to attempt to make a consensus. Within piranha, we run minimap2 to map reads against the background reference panel. The top hit within the background reference panel is reported, by default showing the "ddns_group" field. The categories displayed are:
 
 - Sabin1-Related
 - Sabin2-Related
@@ -305,6 +322,7 @@ We have set the minimum read depth to be 50 reads in order to attempt to make a 
 - WPV3
 - NonPolioEV
 - Unmapped
+- PositiveControl (if a positive control has been used)
 
 When sequencing samples at high depth, using mapping software on the raw nanopore reads (which are error prone) can lead to a certain level of noise. Hits above the minimum read depth threshold (Default >50) are highlighted in red in the final report. If the population of reads mapping to a particular reference successfully makes a consensus sequence at the end of the piranha pipeline, this is an indication of a genuine population of reads rather than noise.
 
@@ -314,12 +332,12 @@ Importantly, the reference that is hit within the background references file doe
 ## Custom reference file
 Users can specify their own reference file or by default piranha will access the reference file packaged with the software.
 
-The reference file must be in fasta format and, within that file, the first field must be the reference ID (without spaces). This reference file can include additional information in the following format:
+The reference file must be in fasta format and, within that file, the first field must be the reference ID (without spaces). There must also be ddns_group specified in the header field. This reference file can include additional information in the following format:
 
 ```
->Poliovirus3-wt_JN812657 ddns_group=WPV3 species=Poliovirus3-wt cluster=Poliovirus3-wt
+>Poliovirus3-wt_JN812657 ddns_group=WPV3 species=Poliovirus3-wt 
 GGGGTGGACGATCTGATAACAGAA...
->Poliovirus3-Sabin_AY184221 ddns_group=Sabin3-related species=Sabin3-related cluster=Sabin3-related
+>Poliovirus3-Sabin_AY184221 ddns_group=Sabin3-related species=Sabin3-related
 GGTATTGAAGATTTGACTTCTGAA...
 ```
 
