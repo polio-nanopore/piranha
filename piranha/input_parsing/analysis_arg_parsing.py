@@ -70,8 +70,8 @@ def sample_type(sample_type_arg,config):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_SAMPLE_TYPE,sample_type_arg,config)
     
-    if config[KEY_SAMPLE_TYPE] not in valid_sample_types:
-        error_str = ', '.join(valid_sample_types)
+    if config[KEY_SAMPLE_TYPE] not in VALID_SAMPLE_TYPES:
+        error_str = ', '.join(VALID_SAMPLE_TYPES)
         sys.stderr.write(cyan(f"`{KEY_SAMPLE_TYPE}` must be one of {error_str}.\n"))
         sys.exit(-1)
 
@@ -79,10 +79,11 @@ def analysis_mode(analysis_mode_arg,config):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_ANALYSIS_MODE,analysis_mode_arg,config)
 
-    if config[KEY_ANALYSIS_MODE] not in valid_analysis_modes:
-        error_str = ', '.join(valid_analysis_modes)
+    if config[KEY_ANALYSIS_MODE] not in VALID_ANALYSIS_MODES:
+        error_str = ', '.join(VALID_ANALYSIS_MODES)
         sys.stderr.write(cyan(f"`{KEY_ANALYSIS_MODE}` must be one of {error_str}.\n"))
         sys.exit(-1)
+
 
     #must do this before parsing args for min and max read len
     if config[KEY_ANALYSIS_MODE] in READ_LENGTH_DICT:

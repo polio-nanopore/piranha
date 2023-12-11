@@ -259,8 +259,8 @@ OUTGROUP_SEQUENCES_FILE_WG = "outgroups.wg.fasta"
 OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
-valid_analysis_modes = ["vp1","panev","wg"]
-valid_sample_types = ["stool","environmental"]
+VALID_ANALYSIS_MODES = ["vp1","wg"]
+VALID_SAMPLE_TYPES = ["stool","environmental"]
 
 DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
 MODULE_LIST = ["mako","Bio"]
