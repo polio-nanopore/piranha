@@ -154,6 +154,7 @@ def main(sysargs = sys.argv[1:]):
     input_qc.parse_input_group(args.barcodes_csv,
                                 args.readdir,
                                 args.reference_sequences,
+                                args.reference_group_field,
                                 config)
 
     input_qc.control_group_parsing(args.positive_control,

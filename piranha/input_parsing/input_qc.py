@@ -338,7 +338,7 @@ def parse_read_dir(readdir,config):
             print(green(f"Barcode {barcode}:\t") + f"0 fastq files")
             print(cyan(f"Warning: No read files identified for barcode `{barcode}`.\nThis may be a negative control or a failed sample, but be aware it will not be analysed."))
 
-def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
+def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_field,config):
 
     parse_barcodes_csv(barcodes_csv,config)
 
@@ -347,11 +347,19 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
     misc.add_file_to_config(KEY_REFERENCE_SEQUENCES,reference_sequences,config)
     misc.check_path_exists(config[KEY_REFERENCE_SEQUENCES])
 
+    misc.add_arg_to_config(KEY_REFERENCE_GROUP_FIELD,reference_group_field,config)
     #check they have unique identifiers
     seq_ids = collections.Counter()
+    ref_group_field_in_headers = True
     for record in SeqIO.parse(config[KEY_REFERENCE_SEQUENCES],"fasta"):
+        if not config[KEY_REFERENCE_GROUP_FIELD] in record.description:
+            ref_group_field_in_headers = False
         seq_ids[record.id]+=1
     
+    if not ref_group_field_in_headers:
+        sys.stderr.write(cyan(f"\nReference fasta file contains records without the specified `--reference-group-field` ({config[KEY_REFERENCE_GROUP_FIELD]}).\n"))
+        sys.exit(-1)
+
     more_than_once = []
     for seq in seq_ids:
         if seq_ids[seq]>1:
