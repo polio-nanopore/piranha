@@ -45,7 +45,7 @@ rule join_cns_ref:
             for record in SeqIO.parse(input.ref,KEY_FASTA):
                 match_field = ""
                 for field in record.description.split(" "):
-                    if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+                    if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
                         match_field = field.split("=")[1]
 
                 fw.write(f">{match_field} {record.description}\n{record.seq}\n")
@@ -114,7 +114,7 @@ rule join_clean_cns_ref:
             for record in SeqIO.parse(input.ref,KEY_FASTA):
                 match_field = ""
                 for field in record.description.split(" "):
-                    if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+                    if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
                         match_field = field.split("=")[1]
 
                 fw.write(f">{match_field} {record.description}\n{record.seq}\n")

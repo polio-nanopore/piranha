@@ -239,12 +239,13 @@ def parse_paf_file(paf_file,
                     barcode,
                     analysis_mode,
                     min_map_quality,
+                    reference_match_field,
                     config):
     
     if is_non_zero_file(paf_file):
         
         permissive_ref_name_map = make_ref_match_field_map(references_sequences,reference_match_field,positive_references,include_positive_references)
-        if config[KEY_REFERENCE_MATCH_FIELD] == VALUE_REFERENCE_MATCH_FIELD:
+        if reference_match_field == VALUE_REFERENCE_GROUP_FIELD:
             # only run the wibble match if using default value for ref group (now ddns_group)
             ref_name_map = make_match_field_to_reference_group_map(permissive_ref_name_map)
         else:
