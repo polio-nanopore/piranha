@@ -30,11 +30,11 @@ KEY_MIN_PCENT = "min_read_pcent"
 KEY_MIN_MAP_QUALITY = "min_map_quality"
 KEY_MIN_ALN_BLOCK = "min_aln_block"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
-KEY_REFERENCE_MATCH_FIELD = "reference_match_field"
+KEY_REFERENCE_GROUP_FIELD = "reference_match_field"
 KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
 
-KEY_REFERENCE_MATCH_FIELD = "reference_match_field"
+KEY_REFERENCE_GROUP_FIELD = "reference_match_field"
 
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
@@ -193,7 +193,7 @@ CALL_THRESHOLD_DICT = {
 
 
 # ref group default
-VALUE_REFERENCE_MATCH_FIELD = "ddns_group"
+VALUE_REFERENCE_GROUP_FIELD = "ddns_group"
 
 # report defaults
 VALUE_ORIENTATION="vertical"

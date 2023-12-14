@@ -37,7 +37,7 @@ def get_defaults():
                     KEY_MIN_READS:VALUE_MIN_READS,   # where to pad to using datafunk
                     KEY_MIN_PCENT:VALUE_MIN_PCENT,
 
-                    KEY_REFERENCE_MATCH_FIELD:VALUE_REFERENCE_MATCH_FIELD,
+                    KEY_REFERENCE_GROUP_FIELD:VALUE_REFERENCE_GROUP_FIELD,
 
                     KEY_MIN_READ_LENGTH:READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][0],
                     KEY_MAX_READ_LENGTH:READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][1],
