@@ -41,13 +41,13 @@ def gather_filter_reads_by_length(dir_in,barcode,reads_out,config):
         print(green(f"Total passed reads {barcode}:"),len(fastq_records))
         SeqIO.write(fastq_records,fw, "fastq")
 
-def parse_match_field(description):
+def parse_match_field(description,reference_match_field):
     for item in str(description).split(" "):
-        if item.startswith(VALUE_REFERENCE_MATCH_FIELD):
+        if item.startswith(reference_match_field):
             match_field = item.split("=")[1]
             return match_field
 
-def make_ref_match_field_map(references,positive_references,include_positive_references):
+def make_ref_match_field_map(references,reference_match_field,positive_references,include_positive_references):
     ref_map = {}
     for record in SeqIO.parse(references,KEY_FASTA):
         match_field = ""
@@ -55,9 +55,9 @@ def make_ref_match_field_map(references,positive_references,include_positive_ref
             if record.id in positive_references:
                 ref_map[record.id] = "p" #quicker for parsing below
             else:
-                ref_map[record.id] = parse_match_field(record.description)
+                ref_map[record.id] = parse_match_field(record.description,reference_match_field)
         else:
-            ref_map[record.id] = parse_match_field(record.description)
+            ref_map[record.id] = parse_match_field(record.description,reference_match_field)
     return ref_map
 
 def make_match_field_to_reference_group_map(ref_map):
@@ -243,8 +243,12 @@ def parse_paf_file(paf_file,
     
     if is_non_zero_file(paf_file):
         
-        permissive_ref_name_map = make_ref_match_field_map(references_sequences,positive_references,include_positive_references)
-        ref_name_map = make_match_field_to_reference_group_map(permissive_ref_name_map)
+        permissive_ref_name_map = make_ref_match_field_map(references_sequences,reference_match_field,positive_references,include_positive_references)
+        if config[KEY_REFERENCE_MATCH_FIELD] == VALUE_REFERENCE_MATCH_FIELD:
+            # only run the wibble match if using default value for ref group (now ddns_group)
+            ref_name_map = make_match_field_to_reference_group_map(permissive_ref_name_map)
+        else:
+            ref_name_map = permissive_ref_name_map
 
         min_aln_block = config[KEY_MIN_ALN_BLOCK]
 
