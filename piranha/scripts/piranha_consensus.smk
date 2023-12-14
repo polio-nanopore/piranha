@@ -46,6 +46,7 @@ rule medaka_haploid_variant:
             medaka_haploid_variant -i {input.reads:q} \
                                 -r {input.ref:q} \
                                 -o {params.outdir:q} \
+                                -m {params.model:q} \
                                 -f -x && \
             medaka stitch {output.probs:q} {input.ref:q} {output.cns:q}
         else
@@ -77,7 +78,8 @@ rule medaka_haploid_variant_cns:
             then
                 medaka_haploid_variant -i {input.reads:q} \
                                     -r {input.ref:q} \
-                                    -o {params.outdir} \
+                                    -o {params.outdir:q} \
+                                    -m {params.model:q} \
                                     -f -x && \
                 medaka stitch {output.probs} {input.ref} {output.cns}
             else
