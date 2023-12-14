@@ -34,6 +34,8 @@ KEY_REFERENCE_MATCH_FIELD = "reference_match_field"
 KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
 
+KEY_REFERENCE_MATCH_FIELD = "reference_match_field"
+
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
 KEY_NAME = "name"
