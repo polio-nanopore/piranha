@@ -25,6 +25,10 @@ Any issues or feedback about the analysis or report please flag to this reposito
 ## Installing within EPI2ME
 - Piranha is also compatible with the [EPI2ME](https://labs.epi2me.io/downloads/) workflow desktop application. This mode of running does not provide the same level of input checking and configurability as either the ARTIFICE GUI or the command line, but is provided as an alternative interactive interface. Once EPI2ME and docker have been downloaded, follow the instructions to [download a custom workflow](https://labs.epi2me.io/quickstart/) using the github path `https://github.com/polio-nanopore/piranha`.
 
+## Install through bioconda
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/piranha-polio/README.html)
+
+
 ## Installation instructions (quick command line reference)
 
 >You need to have Git, a version of conda (link to Miniconda [here](https://docs.conda.io/en/latest/miniconda.html)) and mamba installed to run the following commands. 
