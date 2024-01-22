@@ -20,6 +20,7 @@ Any issues or feedback about the analysis or report please flag to this reposito
 
 
 ## Installing via PIRANHA GUI
+Piranha does not require use of the command-line to run. Users can access piranha through the PiranhaGUI application that can be downloaded at the link below. This application enables teams without access to a bioinformatician to use piranha and run standard detection of poliovirus VP1 in stool through nanopore sequencing. 
 - Download the release package for your machine from the [PiranhaGUI respository](https://github.com/polio-nanopore/piranhaGUI)
 
 ## Installing within EPI2ME
