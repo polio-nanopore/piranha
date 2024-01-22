@@ -19,7 +19,7 @@ Any issues or feedback about the analysis or report please flag to this reposito
 ## See example data [here](https://github.com/polio-nanopore/piranha/tree/main/test_data)
 
 
-## Installing via ARTIFICE GUI
+## Installing via PIRANHA GUI
 - Download the release package for your machine from the [PiranhaGUI respository](https://github.com/polio-nanopore/piranhaGUI)
 
 ## Installing within EPI2ME
