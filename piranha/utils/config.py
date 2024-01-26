@@ -34,6 +34,7 @@ KEY_MEDAKA_MODEL = "medaka_model"
 KEY_PRIMER_LENGTH = "primer_length"
 
 KEY_REFERENCE_GROUP_FIELD = "reference_group_field"
+KEY_REFERENCE_GROUP_VALUES = "reference_group_values"
 
 KEY_BARCODE = "barcode"
 KEY_SAMPLE = "sample"
@@ -121,6 +122,9 @@ KEY_CONTROL_STATUS="control_status"
 KEY_ORIENTATION="orientation"
 KEY_CONFIGURATION_TABLE_FIELDS = "configuration_table_fields"
 
+KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = "sample_composition_table_header_fields"
+KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = "detailed_sample_composition_table_header_fields"
+
 # MISC KEYS
 KEY_USERNAME="username"
 KEY_INSTITUTE="institute"
@@ -193,6 +197,7 @@ CALL_THRESHOLD_DICT = {
 
 # ref group default
 VALUE_REFERENCE_GROUP_FIELD = "ddns_group"
+VALUE_REFERENCE_GROUP_VALUES = {"Sabin1-related","Sabin2-related","Sabin3-related","WPV1","WPV2","WPV3","NonPolioEV"}
 
 # report defaults
 VALUE_ORIENTATION="vertical"
@@ -209,35 +214,40 @@ VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]
 SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification","reference_group","consensus_id","Number of mutations"]
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 
-SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
-                                "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
+SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC = ["sample","barcode","PositiveControl","unmapped"]
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE = ["closest_reference","num_reads","nt_diff_from_reference","pcent_match","classification"]
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL = ["comments"]
 
 
-SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
-                                "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
+# SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
+#                                 "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
 
-DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
-                    "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
-                    "Sabin2-related|closest_reference","Sabin2-related|num_reads","Sabin2-related|nt_diff_from_reference","Sabin2-related|pcent_match","Sabin2-related|classification",
-                    "Sabin3-related|closest_reference","Sabin3-related|num_reads","Sabin3-related|nt_diff_from_reference","Sabin3-related|pcent_match","Sabin3-related|classification",
-                    "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
-                    "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
-                    "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
-                    "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
-                    "comments"]
 
-DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
-                    "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
-                    "Sabin2-related|closest_reference","Sabin2-related|num_reads","Sabin2-related|nt_diff_from_reference","Sabin2-related|pcent_match","Sabin2-related|classification",
-                    "Sabin3-related|closest_reference","Sabin3-related|num_reads","Sabin3-related|nt_diff_from_reference","Sabin3-related|pcent_match","Sabin3-related|classification",
-                    "nOPV2|closest_reference","nOPV2|num_reads","nOPV2|nt_diff_from_reference","nOPV2|pcent_match","nOPV2|classification",
-                    "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
-                    "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
-                    "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
-                    "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
-                    "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
-                    "comments"]
+# SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related","nOPV2",
+#                                 "WPV1","WPV2","WPV3","NonPolioEV","PositiveControl","unmapped"]
+
+# DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = [
+#                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
+#                     "Sabin2-related|closest_reference","Sabin2-related|num_reads","Sabin2-related|nt_diff_from_reference","Sabin2-related|pcent_match","Sabin2-related|classification",
+#                     "Sabin3-related|closest_reference","Sabin3-related|num_reads","Sabin3-related|nt_diff_from_reference","Sabin3-related|pcent_match","Sabin3-related|classification",
+#                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
+#                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
+#                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
+#                     "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
+#                     "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
+#                     "comments"]
+
+# DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG = [
+#                     "Sabin1-related|closest_reference","Sabin1-related|num_reads","Sabin1-related|nt_diff_from_reference","Sabin1-related|pcent_match","Sabin1-related|classification",
+#                     "Sabin2-related|closest_reference","Sabin2-related|num_reads","Sabin2-related|nt_diff_from_reference","Sabin2-related|pcent_match","Sabin2-related|classification",
+#                     "Sabin3-related|closest_reference","Sabin3-related|num_reads","Sabin3-related|nt_diff_from_reference","Sabin3-related|pcent_match","Sabin3-related|classification",
+#                     "nOPV2|closest_reference","nOPV2|num_reads","nOPV2|nt_diff_from_reference","nOPV2|pcent_match","nOPV2|classification",
+#                     "WPV1|closest_reference","WPV1|num_reads","WPV1|nt_diff_from_reference","WPV1|pcent_match","WPV1|classification",
+#                     "WPV2|closest_reference","WPV2|num_reads","WPV2|nt_diff_from_reference","WPV2|pcent_match","WPV2|classification",
+#                     "WPV3|closest_reference","WPV3|num_reads","WPV3|nt_diff_from_reference","WPV3|pcent_match","WPV3|classification",
+#                     "NonPolioEV|closest_reference","NonPolioEV|num_reads","NonPolioEV|nt_diff_from_reference","NonPolioEV|pcent_match","NonPolioEV|classification",
+#                     "PositiveControl|closest_reference","PositiveControl|num_reads","PositiveControl|nt_diff_from_reference","PositiveControl|pcent_match","PositiveControl|classification",
+#                     "comments"]
 
 VALUE_CONFIGURATION_TABLE_FIELDS = [
                     KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_MAP_QUALITY,KEY_MIN_READS,KEY_MIN_ALN_BLOCK,
