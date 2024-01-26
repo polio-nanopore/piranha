@@ -578,17 +578,9 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     
     # composition table header
     
-    
-    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
-        config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
-        config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
-    else:
-        config[KEY_COMPOSITION_TABLE_HEADER] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
-        config[KEY_DETAILED_TABLE_HEADER] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
-
     report_composition_table_header = []
     not_detected = []
-    for field in config[KEY_COMPOSITION_TABLE_HEADER]:
+    for field in config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS]:
         if field in [KEY_SAMPLE, KEY_BARCODE]:
             report_composition_table_header.append(field)
         elif field in composition_table_header_dict:
@@ -605,7 +597,7 @@ def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sam
     config[KEY_SUMMARY_TABLE_HEADER] = SAMPLE_SUMMARY_TABLE_HEADER_FIELDS
     
     # detailed csv for download (1)
-    make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_TABLE_HEADER])
+    make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS])
 
     phylo_data = {}
     background_data = {}
