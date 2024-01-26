@@ -286,11 +286,9 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
     summary_rows = {}
     refs_out = collections.defaultdict(list)
 
-    SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1
-
-    if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
-        SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
-    
+    # if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
+    #     SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
+    SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS]
 
     with open(barcodes_csv,"r") as f:
         reader = csv.DictReader(f)
