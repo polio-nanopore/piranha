@@ -338,6 +338,16 @@ def parse_read_dir(readdir,config):
             print(green(f"Barcode {barcode}:\t") + f"0 fastq files")
             print(cyan(f"Warning: No read files identified for barcode `{barcode}`.\nThis may be a negative control or a failed sample, but be aware it will not be analysed."))
 
+def parse_ref_group_values(description,ref_group_key):
+    fields = description.split(" ")
+    
+    ref_group = ""
+    for i in fields:
+        if i.startswith(ref_group_key):
+            ref_group=i.split("=")[1]
+
+    return ref_group
+
 def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_field,config):
 
     parse_barcodes_csv(barcodes_csv,config)
@@ -351,7 +361,11 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_f
     #check they have unique identifiers
     seq_ids = collections.Counter()
     ref_group_field_in_headers = True
+    ref_group_values = set()
     for record in SeqIO.parse(config[KEY_REFERENCE_SEQUENCES],"fasta"):
+        ref_group_value = parse_ref_group_values(record.description,config[KEY_REFERENCE_GROUP_FIELD])
+        ref_group_values.add(ref_group_value)
+
         if not config[KEY_REFERENCE_GROUP_FIELD] in record.description:
             ref_group_field_in_headers = False
         seq_ids[record.id]+=1
@@ -359,6 +373,26 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_f
     if not ref_group_field_in_headers:
         sys.stderr.write(cyan(f"\nReference fasta file contains records without the specified `--reference-group-field` ({config[KEY_REFERENCE_GROUP_FIELD]}).\n"))
         sys.exit(-1)
+
+    print(f"{len(ref_group_values)}" + green(f" reference group values identified in reference file."))
+
+    config[KEY_REFERENCE_GROUP_VALUES] = ref_group_values
+
+    SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC
+    DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = []
+
+    for i in sorted(config[KEY_REFERENCE_GROUP_VALUES]):
+        SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS.append(i)
+
+        for j in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE:
+            DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS.append(f"{i}|{j}")
+    
+    for i in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL:
+        DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS.append(i)
+
+    config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
+    config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
+
 
     more_than_once = []
     for seq in seq_ids:
