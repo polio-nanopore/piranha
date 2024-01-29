@@ -17,6 +17,7 @@ from piranha.utils.config import *
 
 import os
 import sys
+import shutil
 import yaml
 import argparse
 
@@ -83,6 +84,8 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
     o_group.add_argument('--language',action="store",help=f"Output report language. Options: English, French. Default: {VALUE_LANGUAGE}")
     o_group.add_argument('--save-config',action="store_true",help=f"Output the config file with all parameters used")
+    o_group.add_argument('--archive-fastq',action="store_true",help=f"Write the supplied fastq_pass directory to the output directory.")
+    o_group.add_argument('--archivedir',action="store",help=f"Configure where to put the fastq_pass files, default in the output directory.")
 
     misc_group = parser.add_argument_group('Misc options')
     misc_group.add_argument('--runname',action="store",help=f"Run name to appear in report. Default: {VALUE_RUNNAME}")
@@ -169,6 +172,8 @@ def main(sysargs = sys.argv[1:]):
                                         args.datestamp,
                                         args.tempdir,
                                         args.no_temp,
+                                        args.archive_fastq,
+                                        args.archivedir,
                                         config)
 
     init.misc_args_to_config(args.verbose,
@@ -271,6 +276,11 @@ def main(sysargs = sys.argv[1:]):
                 for fn in f:
                     if not os.path.getsize(os.path.join(r,fn)):
                         os.remove(os.path.join(r,fn))
+
+            if config[KEY_ARCHIVE_FASTQ]:
+
+                shutil.copytree(config[KEY_READDIR],config[KEY_ARCHIVEDIR],dirs_exist_ok=True)
+                print(green("Archiving fastq_pass to ") + f"{config[KEY_ARCHIVEDIR]}.")
 
             return 0
         return 1

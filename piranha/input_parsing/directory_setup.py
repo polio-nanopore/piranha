@@ -73,6 +73,25 @@ def output_report_filename(d,config):
         output_report = f"{config[KEY_OUTPUT_PREFIX]}.html"
     return output_report
 
+def set_up_archivedir(config):
+    if config[KEY_ARCHIVE_FASTQ]:
+        archivedir= os.path.join(config[KEY_OUTDIR], "fastq_pass")
+
+        if KEY_ARCHIVEDIR in config:
+            archivedir = config[KEY_ARCHIVEDIR]
+            try:
+                if not os.path.exists(archivedir):
+                    os.mkdir(archivedir)
+            except:
+                sys.stderr.write(cyan(f'Error: cannot create fastq archive directory {archivedir}.\n'))
+                sys.exit(-1)
+        
+        if not os.path.exists(archivedir):
+            os.mkdir(archivedir)
+        
+        config[KEY_ARCHIVEDIR] = archivedir
+
+
 def set_up_tempdir(config):
     if config[KEY_NO_TEMP]:
         tempdir = config[KEY_OUTDIR]
@@ -104,7 +123,7 @@ def set_up_tempdir(config):
             sys.stderr.write(cyan(f'Error: cannot write to temp directory {tempdir}.\n'))
             sys.exit(-1)
 
-def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_temp,config):
+def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_temp,archive_fastq,archivedir,config):
     
     misc.add_path_to_config(KEY_OUTDIR,outdir,config)
     misc.add_arg_to_config(KEY_OUTPUT_PREFIX,output_prefix,config)
@@ -112,6 +131,8 @@ def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_tem
     misc.add_arg_to_config(KEY_DATESTAMP,datestamp,config)
     misc.add_path_to_config(KEY_TEMPDIR,tempdir,config)
     misc.add_arg_to_config(KEY_NO_TEMP,no_temp,config)
+    misc.add_arg_to_config(KEY_ARCHIVE_FASTQ,archive_fastq,config)
+    misc.add_path_to_config(KEY_ARCHIVEDIR,archivedir,config)
 
     config[KEY_OUTDIR],config[KEY_TODAY] = datestamped_outdir(config)
     
@@ -123,3 +144,5 @@ def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_tem
 
     if not os.path.exists(config[KEY_OUTDIR]):
         os.mkdir(config[KEY_OUTDIR])
+    
+    set_up_archivedir(config)
