@@ -441,6 +441,13 @@ Pitfalls to note:
 
 Suggested configuration settings can be found [here](https://github.com/polio-nanopore/piranha/blob/main/docs/config.ev.yaml) and we would recommend to only use this mode if the user can sufficiently appreciate the limitations the reference file composition may have on detection.
 
+With the supplied config file, piranha can be run as follows:
+
+```
+piranha -c config.ev.yaml
+```
+
+
 ## Experimental haplotype calling pipeline
 
 There is now an experimental haplotype calling pipeline that uses freebayes for initial variant calling and flopp for read phasing with the called variants. It has a number internal QC steps for merging identical haplotypes. This pipeline requires further validation, but can theoretically produce multiple consensus sequences for each poliovirus population present within a sample. The pipeline has mostly be tested on VDPVs of two mixtures, but will be further assessed.
