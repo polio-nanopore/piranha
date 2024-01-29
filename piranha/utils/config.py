@@ -16,6 +16,8 @@ KEY_NO_TEMP = "no_temp"
 KEY_OUTPUT_PREFIX="output_prefix"
 KEY_DATESTAMP="datestamp"
 KEY_OVERWRITE="overwrite"
+KEY_ARCHIVE_FASTQ="archive_fastq"
+KEY_ARCHIVEDIR="archivedir"
 
 KEY_OUTPUT_REPORT="output_report"
 
