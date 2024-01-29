@@ -286,9 +286,7 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
     summary_rows = {}
     refs_out = collections.defaultdict(list)
 
-    # if config[KEY_ANALYSIS_MODE] == VALUE_ANALYSIS_MODE_WG:
-    #     SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_WG
-    SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS]
+    sample_composition_table_header_fields = config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS]
 
     with open(barcodes_csv,"r") as f:
         reader = csv.DictReader(f)
@@ -296,7 +294,7 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
             summary_rows[row[KEY_BARCODE]] = {KEY_BARCODE: row[KEY_BARCODE],
                                             KEY_SAMPLE: row[KEY_SAMPLE]
                                             }
-            for field in SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS:
+            for field in sample_composition_table_header_fields:
                 if field not in summary_rows[row[KEY_BARCODE]]: # the rest are ref counters
                     summary_rows[row[KEY_BARCODE]][field] = 0
 
@@ -321,7 +319,7 @@ def diversity_report(input_files,csv_out,summary_out,ref_file,config):
 
 
     with open(summary_out,"w") as fw2:
-        writer = csv.DictWriter(fw2, fieldnames=SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS, lineterminator="\n")
+        writer = csv.DictWriter(fw2, fieldnames=sample_composition_table_header_fields, lineterminator="\n")
         writer.writeheader()
         for barcode in summary_rows:
             row = summary_rows[barcode]
