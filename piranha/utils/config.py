@@ -214,8 +214,9 @@ VARIANT_CALLS_HEADER_FIELDS = ["barcode","reference","variant_count","variants"]
 SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification","reference_group","consensus_id","Number of mutations"]
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 
-SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC = ["sample","barcode","PositiveControl","unmapped"]
+SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC = ["sample","barcode","unmapped"]
 DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE = ["closest_reference","num_reads","nt_diff_from_reference","pcent_match","classification"]
+SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL = ["NonPolioEV","PositiveControl"]
 DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL = ["comments"]
 
 
