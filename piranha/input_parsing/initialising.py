@@ -37,6 +37,12 @@ def get_defaults():
                     KEY_MIN_READS:VALUE_MIN_READS,   # where to pad to using datafunk
                     KEY_MIN_PCENT:VALUE_MIN_PCENT,
 
+                    KEY_REFERENCE_GROUP_FIELD:VALUE_REFERENCE_GROUP_FIELD,
+                    KEY_REFERENCE_GROUP_VALUES:VALUE_REFERENCE_GROUP_VALUES,
+
+                    KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS:[],
+                    KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS:[],
+                    
                     KEY_MIN_READ_LENGTH:READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][0],
                     KEY_MAX_READ_LENGTH:READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][1],
                     KEY_MIN_MAP_QUALITY:VALUE_MIN_MAP_QUALITY,

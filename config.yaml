@@ -5,15 +5,21 @@ runname: "MIN003"
 barcodes_csv: "piranha/test/pak_run/barcodes01.csv"
 readdir: "piranha/test/pak_run/demultiplexed"
 
+min_read_length: 500
+max_read_length: 2300
 threads: 1
 
 negative_control: "negative"
 positive_control: "positive"
 
 # run_phylo: True
-supplementary_datadir: "piranha/test/supp_data"
+# supplementary_datadir: "piranha/test/supp_data"
 # update_local_database: True
-local_database_threshold: 5
+# local_database_threshold: 5
+reference_group_field: "species"
+min_aln_block: 0
+min_read_pcent: 0
+
 
 overwrite: True
 no_temp: True

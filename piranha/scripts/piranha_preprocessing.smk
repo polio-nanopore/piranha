@@ -47,8 +47,7 @@ rule assess_broad_diversity:
         map_file = rules.map_reads.output.paf,
         ref = config[KEY_REFERENCE_SEQUENCES]
     params:
-        barcode = "{barcode}",
-        min_map_quality = config[KEY_MIN_MAP_QUALITY]
+        barcode = "{barcode}"
     output:
         csv = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"),
         hits = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_reads.csv"),
@@ -63,7 +62,8 @@ rule assess_broad_diversity:
                         config[KEY_INCLUDE_POSITIVE_REFERENCES],
                         params.barcode,
                         config[KEY_ANALYSIS_MODE],
-                        params.min_map_quality,
+                        config[KEY_MIN_MAP_QUALITY],
+                        config[KEY_REFERENCE_GROUP_FIELD],
                         config)
 
 rule write_hit_fastq:

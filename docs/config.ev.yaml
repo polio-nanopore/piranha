@@ -1,0 +1,21 @@
+username: "Aine O'Toole"
+institute: "IEE"
+runname: "MIN003"
+
+barcodes_csv: "/localdisk/home/data/min003/barcodes.csv"
+readdir: "/localdisk/home/data/min003/fastq_pass"
+
+min_read_length: 500
+max_read_length: 2300
+min_aln_block: 0
+min_read_pcent: 0
+
+threads: 1
+
+negative_control: "negative"
+positive_control: "positive"
+
+reference_group_field: "species"
+
+overwrite: True
+no_temp: True

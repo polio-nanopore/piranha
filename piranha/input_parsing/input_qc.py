@@ -108,7 +108,7 @@ def parse_barcodes_csv(barcodes_csv,config):
 #             total +=1
 #             passed = False
 #             for field in record.description.split(" "):
-#                 if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+#                 if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
 #                     passed=True
 #                     continue
 #             if not passed:
@@ -118,7 +118,7 @@ def parse_barcodes_csv(barcodes_csv,config):
 #         sys.exit(-1)
 
 #     if incorrect >= 1:
-#         sys.stderr.write(cyan(f"Supplementary sequences file lacks `{VALUE_REFERENCE_MATCH_FIELD}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
+#         sys.stderr.write(cyan(f"Supplementary sequences file lacks `{VALUE_REFERENCE_GROUP_FIELD}` annotation in header of {incorrect} out of {total} sequences parsed.\n"))
 #         sys.exit(-1)
 #     else:
 #         print(green("Supplementary sequences:"), total, "sequences parsed.")
@@ -146,7 +146,7 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
         total_seqs["total"] +=1
         ref_group = ""
         for field in record.description.split(" "):
-            if field.startswith(VALUE_REFERENCE_MATCH_FIELD):
+            if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
                 ref_group = field.split("=")[1]
         
         if ref_group not in config[KEY_REFERENCES_FOR_CNS]:
@@ -159,7 +159,7 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
 def check_there_are_seqs(total_seqs,supplementary_datadir,no_reference_group,config):
     if total_seqs["total"]==0:
         sys.stderr.write(cyan(f"Error: No sequence files matched in `{supplementary_datadir}`.\nEnsure the directory provided contains FASTA files with appropriate annotations in the header.\n"))
-        sys.stderr.write(cyan(f"Header must specify one of {config[KEY_REFERENCES_FOR_CNS]} under {VALUE_REFERENCE_MATCH_FIELD}=X, where X is the appropriate group to be included in phylo pipeline.\n"))
+        sys.stderr.write(cyan(f"Header must specify one of {config[KEY_REFERENCES_FOR_CNS]} under {VALUE_REFERENCE_GROUP_FIELD}=X, where X is the appropriate group to be included in phylo pipeline.\n"))
         sys.exit(-1)
 
     elif no_reference_group:
@@ -338,7 +338,17 @@ def parse_read_dir(readdir,config):
             print(green(f"Barcode {barcode}:\t") + f"0 fastq files")
             print(cyan(f"Warning: No read files identified for barcode `{barcode}`.\nThis may be a negative control or a failed sample, but be aware it will not be analysed."))
 
-def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
+def parse_ref_group_values(description,ref_group_key):
+    fields = description.split(" ")
+    
+    ref_group = ""
+    for i in fields:
+        if i.startswith(ref_group_key):
+            ref_group=i.split("=")[1]
+
+    return ref_group
+
+def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_field,config):
 
     parse_barcodes_csv(barcodes_csv,config)
 
@@ -347,11 +357,49 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,config):
     misc.add_file_to_config(KEY_REFERENCE_SEQUENCES,reference_sequences,config)
     misc.check_path_exists(config[KEY_REFERENCE_SEQUENCES])
 
+    misc.add_arg_to_config(KEY_REFERENCE_GROUP_FIELD,reference_group_field,config)
     #check they have unique identifiers
     seq_ids = collections.Counter()
+    ref_group_field_in_headers = True
+    ref_group_values = set()
     for record in SeqIO.parse(config[KEY_REFERENCE_SEQUENCES],"fasta"):
+        ref_group_value = parse_ref_group_values(record.description,config[KEY_REFERENCE_GROUP_FIELD])
+        ref_group_values.add(ref_group_value)
+
+        if not config[KEY_REFERENCE_GROUP_FIELD] in record.description:
+            ref_group_field_in_headers = False
         seq_ids[record.id]+=1
     
+    if not ref_group_field_in_headers:
+        sys.stderr.write(cyan(f"\nReference fasta file contains records without the specified `--reference-group-field` ({config[KEY_REFERENCE_GROUP_FIELD]}).\n"))
+        sys.exit(-1)
+
+    print(f"{len(ref_group_values)}" + green(f" reference group values identified in reference file."))
+
+    config[KEY_REFERENCE_GROUP_VALUES] = ref_group_values
+
+    sample_composition_table_header_fields = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC
+    detailed_sample_composition_table_header_fields = []
+
+    for i in sorted(config[KEY_REFERENCE_GROUP_VALUES]):
+        sample_composition_table_header_fields.append(i)
+
+        for j in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE:
+            detailed_sample_composition_table_header_fields.append(f"{i}|{j}")
+    
+    for i in SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL:
+        if i not in sample_composition_table_header_fields:
+            sample_composition_table_header_fields.append(i)
+            for j in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE:
+                detailed_sample_composition_table_header_fields.append(f"{i}|{j}")
+
+    for i in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL:
+        detailed_sample_composition_table_header_fields.append(i)
+        
+    config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = sample_composition_table_header_fields
+    config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = detailed_sample_composition_table_header_fields
+
+
     more_than_once = []
     for seq in seq_ids:
         if seq_ids[seq]>1:
