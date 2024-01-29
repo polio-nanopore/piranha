@@ -378,20 +378,26 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_f
 
     config[KEY_REFERENCE_GROUP_VALUES] = ref_group_values
 
-    SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC
-    DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS = []
+    sample_composition_table_header_fields = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC
+    detailed_sample_composition_table_header_fields = []
 
     for i in sorted(config[KEY_REFERENCE_GROUP_VALUES]):
-        SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS.append(i)
+        sample_composition_table_header_fields.append(i)
 
         for j in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE:
-            DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS.append(f"{i}|{j}")
+            detailed_sample_composition_table_header_fields.append(f"{i}|{j}")
     
-    for i in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL:
-        DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS.append(i)
+    for i in SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL:
+        if i not in sample_composition_table_header_fields:
+            sample_composition_table_header_fields.append(i)
+            for j in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE:
+                detailed_sample_composition_table_header_fields.append(f"{i}|{j}")
 
-    config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
-    config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS
+    for i in DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL:
+        detailed_sample_composition_table_header_fields.append(i)
+        
+    config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = sample_composition_table_header_fields
+    config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS] = detailed_sample_composition_table_header_fields
 
 
     more_than_once = []
