@@ -388,6 +388,59 @@ and piranha will check which ones you have installed with your version of medaka
 >```Where a version of Guppy has been used without an exactly corresponding medaka model, the medaka model with the highest version equal to or less than the guppy version should be selected.```
 
 
+## Process enterovirus sequences
+
+Piranha now has the flexibility to cluster sequencing reads by a specified reference group field (`-rg / --reference-group-field`, or `reference_group_field` in a config file). By default, this field is set to `ddns_group` and any records in the reference file must contain this as an annotation in the header description. The reference file that is supplied with piranha contains this field in all records and the values fall into the following categories:
+
+- Sabin1-related
+- Sabin2-related
+- Sabin3-related
+- WPV1
+- WPV2
+- WPV3
+- NonPolioEV
+
+These fields focus on poliovirus detection and all non-polio enterovirus sequences are collaposed into a single category. 
+
+If your use of piranha extends to other enteroviruses, it is now possible to run a more tailored analysis. The reference file that is supplied with piranha has the following  format:
+
+```
+>Poliovirus1-Sabin_AY184219 ddns_group=Sabin1-related species=Sabin1-related cluster=Sabin1-related
+GGGTTAG...CCACATAT
+>CoxsackievirusA21_EF015028 ddns_group=NonPolioEV species=CoxsackievirusA21 cluster=CoxsackievirusA21
+AGATGCA...CAGTGAGA
+```
+
+With the `-rg` flag, you can use the reference file supplied to cluster by ddns_group (default), species or cluster. Then, piranha will dynamically calculate which categories are present during the run. For example, running piranha with `-rg species` will enable clusters of CoxsackievirusA21, or other enterovirus species to be identified and have a consensus sequence generated during piranha analysis.
+
+It is also possible to supply a custom reference file with references and fields of interest to piranha in the following format:
+
+```
+>REF1 my_custom_field=group1
+ACTGT....CTAGCTA
+>REF2 my_custom_field=group1
+ACTGT....CTAGCTA
+>REF3 my_custom_field=group1
+ACTGT....CTAGCTA
+>REF4 my_custom_field=group2
+ACTGT....CTAGCTA
+>REF5 my_custom_field=group2
+ACTGT....CTAGCTA
+```
+and in this example, if `-rg my_custom_field` is supplied, any reads that map to REF1, REF2 or REF3 will be clustered into 'group1' and any reads that map to REF4 or REF5 will be clustered into 'group2'.
+
+Any values will reads mapping will be shown in the final reports.
+
+Pitfalls to note:
+
+1. A caveat with this new approach is that our reference file has been constructed with poliovirus primarily in mind. There are quite a few enterovirus references in the file, covering 113 `species` groups, but there is likely to be gaps in the broad enterovirus diversity covered in this reference file. If you have species of interest you want to be detected, it may be worth supplying a custom reference file. 
+
+2. Enteroviruses are a very diverse group of viruses, it may well be that portions of a read match to something in our reference set, but the rest is too divergent to map. In this case, lowering the alignment block length minimum requirement may enable partial sequences to be recovered. Here, the limitation is the reference-based approach and supplementing the reference file with additional reference sequences may resolve this.
+
+3. Mapping against a reference set that contains multiple sequences that are very similar may significantly decrease the alignment quality score from minimap2. This case arises when there are 2 equally likely matches in the database to your sequencing reaad and the software cannot confidently call the best hit. In the default reference set, we only include a single Sabin1, Sabin2 and Sabin3 reference respectively, as including VDPV sequences in the database may confuse the mapping software. By default, reads with low alignment mapping scores will be filtered out. By lowering the mapping quality threshold, these split cases may be included in the analysis for enteroviruses.
+
+Suggested configuration settings can be found [here](https://github.com/polio-nanopore/piranha/blob/main/docs/config.ev.yaml) and we would recommend to only use this mode if the user can sufficiently appreciate the limitations the reference file composition may have on detection.
+
 ## Experimental haplotype calling pipeline
 
 There is now an experimental haplotype calling pipeline that uses freebayes for initial variant calling and flopp for read phasing with the called variants. It has a number internal QC steps for merging identical haplotypes. This pipeline requires further validation, but can theoretically produce multiple consensus sequences for each poliovirus population present within a sample. The pipeline has mostly be tested on VDPVs of two mixtures, but will be further assessed.
