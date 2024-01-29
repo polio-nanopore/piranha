@@ -19,11 +19,16 @@ Any issues or feedback about the analysis or report please flag to this reposito
 ## See example data [here](https://github.com/polio-nanopore/piranha/tree/main/test_data)
 
 
-## Installing via ARTIFICE GUI
+## Installing via PIRANHA GUI
+Piranha does not require use of the command-line to run. Users can access piranha through the PiranhaGUI application that can be downloaded at the link below. This application enables teams without access to a bioinformatician to use piranha and run standard detection of poliovirus VP1 in stool through nanopore sequencing. 
 - Download the release package for your machine from the [PiranhaGUI respository](https://github.com/polio-nanopore/piranhaGUI)
 
 ## Installing within EPI2ME
 - Piranha is also compatible with the [EPI2ME](https://labs.epi2me.io/downloads/) workflow desktop application. This mode of running does not provide the same level of input checking and configurability as either the ARTIFICE GUI or the command line, but is provided as an alternative interactive interface. Once EPI2ME and docker have been downloaded, follow the instructions to [download a custom workflow](https://labs.epi2me.io/quickstart/) using the github path `https://github.com/polio-nanopore/piranha`.
+
+## Install through bioconda
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/piranha-polio/README.html)
+
 
 ## Installation instructions (quick command line reference)
 
