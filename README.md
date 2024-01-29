@@ -509,6 +509,12 @@ By default, piranha removes the intermediate files it produces during the analys
 
 By default temporary files are stored in `$TMPDIR`, which then gets wiped when the process completes. If you want to store temp files elsewhere this can be done with `--tempdir`.
 
+### Archiving sequencing reads
+
+Piranha can handle archiving the read directory supplied for analysis. If the `--archive-fastq` flag is supplied to piranha (or `archive_fastq` in a config file), piranha will copy the directory tree (so all files and sub-directories) in the readdir path to the output directory under the name "fastq_pass". 
+
+If you want to customise where piranha copies the sequencing read directory to, supply the `--archivedir` argument with the path you wish to write the reads to and it will overwrite the default option to write the reads to the output directory.
+
 ### Customising the report
 The output report can include some information about the sequencing run, the name of the individual running the report and the institute doing the sequencing. To give the report a specific run name (rather than the default title `Nanopore sequencing report`) supply the new name with the command line flag `--runname` or as `runname: ` in the config file. Similarly, to enable the report to display the name of the user and institute, provide `--username` and `--institute` (or within the config file). 
 
