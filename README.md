@@ -636,12 +636,14 @@ Input options:
                         CSV file describing which barcodes were used on which sample
   -r REFERENCE_SEQUENCES, --reference-sequences REFERENCE_SEQUENCES
                         Custom reference sequences file.
+  -rg REFERENCE_GROUP_FIELD, --reference-group-field REFERENCE_GROUP_FIELD
+                        Specify reference description field to group references by. Default: `ddns_group`
   -nc NEGATIVE_CONTROL, --negative-control NEGATIVE_CONTROL
                         Sample name of negative control. If multiple samples, supply as comma-separated string of sample names. E.g.
-                        `sample01,sample02` Default: `n`
+                        `sample01,sample02` Default: `negative`
   -pc POSITIVE_CONTROL, --positive-control POSITIVE_CONTROL
                         Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g.
-                        `sample01,sample02`. Default: `p`
+                        `sample01,sample02`. Default: `positive`
   -pr POSITIVE_REFERENCES, --positive-references POSITIVE_REFERENCES
                         Comma separated string of sequences in the reference file to class as positive control sequences.
 
@@ -718,7 +720,9 @@ Output options:
                         disrupt the record id, so avoid these.
   --language LANGUAGE   Output report language. Options: English, French. Default: English
   --save-config         Output the config file with all parameters used
-
+  --archive-fastq       Write the supplied fastq_pass directory to the output directory.
+  --archivedir ARCHIVEDIR
+                        Configure where to put the fastq_pass files, default in the output directory.
 Misc options:
   --runname RUNNAME     Run name to appear in report. Default: polioDDNS
   --username USERNAME   Username to appear in report. Default: no user name
