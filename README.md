@@ -46,7 +46,8 @@ pip install .
 
 
 ## Installation instructions (full walkthrough)
-If this is your first time running piranha, you’ll need to clone the GitHub repository and install it. If you're running on a Mac machine (OS X) and have never used command line tools such as Git before, you may need to install them. They can be installed easily with the installer. Full instructions can be found [here](https://mac.install.guide/commandlinetools/4.html). Linux systems will have this installed already.
+### Step 1: Git installation 
+If this is your first time running piranha, you’ll need to clone the GitHub repository and install it. If you're running on a Mac machine (OS X) and have never used command line tools such as Git before, you may need to install them. They can be installed easily with the installer. Full instructions can be found [here](https://mac.install.guide/commandlinetools/4.html). Linux systems will have Git installed already.
 
 Double check you have git installed by typing the following into a terminal window:
 
@@ -58,8 +59,24 @@ You should see something like the following printed below:
 
 If you don't see this, follow the link to the install instructions above to install git. If you're using a Windows machine, it's possible to use Windows Subsystem for Linux, which should have git pre-installed. 
 
-You will also need to have a version of conda installed. We recommend the latest version of Miniconda, which can be accessed for download and install [here](https://docs.conda.io/en/latest/miniconda.html).
+### Step 2: Conda\Mamba installation
+You will also need to have a version of conda installed. We recommend the latest version of Miniconda, which can be accessed for download and install [here](https://docs.conda.io/en/latest/miniconda.html). Follow the installation instructions on that page. After successful conda installation and initialistaion you should have ```(base)``` at the start of your command prompt before your username like below:
 
+```(base) aine$```
+
+You can double check your installation has completed successfully by checking the conda version:
+
+```(base) aine$ conda --version```
+
+This should return a version number. If it does not, repeat the installaion steps outlined [here](https://docs.conda.io/en/latest/miniconda.html).
+
+Once conda has been installed, we also recommend installing ```mamba```. This can be done using the following command:
+
+```(base) aine$ conda install mamba -c conda-forge```
+
+Press ```y``` to confirm installation if prompted.
+
+### Step 3: Choose where to download piranha
 I like to keep my repositories in the same place so they’re easy to find, so below I’m making a directory in my home directory (`~`) called repositories and moving into it with `cd`, which is short for "change directory".
 
 ```(base) aine$ cd ~```
@@ -68,6 +85,7 @@ I like to keep my repositories in the same place so they’re easy to find, so b
 
 ```(base) aine$ cd repositories```
 
+### Step 4: Clone the piranha repository
 Now we’re ready to clone the piranha GitHub repository. This creates a local copy of the piranha repository on your computer. It also retains a link back to the original repository, so if any updates are made (such as addition of new features or bug fixes), it's very easy to pull those changes down to your local machine and update your version of piranha. More information on git cloning can be found [here](https://git-scm.com/docs/git-clone).
 
 
@@ -77,37 +95,38 @@ Clone the piranha repository with:
 
  ```(base) aine$ cd piranha```
 
-This directory remains linked to the original GitHub copy, so if you need to update it or get any changes you can do that from this location with the following command:
+This directory remains linked to the original GitHub copy, so if you need to update it or get any changes in the future, you can do that from this location with the following command:
 
 ```(base) aine$ git pull```
 
+### Step 5: Install piranha
 We now need to create the piranha environment. Hopefully you have mamba installed, check if you do with the following command:
 
-```(base) aine$ mamba –version```
+```(base) aine$ mamba --version```
 
-If you see the message `mamba not found` then you should install mamba with:
-
-```(base) aine$ conda install mamba -c conda-forge```
-
-Activate the piranha environment:
-
-```(base) aine$ conda activate piranha```
-
-```(piranha) aine$```
-
-The `(piranha)` in the prompt tells you that the piranha environment is activated.
-
-Now you’ll need run install the piranha python package while you’re in the environment:
-
-```(piranha) aine$ pip install .```
-
-The `.` refers to the current working directory (cwd), which should be the piranha repository. To double check you're in the correct directory, you can type `pwd` (print working directory). 
+If you see the message `mamba not found` then you should repeat the mamba installation instructions found at the end of step 2 above. Next we need to create the environment where piranha will run by using mamba. This following command needs to be run in the newly cloned piranha repository. To double check you're in the correct directory, you can type `pwd` (print working directory): 
 
 ```(piranha) aine$ pwd```
 
 ```/localdisk/home/repositories/piranha```
 
-If you see a path printed like the one above, ending with piranha, you know you're in the correct directory. 
+If you see a path printed like the one above, ending with piranha, you know you're in the correct directory. If you are not in the correct directory, please navigate to it using the ```cd``` command. If you have followed the instructions in step 3 then your piranha repository will be located at ```~/repositories/piranha/```.
+
+Once you are in the piranha directory you can create the piranha environment with this command:
+
+```mamba env create -f environment.yml```
+
+Press ```y``` to confirm installation if prompted. When completed activate the piranha environment:
+
+```(base) aine$ conda activate piranha```
+
+```(piranha) aine$```
+
+Notice that the ```(base)``` in your command prompt has changed to `(piranha)`. This tells you that the piranha environment is activated. Now you’ll need run install the piranha python package while you’re in the environment:
+
+```(piranha) aine$ pip install .```
+
+The `.` refers to the current working directory (cwd), which should be the piranha repository. 
 
 Congratulations! You should now have piranha installed. 
 
