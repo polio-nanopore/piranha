@@ -10,13 +10,13 @@ Piranha is a tool developed to help standardise and streamline sequencing of pol
 
 Any issues or feedback about the analysis or report please flag to this repository.
 
-## Note: piranha has been tested primarily on poliovirus VP1 sequencing data. There are alternative analysis modes in development (e.g. whole genome, panEV), but the authors recommend additional QC checks if using piranha beyond its established poliovirus VP1 pipeline.
+> Note: piranha has been tested primarily on poliovirus VP1 sequencing data. There are alternative analysis modes in development (e.g. whole genome, panEV), but the authors recommend additional QC checks if using piranha beyond its established poliovirus VP1 pipeline.
 
 <img src="./docs/piranha.svg" width="400">
 
-## See example report [here](https://polio-nanopore.github.io/piranha/report.html)
+## Example report [here](https://polio-nanopore.github.io/piranha/report.html)
 
-## See example data [here](https://github.com/polio-nanopore/piranha/tree/main/test_data)
+## Example data [here](https://github.com/polio-nanopore/piranha/tree/main/test_data)
 
 
 ## Installing via PIRANHA GUI
@@ -30,7 +30,7 @@ Piranha does not require use of the command-line to run. Users can access piranh
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/piranha-polio/README.html)
 
 
-## Installation instructions (quick command line reference)
+## Installation instructions (quick)
 
 >You need to have Git, a version of conda (link to Miniconda [here](https://docs.conda.io/en/latest/miniconda.html)) and mamba installed to run the following commands. 
 
@@ -182,7 +182,7 @@ Piranha is also available now on bioconda and can be installed with
 
 
 
-## Quick usage
+# Quick usage
 
 `piranha -i <demultiplexed read directory> -b <path/to/barcodes.csv>`
 
@@ -242,6 +242,8 @@ This is what piranha will look for. Point the software to the directory containi
 
 <br>
 <br>
+
+# Configuration
 
 ## Input configuration
 
@@ -407,7 +409,7 @@ and piranha will check which ones you have installed with your version of medaka
 >```Where a version of Guppy has been used without an exactly corresponding medaka model, the medaka model with the highest version equal to or less than the guppy version should be selected.```
 
 
-## Process enterovirus sequences
+## Process enterovirus sequences  **\*NEW FEATURE\***
 
 Piranha now has the flexibility to cluster sequencing reads by a specified reference group field (`-rg / --reference-group-field`, or `reference_group_field` in a config file). By default, this field is set to `ddns_group` and any records in the reference file must contain this as an annotation in the header description. The reference file that is supplied with piranha contains this field in all records and the values fall into the following categories:
 
@@ -467,7 +469,7 @@ piranha -c config.ev.yaml
 ```
 
 
-## Experimental haplotype calling pipeline
+## Experimental haplotype calling pipeline  **\*NEW FEATURE\***
 
 There is now an experimental haplotype calling pipeline that uses freebayes for initial variant calling and flopp for read phasing with the called variants. It has a number internal QC steps for merging identical haplotypes. This pipeline requires further validation, but can theoretically produce multiple consensus sequences for each poliovirus population present within a sample. The pipeline has mostly be tested on VDPVs of two mixtures, but will be further assessed.
 
@@ -636,12 +638,14 @@ Input options:
                         CSV file describing which barcodes were used on which sample
   -r REFERENCE_SEQUENCES, --reference-sequences REFERENCE_SEQUENCES
                         Custom reference sequences file.
+  -rg REFERENCE_GROUP_FIELD, --reference-group-field REFERENCE_GROUP_FIELD
+                        Specify reference description field to group references by. Default: `ddns_group`
   -nc NEGATIVE_CONTROL, --negative-control NEGATIVE_CONTROL
                         Sample name of negative control. If multiple samples, supply as comma-separated string of sample names. E.g.
-                        `sample01,sample02` Default: `n`
+                        `sample01,sample02` Default: `negative`
   -pc POSITIVE_CONTROL, --positive-control POSITIVE_CONTROL
                         Sample name of positive control. If multiple samples, supply as comma-separated string of sample names. E.g.
-                        `sample01,sample02`. Default: `p`
+                        `sample01,sample02`. Default: `positive`
   -pr POSITIVE_REFERENCES, --positive-references POSITIVE_REFERENCES
                         Comma separated string of sequences in the reference file to class as positive control sequences.
 
@@ -718,7 +722,9 @@ Output options:
                         disrupt the record id, so avoid these.
   --language LANGUAGE   Output report language. Options: English, French. Default: English
   --save-config         Output the config file with all parameters used
-
+  --archive-fastq       Write the supplied fastq_pass directory to the output directory.
+  --archivedir ARCHIVEDIR
+                        Configure where to put the fastq_pass files, default in the output directory.
 Misc options:
   --runname RUNNAME     Run name to appear in report. Default: polioDDNS
   --username USERNAME   Username to appear in report. Default: no user name
