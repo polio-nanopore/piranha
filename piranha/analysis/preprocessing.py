@@ -130,13 +130,19 @@ def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
     return unmapped,status,description
 
 
-def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filter_file):
+def group_hits(paf_file,
+                ref_name_map,
+                min_aln_block,
+                min_map_quality,
+                mapping_filter_file):
+
     total_reads= 0
     ambiguous =0
     unmapped = 0
     hits = collections.defaultdict(set)
     
-    mappings = []
+    multi_hits = collections.Counter()
+    low_quality_hits = collections.defaultdict(set)
 
     last_mapping = None
     with open(mapping_filter_file,"w") as fw:
@@ -147,32 +153,37 @@ def group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filte
                 filtered_reason = ""
                 mapping = parse_line(l)
                 
-
                 if last_mapping:
                     if mapping["read_name"] == last_mapping["read_name"]:
-                        mappings.append(last_mapping)
+                        h = [last_mapping["ref_hit"],mapping["ref_hit"]]
+                        h = "|".join(sorted(h))
+                        multi_hits[h]+=1
+                        continue
                     else:
-                        mappings.append(last_mapping)
                         total_reads +=1
                         
-                        if len(mappings) > 1:
-                            ambiguous +=1
-                            filtered_reason = "ambiguous mapping"
-                            row = {"read_name":mapping["read_name"],"status":"unmapped","description":"ambiguous_mapping"}
-                            writer.writerow(row)
-                        else:
-                            unmapped,status,description = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,unmapped)
-                            row = {"read_name":mapping["read_name"],"status":status,"description":description}
-                            writer.writerow(row)
+                        unmapped,status,description = add_to_hit_dict(hits, mapping,min_aln_block,min_map_quality,unmapped)
+                        row = {"read_name":mapping["read_name"],"status":status,"description":description}
+                        writer.writerow(row)
+                        print(row)
 
-                        mappings = []
+                        # mappings = set()
                         last_mapping = mapping
 
                 else:
+                    
+                    unmapped,status,description = add_to_hit_dict(hits, mapping,min_aln_block,min_map_quality,unmapped)
+                    row = {"read_name":mapping["read_name"],"status":status,"description":description}
+                    writer.writerow(row)
+                    print(row)
+
                     last_mapping = mapping
+                    
 
             unmapped,status,description = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,unmapped)
-            row = {"read_name":mapping["read_name"],"status":status,"description":description}
+            row = {"read_name": mapping["read_name"],
+                    "status": status,
+                    "description": description}
             writer.writerow(row)
             total_reads +=1
     
@@ -253,7 +264,11 @@ def parse_paf_file(paf_file,
 
         min_aln_block = config[KEY_MIN_ALN_BLOCK]
 
-        ref_hits, unmapped, ambiguous, total_reads = group_hits(paf_file,ref_name_map,min_aln_block,min_map_quality,mapping_filter_out)
+        ref_hits, unmapped, ambiguous, total_reads = group_hits(paf_file,
+                                                                ref_name_map,
+                                                                min_aln_block,
+                                                                min_map_quality,
+                                                                mapping_filter_out)
         print(f"Barcode: {barcode}")
         print(green("Unmapped:"),unmapped)
         print(green("Ambiguous mapping:"),ambiguous)
