@@ -101,7 +101,7 @@ def parse_line(line):
 
     return values
 
-def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
+def add_to_hit_dict(hits,mapping,min_map_len,min_map_quality,unmapped):
     status,description = "",""
     if mapping["direction"] == "+":
         start = mapping["read_hit_start"]
@@ -118,6 +118,7 @@ def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
             if int(mapping["map_quality"]) > min_map_quality:
                 hits[mapping["ref_hit"]].add((mapping["read_name"],start,end,mapping["aln_block_len"]))
                 status = "mapped"
+                description = f"MAPQ:{mapping['map_quality']} ALN_LEN:{mapping['aln_block_len']}"
             else:
                 unmapped+=1
                 status = "filtered"
@@ -129,21 +130,24 @@ def add_to_hit_dict(hits, mapping,min_map_len,min_map_quality,unmapped):
 
     return unmapped,status,description
 
-
 def group_hits(paf_file,
                 ref_name_map,
                 min_aln_block,
                 min_map_quality,
-                mapping_filter_file):
+                mapping_filter_file,
+                ):
 
     total_reads= 0
     ambiguous =0
     unmapped = 0
+    status,description="",""
     hits = collections.defaultdict(set)
     
     multi_hits = collections.Counter()
     low_quality_hits = collections.defaultdict(set)
-
+    
+    current_readname = ""
+    same_read_row = []
     last_mapping = None
     with open(mapping_filter_file,"w") as fw:
         writer = csv.DictWriter(fw, fieldnames=["read_name","status","description"],lineterminator='\n')
@@ -153,46 +157,73 @@ def group_hits(paf_file,
                 filtered_reason = ""
                 mapping = parse_line(l)
                 
-                if last_mapping:
-                    if mapping["read_name"] == last_mapping["read_name"]:
-                        h = [last_mapping["ref_hit"],mapping["ref_hit"]]
+                if not current_readname:
+                    #so the very first read
+                    current_readname = mapping["read_name"]
+                    same_read_row.append(mapping)
+                    continue
+
+                #second read until the end    
+                if mapping["read_name"] == current_readname:
+                    same_read_row.append(mapping)
+                else:
+                    total_reads +=1
+                    first_hit = same_read_row[0]
+                    unmapped,status,description = add_to_hit_dict(hits,first_hit,min_aln_block,min_map_quality,unmapped)
+
+                    if len(same_read_row) >1:
+                        #chimeric/multimapped reads
+                        h = [i["ref_hit"] for i in same_read_row]
                         h = "|".join(sorted(h))
                         multi_hits[h]+=1
-                        continue
-                    else:
-                        total_reads +=1
-                        
-                        unmapped,status,description = add_to_hit_dict(hits, mapping,min_aln_block,min_map_quality,unmapped)
-                        row = {"read_name":mapping["read_name"],"status":status,"description":description}
-                        writer.writerow(row)
-                        print(row)
+                        ambiguous +=1
+                        description += f"; ambiguous reference hit: {h}"
 
-                        # mappings = set()
-                        last_mapping = mapping
-
-                else:
-                    
-                    unmapped,status,description = add_to_hit_dict(hits, mapping,min_aln_block,min_map_quality,unmapped)
-                    row = {"read_name":mapping["read_name"],"status":status,"description":description}
+                    row = {"read_name":current_readname,
+                           "status":status,
+                           "description":description}
                     writer.writerow(row)
-                    print(row)
 
-                    last_mapping = mapping
-                    
+                    current_readname = mapping["read_name"]
+                    same_read_row = [mapping]
 
-            unmapped,status,description = add_to_hit_dict(hits, last_mapping,min_aln_block,min_map_quality,unmapped)
-            row = {"read_name": mapping["read_name"],
-                    "status": status,
-                    "description": description}
-            writer.writerow(row)
             total_reads +=1
+
+            first_hit = same_read_row[0]
+            unmapped,status,description = add_to_hit_dict(hits,first_hit,min_aln_block,min_map_quality,unmapped)
+            
+            row = {"read_name":current_readname,
+                       "status":status,
+                       "description":description}
+            writer.writerow(row)
+                
+    ref_group_hits = collections.defaultdict(set)
+
+    ref_group_ref = {}
+    ref_count_map = collections.defaultdict(list)
     
+    for hit in hits:
+        ref_group = ref_name_map[hit]
+        
+        reads = hits[hit]
+        read_count = len(reads)
+        ref_count_map[ref_group].append([hit, read_count])
+        
+        ref_group_hits[ref_group] = reads.union(ref_group_hits[ref_group])
+
+    for ref_group in ref_count_map:
+        refs = ref_count_map[ref_group]
+        if len(refs)>1:
+            refs = sorted(refs, key = lambda x : x[1], reverse=True)
+        top_ref_hit = refs[0][0]
+        ref_group_ref[ref_group]=top_ref_hit
+        
     if total_reads == 0:
-        return {}, 0, 0, 0
+        return {}, 0, 0, 0, {}, {}
+        
+    return ref_group_hits, unmapped, ambiguous, total_reads, multi_hits, ref_group_ref
 
-    return hits, unmapped, ambiguous, total_reads
-
-def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode):
+def write_out_report(hits,ref_group_ref,csv_out,unmapped,total_reads,barcode):
 
     with open(csv_out,"w") as fw:
         writer = csv.DictWriter(fw, fieldnames=SAMPLE_HIT_HEADER_FIELDS,lineterminator="\n")
@@ -211,9 +242,9 @@ def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode
             KEY_REFERENCE_GROUP:"unmapped"}
         writer.writerow(unmapped_row)
 
-        for reference in hits:
-            hit_count = len(hits[reference])
-            ref_group = ref_map[reference]
+        for ref_group in hits:
+            hit_count = len(hits[ref_group])
+            reference = ref_group_ref[ref_group]
             mapped_row = {
                 KEY_BARCODE:barcode,
                 KEY_REFERENCE:reference,
@@ -222,20 +253,31 @@ def write_out_report(ref_index,ref_map,csv_out,hits,unmapped,total_reads,barcode
                 KEY_REFERENCE_GROUP:ref_group}
             writer.writerow(mapped_row)
 
-def write_out_hits(hits,outfile):
+def write_out_hits(hits,ref_group_ref,outfile):
     with open(outfile,"w") as fw:
         writer = csv.DictWriter(fw, lineterminator="\n",fieldnames=["read_name","hit","start","end","aln_block_len"])
         writer.writeheader()
-        for hit in hits:
-            hit_info = hits[hit]
+        for ref_group in hits:
+            hit_info = hits[ref_group]
+            reference = ref_group_ref[ref_group]
             for read in hit_info:
                 name,start,end,aln_len = read
                 row = {"read_name":name,
-                        "hit":hit,
+                        "hit":reference,
                         "start":start,
                         "end":end,
                         "aln_block_len":aln_len}
                 writer.writerow(row)
+
+def write_out_multi_mapped(multi_out,multi_hits):
+    
+    with open(multi_out,"w") as fw:
+        writer = csv.DictWriter(fw, fieldnames=["references","multihit_count"],lineterminator="\n")
+        writer.writeheader()
+        for i in multi_hits:
+            row= {"references":i,"multihit_count":multi_hits[i]}
+            writer.writerow(row)
+
 
 def is_non_zero_file(fpath):  
     return os.path.isfile(fpath) and os.path.getsize(fpath) > 0
@@ -244,6 +286,7 @@ def parse_paf_file(paf_file,
                     csv_out,
                     mapping_filter_out,
                     hits_out,
+                    multi_out,
                     references_sequences,
                     positive_references,
                     include_positive_references,
@@ -264,24 +307,32 @@ def parse_paf_file(paf_file,
 
         min_aln_block = config[KEY_MIN_ALN_BLOCK]
 
-        ref_hits, unmapped, ambiguous, total_reads = group_hits(paf_file,
+        ref_group_hits, unmapped, ambiguous, total_reads, multi_hits, ref_group_ref = group_hits(paf_file,
                                                                 ref_name_map,
                                                                 min_aln_block,
                                                                 min_map_quality,
                                                                 mapping_filter_out)
         print(f"Barcode: {barcode}")
+        print(green("Total reads:"), total_reads)
         print(green("Unmapped:"),unmapped)
         print(green("Ambiguous mapping:"),ambiguous)
 
         ref_index =  SeqIO.index(references_sequences,KEY_FASTA)
-        write_out_report(ref_index,ref_name_map,csv_out,ref_hits,unmapped,total_reads,barcode)
 
-        write_out_hits(ref_hits,hits_out)
+        write_out_multi_mapped(multi_out,multi_hits)
+
+        write_out_report(ref_group_hits,ref_group_ref,csv_out,unmapped,total_reads,barcode)
+
+        write_out_hits(ref_group_hits,ref_group_ref,hits_out)
 
     else:
         print("No reads for",barcode)
         with open(csv_out,"w") as fw:
             writer = csv.DictWriter(fw, fieldnames=SAMPLE_HIT_HEADER_FIELDS,lineterminator="\n")
+            writer.writeheader()
+
+        with open(multi_out,"w") as fw:
+            writer = csv.DictWriter(fw, fieldnames=["references","multihit_count"],lineterminator="\n")
             writer.writeheader()
 
         with open(hits_out,"w") as fw:
@@ -291,7 +342,6 @@ def parse_paf_file(paf_file,
         with open(mapping_filter_out,"w") as fw:
             writer = csv.DictWriter(fw, lineterminator="\n",fieldnames=["read_name","status","description"])
             writer.writeheader()
-
 
 
 def diversity_report(input_files,csv_out,summary_out,ref_file,config):
@@ -405,4 +455,3 @@ def write_out_ref_fasta(to_write,ref_file,outdir):
         with open(os.path.join(outdir,f"{ref}.reference.fasta"),"w") as fw:
             record = ref_index[ref]
             fw.write(f">{record.description}\n{record.seq}\n")
-    
