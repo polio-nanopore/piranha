@@ -35,7 +35,7 @@ rule rasusa:
         fastq= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","downsample.fastq")
     run:
         ref_len = 0
-        for record in SeqIO.parse(input.ref,"fasta"):
+        for record in SeqIO.parse(input.ref,KEY_FASTA):
             ref_len = len(record)
         shell("rasusa -i {input.reads:q} -c {params.depth:q} " + f"-g {ref_len}b" + " -o {output.fastq:q}")
 
@@ -124,7 +124,7 @@ rule haplotype_qc:
         minimum reads for the haplotype to be used
         """
         partitions = parse_partition_file(input.partition)
-        seq_index = SeqIO.index(input.reads, "fastq")
+        seq_index = SeqIO.index(input.reads, KEY_FASTQ)
         merge_info = collapse_close(input.flopp,config[KEY_MIN_HAPLOTYPE_DISTANCE],input.vcf)
         with open(output.txt,"w") as fhaplo:
             merged_haplo_count = 0
@@ -144,7 +144,7 @@ rule haplotype_qc:
                             record = seq_index[read]
                             records.append(record)
 
-                        SeqIO.write(records,fw,"fastq")
+                        SeqIO.write(records,fw,KEY_FASTQ)
 
                     haplo_ref = os.path.join(params.haplodir,f"{haplotype}.reference.fasta")
                     shell(f"cp {input.ref} {haplo_ref}")
