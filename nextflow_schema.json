@@ -15,7 +15,7 @@
       "properties": {
         "barcodes_csv": {
           "type": "string",
-          "format": "path",
+          "format": "file-path",
           "title": "Barcodes",
           "description": "A CSV file with barcode and sample columns.",
           "help_text": ".",
