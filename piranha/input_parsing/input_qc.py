@@ -148,9 +148,11 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
         for field in record.description.split(" "):
             if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
                 ref_group = field.split("=")[1]
+                # print(VALUE_REFERENCE_GROUP_FIELD, "ref group", ref_group)
         
         if ref_group not in config[KEY_REFERENCES_FOR_CNS]:
             no_reference_group.add(record.id)
+            # print(record.id)
         else:
             total_seqs[ref_group]+=1
             seq_records.append(record)
