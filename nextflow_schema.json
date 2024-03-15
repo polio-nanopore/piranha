@@ -23,7 +23,7 @@
         },
         "run_dir": {
           "type": "string",
-          "format": "path",
+          "format": "directory-path",
           "title": "Run directory",
           "description": "A directory containing a directory of fastq for a each barcode in a run.",
           "help_text": "A directory containing subdirectories of fastq files as created by MinKNOW.",
@@ -66,7 +66,7 @@
       "properties": {
         "config": {
           "type": "string",
-          "format": "path",
+          "format": "file-path",
           "title": "Config file",
           "description": "A config file with parameters for piranha."
         },
