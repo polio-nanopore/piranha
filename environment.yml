@@ -4,7 +4,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
-  - python=3.10
+  - python
   - bcftools=1.18
   - coreutils=9.1
   - flopp=0.2.0
