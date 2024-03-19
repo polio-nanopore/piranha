@@ -31,6 +31,8 @@ process run_piranha {
         extra += " --primer-length ${params.primer_length}"
     if ( params.run_phylo )
         extra += " --run-phylo"
+    if ( params.medaka_model )
+        extra += " --medaka-model ${params.medaka_model}"
     if ( params.supplementary_datadir )
         extra += " --supplementary-datadir ${params.supplementary_datadir}"
     """
