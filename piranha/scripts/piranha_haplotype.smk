@@ -95,7 +95,7 @@ rule flopp:
             -o {output.flopp:q} \
             -P {params.partition_path} 
         else
-            echo "No variants called - single reference haplotype"
+            echo "Less than 2 variants called - haplotyping not possible, one haplotype will be output"
             touch {output.partition:q}
             touch {output.flopp:q}
         fi
@@ -129,10 +129,14 @@ rule haplotype_qc:
         with open(output.txt,"w") as fhaplo:
             merged_haplo_count = 0
             for subset in merge_info:
-                reads = set()
-                for part in subset:
-                    part_reads = partitions[part]
-                    reads = reads.union(part_reads)
+                if subset == [0] and len(merge_info) == 1:
+                    # flopp wasn't run, single haplo to be called using all reads
+                    reads = [read for read in seq_index]
+                else:
+                    reads = set()
+                    for part in subset:
+                        part_reads = partitions[part]
+                        reads = reads.union(part_reads)
 
                 if len(reads) > params.min_reads:
                     print(green(f"Haplotype HAP0{merged_haplo_count}:"), len(reads), "reads")

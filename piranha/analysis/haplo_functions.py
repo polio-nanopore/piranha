@@ -11,7 +11,6 @@ from piranha.utils.log_colours import green,cyan,red
 
 
 def parse_partition_file(partition_file):
-
     partitions = collections.defaultdict(set)
     with open(partition_file, "r") as f:
         part = ""
@@ -35,6 +34,11 @@ def collapse_close(flopp_file,distance_cutoff,vcf_file):
     final_haplos = []
     vcf = parse_VCF(vcf_file)
     parsed_flopp = parse_flopp_reads(flopp_file)
+    #if flopp wasn't run then the file is empty, parsing gives empty list
+    #need a single partition containing all reads
+    if parsed_flopp == []:
+        return [[0]]
+
     for h in parsed_flopp:
         collapse_into_current = [haplo_pos]
         if haplo_pos in collapsed:
