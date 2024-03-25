@@ -86,7 +86,7 @@ rule flopp:
     shell:
         """
         VARIANTS=$(grep -v '#' {input.vcf} | wc -l)
-        if [[ $VARIANTS -gt 0 ]]
+        if [[ $VARIANTS -gt 1 ]]
         then
             flopp -b {input.bam:q} \
             -c {input.vcf:q} \
