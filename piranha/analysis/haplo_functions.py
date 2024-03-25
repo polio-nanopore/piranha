@@ -180,7 +180,12 @@ def parse_support_col(col):
     total_reads = 0
     base_support = {}
     for base in base_split:
-        base_val,support_reads = base.split(':')
+        try:
+            base_val,support_reads = base.split(':')
+        except ValueError:
+            # -1 in the support col - means zero reads in partition overlap this position
+            base_val = '-1'
+            support_reads = 0
         # if base_val == selbase_val:
         #     base_support = int(support_reads)
         base_support[base_val] = int(support_reads)
@@ -191,12 +196,16 @@ def check_site_sig(base_support,allele_freqs):
     #check if allele freqs are consistent with random sample from overall reads for this site
     #need to know these are the same order
     #reads might have 100% one allele, need to insert zero in this case, then sort to make sure order correct
+    if '-1' in base_support.keys():
+        # zero read coverage, this site shouldn't be significant
+        return False
     for key in allele_freqs:
         if key not in base_support:
             base_support[key] = 0
     read_counts = [base_support[k] for k in sorted(base_support)]
     exp = [allele_freqs[allele_freq]*sum(read_counts) for allele_freq in allele_freqs]
     try:
+        print('TRYING CHI SQUARE')
         pval = chisquare(f_obs=read_counts,f_exp=exp).pvalue
     except Exception as e:
         print('Observed values for read counts',read_counts)
@@ -230,7 +239,16 @@ def get_haplo_dist(h1,h2,parsed_VCF):
 def sum_base_support(dict1,dict2):
     out_dict = {}
     for key in dict1:
-        out_dict[key] = dict1[key] + dict2[key]
+        try:
+            out_dict[key] = dict1[key] + dict2[key]
+        except KeyError:
+            #base not recorded in dict2 - probably a -1 col
+            out_dict[key] = dict1[key]
+    # check for extra keys in other dict
+    for key in dict2:
+        if key not in dict1.keys():
+            out_dict[key] = dict2[key]
+
     return out_dict
 
 def calc_sd(haplotypes):
