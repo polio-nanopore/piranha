@@ -85,8 +85,11 @@ rule flopp:
         partition = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","flopp_partitions","{reference}_part.txt")
     shell:
         """
-        VARIANTS=$(grep -v '#' {input.vcf} | wc -l)
-        if [[ $VARIANTS -gt 0 ]]
+        # || true to stop snakemake catching the exit code 1 grep returns on finding zero lines
+        VARIANTS=$((grep -v '#' {input.vcf} | wc -l) || true)
+        echo "Number of variants"
+        echo $VARIANTS
+        if [[ $VARIANTS -gt 1 ]]
         then
             flopp -b {input.bam:q} \
             -c {input.vcf:q} \
@@ -95,7 +98,7 @@ rule flopp:
             -o {output.flopp:q} \
             -P {params.partition_path} 
         else
-            echo "No variants called - single reference haplotype"
+            echo "Less than 2 variants called - haplotyping not possible, one haplotype will be output"
             touch {output.partition:q}
             touch {output.flopp:q}
         fi
@@ -129,10 +132,14 @@ rule haplotype_qc:
         with open(output.txt,"w") as fhaplo:
             merged_haplo_count = 0
             for subset in merge_info:
-                reads = set()
-                for part in subset:
-                    part_reads = partitions[part]
-                    reads = reads.union(part_reads)
+                if subset == [0] and len(merge_info) == 1:
+                    # flopp wasn't run, single haplo to be called using all reads
+                    reads = [read for read in seq_index]
+                else:
+                    reads = set()
+                    for part in subset:
+                        part_reads = partitions[part]
+                        reads = reads.union(part_reads)
 
                 if len(reads) > params.min_reads:
                     print(green(f"Haplotype HAP0{merged_haplo_count}:"), len(reads), "reads")
