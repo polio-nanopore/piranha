@@ -85,7 +85,10 @@ rule flopp:
         partition = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","flopp_partitions","{reference}_part.txt")
     shell:
         """
-        VARIANTS=$(grep -v '#' {input.vcf} | wc -l)
+        # || true to stop snakemake catching the exit code 1 grep returns on finding zero lines
+        VARIANTS=$((grep -v '#' {input.vcf} | wc -l) || true)
+        echo "Number of variants"
+        echo $VARIANTS
         if [[ $VARIANTS -gt 1 ]]
         then
             flopp -b {input.bam:q} \

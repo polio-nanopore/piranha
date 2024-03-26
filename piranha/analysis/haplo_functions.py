@@ -205,7 +205,6 @@ def check_site_sig(base_support,allele_freqs):
     read_counts = [base_support[k] for k in sorted(base_support)]
     exp = [allele_freqs[allele_freq]*sum(read_counts) for allele_freq in allele_freqs]
     try:
-        print('TRYING CHI SQUARE')
         pval = chisquare(f_obs=read_counts,f_exp=exp).pvalue
     except Exception as e:
         print('Observed values for read counts',read_counts)
