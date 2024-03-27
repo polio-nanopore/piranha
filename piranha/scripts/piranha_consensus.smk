@@ -113,19 +113,19 @@ rule gather_merge_cns:
                 haplodir = "/".join(cns_file.split("/")[:-1])+"_cns"
 
             haplo_bam = os.path.join(haplodir, "calls_to_ref.bam")
-            for record in SeqIO.parse(cns_file, "fasta"):
+            for record in SeqIO.parse(cns_file, KEY_FASTA):
                 print(record.id)
                 sequences[str(record.seq)].add(haplo_bam)
                 ref_seqs[str(record.seq)] = record.id
         
         ref_file_dict = {}
         for ref_file in input.ref:
-            for record in SeqIO.parse(ref_file,"fasta"):
+            for record in SeqIO.parse(ref_file,KEY_FASTA):
                 ref_file_dict[record.id] = ref_file
         # print(ref_file_dict)
         cns_file_dict = {}
         for cns_file in input.cns_cns:
-            for record in SeqIO.parse(cns_file,"fasta"):
+            for record in SeqIO.parse(cns_file,KEY_FASTA):
                 cns_file_dict[record.id] = cns_file
         # print(cns_file_dict)
             
