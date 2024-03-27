@@ -21,7 +21,8 @@ rule all:
         os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
-        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES)
+        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv"), reference=REFERENCES)
 
 
 # do this per  cns
@@ -30,7 +31,35 @@ rule files:
     params:
         ref= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.ref.fasta"),
         cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta")
-        
+
+rule maskara:
+    input:
+        ref= rules.files.params.ref,
+        cns = rules.files.params.cns,
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.bam"),
+    params:
+        reference = "{reference}"
+    output:
+        mask = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv")
+    run:
+        ref = params.reference.split(".SEQ")[0]
+        outfile = output.mask[:-4]
+        shell(f"maskara '{input.bam}' -r '{ref}' -o '{outfile}'")
+
+        # cns = ""
+        # for record in SeqIO.parse(input.cns, "fasta"):
+        #     cns = str(record.seq)
+        # new_seq = ""
+        # with open(output.mask, "r") as f:
+        #     for l in f:
+        #         l= l.rstrip()
+        #         ref,start,end = l.split("\t")
+        #         new_seq = 
+
+
+
+
+
 
 rule join_cns_ref:
     input:
