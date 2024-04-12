@@ -40,7 +40,8 @@ rule maskara:
     params:
         reference = "{reference}"
     output:
-        mask = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv")
+        mask = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv"),
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.masked.fasta")
     run:
         ref = params.reference.split(".SEQ")[0]
         outfile = output.mask[:-4]
@@ -54,17 +55,18 @@ rule maskara:
         #     for l in f:
         #         l= l.rstrip()
         #         ref,start,end = l.split("\t")
-        #         new_seq = 
-
-
-
-
+        #         start = int(start)
+        #         end = int(end)
+        #         if not new_seq:
+        #             new_seq = cns[:start]
+                
+        #         new_seq += cns[:]
 
 
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
-        cns = rules.files.params.cns
+        cns = rules.files.output.maskara
     params:
         reference = "{reference}"
     output:
