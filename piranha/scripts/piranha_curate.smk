@@ -30,12 +30,14 @@ rule all:
 rule files:
     params:
         ref= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.ref.fasta"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta")
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta"),
+        vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
 
 rule maskara:
     input:
         ref= rules.files.params.ref,
         cns = rules.files.params.cns,
+        vcf = rules.files.params.vcf, #Need to get the vcf files for bcftools consensus to work
         bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.bam"),
     params:
         reference = "{reference}"
@@ -43,10 +45,15 @@ rule maskara:
         mask = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv"),
         fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.masked.fasta")
     run:
+        mask_file = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{wildcards.reference}.merged_cns.mask") #Added this line to define output variable in maskara command (wouldn't be a problem is maska didn't add a .tsv; must fix)
         ref = params.reference.split(".SEQ")[0]
         outfile = output.mask[:-4]
-        shell(f"maskara '{input.bam}' -r '{ref}' -o '{outfile}'")
-
+        shell(f"maskara '{input.bam}' -r '{ref}' -o '{mask_file}'")
+        shell(f"echo '{ref}    {ref}' | bcftools annotate --rename-chrs /dev/stdin '{input.vcf}' > {input.vcf}_renamed.vcf") #This line is not used currently, but if there's a change to the input to bcftools may be needed. Changes the name of the chrm variants are mapped against to allow bcftools to appy variants to whichever input is needed if your fasta is titled differently.
+        shell(f"bgzip -c '{input.vcf}_renamed.vcf' > '{input.vcf}_renamed.vcf.gz'") #bcftools needs vcf files to be bgzipped...
+        shell(f"bcftools index '{input.vcf}_renamed.vcf.gz'") #...and also indexed
+        shell(f"bcftools consensus -f '{input.ref}' -m '{mask_file}.tsv' '{input.vcf}_renamed.vcf.gz' > '{output.fasta}'") #Applies the mask and variants to the ORIGINAL REFERENCE. I think this is sensible, bcftools fails if you give it merged_cns for example as the "ref" alleles in the vcf don't match the provided "ref" sequence.
+        
         # cns = ""
         # for record in SeqIO.parse(input.cns, "fasta"):
         #     cns = str(record.seq)
@@ -66,7 +73,7 @@ rule maskara:
 rule join_cns_ref:
     input:
         ref=rules.files.params.ref,
-        cns = rules.files.output.maskara
+        cns = rules.maskara.output.fasta
     params:
         reference = "{reference}"
     output:
