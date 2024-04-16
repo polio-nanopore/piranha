@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import os
 import collections
 from Bio import SeqIO
@@ -8,8 +7,9 @@ import yaml
 
 from piranha.analysis.clean_gaps import *
 from piranha.analysis.consensus_functions import *
-from piranha.utils.log_colours import green,cyan,yellow
+from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
+
 
 
 BARCODE = config[KEY_BARCODE]
@@ -18,159 +18,206 @@ REFERENCES = config[BARCODE]
 
 rule all:
     input:
-        os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
+        os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta"),
+        os.path.join(config[KEY_TEMPDIR],"variants.csv"),
+        os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
+        expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES),
+        expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv"), reference=REFERENCES)
+
+
+# do this per  cns
 
 rule files:
     params:
-        ref=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.reference.fasta"),
-        reads=os.path.join(config[KEY_TEMPDIR],"reference_groups","{reference}.fastq")
+        ref= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.ref.fasta"),
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta"),
+        vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
 
-rule medaka_haploid_variant:
+rule maskara:
     input:
-        reads=rules.files.params.reads,
-        ref=rules.files.params.ref
+        ref= rules.files.params.ref,
+        cns = rules.files.params.cns,
+        vcf = rules.files.params.vcf, #Need to get the vcf files for bcftools consensus to work
+        bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.bam"),
     params:
-        model = config[KEY_MEDAKA_MODEL],
-        outdir =  os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
+        reference = "{reference}"
     output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),
-        pub_vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.hapoid_variant.log")
+        mask = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv"),
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.masked.fasta")
+    run:
+        mask_file = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{wildcards.reference}.merged_cns.mask") #Added this line to define output variable in maskara command (wouldn't be a problem is maska didn't add a .tsv; must fix)
+        ref = params.reference.split(".SEQ")[0]
+        outfile = output.mask[:-4]
+        shell(f"maskara '{input.bam}' -r '{ref}' -o '{mask_file}'")
+        shell(f"echo '{ref}    {ref}' | bcftools annotate --rename-chrs /dev/stdin '{input.vcf}' > {input.vcf}_renamed.vcf") #This line is not used currently, but if there's a change to the input to bcftools may be needed. Changes the name of the chrm variants are mapped against to allow bcftools to appy variants to whichever input is needed if your fasta is titled differently.
+        shell(f"bgzip -c '{input.vcf}_renamed.vcf' > '{input.vcf}_renamed.vcf.gz'") #bcftools needs vcf files to be bgzipped...
+        shell(f"bcftools index '{input.vcf}_renamed.vcf.gz'") #...and also indexed
+        shell(f"bcftools consensus -f '{input.ref}' -m '{mask_file}.tsv' '{input.vcf}_renamed.vcf.gz' > '{output.fasta}'") #Applies the mask and variants to the ORIGINAL REFERENCE. I think this is sensible, bcftools fails if you give it merged_cns for example as the "ref" alleles in the vcf don't match the provided "ref" sequence.
+        
+        # cns = ""
+        # for record in SeqIO.parse(input.cns, "fasta"):
+        #     cns = str(record.seq)
+        # new_seq = ""
+        # with open(output.mask, "r") as f:
+        #     for l in f:
+        #         l= l.rstrip()
+        #         ref,start,end = l.split("\t")
+        #         start = int(start)
+        #         end = int(end)
+        #         if not new_seq:
+        #             new_seq = cns[:start]
+                
+        #         new_seq += cns[:]
+
+
+rule join_cns_ref:
+    input:
+        ref=rules.files.params.ref,
+        cns = rules.maskara.output.fasta
+    params:
+        reference = "{reference}"
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_cns.fasta")
+    run:
+        with open(output[0],"w") as fw:
+            for record in SeqIO.parse(input.ref,KEY_FASTA):
+                match_field = ""
+                for field in record.description.split(" "):
+                    if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
+                        match_field = field.split("=")[1]
+
+                fw.write(f">{match_field} {record.description}\n{record.seq}\n")
+            if "Sabin" in params.reference:
+                for record in SeqIO.parse(input.cns,KEY_FASTA):
+                    cns = record.id.split(".")[-1]
+                    record_name = str(SAMPLE).replace(" ","_")
+                    record_name += f"|{cns}"
+                    fw.write(f">{record_name}\n{record.seq}\n")
+            else:
+                # need to check up on this
+                for record in SeqIO.parse(input.cns,KEY_FASTA):
+                    record_name = str(SAMPLE).replace(" ","_")
+                    fw.write(f">{record_name}\n{record.seq}\n")
+
+
+rule align_cns_ref:
+    input:
+        rules.join_cns_ref.output.fasta
+    output:
+        aln = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_cns.aln.fasta")
     shell:
         """
-        [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-        if [ -s {input.ref:q} ]
-        then
-            medaka_haploid_variant -i {input.reads:q} \
-                                -r {input.ref:q} \
-                                -o {params.outdir:q} \
-                                -m {params.model:q} \
-                                -f -x && \
-            medaka stitch {output.probs:q} {input.ref:q} {output.cns:q}
-        else
-            touch {output.cns:q}
-            touch {output.probs:q}
-            touch {output.vcf:q}
-        fi
-        cp {output.vcf:q} {output.pub_vcf:q}
+        mafft {input:q} > {output:q}
+        """
+        
+# this step might lead to some sequences now being identical
+rule curate_variants:
+    input:
+        aln = rules.align_cns_ref.output.aln
+    params:
+        reference = "{reference}"
+    output:
+        masked = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","masked.csv"),
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_cns_clean.fasta")
+    run:
+        masked = clean_medaka_cns(SAMPLE, input.aln, output.fasta)
+        with open(output.masked,"w") as fw:
+            for var in masked:
+                site = int(var) + 1
+                fw.write(f"{params.reference},{site},{masked[var]}\n")
+
+rule gather_masked_variants:
+    input:
+        expand(rules.curate_variants.output.masked, reference=REFERENCES)
+    output:
+        masked = os.path.join(config[KEY_TEMPDIR],"masked_variants.csv")
+    run:
+        with open(output.masked,"w") as fw:
+            fw.write("reference,site,variant\n")
+            for i in input:
+                with open(i, "r") as f:
+                    for l in f:
+                        l=l.rstrip("\n")
+                        fw.write(l + '\n')
+
+
+rule join_clean_cns_ref:
+    input:
+        ref=rules.files.params.ref,
+        cns=rules.curate_variants.output.fasta
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_medaka_cns_clean.fasta")
+    run:
+        with open(output[0],"w") as fw:
+            for record in SeqIO.parse(input.ref,KEY_FASTA):
+                match_field = ""
+                for field in record.description.split(" "):
+                    if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
+                        match_field = field.split("=")[1]
+
+                fw.write(f">{match_field} {record.description}\n{record.seq}\n")
+            for record in SeqIO.parse(input.cns,KEY_FASTA):
+                record_name = SAMPLE.replace(" ","_")
+                fw.write(f">{record_name}\n{record.seq}\n")
+
+rule align_clean_cns_ref:
+    input:
+        rules.join_clean_cns_ref.output.fasta
+    output:
+        aln = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","ref_medaka_cns_clean.aln.fasta")
+    shell:
+        """
+        mafft {input:q} > {output:q}
         """
 
-rule medaka_haploid_variant_cns:
+rule make_snipit_graph:
     input:
-        reads=rules.files.params.reads,
-        ref=rules.medaka_haploid_variant.output.cns
+        aln = rules.align_clean_cns_ref.output.aln
     params:
-        reference = "{reference}",
-        model = config[KEY_MEDAKA_MODEL],
-        outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns")
+        out_stem = os.path.join(config[KEY_TEMPDIR],"snipit","{reference}")
     output:
-        probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus_probs.hdf"),
-        vcf = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","medaka.vcf"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta")
-    log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}_cns.hapoid_variant.log")
+        os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg")
     run:
-        if not "Sabin" in params.reference:
-            shell("""
-            [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
-            if [ -s {input.ref:q} ]
-            then
-                medaka_haploid_variant -i {input.reads:q} \
-                                    -r {input.ref:q} \
-                                    -o {params.outdir:q} \
-                                    -m {params.model:q} \
-                                    -f -x && \
-                medaka stitch {output.probs} {input.ref} {output.cns}
-            else
-                touch {output.cns:q}
-                touch {output.probs:q}
-                touch {output.vcf:q}
-            fi
-            """)
-        else:
-            shell("""
-            touch {output.cns:q}
-            touch {output.probs:q}
-            touch {output.vcf:q}
-            """)
+        try:
+            shell("""snipit {input.aln:q} -o {params.out_stem} -f svg -c wes""")
+        except:
+            shell("touch {output[0]:q}")
 
-rule gather_merge_cns:
+rule assess_variants:
     input:
-        ref=expand(rules.files.params.ref,reference=REFERENCES),
-        cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus.fasta"),reference=REFERENCES),
-        cns_cns = expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus.fasta"),reference=REFERENCES)
+        rules.align_clean_cns_ref.output.aln
+    params:
+        reference = "{reference}"
     output:
-        yaml = os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
+        csv = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","variants.csv")
     run:
-        sequences = collections.defaultdict(set)
-        ref_seqs = {}
+        parse_variants(input[0],output.csv,BARCODE,params.reference)
+ 
+rule gather_variants:
+    input:
+        expand(rules.assess_variants.output.csv, reference=REFERENCES)
+    output:
+        csv = os.path.join(config[KEY_TEMPDIR],"variants.csv")
+    run:
+        join_variant_files(VARIANT_CALLS_HEADER_FIELDS,input,output.csv)
 
-        for cns_file in input.cns:
-            if "Sabin" in cns_file:
-                haplodir = "/".join(cns_file.split("/")[:-1])
-            else:
-                haplodir = "/".join(cns_file.split("/")[:-1])+"_cns"
+rule gather_cns:
+    input:
+        variants = rules.gather_variants.output.csv,
+        seqs = expand(rules.curate_variants.output.fasta, reference=REFERENCES)
+    output:
+        os.path.join(config[KEY_TEMPDIR],"consensus_sequences.fasta")
+    run:
+        var_dict = {}
+        with open(input.variants, "r") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                var_dict[row[KEY_REFERENCE]] = row
 
-            haplo_bam = os.path.join(haplodir, "calls_to_ref.bam")
-            for record in SeqIO.parse(cns_file, KEY_FASTA):
-                print(record.id)
-                sequences[str(record.seq)].add(haplo_bam)
-                ref_seqs[str(record.seq)] = record.id
-        
-        ref_file_dict = {}
-        for ref_file in input.ref:
-            for record in SeqIO.parse(ref_file,KEY_FASTA):
-                ref_file_dict[record.id] = ref_file
-        # print(ref_file_dict)
-        cns_file_dict = {}
-        for cns_file in input.cns_cns:
-            for record in SeqIO.parse(cns_file,KEY_FASTA):
-                cns_file_dict[record.id] = cns_file
-        # print(cns_file_dict)
-            
-        for seq in sequences:
-            print(seq[:5],"...",sequences[seq])
-        
-        ref_count = collections.Counter()
-        ref_cns = []
-        new_config = config
-
-        for seq in sequences:
-            ref = ref_seqs[seq]
-            ref_count[ref] +=1
-            record_id = f"{ref_seqs[seq]}.{config[KEY_CNS_STEM]}0{ref_count[ref]}"
-            ref_cns.append(record_id)
-
-            haplo_bams = ""
-            for i in sequences[seq]:
-                haplo_bams += f"'{i}' "
-
-            out_bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.bam")
-            read_count_out = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.read_count.txt")
-
-            shell(f"samtools merge -f '{out_bam}' {haplo_bams} && samtools index '{out_bam}'")
-            shell(f"samtools view -F 0x904 -c '{out_bam}' > {read_count_out}")
-
-            with open(read_count_out,"r") as f:
-                for l in f:
-                    read_count = l.rstrip()
-                    new_config[record_id] = read_count
-
-            with open(os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.merged_cns.fasta"),"w") as fseq:
-                fseq.write(f">{record_id} read_count={read_count}\n{seq}\n")
-
-            cns_ref = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.ref.fasta")
-            cns_cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis",f"{record_id}.cns_ref.fasta")
-            # print(cns_cns)
-            shell(f"cp '{ref_file_dict[ref]}' '{cns_ref}'")
-            if ref in cns_file_dict:
-                shell(f"cp '{cns_file_dict[ref]}' '{cns_cns}'")
-            
-        new_config[BARCODE] = ref_cns
-
-        with open(output.yaml, 'w') as fw:
-            yaml.dump(new_config, fw) 
-        print(yellow("-----------------------"))
-
-
+        with open(output[0],"w") as fw:
+            for in_file in input.seqs:
+                reference = os.path.basename(os.path.dirname(in_file))
+                for record in SeqIO.parse(in_file,KEY_FASTA):
+                    variant_count = var_dict[reference]["variant_count"]
+                    variant_string = var_dict[reference]["variants"]
+                    fw.write(f">{reference}|{BARCODE}|{variant_count}|{variant_string}\n{record.seq}\n")
