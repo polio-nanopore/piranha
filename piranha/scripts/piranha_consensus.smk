@@ -104,6 +104,7 @@ rule gather_merge_cns:
         yaml = os.path.join(config[KEY_TEMPDIR],"consensus_config.yaml")
     run:
         sequences = collections.defaultdict(set)
+        variant_calls = collections.defaultdict(set)
         ref_seqs = {}
 
         for cns_file in input.cns:
@@ -113,9 +114,11 @@ rule gather_merge_cns:
                 haplodir = "/".join(cns_file.split("/")[:-1])+"_cns"
 
             haplo_bam = os.path.join(haplodir, "calls_to_ref.bam")
+            haplo_vcf = os.path.join(haplodir, "medaka.vcf")
             for record in SeqIO.parse(cns_file, KEY_FASTA):
                 print(record.id)
                 sequences[str(record.seq)].add(haplo_bam)
+                variant_calls[str(record.seq)].add(haplo_vcf)
                 ref_seqs[str(record.seq)] = record.id
         
         ref_file_dict = {}
