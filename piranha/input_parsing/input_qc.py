@@ -102,7 +102,7 @@ def parse_barcodes_csv(barcodes_csv,config):
 #     total = 0
 #     seq_ids = set()
 #     try:
-#         for record in SeqIO.parse(supplementary_sequences,"fasta"):
+#         for record in SeqIO.parse(supplementary_sequences,KEY_FASTA):
 #             seq_ids.add(record.id)
 
 #             total +=1
@@ -142,15 +142,17 @@ def qc_supplementary_metadata_file(supplementary_metadata,config):
 
 
 def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_group,total_seqs,seq_info,config):
-    for record in SeqIO.parse(os.path.join(supplementary_datadir,supp_file),"fasta"):
+    for record in SeqIO.parse(os.path.join(supplementary_datadir,supp_file),KEY_FASTA):
         total_seqs["total"] +=1
         ref_group = ""
         for field in record.description.split(" "):
             if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
                 ref_group = field.split("=")[1]
+                # print(VALUE_REFERENCE_GROUP_FIELD, "ref group", ref_group)
         
         if ref_group not in config[KEY_REFERENCES_FOR_CNS]:
             no_reference_group.add(record.id)
+            # print(record.id)
         else:
             total_seqs[ref_group]+=1
             seq_records.append(record)
@@ -202,7 +204,7 @@ def gather_supplementary_data(supplementary_datadir,supplementary_sequences,supp
         
         check_there_are_seqs(total_seqs,supplementary_datadir,no_reference_group,config)
 
-        SeqIO.write(seq_records,fw, "fasta")
+        SeqIO.write(seq_records,fw, KEY_FASTA)
 
         supplementary_metadata_header = set()
 
@@ -362,7 +364,7 @@ def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_f
     seq_ids = collections.Counter()
     ref_group_field_in_headers = True
     ref_group_values = set()
-    for record in SeqIO.parse(config[KEY_REFERENCE_SEQUENCES],"fasta"):
+    for record in SeqIO.parse(config[KEY_REFERENCE_SEQUENCES],KEY_FASTA):
         ref_group_value = parse_ref_group_values(record.description,config[KEY_REFERENCE_GROUP_FIELD])
         ref_group_values.add(ref_group_value)
 
@@ -456,7 +458,7 @@ def control_group_parsing(positive_control, negative_control, positive_reference
             print(f"- {neg}")
 
     if config[KEY_INCLUDE_POSITIVE_REFERENCES]:
-        refs = SeqIO.index(config[KEY_REFERENCE_SEQUENCES],"fasta")
+        refs = SeqIO.index(config[KEY_REFERENCE_SEQUENCES],KEY_FASTA)
         not_in = set()
         for ref in config[KEY_POSITIVE_REFERENCES]:
             if ref not in refs:

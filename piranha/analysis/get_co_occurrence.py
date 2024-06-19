@@ -19,7 +19,7 @@ def get_combinations(variants,read_fasta_file,reference,barcode,threshold):
         sites = [int(i.split(":")[0]) for i in variant_list]
 
         c = 100
-        for record in SeqIO.parse(read_fasta_file,"fasta"):
+        for record in SeqIO.parse(read_fasta_file,KEY_FASTA):
             
             if not c:
                 break

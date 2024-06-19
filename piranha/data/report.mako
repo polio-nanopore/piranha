@@ -889,7 +889,7 @@
          ],
        "layer":[
              {
-               "transform": [{"calculate": "datum[filterBy]", "as": "EV reads present"}],
+               "transform": [{"calculate": "datum[filterBy]", "as": "Reads present"}],
                "mark": {"type":"circle","size":500},
                "encoding": {
                  "x": {"field": "x", "type": "nominal",
