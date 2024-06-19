@@ -25,7 +25,7 @@ setup(name='piranha',
             "pandas~=1.5",
             "snipit>=1.2",
             "biopython",
-            "medaka>=1.7.1",
+            "medaka~=1.11.0",
             "numpy<=1.23.5",
             "scipy~=1.11"
       ],
