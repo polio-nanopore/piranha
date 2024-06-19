@@ -41,7 +41,7 @@ RUN source /venv/bin/activate && pip install --user --no-cache-dir . \
   && mamba install -c anaconda -c defaults tensorflow<2.15.0 tensorflow-estimator
 
 # build image
-FROM debian:bookworm-slim AS runtime-image
+FROM debian:bullseye-slim AS runtime-image
 
 COPY --from=compile-image /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
