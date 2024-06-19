@@ -37,10 +37,10 @@ RUN conda clean --all &&\
 # build piranha
 WORKDIR /data/piranha
 RUN source /venv/bin/activate && pip install --user --no-cache-dir . 
-  #&& \
-  #pip uninstall -y tensorflow tensorflow-estimator 
-  #&& \
-  #mamba install -c anaconda -c defaults tensorflow tensorflow-estimator
+  && \
+  pip uninstall -y tensorflow tensorflow-estimator 
+  && \
+  mamba install -c anaconda -c defaults tensorflow tensorflow-estimator
 
 # build image
 FROM debian:bookworm-slim AS runtime-image
