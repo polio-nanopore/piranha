@@ -13,7 +13,6 @@ dependencies:
   - cov-ert::jclusterfunk>=0.0.25
   - mafft
   - minimap2=2.17
-  - pyabpoa
   - rasusa=0.7.1
   - samtools=1.20
   - snakemake-minimal=7.32.4

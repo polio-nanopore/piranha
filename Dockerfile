@@ -38,7 +38,8 @@ RUN conda clean --all &&\
 WORKDIR /data/piranha
 RUN source /venv/bin/activate && pip install --user --no-cache-dir . \ 
   && pip uninstall -y tensorflow keras \
-  && conda install -c conda-forge tensorflow~=2.14.0 keras~=2.14
+  && conda install -c conda-forge tensorflow~=2.11 keras~=2.11 \
+  && pip install pyabpoa==1.5.1
 
 # build image
 FROM debian:bullseye-slim AS runtime-image
