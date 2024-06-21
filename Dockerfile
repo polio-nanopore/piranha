@@ -40,6 +40,9 @@ RUN source /venv/bin/activate && pip install --user --no-cache-dir . \
   && pip uninstall -y tensorflow keras pyabpoa \
   && conda install -y -c conda-forge tensorflow~=2.11 keras~=2.11
 
+# test piranha runs while have data before creating runtime image
+RUN source /venv/bin/activate && piranha -h && piranha -i /data/piranha/test_data/demultiplexed -b /data/piranha/test_data/barcodes.csv
+
 # build image
 FROM debian:bullseye-slim AS runtime-image
 
