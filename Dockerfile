@@ -11,7 +11,7 @@ RUN apt-get update -y && \
   apt-get clean && apt-get autoclean
 
 # copy in piranha
-RUN git clone  -b dev https://github.com/polio-nanopore/piranha.git && \
+RUN git clone https://github.com/polio-nanopore/piranha.git && \
   cd /data/piranha && \
   mamba install conda -n base -c conda-forge -c defaults -c bioconda && \
   mamba env create -f /data/piranha/environment.yml
