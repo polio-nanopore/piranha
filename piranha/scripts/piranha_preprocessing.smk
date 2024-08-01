@@ -51,12 +51,14 @@ rule assess_broad_diversity:
     output:
         csv = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","refs_present.csv"),
         hits = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_reads.csv"),
+        multi_out = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","multi_mapped_refs.csv"),
         parsing = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","hits_filter_description.csv")
     run:
         parse_paf_file(input.map_file,
                         output.csv,
                         output.parsing,
                         output.hits,
+                        output.multi_out,
                         config[KEY_REFERENCE_SEQUENCES],
                         config[KEY_POSITIVE_REFERENCES],
                         config[KEY_INCLUDE_POSITIVE_REFERENCES],

@@ -190,7 +190,7 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
     with open(new_db_seqs,"w") as fw:
         countnew = 0
 
-        for record in SeqIO.parse(sample_sequences, "fasta"):
+        for record in SeqIO.parse(sample_sequences, KEY_FASTA):
             new_record = record
             desc_list = new_record.description.split(" ")
             write_record = True
@@ -211,7 +211,7 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
                 new_desc_list = [i for i in desc_list if not i.startswith("barcode=")]
                 new_record.description = " ".join(new_desc_list)
                 
-                SeqIO.write(new_record, fw, "fasta")
+                SeqIO.write(new_record, fw, KEY_FASTA)
                 countnew+=1
                 sample = record.id.split("|")[0]
                 record_ids[record.id] = sample

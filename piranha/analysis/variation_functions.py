@@ -37,7 +37,7 @@ def parse_variant_file(var_file):
 def ref_dict_maker(ref_fasta):
     ref_dict = {}
     ref_fasta = pysam.FastaFile(ref_fasta)
-    for idx, base in enumerate(ref_fasta.fetch(ref_fasta.references[0])):
+    for idx, base in enumerate(ref_fasta.fetch(ref_fasta.references[0]), start=0):
         ref_dict[idx] = base
 
     return ref_dict
