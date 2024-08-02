@@ -12,7 +12,7 @@ setup(name='piranha',
       packages=find_packages(),
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
-            "piranha/scripts/piranha_vp1.smk",
+            "piranha/scripts/piranha_main.smk",
             "piranha/scripts/piranha_haplotype.smk",
             "piranha/scripts/piranha_consensus.smk",
             "piranha/scripts/piranha_curate.smk",
