@@ -120,8 +120,9 @@ rule curate_sequences:
 rule generate_variation_info:
     input:
         snakefile = os.path.join(workflow.current_basedir,"piranha_variation.smk"),
-        fasta = rules.curate_sequences.output.fasta,
-        yaml = rules.generate_consensus_sequences.output.yaml
+        yaml = rules.generate_consensus_sequences.output.yaml,
+        variants = rules.curate_sequences.output.csv,
+        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta")
     params:
         barcode = "{barcode}",
         outdir = os.path.join(config[KEY_OUTDIR],"{barcode}"),
@@ -129,7 +130,8 @@ rule generate_variation_info:
     threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}_variation.smk.log")
     output:
-        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json")
+        json = os.path.join(config[KEY_TEMPDIR],"{barcode}","variation_info.json"),
+        json_mask = os.path.join(config[KEY_TEMPDIR],"{barcode}","mask_info.json")
     run:
         # decide if we want 1 per haplotyde or 1 per ref group, will need mods either way
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
@@ -143,10 +145,20 @@ rule generate_variation_info:
                     f"sample='{sample}' "
                     "--cores {threads} &> {log:q}")
 
+
+rule mask_consensus_sequences:
+    input:
+        mask_json = rules.generate_variation_info.output.json_mask,
+        fasta = rules.curate_sequences.output.fasta
+    output:
+        fasta = os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.masked.fasta")
+    run:
+        mask_low_coverage(input.mask_json, input.fasta,output.fasta)
+
 rule gather_consensus_sequences:
     input:
         composition = rules.files.params.composition,
-        fasta = expand(rules.curate_sequences.output.fasta, barcode=config[KEY_BARCODES])
+        fasta = expand(rules.mask_consensus_sequences.output.fasta, barcode=config[KEY_BARCODES])
     params:
         publish_dir = os.path.join(config[KEY_OUTDIR],"published_data")
     output:
@@ -156,8 +168,6 @@ rule gather_consensus_sequences:
         # needs mod for checking & merging identical cns within ref group
         # also header now needs hap parsing & hap->CNS mapping
         gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA],config[KEY_RUNNAME], output[0],params.publish_dir,config)
-
-
 
 rule generate_report:
     input:
@@ -177,6 +187,8 @@ rule generate_report:
             config_loaded = yaml.safe_load(f)
         with open(input.cns_yaml, 'r') as f:
             cns_config_loaded = yaml.safe_load(f)
+
+        #var dict now has total on it- so can infer from var dict which sites have been masked out
         make_sample_report(output.html,
                             input.variation_info,
                             input.consensus_seqs,
