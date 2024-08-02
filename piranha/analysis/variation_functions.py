@@ -60,7 +60,7 @@ def non_ref_prcnt_calc(pos,pileup_dict,ref_dict):
         else:
             non_ref_prcnt = round((100 - ((ref_count / total) * 100)), 2)
 
-    return non_ref_prcnt
+    return non_ref_prcnt,total
 
 
 
@@ -138,7 +138,7 @@ def pileupper(bamfile,ref_dict,var_dict,base_q=13):
         pileup_dict["T reads"] = T_counter
         pileup_dict["G reads"] = G_counter
         pileup_dict["- reads"] = del_counter
-        pileup_dict["Percentage"] = non_ref_prcnt_calc(pileupcolumn.pos,pileup_dict,ref_dict)
+        pileup_dict["Percentage"],pileup_dict["Total"] = non_ref_prcnt_calc(pileupcolumn.pos,pileup_dict,ref_dict)
         pileup_dict["Ref base"] = ref_dict[pileupcolumn.pos]
         variation_info.append(pileup_dict)
 
