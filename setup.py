@@ -12,7 +12,7 @@ setup(name='piranha',
       packages=find_packages(),
       scripts=[
             "piranha/scripts/piranha_preprocessing.smk",
-            "piranha/scripts/piranha_vp1.smk",
+            "piranha/scripts/piranha_main.smk",
             "piranha/scripts/piranha_haplotype.smk",
             "piranha/scripts/piranha_consensus.smk",
             "piranha/scripts/piranha_curate.smk",
@@ -30,7 +30,7 @@ setup(name='piranha',
             "scipy~=1.11"
       ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
-      url='https://github.com/aineniamh/piranha',
+      url='https://github.com/polio-nanopore/piranha',
       author='Aine OToole',
       author_email='aine.otoole@ed.ac.uk',
       entry_points="""

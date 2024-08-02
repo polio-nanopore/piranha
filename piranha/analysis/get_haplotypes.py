@@ -112,12 +112,12 @@ def write_haplotype_ref(ref,taxon,read_haplotypes,outdir):
 
 def write_haplotype_fastq(reads,taxon,read_haplotypes,outdir):
     
-    reads = SeqIO.index(reads,"fastq")
+    reads = SeqIO.index(reads,KEY_FASTQ)
     for h in read_haplotypes:
         with open(os.path.join(outdir, f"{taxon}_{h}.fastq"),"w") as fw:
             for read in read_haplotypes[h]:
                 record = reads[read]
-                SeqIO.write(record,fw,"fastq")
+                SeqIO.write(record,fw,KEY_FASTQ)
 
 
 def get_haplotypes(fasta,vcf,reads,ref,out_haplotypes,outdir,taxon,min_reads,min_pcent):

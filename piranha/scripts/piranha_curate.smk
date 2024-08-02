@@ -22,6 +22,7 @@ rule all:
         os.path.join(config[KEY_TEMPDIR],"variants.csv"),
         os.path.join(config[KEY_TEMPDIR],"masked_variants.csv"),
         expand(os.path.join(config[KEY_TEMPDIR],"snipit","{reference}.svg"), reference=REFERENCES)
+        # expand(os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.mask.tsv"), reference=REFERENCES)
 
 
 # do this per  cns
@@ -29,8 +30,8 @@ rule all:
 rule files:
     params:
         ref= os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.ref.fasta"),
-        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta")
-        
+        cns = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}.merged_cns.fasta"),
+        vcf = os.path.join(config[KEY_TEMPDIR],"variant_calls","{reference}.vcf")
 
 rule join_cns_ref:
     input:

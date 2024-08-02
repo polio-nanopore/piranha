@@ -889,7 +889,7 @@
          ],
        "layer":[
              {
-               "transform": [{"calculate": "datum[filterBy]", "as": "EV reads present"}],
+               "transform": [{"calculate": "datum[filterBy]", "as": "Reads present"}],
                "mark": {"type":"circle","size":500},
                "encoding": {
                  "x": {"field": "x", "type": "nominal",
@@ -905,7 +905,7 @@
                                  "labelFont":"Helvetica Neue",
                                  "labelFontSize":18
                                  }},
-                 "fill": {"field": "EV reads present",
+                 "fill": {"field": "Reads present",
                           "scale": {"range": ["#e68781", "#48818d", "#b2b2b2"]},
                           "sort": ["Present","Absent","N/A"]
                         },
@@ -1049,7 +1049,7 @@
     <div id="citation_box" class="info_box">
       <p>${LANGUAGE_CONFIG["53"]}</p>
       <p>
-        <strong>O’Toole Á, Colquhoun R, Ansley C, Troman C, Maloney D, Vance Z, Akello J, Bujaki E, Majumdar M, Khurshid A, Arshad Y, Alam MM, Martin J, Shaw A, Grassly N, Rambaut A</strong> (2023) Automated detection and classification of polioviruses from nanopore sequencing reads using piranha. <i>bioRxiv</i> <a style='color:#e68781' href="https://doi.org/10.1101/2023.09.05.556319">https://doi.org/10.1101/2023.09.05.556319</a>
+        <strong>O’Toole Á, Colquhoun R, Ansley C, Troman C, Maloney D, Vance Z, Akello J, Bujaki E, Majumdar M, Khurshid A, Arshad Y, Alam MM, Martin J, Shaw A, Grassly N, Rambaut A</strong> (2023) Automated detection and classification of polioviruses from nanopore sequencing reads using piranha. <i>Virus Evolution</i> <a style='color:#e68781' href="https://doi.org/10.1093/ve/veae023">https://doi.org/10.1093/ve/veae023</a>
       </p>
     </div>
     <footer class="page-footer">

@@ -20,7 +20,7 @@ def get_snakefile(thisdir,analysis_mode):
 
     snakefile = os.path.join(thisdir, 'scripts',f'piranha_{analysis_mode}.smk')
     if not os.path.exists(snakefile):
-        sys.stderr.write(cyan(f'Error: cannot find Snakefile at {snakefile}\n Check installation or specify another analysis mode\n'))
+        sys.stderr.write(cyan(f'Error: cannot find Snakefile at {snakefile}\n Check installation\n'))
         sys.exit(-1)
     return snakefile
 
