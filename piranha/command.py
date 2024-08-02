@@ -45,7 +45,7 @@ def main(sysargs = sys.argv[1:]):
 
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`. Default: `{VALUE_SAMPLE_TYPE}`")
-    analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run. Options: `vp1`, `wg`. Default: `{VALUE_ANALYSIS_MODE}`")
+    analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run, for preconfigured defaults. Options: `vp1`, `wg`. Default: `{VALUE_ANALYSIS_MODE}`")
     analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
     analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
     analysis_group.add_argument("-q","--min-map-quality",action="store",type=int,help=f"Minimum mapping quality. Range 0 to 60, however 0 can imply a multimapper. Default: {VALUE_MIN_MAP_QUALITY}")
@@ -128,7 +128,7 @@ def main(sysargs = sys.argv[1:]):
     misc.add_check_valid_arg(KEY_ORIENTATION,args.orientation,VALID_ORIENTATION,config)
 
     # grabs the snakefile
-    snakefile = data_install_checks.get_snakefile(thisdir,config[KEY_ANALYSIS_MODE])
+    snakefile = data_install_checks.get_snakefile(thisdir)
     
     # Checks medaka options if non default values used.
     analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
