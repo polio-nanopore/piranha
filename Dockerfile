@@ -13,7 +13,7 @@ RUN apt-get update -y && \
 # copy in piranha
 RUN git clone https://github.com/polio-nanopore/piranha.git && \
   cd /data/piranha && \
-  mamba install conda -n base -c conda-forge -c defaults && \
+  mamba install conda -n base -c conda-forge -c defaults -c bioconda && \
   mamba env create -f /data/piranha/environment.yml
 
 # Make RUN commands use the new environment:
@@ -37,8 +37,11 @@ RUN conda clean --all &&\
 # build piranha
 WORKDIR /data/piranha
 RUN source /venv/bin/activate && pip install --user --no-cache-dir . \ 
-  && pip uninstall -y tensorflow tensorflow-estimator \
-  && mamba install -c anaconda -c defaults tensorflow~=2.10 tensorflow-estimator
+  && pip uninstall -y tensorflow keras pyabpoa \
+  && conda install -y -c conda-forge tensorflow~=2.11 keras~=2.11
+
+# test piranha runs while have data before creating runtime image
+RUN source /venv/bin/activate && piranha -h && piranha -i /data/piranha/test_data/demultiplexed -b /data/piranha/test_data/barcodes.csv
 
 # build image
 FROM debian:bullseye-slim AS runtime-image
