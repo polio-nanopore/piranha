@@ -30,7 +30,7 @@ setup(name='piranha',
             "scipy~=1.11"
       ],
       description='piranha: Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis',
-      url='https://github.com/aineniamh/piranha',
+      url='https://github.com/polio-nanopore/piranha',
       author='Aine OToole',
       author_email='aine.otoole@ed.ac.uk',
       entry_points="""
