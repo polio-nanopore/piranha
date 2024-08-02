@@ -128,7 +128,7 @@ def main(sysargs = sys.argv[1:]):
     misc.add_check_valid_arg(KEY_ORIENTATION,args.orientation,VALID_ORIENTATION,config)
 
     # grabs the snakefile
-    snakefile = data_install_checks.get_snakefile(thisdir)
+    snakefile = data_install_checks.get_snakefile(thisdir,"main")
     
     # Checks medaka options if non default values used.
     analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
