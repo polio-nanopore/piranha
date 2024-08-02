@@ -3,6 +3,8 @@ import os
 import collections
 from Bio import SeqIO
 import csv
+import json
+from itertools import groupby
 
 from piranha.utils.config import *
 
@@ -103,3 +105,55 @@ def get_sample(barcodes_csv,barcode):
                 if row[KEY_BARCODE] == barcode:
                     sample = row[KEY_SAMPLE]
     return sample
+
+
+
+
+def group_consecutive_sites(lst):
+    out = []
+    for _, g in groupby(enumerate(lst), lambda k: k[0] - k[1]):
+        start = next(g)[1]
+        end = list(v for _, v in g) or [start]
+        out.append(range(start, end[-1] + 1))
+    return out
+
+def get_mask_dict(mask_file):
+    mask_dict = {}
+    with open(mask_file,"r") as f:
+        mask_json = json.load(f)
+        
+        for ref in mask_json:
+
+            sites_to_mask = sorted(mask_json[ref])
+            mask_ranges = group_consecutive_sites(sites_to_mask)
+            mask_dict[ref] = mask_ranges
+    return mask_dict
+            
+
+def mask_low_coverage(mask_file, sequences,output):
+    mask_dict = get_mask_dict(mask_file)
+    records = 0
+    with open(output,"w") as fw:
+        for record in SeqIO.parse(sequences,"fasta"):
+            seq_id = record.id.split("|")[0]
+            if seq_id in mask_dict and mask_dict[seq_id]:
+                mask_ranges = mask_dict[seq_id]
+                n_count = 0
+                new_seq = str(record.seq)
+                for site in mask_ranges:
+
+                    start,stop = site[0]-1,site[-1]+1
+
+                    if site[0] == 0:
+                        length = stop
+                        n_count+=length
+                        new_seq = ("N"*length) + new_seq[stop:]
+                    else:
+                        length = stop-start
+                        new_seq = new_seq[:start] + ("N"*length) + new_seq[stop:]
+                        n_count+=length
+
+                n_diff = new_seq.count("N") - str(record.seq).count("N") 
+                fw.write(f">{record.description}\n{new_seq}\n")
+            else:
+                fw.write(f">{record.description}\n{record.seq}\n")
