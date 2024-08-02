@@ -905,7 +905,7 @@
                                  "labelFont":"Helvetica Neue",
                                  "labelFontSize":18
                                  }},
-                 "fill": {"field": "EV reads present",
+                 "fill": {"field": "Reads present",
                           "scale": {"range": ["#e68781", "#48818d", "#b2b2b2"]},
                           "sort": ["Present","Absent","N/A"]
                         },
