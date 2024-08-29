@@ -310,6 +310,7 @@ def parse_read_dir(readdir,config):
     run_id = False
 
     count_read_files = collections.Counter()
+    found_read_dir = config[KEY_READDIR]
     for r,d,f in os.walk(config[KEY_READDIR]):
         for fn in f:
             if fn.endswith(".fastq") or fn.endswith(".fq") or fn.endswith(".gz") or fn.endswith(".gzip"):
@@ -319,9 +320,12 @@ def parse_read_dir(readdir,config):
                         run_id = fn.split(".")[0].split("_")[-2]
                     except:
                         run_id = ""
+                found_read_dir = "/".join(r.split("/")[:-1])
                 barcode = r.split("/")[-1]
+
                 count_read_files[barcode]+=1
-    
+
+    config[KEY_READDIR] = found_read_dir
     config[KEY_RUNID] = run_id
     
     print(green("Found read files"))
@@ -339,10 +343,19 @@ def parse_read_dir(readdir,config):
         sys.stderr.write(cyan(f"Error: No barcode directories found, please check file path points to where demultiplexed reads are.\n"))
         sys.exit(-1)
 
+    matched_barcodes = set()
     for barcode in config[KEY_BARCODES]:
         if barcode not in count_read_files:
             print(green(f"Barcode {barcode}:\t") + f"0 fastq files")
             print(cyan(f"Warning: No read files identified for barcode `{barcode}`.\nThis may be a negative control or a failed sample, but be aware it will not be analysed."))
+        else:
+            matched_barcodes.add(barcode)
+
+    if not matched_barcodes:
+        sys.stderr.write(cyan(f"Error: No barcodes in supplied barcode file matched at the file path destination, please check file path points to where demultiplexed reads are.\n"))
+        sys.exit(-1)
+    else:
+        print(green("Number of matched barcodes: "), len(matched_barcodes))
 
 def parse_ref_group_values(description,ref_group_key):
     fields = description.split(" ")
