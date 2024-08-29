@@ -335,6 +335,10 @@ def parse_read_dir(readdir,config):
         if d not in config[KEY_BARCODES]:
             print(cyan(f"Warning: barcode {d} is not included in the input barcodes csv and will not be analysed."))
 
+    if len(count_read_files) == 0:
+        sys.stderr.write(cyan(f"Error: No barcode directories found, please check file path points to where demultiplexed reads are.\n"))
+        sys.exit(-1)
+
     for barcode in config[KEY_BARCODES]:
         if barcode not in count_read_files:
             print(green(f"Barcode {barcode}:\t") + f"0 fastq files")
