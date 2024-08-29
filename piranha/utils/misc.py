@@ -70,6 +70,8 @@ def check_date_format(to_check, line_count, header):
 def add_arg_to_config(key,arg,config):
     if arg:
         config[key] = arg
+    elif arg == 0:
+        config[key] = arg
 
 def add_file_to_config(key,arg,config):
     if arg:
