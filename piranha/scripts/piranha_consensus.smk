@@ -43,7 +43,7 @@ rule medaka_haploid_variant:
         [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
         if [ -s {input.ref:q} ]
         then
-            medaka_haploid_variant -i {input.reads:q} \
+            medaka_variant -i {input.reads:q} \
                                 -r {input.ref:q} \
                                 -o {params.outdir:q} \
                                 -m {params.model:q} \
@@ -76,7 +76,7 @@ rule medaka_haploid_variant_cns:
             [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
             if [ -s {input.ref:q} ]
             then
-                medaka_haploid_variant -i {input.reads:q} \
+                medaka_variant -i {input.reads:q} \
                                     -r {input.ref:q} \
                                     -o {params.outdir:q} \
                                     -m {params.model:q} \
