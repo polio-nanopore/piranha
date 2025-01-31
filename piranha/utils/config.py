@@ -33,6 +33,7 @@ KEY_MIN_MAP_QUALITY = "min_map_quality"
 KEY_MIN_ALN_BLOCK = "min_aln_block"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
 KEY_MEDAKA_MODEL = "medaka_model"
+KEY_MINIMAP2_OPTIONS = "minimap2_options"
 KEY_PRIMER_LENGTH = "primer_length"
 
 KEY_REFERENCE_GROUP_FIELD = "reference_group_field"
@@ -330,10 +331,10 @@ FRENCH_RESOURCES = [
     ]
 
 
-MINIMAP2_VALID_FLAGS = set(
+MINIMAP2_VALID_FLAGS = [
     "k","w","f",
     "g","G","F","r","n","m",
     "A","B","O","E","z","s",
     "u","x"
-)
+]
     
