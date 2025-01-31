@@ -32,12 +32,14 @@ rule map_reads:
         ref = config[KEY_REFERENCE_SEQUENCES],
         fastq = rules.filter_by_length.output.fastq
     threads: workflow.cores
+    params:
+        minimap2_options = config[KEY_MINIMAP2_OPTIONS]
     log: os.path.join(config[KEY_TEMPDIR],"logs","{barcode}.minimap2_initial.log")
     output:
         paf = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.paf")
     shell:
         """
-        minimap2 -t {threads} -k 5 -w 4 --secondary=no --paf-no-hit \
+        minimap2 -t {threads} {params.minimap2_options} --secondary=no --paf-no-hit \
         {input.ref:q} \
         {input.fastq:q} -o {output:q} &> {log:q}
         """
