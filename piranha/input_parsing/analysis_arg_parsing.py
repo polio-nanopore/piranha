@@ -81,20 +81,20 @@ def minimap2_options_parsing(minimap2_options,config):
             to_parse = to_parse.split(" ")
 
         for option in to_parse:
-            # eg country=Ireland 
-            flag,value = factor.split("=")
+            option = option.lstrip().rstrip()
+            flag,value = option.split("=")
             if flag in MINIMAP2_VALID_FLAGS:
                 options[flag] = value
             else:
                 not_found.append(flag)
         
         if len(not_found)==1:
-            sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument contains a flag that is not valid for minimap2 configuration in piranha:") + f" {not_found[0]}\n")
+            sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument contains a flag that is not valid for minimap2 configuration in piranha:") + f" -{not_found[0]}\n")
             misc.minimap2_help()
             sys.exit(-1)
         elif len(not_found)>1:
-            not_found_str = not_found.join("\n - ")
-            sys.stderr.write(cyan(f"Error: `-fm/--from-metadata` argument contains flags that are not valid for minimap2 configuration in piranha:") + f"\n - {not_found_str}\n")
+            not_found_str = "\n -".join(not_found)
+            sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument contains flags that are not valid for minimap2 configuration in piranha:") + f"\n -{not_found_str}\n")
             misc.minimap2_help()
             sys.exit(-1)
         else:
@@ -132,7 +132,7 @@ def analysis_mode(analysis_mode_arg,config):
         config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][0]
         config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][1]
 
-    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}")
+    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}\n***\n")
     # if config[KEY_ANALYSIS_MODE] != "vp1":
     #     sys.stderr.write(cyan(f"Only `vp1` analysis mode currently implemented.\n"))
     #     sys.exit(-1)
