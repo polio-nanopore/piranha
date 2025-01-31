@@ -22,9 +22,10 @@ rule filter_by_length:
         file_path = os.path.join(config[KEY_READDIR], "{barcode}"),
         barcode = "{barcode}"
     output:
-        fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.fastq")
+        fastq = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.fastq"),
+        report = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filter_report.csv")
     run:
-        gather_filter_reads_by_length(params.file_path,params.barcode,output.fastq,config)
+        gather_filter_reads_by_length(params.file_path,params.barcode,output.fastq,output.report,config)
 
 rule map_reads:
     input:
@@ -36,7 +37,7 @@ rule map_reads:
         paf = os.path.join(config[KEY_TEMPDIR],"{barcode}","initial_processing","filtered_reads.paf")
     shell:
         """
-        minimap2 -t {threads} -x asm20 --secondary=no --paf-no-hit \
+        minimap2 -t {threads} -k 5 -w 4 --secondary=no --paf-no-hit \
         {input.ref:q} \
         {input.fastq:q} -o {output:q} &> {log:q}
         """
@@ -89,7 +90,7 @@ rule write_hit_fastq:
         for ref in to_write:
             written = os.path.join(params.outdir,f"{ref}.fastq")
             published = os.path.join(params.publish_dir,f"{ref}.fastq")
-            shell(f"cp {written} {published}")
+            shell(f"cp '{written}' '{published}'")
 
         write_out_ref_fasta(to_write,config[KEY_REFERENCE_SEQUENCES],params.outdir)
 
