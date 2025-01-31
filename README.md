@@ -416,7 +416,9 @@ Specify one or more minimap2 command line options to overwrite the default mappi
 
 The options take the form `flag=value` and can be any number of space-delimited options.
 
-*Example:*
+For example, to run the present (`x`) option in minimap2 for ONT data, you would supply piranha with `-mo x=map-ont`, where `x` is the flag for preset options in minimap2 and `map-ont` is the value that instructs minimap2 to map ONT read data.
+
+*Detailed example:*
 Without any use of this flag, the command run in piranha for minimap2 is:
 ```
 minimap2 -t [threads]
