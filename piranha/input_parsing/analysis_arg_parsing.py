@@ -98,6 +98,30 @@ def minimap2_options_parsing(minimap2_options,config):
             misc.minimap2_help()
             sys.exit(-1)
         else:
+            for flag in options:
+                if flag in MINIMAP2_FLOAT_FLAGS:
+                    try:
+                        trial = float(options[flag])
+                    except:
+                        sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument {flag} should be a float.\nValue supplied: {options[flag]}"))
+                        misc.minimap2_help()
+                        sys.exit(-1)
+                elif flag in MINIMAP2_INT_FLAGS:
+                    try:
+                        trial = int(options[flag])
+                    except:
+                        sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument {flag} should be an integer.\nValue supplied: {options[flag]}"))
+                        misc.minimap2_help()
+                        sys.exit(-1)
+                elif flag == "x":
+                    if not options[flag] in MINIMAP2_PRESET_OPTIONS:
+                        sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument {flag} should specify one of the following options:\n"))
+                        for i in MINIMAP2_PRESET_OPTIONS:
+                            sys.stderr.write(f"- {i}\n")
+                        sys.stderr.write(cyan(f"Value supplied: {options[flag]}\n"))
+                        sys.exit(-1)
+
+
             minimap2_string = ""
             for flag in options:
                 minimap2_string += f"-{flag}{options[flag]} "

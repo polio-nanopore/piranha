@@ -330,10 +330,13 @@ FRENCH_RESOURCES = [
         RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]
 
+MINIMAP2_FLOAT_FLAGS = ["f"]
+MINIMAP2_INT_FLAGS = ["k","w","g","r","n","F","m","A","B","O","E","z","s","u"]
+MINIMAP2_PRESET_OPTIONS = ["map-pb","map-ont","sr","asm5","asm10","asm20"]
 
 MINIMAP2_VALID_FLAGS = [
     "k","w","f",
-    "g","G","F","r","n","m",
+    "g","r","n","m",
     "A","B","O","E","z","s",
     "u","x"
 ]
