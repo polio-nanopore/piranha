@@ -145,6 +145,8 @@ def main(sysargs = sys.argv[1:]):
                                                 args.min_map_quality,
                                                 config)
 
+    config[KEY_MINIMAP2_OPTIONS]analysis_arg_parsing.minimap2_options_parsing(args.minimap2_options)
+
     # Configures which haplotype defaults and whether to run haplo calling
     analysis_arg_parsing.haplo_group_parsing(args.run_haplotyping,
                         args.haplotype_sample_size,
