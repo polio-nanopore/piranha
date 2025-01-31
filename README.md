@@ -427,7 +427,7 @@ minimap2 -t [threads]
   	-x asm20
         [ref] [reads] -o [outfile]
 ```
-This command means that [threads] number of threads will be used, that only primary chains will be reported (the top hit for each read), and that in the output (PAF) file even reads with no hits will be recorded for record-keeping sake. The -x asm20 flag refers to the preset option to assemble a query against the entire target (our reads are longer than the reference, so this has worked well in simulations) and theoretically it should be able to handle up to 20% divergence.
+This command means that [threads] number of threads will be used, that only primary chains will be reported (the top hit for each read), and that in the output (PAF) file even reads with no hits will be recorded for record-keeping sake. The -x asm20 flag refers to the preset option to assemble a query against the entire target (our reads are longer than the reference, so this has worked well in simulations) and theoretically it should be able to handle up to 5% sequence divergence.
 
 With recent data and having recently being informed by [Seedability](https://academic.oup.com/bioinformaticsadvances/article/3/1/vbad108/7241684), we are investigating changing the default settings for more sensitivity (perhaps in cases where few reads are mapping, or default accross the board).
  
