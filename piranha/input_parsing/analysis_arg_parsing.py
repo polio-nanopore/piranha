@@ -66,6 +66,40 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     
     check_if_float(KEY_MIN_PCENT,config)
 
+def minimap2_options_parsing(to_parse):
+
+    options = {}
+    not_found = []
+
+    if not type(to_parse)==list:
+        to_parse = to_parse.split(" ")
+
+    for option in to_parse:
+        # eg country=Ireland 
+        flag,value = factor.split("=")
+        if flag in MINIMAP2_VALID_FLAGS:
+            options[flag] = value
+        else:
+            not_found.append(flag)
+    
+    if len(not_found)==1:
+        sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument contains a flag that is not valid for minimap2 configuration in piranha:") + f" {not_found[0]}\n")
+        misc.minimap2_help()
+        sys.exit(-1)
+    elif len(not_found)>1:
+        not_found_str = not_found.join("\n - ")
+        sys.stderr.write(cyan(f"Error: `-fm/--from-metadata` argument contains flags that are not valid for minimap2 configuration in piranha:") + f"\n - {not_found_str}\n")
+        misc.minimap2_help()
+        sys.exit(-1)
+    else:
+        minimap2_string = ""
+        for flag in options:
+            minimap2_string += f"-{flag}{options[flag]} "
+        print(green("Reconfiguring minimap2 with options:"))
+        print(minimap2_string)
+        return minimap2_string
+
+
 def sample_type(sample_type_arg,config):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_SAMPLE_TYPE,sample_type_arg,config)
