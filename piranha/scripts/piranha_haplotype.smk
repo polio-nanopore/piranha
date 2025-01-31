@@ -52,7 +52,7 @@ rule minimap_for_bam:
         bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","downsample.bam")
     shell:
         """
-        minimap2 -t {threads} {params.minimap2_options} --secondary=no  \
+        minimap2 -t {threads} -a {params.minimap2_options} --secondary=no  \
         {input.ref:q} \
         {input.fastq:q} | samtools sort -@ {threads} -O bam -o {output:q} &> {log:q}
         """
