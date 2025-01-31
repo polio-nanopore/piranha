@@ -122,7 +122,7 @@ def header(v):
 def preamble(v):
     header(v)
 
-def minimap2_help(v):
+def minimap2_help():
     print(green("""\n
 *** minimap2 [options] within piranha ***
 Options:
