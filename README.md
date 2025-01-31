@@ -412,7 +412,7 @@ and piranha will check which ones you have installed with your version of medaka
 
 This flag can be used to configure the mapping options to fine-tune the sensistivity of [minimap2](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778) for your data. 
 
-Specify one or more minimap2 command line options to overwrite the default mapping settings. The current default mapping configuration is set to `-x asm20`, however recent data has suggested for shorter read lengths there are sensistivity issues for samples diverged from the pre-installed reference set.
+Specify one or more minimap2 command line options to overwrite the default mapping settings. The current default mapping configuration is set to `-x asm20`, however recent data has suggested for shorter read lengths there are sensitivity issues for samples diverged from the pre-installed reference set.
 
 The options take the form `flag=value` and can be any number of space-delimited options.
 
