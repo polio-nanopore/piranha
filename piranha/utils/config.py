@@ -328,3 +328,12 @@ FRENCH_RESOURCES = [
         RESOURCE_KEY_DIRECTORY:"data",
         RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]
+
+
+MINIMAP2_VALID_FLAGS = set(
+    "k","w","f",
+    "g","G","F","r","n","m",
+    "A","B","O","E","z","s",
+    "u","x"
+)
+    
