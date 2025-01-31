@@ -33,6 +33,7 @@ KEY_MIN_MAP_QUALITY = "min_map_quality"
 KEY_MIN_ALN_BLOCK = "min_aln_block"
 KEY_REFERENCE_SEQUENCES = "reference_sequences"
 KEY_MEDAKA_MODEL = "medaka_model"
+KEY_MINIMAP2_OPTIONS = "minimap2_options"
 KEY_PRIMER_LENGTH = "primer_length"
 
 KEY_REFERENCE_GROUP_FIELD = "reference_group_field"
@@ -215,8 +216,9 @@ READ_LENGTH_DICT = {
 VALUE_PRIMER_LENGTH = 30
 VALUE_MIN_MAP_QUALITY = 0
 VALUE_DEFAULT_MEDAKA_MODEL="r941_min_hac_variant_g507"
+VALUE_DEFAULT_MINIMAP2="-x asm20"
 
-VALUE_MIN_READS = 20
+VALUE_MIN_READS = 50
 VALUE_MIN_PCENT = 2
 
 # vdpv call thresholds
@@ -327,3 +329,12 @@ FRENCH_RESOURCES = [
         RESOURCE_KEY_DIRECTORY:"data",
         RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]
+
+
+MINIMAP2_VALID_FLAGS = [
+    "k","w","f",
+    "g","G","F","r","n","m",
+    "A","B","O","E","z","s",
+    "u","x"
+]
+    

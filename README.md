@@ -408,6 +408,76 @@ and piranha will check which ones you have installed with your version of medaka
 
 >```Where a version of Guppy has been used without an exactly corresponding medaka model, the medaka model with the highest version equal to or less than the guppy version should be selected.```
 
+### `-mo/--minimap2-options`
+
+This flag can be used to configure the mapping options to fine-tune the sensistivity of [minimap2](https://academic.oup.com/bioinformatics/article/34/18/3094/4994778) for your data. 
+
+Specify one or more minimap2 command line options to overwrite the default mapping settings. The current default mapping configuration is set to `-x asm20`, however recent data has suggested for shorter read lengths there are sensistivity issues for samples diverged from the pre-installed reference set.
+
+The options take the form `flag=value` and can be any number of space-delimited options.
+
+*Example:*
+Without any use of this flag, the command run in piranha for minimap2 is:
+```
+minimap2 -t [threads]
+	--secondary=no 
+ 	--paf-no-hit
+  	-x asm20
+        [ref] [reads] -o [outfile]
+```
+This command means that [threads] number of threads will be used, that only primary chains will be reported (the top hit for each read), and that in the output (PAF) file even reads with no hits will be recorded for record-keeping sake. The -x asm20 flag refers to the preset option to assemble a query against the entire target (our reads are longer than the reference, so this has worked well in simulations) and theoretically it should be able to handle up to 20% divergence.
+
+With recent data and having recently being informed by [Seedability](https://academic.oup.com/bioinformaticsadvances/article/3/1/vbad108/7241684), we are investigating changing the default settings for more sensitivity (perhaps in cases where few reads are mapping, or default accross the board).
+ 
+For short reads of a sample diverged from the reference, we suggest using:
+`-mo k=5 w=4`, which will overwrite the minimap2 option `-x asm20` and result in the following minimap2 command being run:
+
+```
+minimap2 -t [threads]
+	--secondary=no 
+ 	--paf-no-hit
+  	-k5 -w4
+        [ref] [reads] -o [outfile]
+```
+which is a much smaller k (kmer) and w (minimiser window) size (5 and 4, as opposed to 19 and 10 with asm20). The default settings of minimap2 outwith piranha are k=15 and w=10, recommended for ONT data, however in the case of the DDNS protocol, read lengths are only ~1.2kb. According to Seedability, a much lower kmer and window size is appropriate.
+
+> Note: lowering the k and w values will increase the time taken for minimap2 to run.
+
+> Note: not *all* minimap2 options will be available for configuration as the output format must stay the same for piranha to reliably parse the output file (e.g. -a not available as it will produce a SAM file rather than a PAF file).
+
+The options available within piranha for configuration are:
+
+```
+*** minimap2 configurable options within piranha ***
+Options:
+  Indexing:
+    -k INT       k-mer size (no larger than 28) [15]
+    -w INT       minimizer window size [10]
+  Mapping:
+    -f FLOAT     filter out top FLOAT fraction of repetitive minimizers [0.0002]
+    -g NUM       stop chain enlongation if there are no minimizers in INT-bp [5000]
+    -G NUM       max intron length (effective with -xsplice; changing -r) [200k]
+    -F NUM       max fragment length (effective with -xsr or in the fragment mode) [800]
+    -r NUM       bandwidth used in chaining and DP-based alignment [500]
+    -n INT       minimal number of minimizers on a chain [3]
+    -m INT       minimal chaining score (matching bases minus log gap penalty) [40]
+  Alignment:
+    -A INT       matching score [2]
+    -B INT       mismatch penalty [4]
+    -O INT[,INT] gap open penalty [4,24]
+    -E INT[,INT] gap extension penalty; a k-long gap costs min{O1+k*E1,O2+k*E2} [2,1]
+    -z INT[,INT] Z-drop score and inversion Z-drop score [400,200]
+    -s INT       minimal peak DP alignment score [80]
+    -u CHAR      how to find GT-AG. f:transcript strand, b:both strands, n:don't match GT-AG [n]
+  Preset:
+    -x STR       preset (always applied before other options; see minimap2.1 for details) []
+                 - map-pb/map-ont: PacBio/Nanopore vs reference mapping
+                 - ava-pb/ava-ont: PacBio/Nanopore read overlap
+                 - asm5/asm10/asm20: asm-to-ref mapping, for ~0.1/1/5% sequence divergence
+                 - splice: long-read spliced alignment
+                 - sr: genomic short-read mapping
+
+```
 
 ## Process enterovirus sequences  **\*NEW FEATURE\***
 

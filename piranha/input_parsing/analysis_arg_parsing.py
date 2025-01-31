@@ -66,6 +66,48 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     
     check_if_float(KEY_MIN_PCENT,config)
 
+def minimap2_options_parsing(minimap2_options,config):
+    to_parse = ""
+    if KEY_MINIMAP2_OPTIONS in config:
+        to_parse = config[KEY_MINIMAP2_OPTIONS]
+    elif minimap2_options:
+        to_parse = minimap2_options
+
+    if to_parse:
+        options = {}
+        not_found = []
+
+        if not type(to_parse)==list:
+            to_parse = to_parse.split(" ")
+
+        for option in to_parse:
+            option = option.lstrip().rstrip()
+            flag,value = option.split("=")
+            if flag in MINIMAP2_VALID_FLAGS:
+                options[flag] = value
+            else:
+                not_found.append(flag)
+        
+        if len(not_found)==1:
+            sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument contains a flag that is not valid for minimap2 configuration in piranha:") + f" -{not_found[0]}\n")
+            misc.minimap2_help()
+            sys.exit(-1)
+        elif len(not_found)>1:
+            not_found_str = "\n -".join(not_found)
+            sys.stderr.write(cyan(f"Error: `-mo/--minimap2-options` argument contains flags that are not valid for minimap2 configuration in piranha:") + f"\n -{not_found_str}\n")
+            misc.minimap2_help()
+            sys.exit(-1)
+        else:
+            minimap2_string = ""
+            for flag in options:
+                minimap2_string += f"-{flag}{options[flag]} "
+            print(green("Reconfiguring minimap2 with options:"))
+            print(minimap2_string)
+            return minimap2_string
+    else:
+        return VALUE_DEFAULT_MINIMAP2
+
+
 def sample_type(sample_type_arg,config):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_SAMPLE_TYPE,sample_type_arg,config)
@@ -90,7 +132,7 @@ def analysis_mode(analysis_mode_arg,config):
         config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][0]
         config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][1]
 
-    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}")
+    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}\n***\n")
     # if config[KEY_ANALYSIS_MODE] != "vp1":
     #     sys.stderr.write(cyan(f"Only `vp1` analysis mode currently implemented.\n"))
     #     sys.exit(-1)

@@ -10,36 +10,47 @@ import re
 
 from piranha.utils.log_colours import green,cyan,red
 
-def gather_filter_reads_by_length(dir_in,barcode,reads_out,config):
+def gather_filter_reads_by_length(dir_in,barcode,reads_out,report_out,config):
 
     if not os.path.exists(dir_in):
         os.mkdir(dir_in)
 
     fastq_records = []
+    with open(report_out, "w") as fw2:
+        report_writer = csv.DictWriter(fw2, lineterminator="\n", fieldnames=["read","length","status"])
+        report_writer.writeheader()
+        total_reads = 0
+        with open(reads_out,"w") as fw:
+            for r,d,f in os.walk(dir_in):
+                for reads_in in f:
+                    if reads_in.endswith(".gz") or reads_in.endswith(".gzip"):
+                        with gzip.open(os.path.join(dir_in,reads_in), "rt") as handle:
+                            for record in SeqIO.parse(handle, KEY_FASTQ):
+                                total_reads +=1
+                                length = len(record)
+                                status = "filter"
+                                if length > int(config[KEY_MIN_READ_LENGTH]) and length < int(config[KEY_MAX_READ_LENGTH]):
+                                    fastq_records.append(record)
+                                    status = "keep"
 
-    total_reads = 0
-    with open(reads_out,"w") as fw:
-        for r,d,f in os.walk(dir_in):
-            for reads_in in f:
-                if reads_in.endswith(".gz") or reads_in.endswith(".gzip"):
-                    with gzip.open(os.path.join(dir_in,reads_in), "rt") as handle:
-                        for record in SeqIO.parse(handle, KEY_FASTQ):
+                                row = {"read":record.id, "length":length,"status":status}
+                                report_writer.writerow(row)
+                                
+                    elif reads_in.endswith(".fastq") or reads_in.endswith(".fq"):
+                        for record in SeqIO.parse(os.path.join(dir_in,reads_in),KEY_FASTQ):
                             total_reads +=1
                             length = len(record)
+                            status = "filter"
                             if length > int(config[KEY_MIN_READ_LENGTH]) and length < int(config[KEY_MAX_READ_LENGTH]):
                                 fastq_records.append(record)
-                                
+                                status = "keep"
 
-                elif reads_in.endswith(".fastq") or reads_in.endswith(".fq"):
-                    for record in SeqIO.parse(os.path.join(dir_in,reads_in),KEY_FASTQ):
-                        total_reads +=1
-                        length = len(record)
-                        if length > int(config[KEY_MIN_READ_LENGTH]) and length < int(config[KEY_MAX_READ_LENGTH]):
-                            fastq_records.append(record)
+                            row = {"read":record.id, "length":length,"status":status}
+                            report_writer.writerow(row)
 
-        print(green(f"Total reads {barcode}:"),total_reads)
-        print(green(f"Total passed reads {barcode}:"),len(fastq_records))
-        SeqIO.write(fastq_records,fw, KEY_FASTQ)
+            print(green(f"Total reads {barcode}:"),total_reads)
+            print(green(f"Total passed reads {barcode}:"),len(fastq_records))
+            SeqIO.write(fastq_records,fw, KEY_FASTQ)
 
 def parse_match_field(description,reference_match_field):
     for item in str(description).split(" "):

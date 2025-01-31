@@ -121,4 +121,39 @@ def header(v):
 
 def preamble(v):
     header(v)
-    
+
+def minimap2_help(v):
+    print(green("""\n
+*** minimap2 [options] within piranha ***
+Options:
+  Indexing:
+    -k INT       k-mer size (no larger than 28) [15]
+    -w INT       minimizer window size [10]
+  Mapping:
+    -f FLOAT     filter out top FLOAT fraction of repetitive minimizers [0.0002]
+    -g NUM       stop chain enlongation if there are no minimizers in INT-bp [5000]
+    -G NUM       max intron length (effective with -xsplice; changing -r) [200k]
+    -F NUM       max fragment length (effective with -xsr or in the fragment mode) [800]
+    -r NUM       bandwidth used in chaining and DP-based alignment [500]
+    -n INT       minimal number of minimizers on a chain [3]
+    -m INT       minimal chaining score (matching bases minus log gap penalty) [40]
+  Alignment:
+    -A INT       matching score [2]
+    -B INT       mismatch penalty [4]
+    -O INT[,INT] gap open penalty [4,24]
+    -E INT[,INT] gap extension penalty; a k-long gap costs min{O1+k*E1,O2+k*E2} [2,1]
+    -z INT[,INT] Z-drop score and inversion Z-drop score [400,200]
+    -s INT       minimal peak DP alignment score [80]
+    -u CHAR      how to find GT-AG. f:transcript strand, b:both strands, n:don't match GT-AG [n]
+  Preset:
+    -x STR       preset (always applied before other options; see minimap2.1 for details) []
+                 - map-pb/map-ont: PacBio/Nanopore vs reference mapping
+                 - ava-pb/ava-ont: PacBio/Nanopore read overlap
+                 - asm5/asm10/asm20: asm-to-ref mapping, for ~0.1/1/5% sequence divergence
+                 - splice: long-read spliced alignment
+                 - sr: genomic short-read mapping
+
+See `man ./minimap2.1' for detailed description of these and other advanced command-line options.
+
+\n"""))
+

@@ -44,13 +44,15 @@ rule minimap_for_bam:
     input:
         ref=rules.files.params.ref,
         fastq = rules.rasusa.output.fastq
+    params:
+        minimap2_options = config[KEY_MINIMAP2_OPTIONS]
     threads: workflow.cores
     log: os.path.join(config[KEY_TEMPDIR],"logs","{reference}.minimap2_for_bam.log")
     output:
         bam = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","haplotyping","downsample.bam")
     shell:
         """
-        minimap2 -t {threads} -ax asm20 --secondary=no  \
+        minimap2 -t {threads} -a {params.minimap2_options} --secondary=no  \
         {input.ref:q} \
         {input.fastq:q} | samtools sort -@ {threads} -O bam -o {output:q} &> {log:q}
         """
