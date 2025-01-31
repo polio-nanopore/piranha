@@ -55,6 +55,8 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("-p","--min-read-pcent",action="store",type=float,help=f"Minimum percentage of sample required for consensus generation. Default: {VALUE_MIN_PCENT}")
     analysis_group.add_argument("-a","--min-aln-block",action="store",type=float,help=f"Minimum alignment block length. Default: 0.6*MIN_READ_LENGTH")
     analysis_group.add_argument("--primer-length",action="store",type=int,help=f"Length of primer sequences to trim off start and end of reads. Default: {VALUE_PRIMER_LENGTH}")
+    analysis_group.add_argument("-mo","--minimap2-options",action="store",nargs='*',
+                                help=f"Specify any number of minimap2 options to overwrite the default mapping settings. The options take the form `flag=value` and can be any number of space-delimited options. Default: {VALUE_DEFAULT_MINIMAP2}. Example: For short reads of a sample diverged from the reference, we suggest using `-mo k=5 w=4`, which overwrites the minimap2 option `-x asm20`.")
 
     haplo_group = parser.add_argument_group('Haplotyping options')
     haplo_group.add_argument("-rh","--run-haplotyping",action="store_true",help=f"Trigger the optional haplotyping module. Additional dependencies may need to be installed.")
