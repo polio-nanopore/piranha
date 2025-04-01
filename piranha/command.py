@@ -44,7 +44,7 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument("-pr","--positive-references",action="store",help=f"Comma separated string of sequences in the reference file to class as positive control sequences.")
 
     analysis_group = parser.add_argument_group('Analysis options')
-    analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`. Default: `{VALUE_SAMPLE_TYPE}`")
+    analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`, `isolate`. Default: `{VALUE_SAMPLE_TYPE}`")
     analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run, for preconfigured defaults. Options: `vp1`, `wg`. Default: `{VALUE_ANALYSIS_MODE}`")
     analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
     analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")

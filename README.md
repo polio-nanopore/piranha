@@ -723,7 +723,7 @@ Input options:
 
 Analysis options:
   -s SAMPLE_TYPE, --sample-type SAMPLE_TYPE
-                        Specify sample type. Options: `stool`, `environmental`. Default: `stool`
+                        Specify sample type. Options: `stool`, `environmental`, `isolate`. Default: `stool`
   -m ANALYSIS_MODE, --analysis-mode ANALYSIS_MODE
                         Specify analysis mode to run. Options: `vp1`,`panev`, `wg`. Default: `vp1`
   --medaka-model MEDAKA_MODEL
