@@ -307,7 +307,7 @@ OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 VALID_ANALYSIS_MODES = ["vp1","wg"]
-VALID_SAMPLE_TYPES = ["stool","environmental"]
+VALID_SAMPLE_TYPES = ["stool","environmental","isolate"]
 
 DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
 MODULE_LIST = ["mako","Bio"]
