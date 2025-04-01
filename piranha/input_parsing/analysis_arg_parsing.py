@@ -141,6 +141,16 @@ def sample_type(sample_type_arg,config):
         sys.stderr.write(cyan(f"`{KEY_SAMPLE_TYPE}` must be one of {error_str}.\n"))
         sys.exit(-1)
 
+    if config[KEY_SAMPLE_TYPE] == VAR_ENVIRONMENTAL:
+        for key in ENVIRONMENTAL_DEFAULT_DICT:
+            config[key] = ENVIRONMENTAL_DEFAULT_DICT[key]
+
+    if config[KEY_SAMPLE_TYPE] == VAR_ISOLATE:
+        for key in ISOLATE_DEFAULT_DICT:
+            config[key] = ISOLATE_DEFAULT_DICT[key]
+
+    
+
 def analysis_mode(analysis_mode_arg,config):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_ANALYSIS_MODE,analysis_mode_arg,config)
