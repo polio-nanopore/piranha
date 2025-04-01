@@ -83,6 +83,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument('--overwrite', action="store_true",help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
     o_group.add_argument('-temp','--tempdir',action="store",help="Specify where you want the temp stuff to go. Default: `$TMPDIR`")
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
+    o_group.add_argument("-ff","--fasta-header-fields",action="store",help=f"Comma-separated string of header fields wanted that can be sourced from input csv file. E.g. `sample,barcode,run_id`.")
     o_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
     o_group.add_argument('--language',action="store",help=f"Output report language. Options: English, French. Default: {VALUE_LANGUAGE}")
     o_group.add_argument('--save-config',action="store_true",help=f"Output the config file with all parameters used")
@@ -180,6 +181,8 @@ def main(sysargs = sys.argv[1:]):
                                         args.archivedir,
                                         config)
 
+    init.configure_fasta_header(args.fasta_header_fields,config)
+
     init.misc_args_to_config(args.verbose,
                                 args.threads,
                                 args.username,
@@ -187,6 +190,7 @@ def main(sysargs = sys.argv[1:]):
                                 args.runname,
                                 args.notes,
                                 config)
+    
     # runs qc checks on the phylo input options and configures the phylo settings
     # now need tempdir for this parsing, so run after directory_setup
     # also needs runname to not add runname.today.fasta to the db

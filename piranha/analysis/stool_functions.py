@@ -31,7 +31,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     os.mkdir(os.path.join(publish_dir, f"{barcode}"))
                 handle_dict[barcode] = open(os.path.join(publish_dir, f"{barcode}",f"{barcode}.consensus.fasta"),"w")
 
-
+    fasta_header_fields = config[KEY_FASTA_HEADER_FIELDS]
 
     with open(output_file,"w") as fw:
         for cns_file in input_cns_list:
