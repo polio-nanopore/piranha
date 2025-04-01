@@ -1,5 +1,6 @@
 # I GROUP KEYS
 KEY_BARCODES_CSV = "barcodes_csv"
+KEY_BARCODE_CSV_FIELDNAMES = "barcodes_csv_fieldnames"
 KEY_READDIR = "readdir"
 KEY_BARCODES = "barcodes"
 KEY_SAMPLES = "samples"
@@ -20,6 +21,7 @@ KEY_ARCHIVE_FASTQ="archive_fastq"
 KEY_ARCHIVEDIR="archivedir"
 
 KEY_OUTPUT_REPORT="output_report"
+KEY_FASTA_HEADER_FIELDS = "fasta_header_fields"
 
 # ANALYSIS OPTION KEYS
 KEY_SAMPLE_TYPE = "sample_type"
@@ -144,6 +146,7 @@ KEY_COOCCURRENCE_INFO="cooccurrence_info"
 KEY_POSITIVE="positive_control"
 KEY_NEGATIVE = "negative_control"
 KEY_POSITIVE_REFERENCES = "positive_references"
+KEY_QC_STATUS = "qc_status"
 KEY_INCLUDE_POSITIVE_REFERENCES = "include_positive_references"
 KEY_SUMMARY_TABLE="summary_table"
 KEY_COMPOSITION_TABLE="composition_table"
@@ -200,7 +203,8 @@ VALUE_POSITIVE_REFERENCES=["CoxsackievirusA20_AF499642"]
 VALUE_OUTPUT_PREFIX = "analysis"
 VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
-VALUE_PHYLO_HEADER = ["name","sample","barcode","source","reference_group","call"]
+VALUE_PHYLO_HEADER = ["name",KEY_SAMPLE,KEY_BARCODE,"source","reference_group","call"]
+VALUE_FASTA_HEADER_FIELDS = [KEY_SAMPLE,KEY_EPID,KEY_SAMPLE_TYPE,KEY_RUNID,KEY_BARCODE,KEY_QC_STATUS]
 
 VALUE_SAMPLE_TYPE = VAR_STOOL
 VALUE_ANALYSIS_MODE = "vp1"
@@ -295,6 +299,7 @@ VALUE_CONFIGURATION_TABLE_FIELDS = [
                     KEY_READDIR,KEY_POSITIVE_REFERENCES
                     ]
 
+
 # file names
 OUTPUT_REPORT = "report.html"
 SAMPLE_COMPOSITION = "sample_composition.csv"
@@ -309,12 +314,14 @@ REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 OUTGROUP_SEQUENCES_FILE_WG = "outgroups.wg.fasta"
 OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 
-# DEPENDENCIES AND RESOURCES TO CHECK
+
+## SAMPLE TYPE CONFIGURATION
+
 VALID_ANALYSIS_MODES = ["vp1","wg"]
 VALID_SAMPLE_TYPES = [VAR_STOOL,VAR_ENVIRONMENTAL,VAR_ISOLATE]
 
 ISOLATE_DEFAULT_DICT = {
-    KEY_MIN_READS:500,
+    KEY_MIN_READS:900,
     KEY_MIN_PCENT:0}
 
 ENVIRONMENTAL_DEFAULT_DICT = {
@@ -322,10 +329,13 @@ ENVIRONMENTAL_DEFAULT_DICT = {
     KEY_MIN_PCENT:0}
 
 
+# DEPENDENCIES AND RESOURCES TO CHECK
+
 DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
 MODULE_LIST = ["mako","Bio"]
 PHYLO_DEPENDENCY_LIST = ["iqtree","mafft","jclusterfunk"]
 PHYLO_MODULE_LIST = []
+
 
 ENGLISH_RESOURCES = [{RESOURCE_KEY:"report_template",
         RESOURCE_KEY_DIRECTORY:"data",
@@ -343,6 +353,9 @@ FRENCH_RESOURCES = [
         RESOURCE_KEY_FILENAME:"barcode_report.mako"}
     ]
 
+
+
+## MINIMAP2 configuration
 MINIMAP2_FLOAT_FLAGS = ["f"]
 MINIMAP2_INT_FLAGS = ["k","w","g","r","n","F","m","A","B","O","E","z","s","u"]
 MINIMAP2_PRESET_OPTIONS = ["map-pb","map-ont","sr","asm5","asm10","asm20"]
