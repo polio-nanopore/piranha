@@ -309,6 +309,10 @@ OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 VALID_ANALYSIS_MODES = ["vp1","wg"]
 VALID_SAMPLE_TYPES = ["stool","environmental","isolate"]
 
+ISOLATE_DEFAULTS = {
+    KEY_MIN_READS:500,
+    KEY_MIN_PCENT:0}
+
 DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
 MODULE_LIST = ["mako","Bio"]
 PHYLO_DEPENDENCY_LIST = ["iqtree","mafft","jclusterfunk"]
