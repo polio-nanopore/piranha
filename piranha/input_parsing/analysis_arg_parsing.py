@@ -142,12 +142,16 @@ def sample_type(sample_type_arg,config):
         sys.exit(-1)
 
     if config[KEY_SAMPLE_TYPE] == VAR_ENVIRONMENTAL:
+        print(green("Using environmental sample defaults:"))
         for key in ENVIRONMENTAL_DEFAULT_DICT:
             config[key] = ENVIRONMENTAL_DEFAULT_DICT[key]
+            print(f"{key}: {ENVIRONMENTAL_DEFAULT_DICT[key]}")
 
     if config[KEY_SAMPLE_TYPE] == VAR_ISOLATE:
+        print(green("Using isolate sample defaults:"))
         for key in ISOLATE_DEFAULT_DICT:
             config[key] = ISOLATE_DEFAULT_DICT[key]
+            print(f"{key}: {ISOLATE_DEFAULT_DICT[key]}")
 
     
 
