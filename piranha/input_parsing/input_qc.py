@@ -44,7 +44,7 @@ def parse_barcodes_csv(barcodes_csv,config):
             if not col in reader.fieldnames:
                 sys.stderr.write(cyan(f"`{col}` must be a column name in barcode csv file.\n"))
                 sys.exit(-1)
-
+        config[KEY_BARCODE_CSV_FIELDNAMES] = reader.fieldnames
         for row in reader:
             if row[KEY_BARCODE] and not row[KEY_SAMPLE]:
                 continue
