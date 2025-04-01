@@ -31,6 +31,7 @@ def get_defaults():
                     KEY_REFERENCES_FOR_CNS:VALUE_REFERENCES_FOR_CNS,
                     KEY_SUMMARY_HEADERS: VALUE_SUMMARY_HEADERS,
                     KEY_ARCHIVE_FASTQ:False,
+                    KEY_FASTA_HEADER_FIELDS:VALUE_FASTA_HEADER_FIELDS
 
                     # input seq options
                     KEY_SAMPLE_TYPE:VALUE_SAMPLE_TYPE,  #options are stool or environmental
@@ -226,6 +227,21 @@ def misc_args_to_config(verbose,threads,username,institute,run_name,notes,config
     misc.add_arg_to_config(KEY_INSTITUTE,institute,config)
     misc.add_arg_to_config(KEY_RUNNAME,run_name,config)
     misc.add_arg_to_config(KEY_NOTES,notes,config)
+
+def configure_fasta_header(fasta_header_fields,config):
+    if fasta_header_fields:
+        fasta_header_input = fasta_header_fields.split(",")
+        unknown_fields = set()
+        for i in fasta_header_input:
+            if i not in config or i not in config[KEY_BARCODE_CSV_FIELDNAMES]:
+                unknown_fields.add(i)
+        if unknown_fields:
+            ", ".join(list(unknown_fields))
+            sys.stderr.write(cyan(f'Error: unknown fields in fasta header field argument:\n') + f'{keys}')
+            sys.exit(-1)
+        else:
+            config[KEY_FASTA_HEADER_FIELDS] = fasta_header_input
+
 
 def set_up_verbosity(config):
     if config[KEY_VERBOSE]:
