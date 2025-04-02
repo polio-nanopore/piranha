@@ -31,7 +31,7 @@ def get_defaults():
                     KEY_REFERENCES_FOR_CNS:VALUE_REFERENCES_FOR_CNS,
                     KEY_SUMMARY_HEADERS: VALUE_SUMMARY_HEADERS,
                     KEY_ARCHIVE_FASTQ:False,
-                    KEY_FASTA_HEADER_FIELDS:VALUE_FASTA_HEADER_FIELDS
+                    KEY_FASTA_HEADER_FIELDS:VALUE_FASTA_HEADER_FIELDS,
 
                     # input seq options
                     KEY_SAMPLE_TYPE:VALUE_SAMPLE_TYPE,  #options are stool or environmental
