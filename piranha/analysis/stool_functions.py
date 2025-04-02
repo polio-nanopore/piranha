@@ -8,7 +8,7 @@ from itertools import groupby
 
 from piranha.utils.config import *
 
-def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,runname, output_file,publish_dir,config):
+def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,output_file,publish_dir,config):
     if not os.path.exists(publish_dir):
         os.mkdir(publish_dir)
     
@@ -45,33 +45,49 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     ref = ".".join(ref_list[:-1])
                     hap = ref_list[-1]
 
+                    metadata = input_metadata[barcode]
+                    metadata[KEY_VARIANT_COUNT] = var_count
+                    metadata[KEY_VARIANTS] = var_string
+                    metadata[KEY_CNS_ID] = hap
+                    metadata[KEY_RUNNAME] = config[KEY_RUNNAME]
+                    metadata[KEY_RUNID] = config[KEY_RUNID]
+
                     info = []
                     for row in analysis_info[barcode]:
                         if row[KEY_REFERENCE] == ref:
                             info = row
 
-                    metadata = input_metadata[barcode]
+                    for col in info:
+                        metadata[col] = info[col]
 
-                    record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
+                    record_id = f""
+                    for field in config[KEY_FASTA_HEADER_FIELDS]:
+                        
+                        if field in metadata:
+                            record_id += f"{metadata[field]}|"
+                            print(field, metadata[field])
+                        else:
+                            record_id += f"|"
+                            print(field, "missing")
 
-                    record_id += f"|{hap}"
+                    # record_id += f"|{hap}|{metadata[KEY_REFERENCE_GROUP]}"
 
-                    if KEY_EPID in metadata:
-                        record_id += f"|{metadata[KEY_EPID]}"
-                    else:
-                        record_id += "|"
+                    # if KEY_EPID in metadata:
+                    #     record_id += f"|{metadata[KEY_EPID]}"
+                    # else:
+                    #     record_id += "|"
 
-                    if KEY_DATE in metadata:
-                        record_id += f"|{metadata[KEY_DATE]}"
-                    else:
-                        record_id += "|"
+                    # if KEY_DATE in metadata:
+                    #     record_id += f"|{metadata[KEY_DATE]}"
+                    # else:
+                    #     record_id += "|"
 
                     record_id += f" {KEY_BARCODE}={barcode}"
                     record_id += f" {KEY_REFERENCE}={ref}"
                     record_id += f" {VALUE_REFERENCE_GROUP_FIELD}={info[KEY_REFERENCE_GROUP]}"
 
-                    if runname:
-                        record_id += f" {KEY_RUNNAME}={runname}"
+                    # if runname:
+                    #     record_id += f" {KEY_RUNNAME}={runname}"
 
                     if "Sabin" in ref:
                         record_id += f" {KEY_VARIANT_COUNT}={var_count}"
