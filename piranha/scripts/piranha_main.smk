@@ -167,7 +167,7 @@ rule gather_consensus_sequences:
         print(green("Gathering fasta files"))
         # needs mod for checking & merging identical cns within ref group
         # also header now needs hap parsing & hap->CNS mapping
-        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA],config[KEY_RUNNAME], output[0],params.publish_dir,config)
+        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA], output[0],params.publish_dir,config)
 
 rule generate_report:
     input:
