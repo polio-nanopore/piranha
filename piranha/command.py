@@ -83,7 +83,7 @@ def main(sysargs = sys.argv[1:]):
     o_group.add_argument('--overwrite', action="store_true",help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
     o_group.add_argument('-temp','--tempdir',action="store",help="Specify where you want the temp stuff to go. Default: `$TMPDIR`")
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
-    o_group.add_argument("-ff","--fasta-header-fields",action="store",help=f"Comma-separated string of header fields wanted that can be sourced from input csv file. E.g. `sample,barcode,run_id`.")
+    o_group.add_argument("-ff","--fasta-header-fields",action="store",help=f"Comma-separated string of header fields wanted that can be sourced from input csv file. E.g. `sample,barcode,runname`.")
     o_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
     o_group.add_argument('--language',action="store",help=f"Output report language. Options: English, French. Default: {VALUE_LANGUAGE}")
     o_group.add_argument('--save-config',action="store_true",help=f"Output the config file with all parameters used")
