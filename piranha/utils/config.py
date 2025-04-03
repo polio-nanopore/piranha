@@ -186,6 +186,10 @@ RESOURCE_KEY="KEY"
 KEY_SUMMARY_HEADERS = "report_summary_headers"
 KEY_COMPOSITION_NOT_DETECTED = "composition_not_detected"
 
+VAR_STOOL = "stool"
+VAR_ENVIRONMENTAL = "environmental"
+VAR_ISOLATE = "isolate"
+
 # default values for config dict
 
 VALUE_LANGUAGE = "English"
@@ -198,7 +202,7 @@ VALUE_SUMMARY_HEADERS = ["taxon","sites","haplotype","num_reads","make_cns"]
 VALUE_REFERENCES_FOR_CNS = ["Sabin1-related","Sabin2-related","Sabin3-related","WPV1"]
 VALUE_PHYLO_HEADER = ["name","sample","barcode","source","reference_group","call"]
 
-VALUE_SAMPLE_TYPE = "stool"
+VALUE_SAMPLE_TYPE = VAR_STOOL
 VALUE_ANALYSIS_MODE = "vp1"
 VALUE_ANALYSIS_MODE_VP1 = "vp1"
 VALUE_ANALYSIS_MODE_WG = "wg"
@@ -218,8 +222,8 @@ VALUE_MIN_MAP_QUALITY = 0
 VALUE_DEFAULT_MEDAKA_MODEL="r941_min_hac_variant_g507"
 VALUE_DEFAULT_MINIMAP2="-x asm20"
 
-VALUE_MIN_READS = 20
-VALUE_MIN_PCENT = 2
+VALUE_MIN_READS = 50
+VALUE_MIN_PCENT = 0
 
 # vdpv call thresholds
 
@@ -307,7 +311,16 @@ OUTGROUP_SEQUENCES_FILE_VP1 = "outgroups.vp1.fasta"
 
 # DEPENDENCIES AND RESOURCES TO CHECK
 VALID_ANALYSIS_MODES = ["vp1","wg"]
-VALID_SAMPLE_TYPES = ["stool","environmental","isolate"]
+VALID_SAMPLE_TYPES = [VAR_STOOL,VAR_ENVIRONMENTAL,VAR_ISOLATE]
+
+ISOLATE_DEFAULT_DICT = {
+    KEY_MIN_READS:500,
+    KEY_MIN_PCENT:0}
+
+ENVIRONMENTAL_DEFAULT_DICT = {
+    KEY_MIN_READS:20,
+    KEY_MIN_PCENT:0}
+
 
 DEPENDENCY_LIST = ["minimap2","snakemake","medaka",]
 MODULE_LIST = ["mako","Bio"]
