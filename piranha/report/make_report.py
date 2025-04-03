@@ -56,9 +56,12 @@ def make_sample_report(report_to_generate,
         
         fields = record.description.split(" ")
         record_id = fields[0]
-        record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
 
-        
+        header_fields = config[KEY_FASTA_HEADER_FIELDS]
+        header_info = record_id.split("|")
+
+        info = dict(zip(header_fields, header_info))
+        record_sample = info[KEY_SAMPLE]
         description_dict = {}
         for field in fields[1:]:
             key,value = field.split("=")
@@ -69,12 +72,12 @@ def make_sample_report(report_to_generate,
             sequences+= f">{record.description}<br>{record.seq}<br>"
             
             # if plan to have more than one seq per ref group will need to modify this
-            info = {KEY_SAMPLE:record_sample,
-                    KEY_REFERENCE_GROUP:reference_group,
-                    "SEQ ID":cns_id,
-                    KEY_EPID:epid,
-                    KEY_DATE:sample_date
-                    }
+            # info = {KEY_SAMPLE:record_sample,
+            #         KEY_REFERENCE_GROUP:reference_group,
+            #         KEY_CNS_ID:cns_id,
+            #         KEY_EPID:epid,
+            #         KEY_DATE:sample_date
+            #         }
 
             for key in description_dict:
                 if key == KEY_VARIANT_COUNT:
@@ -91,7 +94,7 @@ def make_sample_report(report_to_generate,
 
             # if plan to have more than one seq per ref group will need to modify this
             reference=description_dict[KEY_REFERENCE]
-            cns_key = f"{reference}.{cns_id}"
+            cns_key = f"{reference}.{info[KEY_CNS_ID]}"
 
             info_dict[cns_key] = info
             info_dict[cns_key][KEY_READ_COUNT] = cns_config[cns_key]
