@@ -69,8 +69,12 @@ def check_date_format(to_check, line_count, header):
                 
 def add_arg_to_config(key,arg,config):
     if arg:
+        if key in config and config[key]!= arg:
+            print(green(f"Setting {key}:"), arg)
         config[key] = arg
     elif arg == 0:
+        if key in config and config[key]!= arg:
+            print(green(f"Setting {key}:"), arg)
         config[key] = arg
 
 def add_file_to_config(key,arg,config):
@@ -84,6 +88,7 @@ def add_path_to_config(key,arg,config):
         expanded_path = os.path.expanduser(arg)
         path_to_cwd = os.path.abspath(config["cwd"])
         full_path = os.path.join(path_to_cwd,expanded_path)
+        print(green(f"Setting {key}:"), arg)
         config[key]=full_path
 
 def check_path_exists(path):
