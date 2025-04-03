@@ -328,7 +328,10 @@ def parse_read_dir(readdir,config):
     config[KEY_READDIR] = found_read_dir
     config[KEY_RUNID] = run_id
     
-    print(green("Found read files"))
+    if config[KEY_RUNID]:
+        print(green(f"Found read files for run: {config[KEY_RUNID]}"))
+    else:
+        print(green("Found read files"))
     print(yellow("-----------------------"))
     for d in sorted(count_read_files):
         if count_read_files[d] == 1:
