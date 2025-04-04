@@ -616,7 +616,7 @@ def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_sum
     
     # detailed csv for download (1)
     # print(config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS])
-    make_detailed_csv(data_for_report,barcodes_csv,detailed_csv_out,config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS])
+    make_detailed_csv(data_for_report,barcodes_csv,epi_csv,detailed_csv_out,config[KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS])
 
     phylo_data = {}
     background_data = {}
