@@ -37,6 +37,7 @@ def main(sysargs = sys.argv[1:]):
     i_group.add_argument('-c',"--config", action="store",help="Input config file in yaml format, all command line arguments can be passed via the config file.", dest="config")
     i_group.add_argument('-i','--readdir',help="Path to the directory containing fastq read files",dest="readdir")
     i_group.add_argument('-b','--barcodes-csv',help="CSV file describing which barcodes were used on which sample",dest="barcodes_csv")
+    i_group.add_argument('-e','--epi-csv',help="CSV file providing EPI-info for the samples. Sample names must correspond to the names in barcodes_csv",dest="epi_csv")
     i_group.add_argument("-r","--reference-sequences",action="store",dest="reference_sequences",help="Custom reference sequences file.")
     i_group.add_argument("-rg","--reference-group-field",action="store",help=f"Specify reference description field to group references by. Default: `{VALUE_REFERENCE_GROUP_FIELD}`")
     i_group.add_argument("-nc","--negative-control",action="store",help=f"Sample name of negative control. If multiple samples, supply as comma-separated string of sample names. E.g. `sample01,sample02` Default: `{VALUE_NEGATIVE}`")
