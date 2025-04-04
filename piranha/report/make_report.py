@@ -239,7 +239,7 @@ def make_detailed_csv(data_for_report,barcodes_csv,epi_csv,output,detailed_heade
         metadata_headers = reader.fieldnames
         for row in reader:
             sample_metadata[row[KEY_BARCODE]] = row
-            barcode_sample_translator_dict[row[KEY_BARCODE]] = row[KEY_SAMPLE]
+            barcode_sample_translator_dict[row[KEY_SAMPLE]] = row[KEY_BARCODE]
     
 
     header_fields = [KEY_SAMPLE,KEY_BARCODE,KEY_EPID,KEY_INSTITUTE]
