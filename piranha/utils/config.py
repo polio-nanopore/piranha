@@ -1,5 +1,6 @@
 # I GROUP KEYS
 KEY_BARCODES_CSV = "barcodes_csv"
+KEY_EPI_CSV = "epi_csv"
 KEY_READDIR = "readdir"
 KEY_BARCODES = "barcodes"
 KEY_SAMPLES = "samples"
