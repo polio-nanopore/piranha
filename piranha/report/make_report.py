@@ -195,7 +195,7 @@ def make_sample_report(report_to_generate,
         print(green("Generating: ") + f"{report_to_generate}")
         fw.write(buf.getvalue())
 
-def make_detailed_csv(data_for_report,barcodes_csv,output,detailed_header_fields):
+def make_detailed_csv(data_for_report,barcodes_csv,epi_csv,output,detailed_header_fields):
     """
     SUMMARY TABLE
         list of: {KEY_BARCODE:record_barcode,
@@ -232,11 +232,15 @@ def make_detailed_csv(data_for_report,barcodes_csv,output,detailed_header_fields
 
     sample_metadata = {}
     metadata_headers = []
+
+    barcode_sample_translator_dict = {}
     with open(barcodes_csv,"r") as f:
         reader = csv.DictReader(f)
         metadata_headers = reader.fieldnames
         for row in reader:
             sample_metadata[row[KEY_BARCODE]] = row
+            barcode_sample_translator_dict[row[KEY_BARCODE]] = row[KEY_SAMPLE]
+    
 
     header_fields = [KEY_SAMPLE,KEY_BARCODE,KEY_EPID,KEY_INSTITUTE]
     for i in metadata_headers:
@@ -245,6 +249,20 @@ def make_detailed_csv(data_for_report,barcodes_csv,output,detailed_header_fields
 
     for i in detailed_header_fields:
         header_fields.append(i)
+
+    epi_csv_headers = []
+    if epi_csv:
+        with open(epi_csv,"r") as f:
+            reader = csv.DictReader(f)
+            epi_csv_headers = reader.fieldnames
+            for row in reader:
+                barcode = barcode_sample_translator_dict[row[KEY_SAMPLE]]
+                for col in epi_csv_headers:
+                    sample_metadata[barcode][col]= row[col]
+
+    for i in epi_csv_headers:
+        if i not in header_fields:
+            header_fields.append(i)
 
     with open(output,"w") as fw:
         writer = csv.DictWriter(fw,fieldnames=header_fields,lineterminator="\n")
@@ -420,7 +438,7 @@ def get_background_data(metadata,config):
     return data
 
  
-def make_output_report(report_to_generate,barcodes_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
+def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
     
     # which are the negative controls and positive controls
     negative_controls = config[KEY_NEGATIVE]
