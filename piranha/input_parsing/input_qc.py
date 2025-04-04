@@ -395,7 +395,7 @@ def parse_input_group(barcodes_csv,epi_csv,readdir,reference_sequences,reference
     parse_barcodes_csv(barcodes_csv,config)
 
     if epi_csv:
-        misc.add_file_to_config(KEY_EPI_CSV,config)
+        misc.add_file_to_config(KEY_EPI_CSV,epi_csv,config)
 
     if config[KEY_EPI_CSV]:
         check_samples_match(config[KEY_EPI_CSV],config[KEY_SAMPLES])
