@@ -160,6 +160,7 @@ def main(sysargs = sys.argv[1:]):
     misc.add_arg_to_config(KEY_ALL_METADATA,args.all_metadata_to_header,config)
 
     input_qc.parse_input_group(args.barcodes_csv,
+                                args.epi_csv,
                                 args.readdir,
                                 args.reference_sequences,
                                 args.reference_group_field,
@@ -265,6 +266,7 @@ def main(sysargs = sys.argv[1:]):
             # amalgamate all info to make final html report
             make_output_report(report,
                                 config[KEY_BARCODES_CSV],
+                                config[KEY_EPI_CSV],
                                 summary_csv,
                                 composition_csv,
                                 config[KEY_SAMPLE_SEQS],
