@@ -369,6 +369,9 @@ GGTATTGAAGATTTGACTTCTGAA...
 
 Notably, `ddns_group` allows multiple references to be aggregated together/ anonymised within the final report. Current compatibility within piranha allows `ddns_group` fields to include: `WPV1`,`WPV2`,`WPV3`,`Sabin1-related`,`Sabin2-related`,`Sabin3-related` and `NonPolioEV`.
 
+## Additional metadata file
+Piranha can accept a csv file of metadata with the flag `-e/--epi-csv`, which needs to have a column `sample` and rows that correspond to the samples specified in `barcodes.csv`. Any additional metadata provided in this file will be appended to the output `detailed_run_report.csv`. 
+
 ## Initial processing pipeline
 
 - Gathers all read files for a given barcode together
@@ -708,6 +711,9 @@ Input options:
                         Path to the directory containing fastq read files
   -b BARCODES_CSV, --barcodes-csv BARCODES_CSV
                         CSV file describing which barcodes were used on which sample
+  -e EPI_CSV, --epi-csv EPI_CSV
+                        CSV file providing EPI-info for the samples. 
+                        Sample names must correspond to the names in barcodes_csv
   -r REFERENCE_SEQUENCES, --reference-sequences REFERENCE_SEQUENCES
                         Custom reference sequences file.
   -rg REFERENCE_GROUP_FIELD, --reference-group-field REFERENCE_GROUP_FIELD
