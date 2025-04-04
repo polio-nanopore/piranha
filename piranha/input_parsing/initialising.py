@@ -21,6 +21,7 @@ def get_defaults():
                     KEY_READDIR: False,
                     KEY_REFERENCE_SEQUENCES: False,
                     KEY_BARCODES_CSV: False,
+                    KEY_EPI_CSV: False,
                     KEY_RUNID: False,
 
                     # Output options
