@@ -367,9 +367,38 @@ def parse_ref_group_values(description,ref_group_key):
 
     return ref_group
 
-def parse_input_group(barcodes_csv,readdir,reference_sequences,reference_group_field,config):
+def check_samples_match(epi_csv,samples):
+
+    with open(epi_csv,"r") as f:
+        reader = csv.DictReader(f)
+        if not KEY_SAMPLE in reader.fieldnames:
+            sys.stderr.write(cyan(f"Error: No `sample` column in the provided EPI csv.\n"))
+            sys.exit(-1)
+        epi_samples = []
+
+        for row in reader:
+            epi_samples.append(row[KEY_SAMPLE].rstrip().lstrip())
+        
+        missing = []
+        for sample in samples:
+            if sample not in epi_samples:
+                missing.append(sample)
+
+        if missing:
+            sys.stderr.write(cyan(f"Error: sample(s) missing from the EPI csv.\n- "))
+            missing_str = "\n- ".join(missing)
+            sys.stderr.write(cyan(f"{missing_str}\n"))
+            sys.exit(-1)
+
+def parse_input_group(barcodes_csv,epi_csv,readdir,reference_sequences,reference_group_field,config):
 
     parse_barcodes_csv(barcodes_csv,config)
+
+    if epi_csv:
+        misc.add_file_to_config(KEY_EPI_CSV,config)
+
+    if config[KEY_EPI_CSV]:
+        check_samples_match(config[KEY_EPI_CSV],config[KEY_SAMPLES])
 
     parse_read_dir(readdir,config)
 
