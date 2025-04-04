@@ -146,9 +146,9 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
         total_seqs["total"] +=1
         ref_group = ""
         for field in record.description.split(" "):
-            if field.startswith(VALUE_REFERENCE_GROUP_FIELD):
+            if field.startswith(config[KEY_REFERENCE_GROUP_FIELD]):
                 ref_group = field.split("=")[1]
-                # print(VALUE_REFERENCE_GROUP_FIELD, "ref group", ref_group)
+                # print(config[KEY_REFERENCE_GROUP_FIELD], "ref group", ref_group)
         
         if ref_group not in config[KEY_REFERENCES_FOR_CNS]:
             no_reference_group.add(record.id)
@@ -161,7 +161,7 @@ def parse_fasta_file(supplementary_datadir,supp_file,seq_records,no_reference_gr
 def check_there_are_seqs(total_seqs,supplementary_datadir,no_reference_group,config):
     if total_seqs["total"]==0:
         sys.stderr.write(cyan(f"Error: No sequence files matched in `{supplementary_datadir}`.\nEnsure the directory provided contains FASTA files with appropriate annotations in the header.\n"))
-        sys.stderr.write(cyan(f"Header must specify one of {config[KEY_REFERENCES_FOR_CNS]} under {VALUE_REFERENCE_GROUP_FIELD}=X, where X is the appropriate group to be included in phylo pipeline.\n"))
+        sys.stderr.write(cyan(f"Header must specify one of {config[KEY_REFERENCES_FOR_CNS]} under {config[KEY_REFERENCE_GROUP_FIELD]}=X, where X is the appropriate group to be included in phylo pipeline.\n"))
         sys.exit(-1)
 
     elif no_reference_group:
