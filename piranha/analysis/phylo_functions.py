@@ -198,7 +198,7 @@ def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metad
             for i in desc_list:
                 if i.startswith("variant_count"):
                     count = i.split("=")[1]
-                elif i.startswith(VALUE_REFERENCE_GROUP_FIELD):
+                elif i.startswith(config[KEY_REFERENCE_GROUP_FIELD]):
                     match_field = i.split("=")[1]
 
             if "Sabin" in match_field:
