@@ -29,6 +29,8 @@ Piranha does not require use of the command-line to run. Users can access piranh
 ## Install through bioconda
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/piranha-polio/README.html)
 
+## Install with Docker
+Docker image available at: [hub.docker.com/r/polionanopore/piranha](https://hub.docker.com/r/polionanopore/piranha)
 
 ## Installation instructions (quick)
 
