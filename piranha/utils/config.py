@@ -255,9 +255,9 @@ SAMPLE_SUMMARY_TABLE_HEADER_FIELDS = ["sample","barcode","Sample classification"
 SAMPLE_HIT_HEADER_FIELDS = ["barcode","reference","reference_group","num_reads","percent_of_sample"]
 
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC = ["sample","barcode","unmapped"]
-DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE = ["closest_reference","num_reads","nt_diff_from_reference","pcent_match","classification"]
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_TEMPLATE = ["closest_reference","num_reads","nt_diff_from_reference","pcent_match","classification","classification_assignment_qc"]
 SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL = ["NonPolioEV","PositiveControl"]
-DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL = ["comments","qc_status"]
+DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_ADDITIONAL = ["EPID","institute","gel","comments","qc_status"]
 
 
 # SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_VP1 = ["sample","barcode","Sabin1-related","Sabin2-related","Sabin3-related",
