@@ -39,7 +39,6 @@ def ref_dict_maker(ref_fasta):
     ref_fasta = pysam.FastaFile(ref_fasta)
     for idx, base in enumerate(ref_fasta.fetch(ref_fasta.references[0]), start=0):
         ref_dict[idx] = base
-
     return ref_dict
 
 #function to calculate the percentage of non ref bases at a given position
@@ -104,44 +103,58 @@ def add_to_cooccurance_analysis(pileupread,read_vars,genome_position):
 #Use mpileup to get bases per read at each postion, then calculate % vs ref for each
 def pileupper(bamfile,ref_dict,var_dict,base_q=13):
     bamfile = pysam.AlignmentFile(bamfile, "rb" )
-
-    variation_info = []
-    
+    read_count = 0
+    for read in bamfile.fetch(bamfile.references[0]):
+        read_count +=1
+    print("Mapped reads for variation parsing:",read_count)
     read_vars = collections.defaultdict(dict)
+    variation_info = []
+    if read_count==0:
+        for i in range(len(ref_dict)):
+            pileup_dict = {}
+            A_counter, G_counter, C_counter, T_counter, del_counter = 0,0,0,0,0
+            pileup_dict["Position"] = i+1
+            pileup_dict["A reads"] = A_counter
+            pileup_dict["C reads"] = C_counter
+            pileup_dict["T reads"] = T_counter
+            pileup_dict["G reads"] = G_counter
+            pileup_dict["- reads"] = del_counter
+            pileup_dict["Percentage"],pileup_dict["Total"] = 0,0
+            pileup_dict["Ref base"] = ref_dict[i]
+            variation_info.append(pileup_dict)
+    else:
 
-    for pileupcolumn in bamfile.pileup(bamfile.references[0], min_base_quality=base_q):
-        pileup_dict = {}
-        A_counter, G_counter, C_counter, T_counter, del_counter = 0,0,0,0,0
+        for pileupcolumn in bamfile.pileup(bamfile.references[0], min_base_quality=base_q):
+            pileup_dict = {}
+            A_counter, G_counter, C_counter, T_counter, del_counter = 0,0,0,0,0
 
-        genome_position = pileupcolumn.pos+1
-        
-        for pileupread in pileupcolumn.pileups:
-            if genome_position in var_dict:
+            genome_position = pileupcolumn.pos+1
+            for pileupread in pileupcolumn.pileups:
+                if genome_position in var_dict:
 
-                read_vars = add_to_cooccurance_analysis(pileupread,read_vars,genome_position)
-            if not pileupread.is_del and not pileupread.is_refskip:
-                # query position is None if is_del or is_refskip is set.
-                counts_list = []
-                if pileupread.alignment.query_sequence[pileupread.query_position] == "A":
-                    A_counter += 1
-                elif pileupread.alignment.query_sequence[pileupread.query_position] == "G":
-                    G_counter += 1
-                elif pileupread.alignment.query_sequence[pileupread.query_position] == "C":
-                    C_counter += 1
-                elif pileupread.alignment.query_sequence[pileupread.query_position] == "T":
-                    T_counter += 1
-            else:
-                del_counter += 1
-        pileup_dict["Position"] = pileupcolumn.pos + 1
-        pileup_dict["A reads"] = A_counter
-        pileup_dict["C reads"] = C_counter
-        pileup_dict["T reads"] = T_counter
-        pileup_dict["G reads"] = G_counter
-        pileup_dict["- reads"] = del_counter
-        pileup_dict["Percentage"],pileup_dict["Total"] = non_ref_prcnt_calc(pileupcolumn.pos,pileup_dict,ref_dict)
-        pileup_dict["Ref base"] = ref_dict[pileupcolumn.pos]
-        variation_info.append(pileup_dict)
-
+                    read_vars = add_to_cooccurance_analysis(pileupread,read_vars,genome_position)
+                if not pileupread.is_del and not pileupread.is_refskip:
+                    # query position is None if is_del or is_refskip is set.
+                    counts_list = []
+                    if pileupread.alignment.query_sequence[pileupread.query_position] == "A":
+                        A_counter += 1
+                    elif pileupread.alignment.query_sequence[pileupread.query_position] == "G":
+                        G_counter += 1
+                    elif pileupread.alignment.query_sequence[pileupread.query_position] == "C":
+                        C_counter += 1
+                    elif pileupread.alignment.query_sequence[pileupread.query_position] == "T":
+                        T_counter += 1
+                else:
+                    del_counter += 1
+            pileup_dict["Position"] = pileupcolumn.pos + 1
+            pileup_dict["A reads"] = A_counter
+            pileup_dict["C reads"] = C_counter
+            pileup_dict["T reads"] = T_counter
+            pileup_dict["G reads"] = G_counter
+            pileup_dict["- reads"] = del_counter
+            pileup_dict["Percentage"],pileup_dict["Total"] = non_ref_prcnt_calc(pileupcolumn.pos,pileup_dict,ref_dict)
+            pileup_dict["Ref base"] = ref_dict[pileupcolumn.pos]
+            variation_info.append(pileup_dict)
 
     return variation_info,read_vars
 
