@@ -40,31 +40,40 @@ def parse_barcodes_csv(barcodes_csv,config):
     samples = []
     with open(config[KEY_BARCODES_CSV],"r") as f:
         reader = csv.DictReader(f)
-        for col in [KEY_BARCODE,KEY_SAMPLE]:
+        cols_to_check = [KEY_BARCODE,KEY_SAMPLE]
+        
+        for col in cols_to_check:
             if not col in reader.fieldnames:
                 sys.stderr.write(cyan(f"`{col}` must be a column name in barcode csv file.\n"))
                 sys.exit(-1)
 
+        if KEY_EPID in reader.fieldnames:
+            cols_to_check.append(KEY_EPID)
+            
         for row in reader:
             if row[KEY_BARCODE] and not row[KEY_SAMPLE]:
                 continue
+            
+            
             if row[KEY_BARCODE] in barcodes:
                 barcode = row[KEY_BARCODE]
                 sys.stderr.write(cyan(f"`{barcode}` duplicated in barcode csv file. Note: barcodes must be unique.\n"))
                 sys.exit(-1)
             if row[KEY_SAMPLE] in samples:
                 print(cyan(f"Warning: `{row[KEY_SAMPLE]}` sample name provided for multiple barcodes."))
-            for special_character in ["|",","," ",";"]:
-                if special_character in row[KEY_BARCODE]:
-                    sys.stderr.write(cyan(f"Special character `{special_character}` cannot be used in barcode or sample name. Please remove this character from barcode `{row[KEY_BARCODE]}` and restart.\n"))
-                    sys.exit(-1)
-                elif special_character in row[KEY_SAMPLE]:
-                    sys.stderr.write(cyan(f"Special character `{special_character}` cannot be used in barcode or sample name. Please remove this character from sample `{row[KEY_SAMPLE]}` and restart.\n"))
-                    sys.exit(-1)
+            
+            for col in cols_to_check:
+                for special_character in ["|",","," ",";"]:
+                    if special_character in row[col]:
+                        sys.stderr.write(cyan(f"Special character `{special_character}` cannot be used in {col} field. Please remove this character from `{row[KEY_BARCODE]}` and restart.\n"))
+                        sys.exit(-1)
                     
             if row[KEY_BARCODE] and row[KEY_SAMPLE]:
                 barcodes.append(row[KEY_BARCODE])
                 samples.append(row[KEY_SAMPLE])
+            
+            
+                
 
     config[KEY_BARCODES] = barcodes
     config[KEY_SAMPLES] = samples
