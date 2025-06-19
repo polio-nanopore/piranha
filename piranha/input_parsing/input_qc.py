@@ -63,7 +63,7 @@ def parse_barcodes_csv(barcodes_csv,config):
                 print(cyan(f"Warning: `{row[KEY_SAMPLE]}` sample name provided for multiple barcodes."))
             
             for col in cols_to_check:
-                for special_character in set("|",","," ",";"):
+                for special_character in ["|",","," ",";"]:
                     if special_character in row[col]:
                         sys.stderr.write(cyan(f"Special character `{special_character}` cannot be used in {col} field. Please remove this character from `{row[KEY_BARCODE]}` and restart.\n"))
                         sys.exit(-1)
