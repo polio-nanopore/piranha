@@ -25,7 +25,8 @@ from snakemake.api import (
     ExecutionSettings
 )
 
-def run_snakemake(snake_config,snakefile,v,config):
+def run_snakemake(snake_config,my_snakefile,config):
+    v = config[KEY_VERBOSE]
     pshell = False
     if v:
         pshell = True
