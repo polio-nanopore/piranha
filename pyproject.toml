@@ -34,7 +34,7 @@ Homepage = "https://github.com/aineniamh/piranha"
 Issues = "https://github.com/aineniamh/piranha/issues"
 
 [project.scripts]
-squirrel-cli = "squirrel.command:main"
+piranha = "piranha.command:main"
 
 [tool.setuptools.dynamic]
 version = {attr = "piranha.__version__"}
