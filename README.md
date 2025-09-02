@@ -16,7 +16,7 @@ Any issues or feedback about the analysis or report please flag to this reposito
 
 ## Example report [here](https://polio-nanopore.github.io/piranha/report.html)
 
-## Example data [here](https://github.com/polio-nanopore/piranha/tree/main/test_data)
+## Example data [here](https://github.com/polio-nanopore/piranha/tree/main/docs/test_data)
 
 
 ## Installing via PIRANHA GUI
