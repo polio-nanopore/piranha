@@ -243,8 +243,8 @@ VALUE_REFERENCE_GROUP_VALUES = {"Sabin1-related","Sabin2-related","Sabin3-relate
 VALUE_ORIENTATION="vertical"
 VALID_ORIENTATION=["vertical","horizontal"]
 VALUE_RUNNAME="polioDDNS"
-VALUE_COLOUR_MAP=["#e68781","#476970","#fbedac"]
-VALUE_COLOUR_THEME="#e68781"
+VALUE_COLOUR_MAP=["e68781","476970","fbedac"]
+VALUE_COLOUR_THEME="e68781"
 
 # phylo defaults
 VALUE_TREE_ANNOTATIONS="source "

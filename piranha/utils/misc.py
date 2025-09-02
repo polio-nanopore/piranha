@@ -26,6 +26,14 @@ from snakemake.api import (
 )
 
 def run_snakemake(snake_config,my_snakefile,config):
+
+    clean_config = {}
+    for key in snake_config:
+        val = snake_config[key]
+        if not val==None and not key==None:
+            clean_config[key] = val
+
+
     v = config[KEY_VERBOSE]
     pshell = False
     if v:
@@ -44,7 +52,7 @@ def run_snakemake(snake_config,my_snakefile,config):
                     cores=config[KEY_THREADS]
                     ),
                 config_settings=ConfigSettings(
-                    config=config
+                    config=snake_config
                 ),
                 snakefile=Path(my_snakefile),
                 workdir=Path(config[KEY_TEMPDIR]),
