@@ -25,7 +25,7 @@ from snakemake.api import (
     ExecutionSettings
 )
 
-def run_snakemake(snake_config,my_snakefile,config):
+def run_snakemake(snake_config,my_snakefile,config,configfile=None):
 
     clean_config = {}
     for key in snake_config:
@@ -38,21 +38,23 @@ def run_snakemake(snake_config,my_snakefile,config):
     pshell = False
     if v:
         pshell = True
+    cfiles = []
+    if configfile:
+        cfiles = [Path(configfile)]
     with SnakemakeApi(
         OutputSettings(
             printshellcmds=pshell,
             verbose=v
-            # log_handler_settings=custom_logger,
         )
     ) as snakemake_api:
         try:
-        
             workflow_api = snakemake_api.workflow(
                 resource_settings=ResourceSettings(
                     cores=config[KEY_THREADS]
                     ),
                 config_settings=ConfigSettings(
-                    config=snake_config
+                    config=snake_config,
+                    configfiles=cfiles,
                 ),
                 snakefile=Path(my_snakefile),
                 workdir=Path(config[KEY_TEMPDIR]),
@@ -69,13 +71,14 @@ def run_snakemake(snake_config,my_snakefile,config):
                     keep_incomplete=True
                 ),
             )
-
-
         except Exception as e:
+            print(e)
             snakemake_api.print_exception(e)
+            print(cyan(f"Execution of {my_snakefile} failed. Exiting."))
             return False
-    
+    print(green(f"Success on execution of {my_snakefile}."))
     return True
+    
 
 def add_col_to_metadata(new_column_name, new_column_dict, metadata, new_metadata, match_column, config): 
     #dictionary currently is key=sequence name and value=new col value
