@@ -9,7 +9,9 @@ dependencies = [
     "mako~=1.3.10",
     "pandas~=2.3.1",
     "snipit>=1.2",
-    "biopython"
+    "biopython",
+    "numpy",
+    "scipy"
 ]
 requires-python = ">=3.10"
 authors = [
