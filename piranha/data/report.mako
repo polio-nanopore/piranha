@@ -35,8 +35,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <% colorCodes = config["colour_map"] %>
-    <% themeColor = config["colour_theme"] %>
+    <% colorCodes = [f"#{i}" for i in config["colour_map"]] %>
+    <% themeColor = f'#{config["colour_theme"]}' %>
     <style>
       body {
         padding-top: 50px;

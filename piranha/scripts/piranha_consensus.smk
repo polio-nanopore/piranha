@@ -43,12 +43,19 @@ rule medaka_haploid_variant:
         [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
         if [ -s {input.ref:q} ]
         then
-            medaka_haploid_variant -i {input.reads:q} \
-                                -r {input.ref:q} \
+            medaka_variant -i {input.reads:q} \
+                                    -r {input.ref:q} \
+                                    -o {params.outdir:q} \
+                                    -m {params.model:q} \
+                                    -f -x && \
+                
+                
+                medaka_consensus -i {input.reads:q}  \
+                                -r N  \
+                                -d {input.ref:q} \
                                 -o {params.outdir:q} \
                                 -m {params.model:q} \
-                                -f -x && \
-            medaka stitch {output.probs:q} {input.ref:q} {output.cns:q}
+                                -f -x 
         else
             touch {output.cns:q}
             touch {output.probs:q}
@@ -76,12 +83,20 @@ rule medaka_haploid_variant_cns:
             [ ! -d {params.outdir:q} ] && mkdir {params.outdir:q}
             if [ -s {input.ref:q} ]
             then
-                medaka_haploid_variant -i {input.reads:q} \
+                medaka_variant -i {input.reads:q} \
                                     -r {input.ref:q} \
                                     -o {params.outdir:q} \
                                     -m {params.model:q} \
                                     -f -x && \
-                medaka stitch {output.probs} {input.ref} {output.cns}
+                
+                
+                medaka_consensus -i {input.reads:q}  \
+                                -r N  \
+                                -d {input.ref:q} \
+                                -o {params.outdir:q} \
+                                -m {params.model:q} \
+                                -f -x 
+
             else
                 touch {output.cns:q}
                 touch {output.probs:q}

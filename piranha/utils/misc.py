@@ -11,21 +11,74 @@ import piranha.utils.custom_logger as custom_logger
 from piranha.utils.log_colours import green,cyan,red
 from piranha.utils.config import *
 
-def run_snakemake(snake_config,snakefile,config):
-    if config[KEY_VERBOSE]:
-        print(red("\n**** CONFIG ****"))
-        for k in sorted(config):
-            print(green(f" - {k}: ") + f"{config[k]}")
-        status = snakemake.snakemake(snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR], config=snake_config, cores=config[KEY_THREADS],lock=False
-                                    )
-    else:
-        logger = custom_logger.Logger()
-        status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR], config=snake_config, cores=config[KEY_THREADS],lock=False,
-                                    quiet=True,log_handler=logger.log_handler
-                                    )
-    return status
+
+from pathlib import Path
+
+from snakemake.api import (
+    OutputSettings,
+    ResourceSettings,
+    WorkflowSettings,
+    SnakemakeApi,
+    StorageSettings,
+    ConfigSettings,
+    DAGSettings,
+    ExecutionSettings
+)
+
+def run_snakemake(snake_config,my_snakefile,config,configfile=None):
+
+    clean_config = {}
+    for key in snake_config:
+        val = snake_config[key]
+        if not val==None and not key==None:
+            clean_config[key] = val
+
+
+    v = config[KEY_VERBOSE]
+    pshell = False
+    if v:
+        pshell = True
+    cfiles = []
+    if configfile:
+        cfiles = [Path(configfile)]
+    with SnakemakeApi(
+        OutputSettings(
+            printshellcmds=pshell,
+            verbose=v
+        )
+    ) as snakemake_api:
+        try:
+            workflow_api = snakemake_api.workflow(
+                resource_settings=ResourceSettings(
+                    cores=config[KEY_THREADS]
+                    ),
+                config_settings=ConfigSettings(
+                    config=snake_config,
+                    configfiles=cfiles,
+                ),
+                snakefile=Path(my_snakefile),
+                workdir=Path(config[KEY_TEMPDIR]),
+                )
+            dag_api = workflow_api.dag(
+                dag_settings=DAGSettings(
+                    forceall=True,
+                    force_incomplete=True
+                ),
+                    )
+            dag_api.execute_workflow(
+                execution_settings=ExecutionSettings(
+                    lock=False,
+                    keep_incomplete=True
+                ),
+            )
+        except Exception as e:
+            print(e)
+            snakemake_api.print_exception(e)
+            print(cyan(f"Execution of {my_snakefile} failed. Exiting."))
+            return False
+    print(green(f"Success on execution of {my_snakefile}."))
+    return True
+    
 
 def add_col_to_metadata(new_column_name, new_column_dict, metadata, new_metadata, match_column, config): 
     #dictionary currently is key=sequence name and value=new col value

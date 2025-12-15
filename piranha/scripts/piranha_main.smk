@@ -7,14 +7,11 @@ import yaml
 from piranha.analysis.stool_functions import *
 from piranha.report.make_report import make_sample_report
 from piranha.utils.log_colours import green,cyan
+from piranha.utils import misc
+
 from piranha.utils.config import *
 ##### Target rules #####
-"""
-input files
-os.path.join(config[KEY_OUTDIR],PREPROCESSING_SUMMARY)
-os.path.join(config[KEY_OUTDIR],"hits.csv")
-os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION)
-"""
+
 rule all:
     input:
         os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS),
@@ -46,14 +43,19 @@ rule estimate_haplotypes:
         if config[KEY_RUN_HAPLOTYPING]:
             sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
             print(green(f"Calculating haplotypes for {sample} ({params.barcode})"))
-            shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                        "--forceall "
-                        "--rerun-incomplete "
-                        "{config[log_string]} "
-                        "--configfile {input.yaml:q} "
-                        "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                        f"sample='{sample}' "
-                        "--cores {threads} &> {log:q}")
+
+            config[KEY_BARCODE] = params.barcode
+            config[KEY_SAMPLE] = sample
+            config[KEY_OUTDIR] = params.outdir
+            config[KEY_TEMPDIR] = params.tempdir
+
+            with open(input.yaml, 'r') as f:
+                input_config = yaml.safe_load(f)
+                config[params.barcode] = input_config[params.barcode]
+
+            status = misc.run_snakemake(config,input.snakefile,config,input.yaml)
+            if not status:
+                print(cyan("Failed to run variation pipeline"))
         else:
             shell(
                 """
@@ -75,14 +77,24 @@ rule generate_consensus_sequences:
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Calculating consensus sequences for {sample} ({params.barcode})"))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--rerun-incomplete "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                    f"sample='{sample}' "
-                    "--cores {threads} &> {log:q}")
+
+        config[KEY_BARCODE] = params.barcode
+        config[KEY_SAMPLE] = sample
+        config[KEY_OUTDIR] = params.outdir
+        config[KEY_TEMPDIR] = params.tempdir
+
+        status = misc.run_snakemake(config,input.snakefile,config,input.yaml)
+        if not status:
+            print(cyan("Failed to run consensus pipeline"))
+
+        # shell("snakemake --nolock --snakefile {input.snakefile:q} "
+        #             "--forceall "
+        #             "--rerun-incomplete "
+        #             # "{config[log_string]} "
+        #             "--configfile {input.yaml:q} "
+        #             "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+        #             f"sample='{sample}' "
+        #             "--cores {threads} &> {log:q}")
 
 
 rule curate_sequences:
@@ -104,14 +116,20 @@ rule curate_sequences:
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Curating consensus sequences & variants for {sample} ({params.barcode})"))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--rerun-incomplete "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                    f"sample='{sample}' "
-                    "--cores {threads} &> {log:q}")
+
+        config[KEY_BARCODE] = params.barcode
+        config[KEY_SAMPLE] = sample
+        config[KEY_OUTDIR] = params.outdir
+        config[KEY_TEMPDIR] = params.tempdir
+
+        with open(input.yaml, 'r') as f:
+            input_config = yaml.safe_load(f)
+            config[params.barcode] = input_config[params.barcode]
+
+        status = misc.run_snakemake(config,input.snakefile,config,input.yaml)
+        if not status:
+            print(cyan("Failed to run curation pipeline"))
+
         shell(
             """
             cp {params.variant_dir}/*.vcf {params.publish_dir}
@@ -134,16 +152,31 @@ rule generate_variation_info:
         json_mask = os.path.join(config[KEY_TEMPDIR],"{barcode}","mask_info.json")
     run:
         # decide if we want 1 per haplotyde or 1 per ref group, will need mods either way
+        
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Gathering variation info for {sample} ({params.barcode})"))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--rerun-incomplete "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                    f"sample='{sample}' "
-                    "--cores {threads} &> {log:q}")
+
+        config[KEY_BARCODE] = params.barcode
+        config[KEY_SAMPLE] = sample
+        config[KEY_OUTDIR] = params.outdir
+        config[KEY_TEMPDIR] = params.tempdir
+
+        with open(input.yaml, 'r') as f:
+            input_config = yaml.safe_load(f)
+            config[params.barcode] = input_config[params.barcode]
+
+        status = misc.run_snakemake(config,input.snakefile,config,input.yaml)
+        if not status:
+            print(cyan("Failed to run variation pipeline"))
+        
+        # shell("snakemake --nolock --snakefile {input.snakefile:q} "
+        #             "--forceall "
+        #             "--rerun-incomplete "
+        #             # "{config[log_string]} "
+        #             "--configfile {input.yaml:q} "
+        #             "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
+        #             f"sample='{sample}' "
+        #             "--cores {threads} &> {log:q}")
 
 
 rule mask_consensus_sequences:
