@@ -1,0 +1,129 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "piranha-polio"
+version = "1.5.3"
+description = "Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Aine OToole", email = "aine.otoole@ed.ac.uk"}
+]
+keywords = ["poliovirus", "nanopore", "sequencing", "genomics"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    "mako==1.2.4",
+    "pandas==1.5.3",
+    "snipit>=1.2",
+    "biopython>=1.81",
+    "medaka>=1.12.0",
+    "numpy==1.26.4",
+    "scipy==1.11.4",
+    "snakemake>=7.32.4",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+    "isort>=5.12",
+    "ruff>=0.1.0",
+]
+docs = [
+    "sphinx>=5.0",
+    "sphinx-rtd-theme>=1.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/polio-nanopore/piranha"
+Repository = "https://github.com/polio-nanopore/piranha.git"
+"Bug Tracker" = "https://github.com/polio-nanopore/piranha/issues"
+Documentation = "https://polio-nanopore.github.io/piranha/"
+
+[project.scripts]
+piranha = "piranha.command:main"
+
+[tool.setuptools]
+packages = ["piranha"]
+
+[tool.setuptools.package-data]
+piranha = ["data/*", "scripts/*.smk"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+py_version = 310
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+
+[[tool.mypy.overrides]]
+module = [
+    "snakemake.*",
+    "snipit.*",
+    "Bio.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["piranha/test"]
+python_files = ["test_*.py"]
+addopts = "--cov=piranha --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["piranha"]
+omit = [
+    "*/tests/*",
+    "*/test/*",
+    "*/__main__.py",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]  # line too long (handled by black)
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
