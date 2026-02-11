@@ -10,7 +10,7 @@ from piranha.utils import misc
 def package_data_check(filename,directory,key,config):
     try:
         package_datafile = os.path.join(directory,filename)
-        resource = importlib.resources.files("piranha").joinpath("data", package_datafile)
+        resource = importlib.resources.files("piranha").joinpath(package_datafile)
         with importlib.resources.as_file(resource) as data_path:
             data = str(data_path)
         config[key] = data

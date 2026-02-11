@@ -27,7 +27,9 @@ Homepage = "https://github.com/polio-nanopore/piranha"
 
 [tool.setuptools]
 packages = ["piranha", "piranha.scripts"]
-include-package-data = true
+
+[tool.setuptools.package-data]
+myModule = ["data/*"]
 
 [project.scripts]
 piranha = "piranha.command:main"

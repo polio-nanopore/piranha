@@ -10,7 +10,7 @@ from piranha.report.make_report import make_output_report
 """
 requires snakemake --snakefile piranha/scripts/report_runner.smk --cores 1 --config outdir=analysis_2023-11-14
 """
-package_datafile = os.path.join("data","report.mako")
+package_datafile = os.path.join("report.mako")
     resource = importlib.resources.files("piranha").joinpath("data", package_datafile)
     with importlib.resources.as_file(resource) as data_path:
         data = str(data_path)
