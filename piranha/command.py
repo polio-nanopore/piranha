@@ -145,7 +145,7 @@ def main(sysargs = sys.argv[1:]):
                                                 args.min_aln_block,
                                                 args.primer_length,
                                                 args.min_map_quality,
-                                                args.min_base_quality
+                                                args.min_base_quality,
                                                 config)
 
     config[KEY_MINIMAP2_OPTIONS] = analysis_arg_parsing.minimap2_options_parsing(args.minimap2_options,config)
