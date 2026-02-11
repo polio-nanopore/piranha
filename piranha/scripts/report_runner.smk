@@ -2,7 +2,7 @@ import os
 import collections
 from Bio import SeqIO
 import yaml
-import pkg_resources
+import importlib.resources
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 from piranha.report.make_report import make_output_report
@@ -11,7 +11,9 @@ from piranha.report.make_report import make_output_report
 requires snakemake --snakefile piranha/scripts/report_runner.smk --cores 1 --config outdir=analysis_2023-11-14
 """
 package_datafile = os.path.join("data","report.mako")
-data = pkg_resources.resource_filename('piranha',package_datafile)
+    resource = importlib.resources.files("piranha").joinpath("data", package_datafile)
+    with importlib.resources.as_file(resource) as data_path:
+        data = str(data_path)
 config[KEY_REPORT_TEMPLATE] = data
 
 rule generate_report:
