@@ -101,7 +101,7 @@ def add_to_cooccurance_analysis(pileupread,read_vars,genome_position):
 
 
 #Use mpileup to get bases per read at each postion, then calculate % vs ref for each
-def pileupper(bamfile,ref_dict,var_dict,base_q=13):
+def pileupper(bamfile,ref_dict,var_dict,base_q):
     bamfile = pysam.AlignmentFile(bamfile, "rb" )
     read_count = 0
     for read in bamfile.fetch(bamfile.references[0]):

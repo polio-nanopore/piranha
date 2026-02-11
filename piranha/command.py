@@ -50,6 +50,7 @@ def main(sysargs = sys.argv[1:]):
     analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
     analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
     analysis_group.add_argument("-q","--min-map-quality",action="store",type=int,help=f"Minimum mapping quality. Range 0 to 60, however 0 can imply a multimapper. Default: {VALUE_MIN_MAP_QUALITY}")
+    analysis_group.add_argument("-bq","--min-base-quality",action="store",type=int,help=f"Minimum base quality. Range 0 to 13. Default: {VALUE_MIN_BASE_QUALITY}")
     analysis_group.add_argument("-n","--min-read-length",action="store",type=int,help=f"Minimum read length. Default: {READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][0]}")
     analysis_group.add_argument("-x","--max-read-length",action="store",type=int,help=f"Maximum read length. Default: {READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][1]}")
     analysis_group.add_argument("-d","--min-read-depth",action="store",type=int,help=f"Minimum read depth required for consensus generation. Default: {VALUE_MIN_READS}")
@@ -144,6 +145,7 @@ def main(sysargs = sys.argv[1:]):
                                                 args.min_aln_block,
                                                 args.primer_length,
                                                 args.min_map_quality,
+                                                args.min_base_quality
                                                 config)
 
     config[KEY_MINIMAP2_OPTIONS] = analysis_arg_parsing.minimap2_options_parsing(args.minimap2_options,config)
