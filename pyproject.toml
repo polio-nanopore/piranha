@@ -12,14 +12,15 @@ dependencies = [
     "biopython",
     "medaka~=1.12.0",
     "numpy~=1.26.4",
-    "scipy~=1.11"
+    "scipy~=1.11",
+    "Setuptools<81"
 ]
 authors = [
     {name = "Aine OToole", email = "aine.otoole@ed.ac.uk"}
 ]
 description = "Poliovirus Investigation Resource Automating Nanopore Haplotype Analysis"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = "~=3.10"
 license = "GPL-3.0-or-later"
 
 [project.urls]
