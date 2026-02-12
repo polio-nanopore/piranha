@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import pkg_resources
+import importlib.resources
 from piranha.utils.log_colours import green,cyan
 import sys
 import os
@@ -10,7 +10,9 @@ from piranha.utils import misc
 def package_data_check(filename,directory,key,config):
     try:
         package_datafile = os.path.join(directory,filename)
-        data = pkg_resources.resource_filename('piranha', package_datafile)
+        resource = importlib.resources.files("piranha").joinpath(package_datafile)
+        with importlib.resources.as_file(resource) as data_path:
+            data = str(data_path)
         config[key] = data
     except:
         sys.stderr.write(cyan(f'Error: Missing package data.')+f'\n\t- {filename}\nPlease install the latest piranha version with `piranha --update`.\n')

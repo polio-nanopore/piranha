@@ -55,7 +55,7 @@ rule get_variation_info:
             var_dict = all_var_dict[reference]
 
             # just run pileupper once for both coocurance and variation processing
-            variation_json,read_vars = pileupper(bamfile,ref_dict,var_dict)
+            variation_json,read_vars = pileupper(bamfile,ref_dict,var_dict,config[KEY_MIN_BASE_QUALITY])
             variation_dict[reference]["variation"] = variation_json
 
             # getting cooccurance info here now 

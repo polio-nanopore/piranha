@@ -50,7 +50,7 @@ def medaka_options_parsing(medaka_model,medaka_list_models,config):
         sys.stderr.write(cyan(f"Medaka model specified not valid: `{config[KEY_MEDAKA_MODEL]}`.\nPlease use --medaka-list-models to see which models are available.\nIf needed, update medaka version with `pip install --upgrade medaka`.\n"))
         sys.exit(-1)
 
-def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_read_pcent,min_aln_block,primer_length,min_map_quality,config):
+def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_read_pcent,min_aln_block,primer_length,min_map_quality,min_base_quality,config):
 
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_MIN_READ_LENGTH,min_read_length,config)
@@ -60,8 +60,9 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
     misc.add_arg_to_config(KEY_MIN_ALN_BLOCK,min_aln_block,config)
     misc.add_arg_to_config(KEY_PRIMER_LENGTH,primer_length,config)
     misc.add_arg_to_config(KEY_MIN_MAP_QUALITY,min_map_quality,config)
+    misc.add_arg_to_config(KEY_MIN_BASE_QUALITY,min_base_quality,config)
 
-    for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_ALN_BLOCK]:
+    for key in [KEY_MIN_READ_LENGTH,KEY_MAX_READ_LENGTH,KEY_MIN_READS,KEY_MIN_ALN_BLOCK,KEY_MIN_BASE_QUALITY]:
         check_if_int(key,config)
     
     check_if_float(KEY_MIN_PCENT,config)
