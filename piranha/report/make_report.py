@@ -553,9 +553,9 @@ def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_sum
         if reference_group.startswith("Sabin"):
             # configured number of mutations in sabin for the call threshold of VDPV
             call_threshold = CALL_THRESHOLD_DICT[reference_group]
-            if int(var_count) > call_threshold:
+            if int(var_count) >= call_threshold:
                 call = "VDPV"
-            elif var_count == 0:
+            elif int(var_count) == 0:
                 call = "Sabin"
             else:
                 call = "Sabin-like"

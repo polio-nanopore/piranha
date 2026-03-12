@@ -56,7 +56,7 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
                 if ref_group.startswith("Sabin"):
                     # configured number of mutations in sabin for the call threshold of VDPV
                     call_threshold = CALL_THRESHOLD_DICT[ref_group]
-                    if int(var_count) > call_threshold:
+                    if int(var_count) >= call_threshold:
                         call = "VDPV"
                     elif var_count == 0:
                         call = "Sabin"
