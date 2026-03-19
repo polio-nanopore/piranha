@@ -27,7 +27,7 @@ license = "GPL-3.0-or-later"
 Homepage = "https://github.com/polio-nanopore/piranha"
 
 [tool.setuptools]
-packages = ["piranha", "piranha.scripts"]
+packages = ["piranha", "piranha.scripts", "piranha.input_parsing", "piranha.analysis", "piranha.utils", "piranha.data", "piranha.report"]
 
 [tool.setuptools.package-data]
 myModule = ["data/*"]
