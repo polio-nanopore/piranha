@@ -182,5 +182,5 @@ rule gather_cns:
                 reference = os.path.basename(os.path.dirname(in_file))
                 for record in SeqIO.parse(in_file,KEY_FASTA):
                     variant_count = var_dict[reference]["variant_count"]
-                    # variant_string = var_dict[reference]["variants"]
-                    fw.write(f">{reference}|{BARCODE}|{variant_count}\n{record.seq}\n")
+                    variant_string = var_dict[reference]["variants"]
+                    fw.write(f">{reference}|{BARCODE}|{variant_count}|{variant_string}\n{record.seq}\n")
