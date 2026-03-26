@@ -50,6 +50,7 @@ def make_sample_report(report_to_generate,
     sequence_info = {}
     with open(consensus_info,"r") as f:
         sequence_info = json.load(f)
+        print(sequence_info)
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
@@ -61,7 +62,6 @@ def make_sample_report(report_to_generate,
         """
         record_info = {}
         description_dict = {}
-
         if record.id in sequence_info:
             record_info = sequence_info[record.id]
 

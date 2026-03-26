@@ -41,11 +41,7 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                     if record:
                         cns_info= record.description.split(" ")
                         ref_hap,barcode,var_count,var_string=cns_info[0].split("|")
-                        seq_info = {
-                            KEY_REFERENCE: ref_hap,
-                            KEY_BARCODE: barcode,
-                            KEY_VARIANT_COUNT: var_count,
-                            KEY_VARIANTS: var_string}
+                        
                         # for parsing haplotypes
                         ref_list = ref_hap.split(".")
                         ref = ".".join(ref_list[:-1])
@@ -56,9 +52,19 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                             if row[KEY_REFERENCE] == ref:
                                 info = row
 
+                        
+
                         metadata = input_metadata[barcode]
-                        seq_info[KEY_SAMPLE] = metadata[KEY_SAMPLE]
-                        seq_info[KEY_REFERENCE_GROUP] = info[KEY_REFERENCE_GROUP]
+
+                        seq_info = {
+                            KEY_REFERENCE: ref_hap,
+                            KEY_BARCODE: barcode,
+                            KEY_SAMPLE: metadata[KEY_SAMPLE],
+                            KEY_REFERENCE: ref,
+                            KEY_REFERENCE_GROUP: info[KEY_REFERENCE_GROUP],
+                            KEY_VARIANT_COUNT: var_count,
+                            KEY_HAPLOTYPE: hap,
+                            KEY_VARIANTS: var_string}
 
                         record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
 
@@ -84,6 +90,8 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
 
                         if runname:
                             record_id += f" {KEY_RUNNAME}={runname}"
+                            seq_info[KEY_RUNNAME] = runname
+                        
 
                         # if "Sabin" in ref:
                         #     record_id += f" {KEY_VARIANT_COUNT}={var_count}"
