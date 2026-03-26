@@ -47,7 +47,9 @@ def make_sample_report(report_to_generate,
     sequences = ""
     barcode_sample = ""
 
-    sequence_info = json.loads(consensus_info)
+    sequence_info = {}
+    with open(consensus_info,"r") as f:
+        sequence_info = json.load(f)
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
