@@ -85,12 +85,12 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                         if runname:
                             record_id += f" {KEY_RUNNAME}={runname}"
 
-                        if "Sabin" in ref:
-                            record_id += f" {KEY_VARIANT_COUNT}={var_count}"
-                            record_id += f" {KEY_VARIANTS}={var_string}"
-                        else:
-                            record_id += f" {KEY_VARIANT_COUNT}=NA"
-                            record_id += f" {KEY_VARIANTS}=NA"
+                        # if "Sabin" in ref:
+                        #     record_id += f" {KEY_VARIANT_COUNT}={var_count}"
+                        #     record_id += f" {KEY_VARIANTS}={var_string}"
+                        # else:
+                        #     record_id += f" {KEY_VARIANT_COUNT}=NA"
+                        #     record_id += f" {KEY_VARIANTS}=NA"
 
                         if all_metdata:
                             
