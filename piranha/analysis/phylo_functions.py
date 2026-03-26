@@ -14,9 +14,9 @@ def get_seqs_and_clusters(sample_seqs,sample_info,supplementary_sequences,refere
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
 
-    sample_info = {}
+    seq_info = {}
     with open(sample_info, "r") as f:
-        sample_info=json.load(f)
+        seq_info=json.load(f)
 
     header = VALUE_PHYLO_HEADER
     written = {}
@@ -29,7 +29,7 @@ def get_seqs_and_clusters(sample_seqs,sample_info,supplementary_sequences,refere
 
             if "all_metadata" then everything else gets added to the description
             """
-            description_dict = sample_info[record.id]
+            description_dict = seq_info[record.id]
             # fields = record.description.split(" ")
             
             record_sample,reference_group,cns_id,epid,sample_date = record.id.split("|")
