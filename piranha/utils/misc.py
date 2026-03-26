@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import csv
 import sys
 import datetime as dt
 
@@ -26,30 +25,6 @@ def run_snakemake(snake_config,snakefile,config):
                                     quiet=True,log_handler=logger.log_handler
                                     )
     return status
-
-def add_col_to_metadata(new_column_name, new_column_dict, metadata, new_metadata, match_column, config): 
-    #dictionary currently is key=sequence name and value=new col value
-    print(green("Adding column to master metadata:"), new_column_name)
-    with open(new_metadata, 'w') as fw:
-        
-        with open(metadata,"r") as f:
-            reader = csv.DictReader(f)
-            header = reader.fieldnames
-            header.append(new_column_name)
-            config[KEY_QUERY_CSV_HEADER] = header
-            
-            writer = csv.DictWriter(fw, fieldnames=config[KEY_QUERY_CSV_HEADER],lineterminator='\n')
-            writer.writeheader()
-
-            for row in reader:
-                new_row = row
-
-                if new_row[match_column] in new_column_dict:
-                    new_row[new_column_name] = new_column_dict[new_row[match_column]]
-                else:
-                    new_row[new_column_name] = ""
-
-                writer.writerow(new_row)
 
 def add_check_valid_arg(KEY,arg,valid_values,config):
     add_arg_to_config(KEY,arg,config)
