@@ -4,14 +4,19 @@ from Bio import SeqIO
 import collections
 from piranha.utils.config import *
 import os
+import json
 
 from piranha.utils.log_colours import green,cyan,red
 
 
-def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequences,outgroup_sequences,barcodes_csv,supplementary_metadata,phylo_outdir,config):
+def get_seqs_and_clusters(sample_seqs,sample_info,supplementary_sequences,reference_sequences,outgroup_sequences,barcodes_csv,supplementary_metadata,phylo_outdir,config):
     
     seq_metadata = collections.defaultdict(dict)
     seq_clusters = collections.defaultdict(list)
+
+    sample_info = {}
+    with open(sample_info, "r") as f:
+        sample_info=json.load(f)
 
     header = VALUE_PHYLO_HEADER
     written = {}
@@ -24,15 +29,15 @@ def get_seqs_and_clusters(sample_seqs,supplementary_sequences,reference_sequence
 
             if "all_metadata" then everything else gets added to the description
             """
-            
-            fields = record.description.split(" ")
+            description_dict = sample_info[record.id]
+            # fields = record.description.split(" ")
             
             record_sample,reference_group,cns_id,epid,sample_date = record.id.split("|")
 
-            description_dict = {}
-            for field in fields[1:]:
-                key,value = field.split("=")
-                description_dict[key] = value
+            # description_dict = {}
+            # for field in fields[1:]:
+            #     key,value = field.split("=")
+            #     description_dict[key] = value
 
             if ref_group == reference_group:
                 
