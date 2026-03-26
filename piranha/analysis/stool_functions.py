@@ -8,7 +8,7 @@ from itertools import groupby
 
 from piranha.utils.config import *
 
-def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,runname, output_file,publish_dir,config):
+def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,runname, output_file,output_info,publish_dir,config):
     if not os.path.exists(publish_dir):
         os.mkdir(publish_dir)
     
@@ -34,65 +34,80 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
 
 
     with open(output_file,"w") as fw:
-        for cns_file in input_cns_list:
-            for record in SeqIO.parse(cns_file, KEY_FASTA):
-                if record:
-                    cns_info= record.description.split(" ")
-                    ref_hap,barcode,var_count,var_string=cns_info[0].split("|")
-                    
-                    # for parsing haplotypes
-                    ref_list = ref_hap.split(".")
-                    ref = ".".join(ref_list[:-1])
-                    hap = ref_list[-1]
+        with open(output_info, "w") as fw_info:
+            json_info = {}
+            for cns_file in input_cns_list:
+                for record in SeqIO.parse(cns_file, KEY_FASTA):
+                    if record:
+                        cns_info= record.description.split(" ")
+                        ref_hap,barcode,var_count,var_string=cns_info[0].split("|")
+                        seq_info = {
+                            KEY_REFERENCE: ref_hap,
+                            KEY_BARCODE: barcode,
+                            KEY_VARIANT_COUNT: var_count,
+                            KEY_VARIANTS: var_string}
+                        # for parsing haplotypes
+                        ref_list = ref_hap.split(".")
+                        ref = ".".join(ref_list[:-1])
+                        hap = ref_list[-1]
 
-                    info = []
-                    for row in analysis_info[barcode]:
-                        if row[KEY_REFERENCE] == ref:
-                            info = row
+                        info = []
+                        for row in analysis_info[barcode]:
+                            if row[KEY_REFERENCE] == ref:
+                                info = row
 
-                    metadata = input_metadata[barcode]
+                        metadata = input_metadata[barcode]
+                        seq_info[KEY_SAMPLE] = metadata[KEY_SAMPLE]
+                        seq_info[KEY_REFERENCE_GROUP] = info[KEY_REFERENCE_GROUP]
 
-                    record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
+                        record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
 
-                    record_id += f"|{hap}"
+                        record_id += f"|{hap}"
 
-                    if KEY_EPID in metadata:
-                        record_id += f"|{metadata[KEY_EPID]}"
-                    else:
-                        record_id += "|"
+                        if KEY_EPID in metadata:
+                            record_id += f"|{metadata[KEY_EPID]}"
+                            seq_info[KEY_EPID] = metadata[KEY_EPID]
+                        else:
+                            record_id += "|"
+                            seq_info[KEY_EPID] = ""
 
-                    if KEY_DATE in metadata:
-                        record_id += f"|{metadata[KEY_DATE]}"
-                    else:
-                        record_id += "|"
+                        if KEY_DATE in metadata:
+                            record_id += f"|{metadata[KEY_DATE]}"
+                            seq_info[KEY_DATE] = metadata[KEY_DATE]
+                        else:
+                            record_id += "|"
+                            seq_info[KEY_DATE] = ""
 
-                    record_id += f" {KEY_BARCODE}={barcode}"
-                    record_id += f" {KEY_REFERENCE}={ref}"
-                    record_id += f" {config[KEY_REFERENCE_GROUP_FIELD]}={info[KEY_REFERENCE_GROUP]}"
+                        record_id += f" {KEY_BARCODE}={barcode}"
+                        record_id += f" {KEY_REFERENCE}={ref}"
+                        record_id += f" {config[KEY_REFERENCE_GROUP_FIELD]}={info[KEY_REFERENCE_GROUP]}"
 
-                    if runname:
-                        record_id += f" {KEY_RUNNAME}={runname}"
+                        if runname:
+                            record_id += f" {KEY_RUNNAME}={runname}"
 
-                    if "Sabin" in ref:
-                        record_id += f" {KEY_VARIANT_COUNT}={var_count}"
-                        # record_id += f" {KEY_VARIANTS}={var_string}"
-                    else:
-                        record_id += f" {KEY_VARIANT_COUNT}=NA"
-                        # record_id += f" {KEY_VARIANTS}=NA"
+                        if "Sabin" in ref:
+                            record_id += f" {KEY_VARIANT_COUNT}={var_count}"
+                            record_id += f" {KEY_VARIANTS}={var_string}"
+                        else:
+                            record_id += f" {KEY_VARIANT_COUNT}=NA"
+                            record_id += f" {KEY_VARIANTS}=NA"
 
-                    if all_metdata:
+                        if all_metdata:
+                            
+                            for col in metadata:
+                                if col != KEY_SAMPLE and col != KEY_BARCODE:
+                                    record_id += f" {col}={metadata[col]}"
+                        """
+                        record header is:
+                        >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
+
+                        if "all_metadata" then everything else gets added to the description
+                        """
                         
-                        for col in metadata:
-                            if col != KEY_SAMPLE and col != KEY_BARCODE:
-                                record_id += f" {col}={metadata[col]}"
-                    """
-                    record header is:
-                    >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
-
-                    if "all_metadata" then everything else gets added to the description
-                    """
-                    fw.write(f">{record_id}\n{record.seq}\n")
-                    handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
+                        json_info[record_id] = seq_info
+                        fw.write(f">{record_id}\n{record.seq}\n")
+                        handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
+            json.dump(json_info, fw_info, indent=4)
     
     for handle in handle_dict:
         handle_dict[handle].close()

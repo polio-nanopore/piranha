@@ -162,16 +162,18 @@ rule gather_consensus_sequences:
     params:
         publish_dir = os.path.join(config[KEY_OUTDIR],"published_data")
     output:
-        fasta = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
+        fasta = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS),
+        info = os.path.join(config[KEY_OUTDIR],"published_data","consensus_info.json")
     run:
         print(green("Gathering fasta files"))
         # needs mod for checking & merging identical cns within ref group
         # also header now needs hap parsing & hap->CNS mapping
-        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA],config[KEY_RUNNAME], output[0],params.publish_dir,config)
+        gather_fasta_files(input.composition, config[KEY_BARCODES_CSV], input.fasta,config[KEY_ALL_METADATA],config[KEY_RUNNAME], output.fasta, output.info,params.publish_dir,config)
 
 rule generate_report:
     input:
         consensus_seqs = rules.gather_consensus_sequences.output.fasta,
+        consensus_info = rules.gather_consensus_sequences.output.info,
         variation_info = rules.generate_variation_info.output.json,
         masked_variants = rules.curate_sequences.output.masked,
         variants = rules.curate_sequences.output.csv,
@@ -192,6 +194,7 @@ rule generate_report:
         make_sample_report(output.html,
                             input.variation_info,
                             input.consensus_seqs,
+                            input.consensus_info,
                             input.masked_variants,
                             params.barcode,
                             cns_config_loaded,

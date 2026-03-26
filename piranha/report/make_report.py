@@ -29,6 +29,7 @@ def get_snipit(reference,snipit_file):
 def make_sample_report(report_to_generate,
                         variation_file,
                         consensus_seqs,
+                        consensus_info,
                         masked_variants,
                         barcode,
                         cns_config,
@@ -45,6 +46,9 @@ def make_sample_report(report_to_generate,
     info_dict = {} # keyed at ref- will need to mod if integrate haplo pipeline
     sequences = ""
     barcode_sample = ""
+
+    sequence_info = json.loads(consensus_info)
+
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
         """
@@ -53,16 +57,22 @@ def make_sample_report(report_to_generate,
 
         if "all_metadata" then everything else gets added to the description
         """
-        
+        record_info = {}
+        description_dict = {}
+
+        if record.id in sequence_info:
+            record_info = sequence_info[record.id]
+
+            for key in record_info:
+                description_dict[key] = record_info[key]
+
         fields = record.description.split(" ")
         record_id = fields[0]
         record_sample,reference_group,cns_id,epid,sample_date = record_id.split("|")
-
         
-        description_dict = {}
-        for field in fields[1:]:
-            key,value = field.split("=")
-            description_dict[key] = value
+        # for field in fields[1:]:
+        #     key,value = field.split("=")
+        #     description_dict[key] = value
         
         if barcode == description_dict[KEY_BARCODE]:
             barcode_sample = record_sample
