@@ -112,7 +112,8 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                         if "all_metadata" then everything else gets added to the description
                         """
                         
-                        json_info[record_id] = seq_info
+                        json_key = record_id.split(" ")[0]
+                        json_info[json_key] = seq_info
                         fw.write(f">{record_id}\n{record.seq}\n")
                         handle_dict[barcode].write(f">{record_id}\n{record.seq}\n")
             json.dump(json_info, fw_info, indent=4)
