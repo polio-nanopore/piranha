@@ -74,7 +74,7 @@ def check_path_exists(path):
 
 
 def header(v):
-    print(green("""\n
+    print(green(r"""
                             __                      __            
                     ______ |__|_____ _____  |\____ |  |__ _____   
                     \____ \|  |\  _ \\\__  \ |     \|  |  \\\__  \  
@@ -97,7 +97,7 @@ def header(v):
                            Bill and Melinda Gates Foundation 
                                     (OPP1207299)
 
-\n"""))
+"""))
 
 def preamble(v):
     header(v)
