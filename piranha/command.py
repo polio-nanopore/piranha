@@ -281,7 +281,7 @@ def main(sysargs = sys.argv[1:]):
             if config[KEY_UPDATE_LOCAL_DATABASE]:
                 new_db_seqs = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.fasta")
                 new_db_metadata = os.path.join(config[KEY_SUPPLEMENTARY_DATADIR],f"{config[KEY_RUNNAME]}.csv")
-                phylo_functions.update_local_database(config[KEY_SAMPLE_SEQS],detailed_csv,new_db_seqs,new_db_metadata,config)
+                phylo_functions.update_local_database(config[KEY_SAMPLE_SEQS],sample_seq_info,detailed_csv,new_db_seqs,new_db_metadata,config)
 
             for r,d,f in os.walk(os.path.join(config[KEY_OUTDIR],"published_data")):
                 for fn in f:

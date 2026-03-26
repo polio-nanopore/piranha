@@ -189,22 +189,26 @@ def get_seqs_and_clusters(sample_seqs,sample_info,supplementary_sequences,refere
 
     return list(seq_clusters.keys()),tree_annotations
 
-def update_local_database(sample_sequences,detailed_csv,new_db_seqs,new_db_metadata,config):
-    
+def update_local_database(sample_sequences,sample_info,detailed_csv,new_db_seqs,new_db_metadata,config):
+    seq_info = {}
+    with open(sample_info, "r") as f:
+        seq_info=json.load(f)
+
     record_ids = {}
     with open(new_db_seqs,"w") as fw:
         countnew = 0
 
         for record in SeqIO.parse(sample_sequences, KEY_FASTA):
+
+            record_info = seq_info[record.id]
+
             new_record = record
             desc_list = new_record.description.split(" ")
             write_record = True
 
-            for i in desc_list:
-                if i.startswith("variant_count"):
-                    count = i.split("=")[1]
-                elif i.startswith(config[KEY_REFERENCE_GROUP_FIELD]):
-                    match_field = i.split("=")[1]
+            count = record_info[KEY_VARIANT_COUNT]
+            match_field = record_info[config[KEY_REFERENCE_GROUP_FIELD]]
+            
 
             if "Sabin" in match_field:
                 if int(count) < config[KEY_LOCAL_DATABASE_THRESHOLD]:
