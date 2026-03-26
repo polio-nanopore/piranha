@@ -63,7 +63,6 @@ def gather_fasta_files(summary_info, barcodes_csv, input_cns_list,all_metdata,ru
                             KEY_REFERENCE: ref,
                             KEY_REFERENCE_GROUP: info[KEY_REFERENCE_GROUP],
                             KEY_VARIANT_COUNT: var_count,
-                            KEY_HAPLOTYPE: hap,
                             KEY_VARIANTS: var_string}
 
                         record_id = f"{metadata[KEY_SAMPLE]}|{info[KEY_REFERENCE_GROUP]}"
