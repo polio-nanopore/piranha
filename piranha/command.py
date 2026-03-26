@@ -244,6 +244,7 @@ def main(sysargs = sys.argv[1:]):
                 # figures out how many trees need building, and what sequences are available to go into them
                 # creates the annotations files for the phylogenies too
                 seq_clusters,tree_annotations = phylo_functions.get_seqs_and_clusters(config[KEY_SAMPLE_SEQS],
+                                                                    sample_seq_info,
                                                                     config[KEY_SUPPLEMENTARY_SEQUENCES],
                                                                     config[KEY_REFERENCE_SEQUENCES],
                                                                     config[KEY_OUTGROUP_SEQUENCES],
