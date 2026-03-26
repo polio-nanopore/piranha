@@ -233,7 +233,7 @@ def main(sysargs = sys.argv[1:]):
         if status: 
 
             config[KEY_SAMPLE_SEQS]=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
-
+            sample_seq_info = os.path.join(config[KEY_OUTDIR],"published_data","consensus_info.json")
             # initiate phylo 
             if config[KEY_RUN_PHYLO]:
 
@@ -272,6 +272,7 @@ def main(sysargs = sys.argv[1:]):
                                 summary_csv,
                                 composition_csv,
                                 config[KEY_SAMPLE_SEQS],
+                                sample_seq_info,
                                 detailed_csv,
                                 config[KEY_ANNOTATIONS],
                                 config)
