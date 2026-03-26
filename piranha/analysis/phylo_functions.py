@@ -207,7 +207,14 @@ def update_local_database(sample_sequences,sample_info,detailed_csv,new_db_seqs,
             write_record = True
 
             count = record_info[KEY_VARIANT_COUNT]
-            match_field = record_info[config[KEY_REFERENCE_GROUP_FIELD]]
+            configured_ref_group_key = config[KEY_REFERENCE_GROUP_FIELD]
+            match_field = record_info.get(configured_ref_group_key, "")
+            if not match_field:
+                match_field = record_info.get(KEY_REFERENCE_GROUP, "")
+            if not match_field:
+                fields = record.id.split("|")
+                if len(fields) > 1:
+                    match_field = fields[1]
             
 
             if "Sabin" in match_field:
