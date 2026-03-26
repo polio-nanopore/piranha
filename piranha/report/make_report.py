@@ -50,7 +50,7 @@ def make_sample_report(report_to_generate,
     sequence_info = {}
     with open(consensus_info,"r") as f:
         sequence_info = json.load(f)
-        print(sequence_info)
+        # print(sequence_info)
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
@@ -450,7 +450,7 @@ def get_background_data(metadata,config):
     return data
 
  
-def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_summary,sample_composition,consensus_seqs,detailed_csv_out,annotations_file,config):
+def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_summary,sample_composition,consensus_seqs,consensus_info,detailed_csv_out,annotations_file,config):
     
     # which are the negative controls and positive controls
     negative_controls = config[KEY_NEGATIVE]
@@ -528,11 +528,15 @@ def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_sum
     identical_seq_check = collections.defaultdict(list)
 
     plate_json, positive_types = data_for_plate_viz(positives_for_plate_viz,barcodes_csv,config[KEY_ORIENTATION],config[KEY_BARCODES])
+    
+    sequence_info = {}
+    with open(consensus_info,"r") as f:
+        sequence_info = json.load(f)
 
     for record in SeqIO.parse(consensus_seqs,KEY_FASTA):
         
         fields = record.description.split(" ")
-
+        record_info = sequence_info[record.id]
         """
         record header is:
         >SAMPLE|REFERENCE_GROUP|CNS_ID|EPID|DATE barcode=barcode01 variant_count=8 variants=17:CT;161:CT;427:GA;497:AC;507:CT;772:AG;822:CT;870:CA 
@@ -543,18 +547,10 @@ def make_output_report(report_to_generate,barcodes_csv,epi_csv,preprocessing_sum
         # the first fields there will always be
         record_sample,reference_group,cns_id,epid,sample_date = fields[0].split("|")
 
-        # additional fields that have been added to header description
-        additional_fields = fields[1:]
-
-        additional_info = {}
-        for field in additional_fields:
-            key,value = field.split("=")
-            additional_info[key]=value
-        
-        record_barcode = additional_info[KEY_BARCODE]
-        var_count = additional_info[KEY_VARIANT_COUNT]
-        var_string = additional_info[KEY_VARIANTS]
-        reference = additional_info[KEY_REFERENCE]
+        record_barcode = record_info[KEY_BARCODE]
+        var_count = record_info[KEY_VARIANT_COUNT]
+        var_string = record_info[KEY_VARIANTS]
+        reference = record_info[KEY_REFERENCE]
 
         length_of_seq = len(record)
 
