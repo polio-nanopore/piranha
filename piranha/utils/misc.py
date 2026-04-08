@@ -2,9 +2,8 @@
 import os
 import sys
 import datetime as dt
-
+import yaml
 from pathlib import Path
-
 from snakemake.api import (
     OutputSettings,
     ResourceSettings,
@@ -19,10 +18,21 @@ from piranha.utils.log_colours import green,cyan,red
 from piranha.utils.config import *
 
 
-def run_snakemake(snake_config,my_snakefile,v,config):
+def run_snakemake(snake_configfile,my_snakefile,v,config_dict,extra_config=None):
+    with open(snake_configfile, 'r') as f:
+        snake_config = yaml.safe_load(f)
+    
+    for i in sorted(snake_config):
+        if snake_config[i] is None:
+            sys.stderr.write(cyan(f"Error: config value for {i} not set. Check config file and command line args.\n"))
+            sys.exit(-1)
+
     pshell = False
     if v:
+        for i in sorted(snake_config):
+            print(green(f"{i}:"), snake_config[i])
         pshell = True
+
     with SnakemakeApi(
         OutputSettings(
             printshellcmds=pshell,
@@ -30,17 +40,29 @@ def run_snakemake(snake_config,my_snakefile,v,config):
         )
     ) as snakemake_api:
         try:
-        
-            workflow_api = snakemake_api.workflow(
-                resource_settings=ResourceSettings(
-                    cores=config[KEY_THREADS]
+            if extra_config:
+                workflow_api = snakemake_api.workflow(
+                    resource_settings=ResourceSettings(
+                        cores=config_dict[KEY_THREADS]
+                        ),
+                    config_settings=ConfigSettings(
+                        configfiles=[Path(snake_configfile)],
+                        config=extra_config
                     ),
-                config_settings=ConfigSettings(
-                    config=config
-                ),
-                snakefile=Path(my_snakefile),
-                workdir=Path(config[KEY_TEMPDIR]),
-                )
+                    snakefile=Path(my_snakefile),
+                    workdir=Path(config_dict[KEY_TEMPDIR]),
+                    )
+            else:
+                workflow_api = snakemake_api.workflow(
+                    resource_settings=ResourceSettings(
+                        cores=config_dict[KEY_THREADS]
+                        ),
+                    config_settings=ConfigSettings(
+                        configfiles=[Path(snake_configfile)]
+                    ),
+                    snakefile=Path(my_snakefile),
+                    workdir=Path(config_dict[KEY_TEMPDIR]),
+                    )
             dag_api = workflow_api.dag(
                 dag_settings=DAGSettings(
                     forceall=True,
@@ -53,16 +75,11 @@ def run_snakemake(snake_config,my_snakefile,v,config):
                     keep_incomplete=True
                 ),
             )
-
-
         except Exception as e:
             snakemake_api.print_exception(e)
             return False
-    
     return True
-
-
-
+    
 
 def add_check_valid_arg(KEY,arg,valid_values,config):
     add_arg_to_config(KEY,arg,config)
