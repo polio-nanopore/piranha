@@ -1,0 +1,55 @@
+name: Docker Main Manual Check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker_main_check:
+    name: Build and run Docker image from main
+    runs-on: ubuntu-latest
+
+    if: ${{ github.repository == 'polio-nanopore/piranha' }}
+
+    steps:
+      - name: Check out main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Build docker image from main
+        run: docker build --no-cache . -t piranha-main-check:${{ github.run_id }}
+
+      - name: Check piranha CLI in container
+        run: |
+          docker run --rm piranha-main-check:${{ github.run_id }} piranha --version
+          docker run --rm piranha-main-check:${{ github.run_id }} piranha -h
+
+      - name: Select medaka model for smoke test
+        run: |
+          model=$(docker run --rm piranha-main-check:${{ github.run_id }} medaka tools list_models | tr ',' '\n' | sed '1s/^Available: //' | sed 's/^ //' | grep '_variant_' | head -n 1)
+          if [ -z "$model" ]; then
+            echo "Unable to find an available medaka variant model in the container." >&2
+            exit 1
+          fi
+          echo "MEDAKA_MODEL=$model" >> "$GITHUB_ENV"
+
+      - name: Run piranha test dataset in container
+        run: |
+          mkdir -p "$RUNNER_TEMP/piranha-output"
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/test_data/demultiplexed:/data/run_data/basecalled:ro" \
+            -v "$GITHUB_WORKSPACE/test_data/barcodes.csv:/data/run_data/analysis/barcodes.csv:ro" \
+            -v "$RUNNER_TEMP/piranha-output:/data/run_data/output" \
+            piranha-main-check:${{ github.run_id }} \
+            piranha \
+            -i /data/run_data/basecalled \
+            -b /data/run_data/analysis/barcodes.csv \
+            --outdir /data/run_data/output/piranha_output \
+            --overwrite \
+            --medaka-model "$MEDAKA_MODEL" \
+            -t 2
+
+      - name: Assert expected outputs exist
+        run: |
+          test -f "$RUNNER_TEMP/piranha-output/piranha_output/preprocessing_summary.csv"
+          test -f "$RUNNER_TEMP/piranha-output/piranha_output/detailed_run_report.csv"
