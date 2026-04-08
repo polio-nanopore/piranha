@@ -4,6 +4,7 @@ channels:
   - bioconda
   - defaults
   - nanoporetech 
+  - cov-ert
 dependencies:
   - python
   - biopython
@@ -12,11 +13,11 @@ dependencies:
   - flopp=0.2.0
   - freebayes=1.3.6
   - iqtree>=3.0
-  - cov-ert::jclusterfunk>=0.0.25
+  - jclusterfunk>=0.0.25
   - mafft
   - medaka=2.2.0
   - minimap2>=2.16
   - rasusa=0.7.1
   - samtools=1.20
-  - snakemake-minimal>=9.9.0
+  - snakemake-minimal=9.13.7
   - tabix=1.11
