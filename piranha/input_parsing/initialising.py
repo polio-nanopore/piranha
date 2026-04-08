@@ -9,8 +9,6 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
 from piranha.utils import misc
-import piranha.utils.custom_logger as custom_logger
-import piranha.utils.log_handler_handle as lh
 
 
 def get_defaults():
