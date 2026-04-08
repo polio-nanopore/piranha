@@ -78,11 +78,11 @@ def test_main_mocked_success_path_returns_zero(monkeypatch, tmp_path: Path):
     monkeypatch.setattr(command.directory_setup, "output_group_parsing", fake_output_group_parsing)
     monkeypatch.setattr(command.init, "misc_args_to_config", lambda *a, **k: None)
     monkeypatch.setattr(command.input_qc, "phylo_group_parsing", lambda *a, **k: None)
-    monkeypatch.setattr(command.init, "set_up_verbosity", lambda *a, **k: None)
+    # monkeypatch.setattr(command.init, "set_up_verbosity", lambda *a, **k: None)
 
     calls = {"n": 0}
 
-    def fake_run_snakemake(snake_config, snakefile, cfg):
+    def fake_run_snakemake(snake_configfile, snakefile, args_verbose, cfg, extra_config=None):
         calls["n"] += 1
         if calls["n"] == 1:
             with open(Path(cfg[KEY_TEMPDIR]) / command.PREPROCESSING_CONFIG, "w") as handle:

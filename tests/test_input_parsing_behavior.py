@@ -176,7 +176,7 @@ def test_parse_input_group_populates_reference_headers(tmp_path: Path, monkeypat
         config=config,
     )
 
-    assert config[KEY_REFERENCE_GROUP_VALUES] == {"Sabin2-related", "WPV1"}
+    assert config[KEY_REFERENCE_GROUP_VALUES] == ["Sabin2-related", "WPV1"]
     assert KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS in config
     assert KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS in config
     assert "Sabin2-related" in config[KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS]

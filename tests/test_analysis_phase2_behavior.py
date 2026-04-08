@@ -5,6 +5,15 @@ from pathlib import Path
 from piranha.analysis import clean_gaps, get_co_occurrence, get_haplotypes, variation_functions
 
 
+def test_consensus_pipeline_uses_medaka_variant_and_sequence_commands():
+    repo_root = Path(__file__).resolve().parents[1]
+    snakefile = repo_root / "piranha" / "scripts" / "piranha_consensus.smk"
+    text = snakefile.read_text()
+
+    assert "medaka_variant -i" in text
+    assert "medaka sequence" in text
+
+
 def test_remove_gaps_replaces_deletions_with_n(tmp_path: Path):
     aln = tmp_path / "aln.fasta"
     aln.write_text(">ref\n--ATGC--\n>cns1\n--AT-C--\n")
