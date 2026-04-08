@@ -35,8 +35,7 @@ def run_snakemake(snake_configfile,my_snakefile,v,config_dict,extra_config=None)
 
     with SnakemakeApi(
         OutputSettings(
-            printshellcmds=pshell,
-            verbose=v
+            printshellcmds=pshell
         )
     ) as snakemake_api:
         try:
