@@ -18,7 +18,7 @@ RUN git clone https://github.com/polio-nanopore/piranha.git && \
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "piranha", "/bin/bash", "-c"]
-RUN mamba install -c conda-forge -n piranha python=3.10 conda-pack && \
+RUN mamba install -c conda-forge -n piranha python=3.12 conda-pack && \
   cd /data/piranha && \
   pip install .
 
