@@ -28,7 +28,7 @@ packages = ["piranha", "piranha.scripts", "piranha.input_parsing", "piranha.anal
 include-package-data = true
 
 [tool.setuptools.package-data]
-piranha = ["data/*"]
+piranha = ["data/*", "scripts/*.smk"]
 
 [project.scripts]
 piranha = "piranha.command:main"
