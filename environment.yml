@@ -3,17 +3,21 @@ channels:
   - conda-forge
   - bioconda
   - defaults
+  - nanoporetech 
+  - cov-ert
 dependencies:
-  - python=3.10
-  - bcftools=1.20
-  - coreutils=9.1
+  - python
+  - biopython
+  - bcftools=1.23
+  - coreutils=9.5
   - flopp=0.2.0
   - freebayes=1.3.6
-  - iqtree>=2.1
-  - cov-ert::jclusterfunk>=0.0.25
+  - iqtree>=3.0
+  - jclusterfunk>=0.0.25
   - mafft
-  - minimap2=2.17
+  - medaka=2.2.0
+  - minimap2>=2.16
   - rasusa=0.7.1
   - samtools=1.20
-  - snakemake-minimal=7.32.4
+  - snakemake-minimal=9.13.7
   - tabix=1.11

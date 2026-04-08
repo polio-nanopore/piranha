@@ -434,7 +434,7 @@ def parse_input_group(barcodes_csv,epi_csv,readdir,reference_sequences,reference
 
     print(f"{len(ref_group_values)}" + green(f" reference group values identified in reference file."))
 
-    config[KEY_REFERENCE_GROUP_VALUES] = ref_group_values
+    config[KEY_REFERENCE_GROUP_VALUES] = sorted(ref_group_values)
 
     sample_composition_table_header_fields = SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS_BASIC
     detailed_sample_composition_table_header_fields = []

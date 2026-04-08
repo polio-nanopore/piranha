@@ -2,29 +2,83 @@
 import os
 import sys
 import datetime as dt
-
-import snakemake
-
-
-import piranha.utils.custom_logger as custom_logger
+import yaml
+from pathlib import Path
+from snakemake.api import (
+    OutputSettings,
+    ResourceSettings,
+    WorkflowSettings,
+    SnakemakeApi,
+    StorageSettings,
+    ConfigSettings,
+    DAGSettings,
+    ExecutionSettings
+)
 from piranha.utils.log_colours import green,cyan,red
 from piranha.utils.config import *
 
-def run_snakemake(snake_config,snakefile,config):
-    if config[KEY_VERBOSE]:
-        print(red("\n**** CONFIG ****"))
-        for k in sorted(config):
-            print(green(f" - {k}: ") + f"{config[k]}")
-        status = snakemake.snakemake(snakefile, printshellcmds=True, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR], config=snake_config, cores=config[KEY_THREADS],lock=False
-                                    )
-    else:
-        logger = custom_logger.Logger()
-        status = snakemake.snakemake(snakefile, printshellcmds=False, forceall=True, force_incomplete=True,
-                                    workdir=config[KEY_TEMPDIR], config=snake_config, cores=config[KEY_THREADS],lock=False,
-                                    quiet=True,log_handler=logger.log_handler
-                                    )
-    return status
+
+def run_snakemake(snake_configfile,my_snakefile,v,config_dict,extra_config=None):
+    with open(snake_configfile, 'r') as f:
+        snake_config = yaml.safe_load(f)
+    
+    for i in sorted(snake_config):
+        if snake_config[i] is None:
+            sys.stderr.write(cyan(f"Error: config value for {i} not set. Check config file and command line args.\n"))
+            sys.exit(-1)
+
+    pshell = False
+    if v:
+        for i in sorted(snake_config):
+            print(green(f"{i}:"), snake_config[i])
+        pshell = True
+
+    with SnakemakeApi(
+        OutputSettings(
+            printshellcmds=pshell
+        )
+    ) as snakemake_api:
+        try:
+            if extra_config:
+                workflow_api = snakemake_api.workflow(
+                    resource_settings=ResourceSettings(
+                        cores=config_dict[KEY_THREADS]
+                        ),
+                    config_settings=ConfigSettings(
+                        configfiles=[Path(snake_configfile)],
+                        config=extra_config
+                    ),
+                    snakefile=Path(my_snakefile),
+                    workdir=Path(config_dict[KEY_TEMPDIR]),
+                    )
+            else:
+                workflow_api = snakemake_api.workflow(
+                    resource_settings=ResourceSettings(
+                        cores=config_dict[KEY_THREADS]
+                        ),
+                    config_settings=ConfigSettings(
+                        configfiles=[Path(snake_configfile)]
+                    ),
+                    snakefile=Path(my_snakefile),
+                    workdir=Path(config_dict[KEY_TEMPDIR]),
+                    )
+            dag_api = workflow_api.dag(
+                dag_settings=DAGSettings(
+                    forceall=True,
+                    force_incomplete=True
+                ),
+                    )
+            dag_api.execute_workflow(
+                execution_settings=ExecutionSettings(
+                    lock=False,
+                    keep_incomplete=True
+                ),
+            )
+        except Exception as e:
+            snakemake_api.print_exception(e)
+            return False
+    return True
+    
 
 def add_check_valid_arg(KEY,arg,valid_values,config):
     add_arg_to_config(KEY,arg,config)

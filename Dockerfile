@@ -22,7 +22,7 @@ RUN mamba install -c conda-forge -n piranha python=3.10 conda-pack && \
   cd /data/piranha && \
   pip install .
 
-# Use conda-pack to create a standalone enviornment
+# Use conda-pack to create a standalone environment
 # in /venv:
 RUN conda list && \
   conda-pack -n piranha -o /tmp/env.tar && \
@@ -36,10 +36,8 @@ RUN conda clean --all &&\
 
 # build piranha
 WORKDIR /data/piranha
-RUN source /venv/bin/activate && pip install --user --no-cache-dir . \ 
-  && pip uninstall -y tensorflow keras pyabpoa \
-  && conda install -y -c conda-forge tensorflow~=2.11 keras~=2.11
-
+RUN source /venv/bin/activate && pip install --user --no-cache-dir .  
+  
 # test piranha runs while have data before creating runtime image
 RUN source /venv/bin/activate && piranha -h && piranha -i /data/piranha/test_data/demultiplexed -b /data/piranha/test_data/barcodes.csv
 

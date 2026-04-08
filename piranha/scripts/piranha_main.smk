@@ -8,6 +8,8 @@ from piranha.analysis.stool_functions import *
 from piranha.report.make_report import make_sample_report
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
+
+from piranha.utils.misc import run_snakemake
 ##### Target rules #####
 """
 input files
@@ -46,14 +48,17 @@ rule estimate_haplotypes:
         if config[KEY_RUN_HAPLOTYPING]:
             sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
             print(green(f"Calculating haplotypes for {sample} ({params.barcode})"))
-            shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                        "--forceall "
-                        "--rerun-incomplete "
-                        "{config[log_string]} "
-                        "--configfile {input.yaml:q} "
-                        "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                        f"sample='{sample}' "
-                        "--cores {threads} &> {log:q}")
+
+            extra_config = {}
+            extra_config[KEY_BARCODE] = f'{params.barcode}'
+            extra_config[KEY_OUTDIR] = f'{params.outdir}'
+            extra_config[KEY_TEMPDIR] = f'{params.tempdir}'
+            extra_config[KEY_SAMPLE] = f'{sample}'
+            status = run_snakemake(input.yaml,input.snakefile,config[KEY_VERBOSE],config,extra_config)
+            if not status:
+                print(cyan(f"Haplotype estimation failed for {sample} ({params.barcode}). Check log file for details: {log}"))
+                sys.exit(-1)
+                
         else:
             shell(
                 """
@@ -75,14 +80,16 @@ rule generate_consensus_sequences:
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Calculating consensus sequences for {sample} ({params.barcode})"))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--rerun-incomplete "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                    f"sample='{sample}' "
-                    "--cores {threads} &> {log:q}")
+
+        extra_config = {}
+        extra_config[KEY_BARCODE] = f'{params.barcode}'
+        extra_config[KEY_OUTDIR] = f'{params.outdir}'
+        extra_config[KEY_TEMPDIR] = f'{params.tempdir}'
+        extra_config[KEY_SAMPLE] = f'{sample}'
+        status = run_snakemake(input.yaml,input.snakefile,config[KEY_VERBOSE],config,extra_config)
+        if not status:
+                print(cyan(f"Consensus sequence generation failed for {sample} ({params.barcode}). Check log file for details: {log}"))
+                sys.exit(-1)
 
 
 rule curate_sequences:
@@ -104,14 +111,16 @@ rule curate_sequences:
     run:
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Curating consensus sequences & variants for {sample} ({params.barcode})"))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--rerun-incomplete "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                    f"sample='{sample}' "
-                    "--cores {threads} &> {log:q}")
+
+        extra_config = {}
+        extra_config[KEY_BARCODE] = f'{params.barcode}'
+        extra_config[KEY_OUTDIR] = f'{params.outdir}'
+        extra_config[KEY_TEMPDIR] = f'{params.tempdir}'
+        extra_config[KEY_SAMPLE] = f'{sample}'
+        status = run_snakemake(input.yaml,input.snakefile,config[KEY_VERBOSE],config,extra_config)
+        if not status:
+            print(cyan(f"Sequence curation failed for {sample} ({params.barcode}). Check log file for details: {log}"))
+            sys.exit(-1)
         shell(
             """
             cp {params.variant_dir}/*.vcf {params.publish_dir}
@@ -136,14 +145,16 @@ rule generate_variation_info:
         # decide if we want 1 per haplotyde or 1 per ref group, will need mods either way
         sample = get_sample(config[KEY_BARCODES_CSV],params.barcode)
         print(green(f"Gathering variation info for {sample} ({params.barcode})"))
-        shell("snakemake --nolock --snakefile {input.snakefile:q} "
-                    "--forceall "
-                    "--rerun-incomplete "
-                    "{config[log_string]} "
-                    "--configfile {input.yaml:q} "
-                    "--config barcode={params.barcode} outdir={params.outdir:q} tempdir={params.tempdir:q} "
-                    f"sample='{sample}' "
-                    "--cores {threads} &> {log:q}")
+
+        extra_config = {}
+        extra_config[KEY_BARCODE] = f'{params.barcode}'
+        extra_config[KEY_OUTDIR] = f'{params.outdir}'
+        extra_config[KEY_TEMPDIR] = f'{params.tempdir}'
+        extra_config[KEY_SAMPLE] = f'{sample}'
+        status = run_snakemake(input.yaml,input.snakefile,config[KEY_VERBOSE],config,extra_config)
+        if not status:
+                print(cyan(f"Variation info generation failed for {sample} ({params.barcode}). Check log file for details: {log}"))
+                sys.exit(-1)
 
 
 rule mask_consensus_sequences:

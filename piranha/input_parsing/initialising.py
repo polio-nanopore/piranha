@@ -9,8 +9,6 @@ from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
 from piranha.utils import misc
-import piranha.utils.custom_logger as custom_logger
-import piranha.utils.log_handler_handle as lh
 
 
 def get_defaults():
@@ -22,7 +20,7 @@ def get_defaults():
                     KEY_REFERENCE_SEQUENCES: False,
                     KEY_BARCODES_CSV: False,
                     KEY_EPI_CSV: False,
-                    KEY_RUNID: False,
+                    KEY_RUNID: "",
 
                     # Output options
                     KEY_OUTPUT_PREFIX:VALUE_OUTPUT_PREFIX,
@@ -229,13 +227,13 @@ def misc_args_to_config(verbose,threads,username,institute,run_name,notes,config
     misc.add_arg_to_config(KEY_RUNNAME,run_name,config)
     misc.add_arg_to_config(KEY_NOTES,notes,config)
 
-def set_up_verbosity(config):
-    if config[KEY_VERBOSE]:
-        config[KEY_QUIET] = False
-        config[KEY_LOG_API] = ""
-        config[KEY_LOG_STRING] = ""
-    else:
-        config[KEY_QUIET] = True
-        config[KEY_LOG_API] = ""
-        lh_path = os.path.realpath(lh.__file__)
-        config[KEY_LOG_STRING] = f"--quiet --log-handler-script {lh_path} "
+# def set_up_verbosity(config):
+#     if config[KEY_VERBOSE]:
+#         config[KEY_QUIET] = False
+#         config[KEY_LOG_API] = ""
+#         config[KEY_LOG_STRING] = ""
+#     else:
+#         config[KEY_QUIET] = True
+#         config[KEY_LOG_API] = ""
+#         lh_path = os.path.realpath(lh.__file__)
+#         config[KEY_LOG_STRING] = f"--quiet --log-handler-script {lh_path} "
