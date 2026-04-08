@@ -51,5 +51,6 @@ jobs:
 
       - name: Assert expected outputs exist
         run: |
-          test -f "$RUNNER_TEMP/piranha-output/piranha_output/preprocessing_summary.csv"
           test -f "$RUNNER_TEMP/piranha-output/piranha_output/detailed_run_report.csv"
+          test -f "$RUNNER_TEMP/piranha-output/piranha_output/report.html"
+          test -f "$RUNNER_TEMP/piranha-output/piranha_output/published_data/vp1_sequences.fasta"
