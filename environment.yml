@@ -1,4 +1,4 @@
-name: piranha-updated
+name: piranha
 channels:
   - conda-forge
   - bioconda
