@@ -209,7 +209,7 @@ def main(sysargs = sys.argv[1:]):
         dependency_checks.check_dependencies(PHYLO_DEPENDENCY_LIST, PHYLO_MODULE_LIST)
 
     # ready to run? either verbose snakemake or quiet mode
-    init.set_up_verbosity(config)
+    # init.set_up_verbosity(config)
 
     preprocessing_snakefile = data_install_checks.get_snakefile(thisdir,"preprocessing")
     phylo_snakefile = data_install_checks.get_snakefile(thisdir,"phylo")
@@ -218,17 +218,19 @@ def main(sysargs = sys.argv[1:]):
     # output an optional config file with post processing info
     if args.save_config:
         out_config = os.path.join(config[KEY_OUTDIR], OUTPUT_CONFIG)
-        with open(out_config, 'w') as f:
-            yaml.dump(config, f)
+    else:
+        out_config = os.path.join(config[KEY_TEMPDIR], OUTPUT_CONFIG)
+    with open(out_config, 'w') as f:
+        yaml.dump(config, f)
 
     # runs the preprocessing snakemake
-    status = misc.run_snakemake(config,preprocessing_snakefile,config)
+    status = misc.run_snakemake(out_config,preprocessing_snakefile,args.verbose,config)
 
     if status: # translate "success" into shell exit code of 0
-        with open(os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG),"r") as f:
-            preprocessing_config = yaml.safe_load(f)
+
+        preprocessing_configfile = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
         
-        status = misc.run_snakemake(preprocessing_config,snakefile,config)
+        status = misc.run_snakemake(preprocessing_configfile,snakefile,args.verbose,config)
 
         if status: 
 
@@ -256,9 +258,12 @@ def main(sysargs = sys.argv[1:]):
                 config[KEY_ANNOTATIONS] = os.path.join(config[KEY_OUTDIR],"phylogenetics","annotations.csv")
                 config[KEY_TREE_ANNOTATIONS] = tree_annotations
 
+                phylo_config = os.path.join(config[KEY_TEMPDIR], "phylo_config.yaml")
+                with open(phylo_config, 'w') as f:
+                    yaml.dump(config, f)
                 #run phylo snakemake
                 print(green("Initializing phylo pipeline."))
-                status = misc.run_snakemake(config,phylo_snakefile,config)
+                status = misc.run_snakemake(phylo_config,phylo_snakefile,args.verbose,config)
                 
             # get the inputs for making the overall report
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)
