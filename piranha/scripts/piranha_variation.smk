@@ -67,7 +67,7 @@ rule get_variation_info:
             # getting coverage dict
             sites_to_mask = set()
             for pos_info in variation_json:
-                if pos_info["Total"] < config[KEY_MIN_READS]:
+                if pos_info["Total"] < config[KEY_MIN_HIGH_QUALITY_BASE]:
                     sites_to_mask.add(pos_info["Position"])
             mask_info[reference] = list(sites_to_mask)
 
