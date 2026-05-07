@@ -338,6 +338,15 @@ The length of the alignment block is also used to filter out sporadic, incorrect
 -a, --min-aln-block
 ```
 
+Two additional quality filters are applied at the base level to reduce the impact of low-quality base calls on read classification and consensus generation:
+
+```
+-bq, --min-base-quality
+-mbq, --min-high-quality-base
+```
+
+The `--min-base-quality` (`-bq`) parameter sets the minimum phred-scaled base quality score (default 9) that a base must meet to be counted as part of the read depth. The `--min-high-quality-base` (`-mbq`) parameter sets the minimum number (or proportion) of bases within a read that must pass the base quality threshold (default 10) for that read to be retained. Together these filters help ensure each variant call is supported with high quality bases. Positions that do not meet these thresholds are masked with Ns.
+
 ### How many reads should I count as a signal? 
 
 We have set the minimum read depth to be 50 reads in order to attempt to make a consensus. Within piranha, we run minimap2 to map reads against the background reference panel. The top hit within the background reference panel is reported, by default showing the "ddns_group" field. The categories displayed are:
@@ -747,6 +756,10 @@ Analysis options:
                         Minimum read depth required for consensus generation. Default: 50
   -p MIN_READ_PCENT, --min-read-pcent MIN_READ_PCENT
                         Minimum percentage of sample required for consensus generation. Default: 2
+  -mbq MIN_HIGH_QUALITY_BASE, --min-high-quality-base MIN_HIGH_QUALITY_BASE
+                        Minimum number of bases with high quality. Default: 10
+  -bq MIN_BASE_QUALITY, --min-base-quality MIN_BASE_QUALITY
+                        Minimum base quality. Default: 9
   -a MIN_ALN_BLOCK, --min-aln-block MIN_ALN_BLOCK
                         Minimum alignment block length. Default: 0.6*MIN_READ_LENGTH
   --primer-length PRIMER_LENGTH
