@@ -135,9 +135,6 @@ def main(sysargs = sys.argv[1:]):
     # grabs the snakefile
     snakefile = data_install_checks.get_snakefile(thisdir,"main")
     
-    # Checks medaka options if non default values used.
-    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
-
     # Configures which analysis options to run
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,
                                                 args.max_read_length,
@@ -174,6 +171,8 @@ def main(sysargs = sys.argv[1:]):
                                     args.negative_control,
                                     args.positive_references,
                                     config)
+    # Checks medaka options if non default values used.
+    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,args.readdir,config)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir,
