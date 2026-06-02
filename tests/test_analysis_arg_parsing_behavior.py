@@ -14,6 +14,7 @@ from piranha.utils.config import (
     KEY_SAMPLE_TYPE,
     KEY_HAPLOTYPE_SAMPLE_SIZE,
     KEY_MAX_HAPLOTYPES,
+    VALUE_DEFAULT_MEDAKA_MODEL,
 )
 
 
@@ -26,11 +27,11 @@ def test_get_available_medaka_models_parses_stdout(monkeypatch):
     assert models == ["r941_min_hac_g507", "r1041_e82"]
 
 
-def test_medaka_options_parsing_accepts_valid_model(monkeypatch):
+def test_medaka_options_parsing_accepts_valid_model(monkeypatch, tmp_path):
     monkeypatch.setattr(analysis_arg_parsing, "get_available_medaka_models", lambda: ["m1", "m2"])
     config = {KEY_MEDAKA_MODEL: "m1"}
 
-    analysis_arg_parsing.medaka_options_parsing("m2", False, config)
+    analysis_arg_parsing.medaka_options_parsing("m2", False, str(tmp_path), config)
     assert config[KEY_MEDAKA_MODEL] == "m2"
 
 
@@ -39,9 +40,38 @@ def test_medaka_options_parsing_list_models_exits_zero(monkeypatch):
     config = {KEY_MEDAKA_MODEL: "m1"}
 
     with pytest.raises(SystemExit) as exc_info:
-        analysis_arg_parsing.medaka_options_parsing(None, True, config)
+        analysis_arg_parsing.medaka_options_parsing(None, True, "unused", config)
 
     assert exc_info.value.code == 0
+
+
+def test_medaka_options_parsing_auto_detects_model_from_fastq_header(monkeypatch):
+    inferred_model = "r1041_e82_400bps_hac_v4.2.0"
+    monkeypatch.setattr(analysis_arg_parsing, "get_available_medaka_models", lambda: [inferred_model, "m2"])
+    monkeypatch.setattr(analysis_arg_parsing.os, "walk", lambda _: [("/reads", [], ["sample.fastq"])])
+
+    class Record:
+        description = "read1 basecall_model_version_id=dna_r10.4.1_e8.2_400bps_hac@v4.2.0"
+
+    monkeypatch.setattr(analysis_arg_parsing.SeqIO, "parse", lambda *a, **k: iter([Record()]))
+    config = {KEY_MEDAKA_MODEL: "m1"}
+
+    analysis_arg_parsing.medaka_options_parsing("AUTO", False, "/reads", config)
+    assert config[KEY_MEDAKA_MODEL] == inferred_model
+
+
+def test_medaka_options_parsing_auto_detect_falls_back_to_default_when_model_unavailable(monkeypatch):
+    monkeypatch.setattr(analysis_arg_parsing, "get_available_medaka_models", lambda: ["m1", "m2"])
+    monkeypatch.setattr(analysis_arg_parsing.os, "walk", lambda _: [("/reads", [], ["sample.fastq"])])
+
+    class Record:
+        description = "read1 basecall_model_version_id=dna_r10.4.1_e8.2_400bps_hac@v4.2.0"
+
+    monkeypatch.setattr(analysis_arg_parsing.SeqIO, "parse", lambda *a, **k: iter([Record()]))
+    config = {KEY_MEDAKA_MODEL: "m1"}
+
+    analysis_arg_parsing.medaka_options_parsing("AUTO", False, "/reads", config)
+    assert config[KEY_MEDAKA_MODEL] == VALUE_DEFAULT_MEDAKA_MODEL
 
 
 def test_minimap2_options_parsing_returns_default_if_none():

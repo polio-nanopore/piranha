@@ -76,13 +76,13 @@ def main(sysargs = sys.argv[1:]):
     phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
     phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata files to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
     phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Add newly generated consensus sequences (with a distance greater than a threshold (--local-database-threshold) away from Sabin, if Sabin-related) and associated metadata to the supplementary data directory.")
-    phylo_group.add_argument("-dt","--local-database-threshold",action="store_true",help=f"The threshold beyond which Sabin-related sequences are added to the supplementary data directory if update local database flag used. Default: {VALUE_LOCAL_DATABASE_THRESHOLD}")
+    phylo_group.add_argument("-dt","--local-database-threshold",action="store",type=float,help=f"The threshold beyond which Sabin-related sequences are added to the supplementary data directory if update local database flag used. Default: {VALUE_LOCAL_DATABASE_THRESHOLD}")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
     o_group.add_argument('-pub','--publishdir', action="store",help=f"Output publish directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
     o_group.add_argument('-pre','--output-prefix',action="store",help=f"Prefix of output directory & report name: Default: `{VALUE_OUTPUT_PREFIX}`",dest="output_prefix")
-    o_group.add_argument('--datestamp', action="store",help="Append datestamp to directory name when using <-o/--outdir>. Default: <-o/--outdir> without a datestamp")
+    o_group.add_argument('--datestamp', action="store_true",help="Append datestamp to directory name when using <-o/--outdir>. Default: <-o/--outdir> without a datestamp")
     o_group.add_argument('--overwrite', action="store_true",help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
     o_group.add_argument('-temp','--tempdir',action="store",help="Specify where you want the temp stuff to go. Default: `$TMPDIR`")
     o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
@@ -135,9 +135,6 @@ def main(sysargs = sys.argv[1:]):
     # grabs the snakefile
     snakefile = data_install_checks.get_snakefile(thisdir,"main")
     
-    # Checks medaka options if non default values used.
-    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config)
-
     # Configures which analysis options to run
     analysis_arg_parsing.analysis_group_parsing(args.min_read_length,
                                                 args.max_read_length,
@@ -174,6 +171,8 @@ def main(sysargs = sys.argv[1:]):
                                     args.negative_control,
                                     args.positive_references,
                                     config)
+    # Checks medaka options if non default values used.
+    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,args.readdir,config)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir,

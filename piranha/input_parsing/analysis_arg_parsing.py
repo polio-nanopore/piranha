@@ -4,6 +4,9 @@ import os
 import sys
 import yaml
 import subprocess
+from Bio import SeqIO
+import gzip
+
 from piranha.utils.log_colours import green,cyan
 from piranha.utils.config import *
 
@@ -35,19 +38,75 @@ def get_available_medaka_models():
             models = line.split(": ")[1].split(", ")
     return models
 
-def medaka_options_parsing(medaka_model,medaka_list_models,config):
+def medaka_options_parsing(medaka_model,medaka_list_models,readdir,config):
     models = get_available_medaka_models()
 
     if medaka_list_models:
         print(green("Available medaka models:"))
-        for i in models:
+        for i in sorted(models):
             print(f"- {i}")
         sys.exit(0)
 
-    misc.add_arg_to_config(KEY_MEDAKA_MODEL,medaka_model,config)
-    if config[KEY_MEDAKA_MODEL] not in models:
-        sys.stderr.write(cyan(f"Medaka model specified not valid: `{config[KEY_MEDAKA_MODEL]}`.\nPlease use --medaka-list-models to see which models are available.\nIf needed, update medaka version with `pip install --upgrade medaka`.\n"))
-        sys.exit(-1)
+    if medaka_model == "AUTO":
+        print(green("Attempting to infer medaka model from read headers..."))
+
+    read_model = False
+    for r,d,f in os.walk(readdir):
+        for file in f:
+            if file.endswith(".gz") or file.endswith(".gzip"):
+                with gzip.open(os.path.join(r,file), "rt") as handle:
+                    for record in SeqIO.parse(handle, KEY_FASTQ):
+                        info = record.description.split(" ")
+                        for i in info:
+                            # basecall_model_version_id=dna_r10.4.1_e8.2_400bps_hac@v4.2.0
+                            if i.startswith("basecall_model_version_id="):
+                                medaka_model_from_reads = i.split("basecall_model_version_id=")[1]
+                                #r1041_e82_260bps_hac_variant_v4.1.0 model
+                                #dna_r10.4.1_e8.2_400bps_hac@v4.2.0 reads
+
+                                medaka_model_from_reads = medaka_model_from_reads.lstrip("dna_")
+                                medaka_model_from_reads = medaka_model_from_reads.split("@")
+                                medaka_model_from_reads[0] = medaka_model_from_reads[0].replace(".","")
+                                read_model = "_".join(medaka_model_from_reads)
+
+                                break
+
+            elif file.endswith(".fastq") or file.endswith(".fq"):
+                for record in SeqIO.parse(os.path.join(r,file), "fastq"):
+                    info = record.description.split(" ")
+                    for i in info:
+                        # basecall_model_version_id=dna_r10.4.1_e8.2_400bps_hac@v4.2.0
+                        if i.startswith("basecall_model_version_id="):
+                            medaka_model_from_reads = i.split("basecall_model_version_id=")[1]
+                            #r1041_e82_260bps_hac_variant_v4.1.0 model
+                            #dna_r10.4.1_e8.2_400bps_hac@v4.2.0 reads
+
+                            medaka_model_from_reads = medaka_model_from_reads.lstrip("dna_")
+                            medaka_model_from_reads = medaka_model_from_reads.split("@")
+                            medaka_model_from_reads[0] = medaka_model_from_reads[0].replace(".","")
+                            read_model = "_".join(medaka_model_from_reads)
+
+                            break
+                break
+
+    if read_model in models:
+        print(green(f"Medaka model inferred from reads: `{read_model}`."))
+        misc.add_arg_to_config(KEY_MEDAKA_MODEL,read_model,config)
+    else:
+        print(cyan(f"Medaka model inferred from reads: `{read_model}`. However, this model is not in the list of available medaka models for this version of medaka. Please check your medaka version and update if needed with `pip install --upgrade medaka`.\nAvailable models:"))
+        for i in models:
+            print(f"- {i}")
+        print(green(f"Default medaka model: `{VALUE_DEFAULT_MEDAKA_MODEL}`."))
+        misc.add_arg_to_config(KEY_MEDAKA_MODEL,VALUE_DEFAULT_MEDAKA_MODEL,config)
+        
+    if medaka_model != "AUTO" and medaka_model:
+        print(green(f"Medaka model specified by user: `{medaka_model}`."))
+        if medaka_model in models:
+            misc.add_arg_to_config(KEY_MEDAKA_MODEL,medaka_model,config)
+            print(green(f"Overriding default with medaka model specified by user: `{medaka_model}`."))
+        else:
+            sys.stderr.write(cyan(f"Medaka model specified not valid: `{config[KEY_MEDAKA_MODEL]}`.\nPlease use --medaka-list-models to see which models are available.\nIf needed, update medaka version with `pip install --upgrade medaka`.\n"))
+            sys.exit(-1)
 
 def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_read_pcent,min_aln_block,primer_length,min_map_quality,min_base_quality,min_high_quality_base,config):
 

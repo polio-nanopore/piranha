@@ -10,6 +10,7 @@ dependencies:
   - biopython
   - bcftools=1.23
   - coreutils=9.5
+  - cuda-nvcc-tools=12.9.86
   - flopp=0.2.0
   - freebayes=1.3.6
   - iqtree>=3.0
