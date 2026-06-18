@@ -38,6 +38,37 @@ def get_available_medaka_models():
             models = line.split(": ")[1].split(", ")
     return models
 
+# handling extraction of model from new fastq header style (and old)
+def extract_model(record):
+
+    def format_model(raw_model):
+        medaka_model_from_reads = raw_model.lstrip("dna_")
+        medaka_model_from_reads = medaka_model_from_reads.split("@")
+        medaka_model_from_reads[0] = medaka_model_from_reads[0].replace(".","")
+        model = "_".join(medaka_model_from_reads)
+        return model
+        
+    
+    info = record.description.split() # split with no arg to handle new tab seperated headers as well
+
+    for i in info:
+        # < v26.01
+        if i.startswith("basecall_model_version_id="):
+            medaka_model_from_reads = i.split("basecall_model_version_id=")[1]
+            read_model = format_model(medaka_model_from_reads)
+            return read_model
+        # >= v26.01
+        if i.startswith("RG:Z:"):
+            # RG:Z:06313108-d0c3-48b3-be95-494d4799dd4e_dna_r10.4.1_e8.2_400bps_hac@v5.2.0_barcode54
+            # strip the uuid using the first _
+            medaka_model_from_reads = i.split("_", 1)[1]
+            name, model_version = medaka_model_from_reads.split("@")
+            # _barcodeXX suffix (not present if no demux)
+            model_version = model_version.partition("_")[0] # partition() so we dont IndexError if not present
+            read_model = format_model(f"{name}@{model_version}")
+            return read_model
+
+
 def medaka_options_parsing(medaka_model,medaka_list_models,readdir,config):
     models = get_available_medaka_models()
 
@@ -50,44 +81,26 @@ def medaka_options_parsing(medaka_model,medaka_list_models,readdir,config):
     if medaka_model == "AUTO":
         print(green("Attempting to infer medaka model from read headers..."))
 
+    # minKNOW update 26.01 includes fastq header update that changes key for basecall model
     read_model = False
     for r,d,f in os.walk(readdir):
         for file in f:
             if file.endswith(".gz") or file.endswith(".gzip"):
                 with gzip.open(os.path.join(r,file), "rt") as handle:
                     for record in SeqIO.parse(handle, KEY_FASTQ):
-                        info = record.description.split(" ")
-                        for i in info:
-                            # basecall_model_version_id=dna_r10.4.1_e8.2_400bps_hac@v4.2.0
-                            if i.startswith("basecall_model_version_id="):
-                                medaka_model_from_reads = i.split("basecall_model_version_id=")[1]
-                                #r1041_e82_260bps_hac_variant_v4.1.0 model
-                                #dna_r10.4.1_e8.2_400bps_hac@v4.2.0 reads
-
-                                medaka_model_from_reads = medaka_model_from_reads.lstrip("dna_")
-                                medaka_model_from_reads = medaka_model_from_reads.split("@")
-                                medaka_model_from_reads[0] = medaka_model_from_reads[0].replace(".","")
-                                read_model = "_".join(medaka_model_from_reads)
-
-                                break
+                        read_model = extract_model(record)
+                        if read_model:
+                            break
 
             elif file.endswith(".fastq") or file.endswith(".fq"):
                 for record in SeqIO.parse(os.path.join(r,file), "fastq"):
-                    info = record.description.split(" ")
-                    for i in info:
-                        # basecall_model_version_id=dna_r10.4.1_e8.2_400bps_hac@v4.2.0
-                        if i.startswith("basecall_model_version_id="):
-                            medaka_model_from_reads = i.split("basecall_model_version_id=")[1]
-                            #r1041_e82_260bps_hac_variant_v4.1.0 model
-                            #dna_r10.4.1_e8.2_400bps_hac@v4.2.0 reads
-
-                            medaka_model_from_reads = medaka_model_from_reads.lstrip("dna_")
-                            medaka_model_from_reads = medaka_model_from_reads.split("@")
-                            medaka_model_from_reads[0] = medaka_model_from_reads[0].replace(".","")
-                            read_model = "_".join(medaka_model_from_reads)
-
-                            break
+                    read_model = extract_model(record)
+                    if read_model:
+                        break
+            if read_model:
                 break
+        if read_model:
+            break
 
     if read_model in models:
         print(green(f"Medaka model inferred from reads: `{read_model}`."))
