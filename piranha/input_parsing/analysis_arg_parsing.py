@@ -64,7 +64,7 @@ def extract_model(record):
             medaka_model_from_reads = i.split("_", 1)[1]
             name, model_version = medaka_model_from_reads.split("@")
             # _barcodeXX suffix (not present if no demux)
-            model_version = model_version.partition("_")[0] # partition() so we dont IndexError if not present
+            model_version = model_version.partition("_")[0] # _ not always present, partition better
             read_model = format_model(f"{name}@{model_version}")
             return read_model
 
