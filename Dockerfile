@@ -14,7 +14,8 @@ RUN apt-get update -y && \
 RUN git clone https://github.com/polio-nanopore/piranha.git && \
   cd /data/piranha && \
   mamba install conda -n base -c conda-forge -c defaults -c bioconda && \
-  mamba env create -f /data/piranha/environment.yml
+  mamba env create -f /data/piranha/environment.yml && \
+  medaka tools download_models
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "piranha", "/bin/bash", "-c"]
