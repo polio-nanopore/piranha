@@ -17,11 +17,6 @@ from snakemake.api import (
 from piranha.utils.log_colours import green,cyan,red
 from piranha.utils.config import *
 
-def out_fasta_name_setup(runname,config):
-    if config[KEY_RUNNAME]:
-        config[KEY_SAMPLE_SEQS_FASTA_FILE] = f"{runname}.{SAMPLE_SEQS_FASTA_FILE}"
-    else:
-        config[KEY_SAMPLE_SEQS_FASTA_FILE] = SAMPLE_SEQS_FASTA_FILE
 
 def run_snakemake(snake_configfile,my_snakefile,v,config_dict,extra_config=None):
     with open(snake_configfile, 'r') as f:

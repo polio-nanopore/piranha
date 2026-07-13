@@ -116,6 +116,12 @@ def ignore_args(defaults, valid):
     ])
     return r
 
+def out_fasta_name_setup(runname,config):
+    if config[KEY_RUNNAME]:
+        config[KEY_SAMPLE_SEQS_FASTA_FILE] = f"{runname}.{SAMPLE_SEQS_FASTA_FILE}"
+    else:
+        config[KEY_SAMPLE_SEQS_FASTA_FILE] = SAMPLE_SEQS_FASTA_FILE
+
 
 def check_configfile(cwd,config_arg):
     configfile = os.path.join(cwd,config_arg)
