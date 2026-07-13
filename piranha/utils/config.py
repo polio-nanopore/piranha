@@ -21,6 +21,7 @@ KEY_ARCHIVE_FASTQ="archive_fastq"
 KEY_ARCHIVEDIR="archivedir"
 
 KEY_OUTPUT_REPORT="output_report"
+KEY_SAMPLE_SEQS_FASTA_FILE = "sample_seqs_fasta_file"
 
 # ANALYSIS OPTION KEYS
 KEY_SAMPLE_TYPE = "sample_type"
@@ -309,7 +310,7 @@ PREPROCESSING_CONFIG = "preprocessing_config.yaml"
 PHYLO_CONFIG = "phylo_config.yaml"
 HAPLOTYPING_CONFIG = "haplotyping_config.yaml"
 OUTPUT_CONFIG = "all_config.yaml"
-SAMPLE_SEQS = "vp1_sequences.fasta"
+SAMPLE_SEQS_FASTA_FILE = "vp1_sequences.fasta"
 REFERENCE_SEQUENCES_FILE_WG = "references.wg.fasta"
 REFERENCE_SEQUENCES_FILE_VP1 = "references.vp1.fasta"
 OUTGROUP_SEQUENCES_FILE_WG = "outgroups.wg.fasta"

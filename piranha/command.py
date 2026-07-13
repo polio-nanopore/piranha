@@ -192,6 +192,9 @@ def main(sysargs = sys.argv[1:]):
                                 args.runname,
                                 args.notes,
                                 config)
+
+    init.out_fasta_name_setup(config[KEY_RUNNAME],config)
+
     # runs qc checks on the phylo input options and configures the phylo settings
     # now need tempdir for this parsing, so run after directory_setup
     # also needs runname to not add runname.today.fasta to the db
