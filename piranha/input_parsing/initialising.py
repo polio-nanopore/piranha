@@ -72,6 +72,7 @@ def get_defaults():
                     KEY_ANNOTATIONS:"",
                     KEY_TREE_ANNOTATIONS:VALUE_TREE_ANNOTATIONS,
                     KEY_SAMPLE_SEQS:"",
+                    KEY_SAMPLE_SEQS_FASTA_FILE:"",
                     KEY_SUPPLEMENTARY_DATADIR:"",
                     KEY_PHYLO_METADATA_COLUMNS:VALUE_PHYLO_METADATA_COLUMNS,
                     KEY_SUPPLEMENTARY_METADATA_COLUMNS:VALUE_SUPPLEMENTARY_METADATA_COLUMNS,
@@ -114,6 +115,12 @@ def ignore_args(defaults, valid):
         KEY_OUTPUT_REPORT
     ])
     return r
+
+def out_fasta_name_setup(runname,config):
+    if config[KEY_RUNNAME]:
+        config[KEY_SAMPLE_SEQS_FASTA_FILE] = f"{runname}.{SAMPLE_SEQS_FASTA_FILE}"
+    else:
+        config[KEY_SAMPLE_SEQS_FASTA_FILE] = SAMPLE_SEQS_FASTA_FILE
 
 
 def check_configfile(cwd,config_arg):

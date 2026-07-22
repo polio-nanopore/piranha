@@ -192,6 +192,9 @@ def main(sysargs = sys.argv[1:]):
                                 args.runname,
                                 args.notes,
                                 config)
+
+    init.out_fasta_name_setup(config[KEY_RUNNAME],config)
+
     # runs qc checks on the phylo input options and configures the phylo settings
     # now need tempdir for this parsing, so run after directory_setup
     # also needs runname to not add runname.today.fasta to the db
@@ -235,7 +238,7 @@ def main(sysargs = sys.argv[1:]):
 
         if status: 
 
-            config[KEY_SAMPLE_SEQS]=os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS)
+            config[KEY_SAMPLE_SEQS]=os.path.join(config[KEY_OUTDIR],"published_data",config[KEY_SAMPLE_SEQS_FASTA_FILE])
             sample_seq_info = os.path.join(config[KEY_OUTDIR],"published_data","consensus_info.json")
             # initiate phylo 
             if config[KEY_RUN_PHYLO]:

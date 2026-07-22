@@ -19,7 +19,7 @@ os.path.join(config[KEY_OUTDIR],SAMPLE_COMPOSITION)
 """
 rule all:
     input:
-        os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS),
+        os.path.join(config[KEY_OUTDIR],"published_data",config[KEY_SAMPLE_SEQS_FASTA_FILE]),
         expand(os.path.join(config[KEY_OUTDIR],"barcode_reports","{barcode}_report.html"), barcode=config[KEY_BARCODES]),
         expand(os.path.join(config[KEY_TEMPDIR],"{barcode}","consensus_sequences.fasta"), barcode=config[KEY_BARCODES])
 
@@ -173,7 +173,7 @@ rule gather_consensus_sequences:
     params:
         publish_dir = os.path.join(config[KEY_OUTDIR],"published_data")
     output:
-        fasta = os.path.join(config[KEY_OUTDIR],"published_data",SAMPLE_SEQS),
+        fasta = os.path.join(config[KEY_OUTDIR],"published_data",config[KEY_SAMPLE_SEQS_FASTA_FILE]),
         info = os.path.join(config[KEY_OUTDIR],"published_data","consensus_info.json")
     run:
         print(green("Gathering fasta files"))
