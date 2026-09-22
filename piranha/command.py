@@ -172,7 +172,7 @@ def main(sysargs = sys.argv[1:]):
                                     args.positive_references,
                                     config)
     # Checks medaka options if non default values used.
-    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,args.readdir,config)
+    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config[KEY_READDIR],config)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir,
