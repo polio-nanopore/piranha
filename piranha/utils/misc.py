@@ -97,14 +97,13 @@ def check_date_format(to_check, line_count, header):
         sys.exit(-1)
                 
 def add_arg_to_config(key,arg,config):
-    if arg:
-        if key in config and config[key]!= arg:
-            print(green(f"Setting {key}:"), arg)
-        config[key] = arg
-    elif arg == 0:
-        if key in config and config[key]!= arg:
-            print(green(f"Setting {key}:"), arg)
-        config[key] = arg
+    # Only override when CLI/config parsing explicitly supplied a value.
+    if arg is None:
+        return
+
+    if key in config and config[key] != arg:
+        print(green(f"Setting {key}:"), arg)
+    config[key] = arg
 
 def add_file_to_config(key,arg,config):
     if arg:

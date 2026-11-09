@@ -50,7 +50,7 @@ def get_defaults():
                     KEY_MIN_HIGH_QUALITY_BASE:VALUE_MIN_HIGH_QUALITY_BASE,
                     KEY_MIN_ALN_BLOCK:0.6*(READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][0]),
                     
-                    KEY_MEDAKA_MODEL:VALUE_DEFAULT_MEDAKA_MODEL,
+                    # KEY_MEDAKA_MODEL:VALUE_DEFAULT_MEDAKA_MODEL,
                     KEY_PRIMER_LENGTH:VALUE_PRIMER_LENGTH,
                     
                     KEY_ALL_METADATA:False,
