@@ -98,6 +98,7 @@ def test_output_group_parsing_creates_outdir_and_tempdir(tmp_path: Path):
 
     directory_setup.output_group_parsing(
         outdir="analysis_out",
+        publishdir="",
         output_prefix="analysis",
         overwrite=False,
         datestamp=False,
