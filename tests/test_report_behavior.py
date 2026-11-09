@@ -153,6 +153,72 @@ def test_make_detailed_csv_writes_combined_fields(tmp_path: Path):
     assert row["Sabin2-related|classification"] == "Sabin-like"
 
 
+def test_make_detailed_csv_writes_multiple_rows_for_haplotypes(tmp_path: Path):
+    barcodes = tmp_path / "barcodes.csv"
+    detailed = tmp_path / "detailed.csv"
+
+    barcodes.write_text("sample,barcode,EPID,institute\nS1,barcode01,EPI1,Inst1\n")
+
+    data_for_report = {
+        KEY_SUMMARY_TABLE: [
+            {
+                KEY_BARCODE: "barcode01",
+                KEY_SAMPLE: "S1",
+                KEY_REFERENCE_GROUP: "Sabin2-related",
+                KEY_REFERENCE: "RefA.h1",
+                "Number of mutations": 2,
+                KEY_PERCENT: 99.2,
+                "Sample classification": "Sabin-like",
+            },
+            {
+                KEY_BARCODE: "barcode01",
+                KEY_SAMPLE: "S1",
+                KEY_REFERENCE_GROUP: "Sabin2-related",
+                KEY_REFERENCE: "RefA.h2",
+                "Number of mutations": 5,
+                KEY_PERCENT: 98.5,
+                "Sample classification": "VDPV",
+            },
+        ],
+        KEY_COMPOSITION_TABLE: [
+            {
+                KEY_SAMPLE: "S1",
+                KEY_BARCODE: "barcode01",
+                "Sabin2-related": "120",
+                "NonPolioEV": "3",
+                "unmapped": "0",
+            }
+        ],
+    }
+
+    make_report.make_detailed_csv(
+        data_for_report=data_for_report,
+        barcodes_csv=str(barcodes),
+        epi_csv="",
+        output=str(detailed),
+        detailed_header_fields=[
+            "Sabin2-related|closest_reference",
+            "Sabin2-related|num_reads",
+            "Sabin2-related|nt_diff_from_reference",
+            "Sabin2-related|pcent_match",
+            "Sabin2-related|classification",
+            "NonPolioEV|num_reads",
+            "comments",
+        ],
+    )
+
+    with detailed.open() as handle:
+        rows = list(csv.DictReader(handle))
+
+    assert len(rows) == 2
+    assert rows[0]["Sabin2-related|closest_reference"] == "RefA.h1"
+    assert rows[0]["Sabin2-related|classification"] == "Sabin-like"
+    assert rows[1]["Sabin2-related|closest_reference"] == "RefA.h2"
+    assert rows[1]["Sabin2-related|classification"] == "VDPV"
+    assert rows[0]["Sabin2-related|num_reads"] == "120"
+    assert rows[1]["Sabin2-related|num_reads"] == "120"
+
+
 def test_make_sample_report_end_to_end(tmp_path: Path):
     tempdir = tmp_path / "temp"
     snipit_dir = tempdir / "barcode01" / "snipit"

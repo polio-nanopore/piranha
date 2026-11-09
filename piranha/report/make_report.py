@@ -238,9 +238,9 @@ def make_detailed_csv(data_for_report,barcodes_csv,epi_csv,output,detailed_heade
     "NonPolioEV|num_reads","comments"
     """
 
-    combined_barcodes = collections.defaultdict(dict)
+    combined_barcodes = collections.defaultdict(lambda: collections.defaultdict(list))
     for row in data_for_report[KEY_SUMMARY_TABLE]:
-        combined_barcodes[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]] = row
+        combined_barcodes[row[KEY_BARCODE]][row[KEY_REFERENCE_GROUP]].append(row)
 
     sample_metadata = {}
     metadata_headers = []
@@ -282,32 +282,42 @@ def make_detailed_csv(data_for_report,barcodes_csv,epi_csv,output,detailed_heade
         
 
         for row in data_for_report[KEY_COMPOSITION_TABLE]:
-            to_write = {}
-            to_write = {}
+            base_row = {}
             for i in header_fields:
-                to_write[i] = ""
-            to_write[KEY_SAMPLE] = row[KEY_SAMPLE]
-            to_write[KEY_BARCODE] = row[KEY_BARCODE]
-            
+                base_row[i] = ""
+
+            base_row[KEY_SAMPLE] = row[KEY_SAMPLE]
+            base_row[KEY_BARCODE] = row[KEY_BARCODE]
+
             metadata = sample_metadata[row[KEY_BARCODE]]
-            
-            #take in info from barcodes csv here
+
+            # take in info from barcodes csv here
             for field in metadata:
-                to_write[field] = metadata[field]
+                base_row[field] = metadata[field]
 
             # read count
             for col in row:
                 if col not in [KEY_SAMPLE,KEY_BARCODE,"unmapped"]:
-                    to_write[f"{col}|num_reads"] = row[col]
+                    base_row[f"{col}|num_reads"] = row[col]
 
-            for ref_group in combined_barcodes[row[KEY_BARCODE]]:
-                info = combined_barcodes[row[KEY_BARCODE]][ref_group]
-                to_write[f"{ref_group}|closest_reference"] = info[KEY_REFERENCE]
-                to_write[f"{ref_group}|nt_diff_from_reference"] = info["Number of mutations"]
-                to_write[f"{ref_group}|pcent_match"] = info[KEY_PERCENT]
-                to_write[f"{ref_group}|classification"] = info["Sample classification"]
-        
-            writer.writerow(to_write)
+            summary_by_group = combined_barcodes[row[KEY_BARCODE]]
+            if summary_by_group:
+                max_haplotypes = max(len(info_rows) for info_rows in summary_by_group.values())
+            else:
+                max_haplotypes = 1
+
+            for hap_idx in range(max_haplotypes):
+                to_write = dict(base_row)
+
+                for ref_group, info_rows in summary_by_group.items():
+                    if hap_idx < len(info_rows):
+                        info = info_rows[hap_idx]
+                        to_write[f"{ref_group}|closest_reference"] = info[KEY_REFERENCE]
+                        to_write[f"{ref_group}|nt_diff_from_reference"] = info["Number of mutations"]
+                        to_write[f"{ref_group}|pcent_match"] = info[KEY_PERCENT]
+                        to_write[f"{ref_group}|classification"] = info["Sample classification"]
+
+                writer.writerow(to_write)
     
 
 def well_to_dict(barcode_well_map,j,i,c):
