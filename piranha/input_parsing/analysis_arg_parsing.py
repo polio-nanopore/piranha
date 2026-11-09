@@ -228,7 +228,7 @@ def sample_type(sample_type_arg,config):
 
     
 
-def analysis_mode(analysis_mode_arg,config):
+def analysis_mode(analysis_mode_arg,config,overwritten=None):
     # if command line arg, overwrite config value
     misc.add_arg_to_config(KEY_ANALYSIS_MODE,analysis_mode_arg,config)
 
@@ -240,10 +240,18 @@ def analysis_mode(analysis_mode_arg,config):
 
     #must do this before parsing args for min and max read len
     if config[KEY_ANALYSIS_MODE] in READ_LENGTH_DICT:
-        config[KEY_MIN_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][0]
-        config[KEY_MAX_READ_LENGTH] = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][1]
+        overwritten_keys = set(overwritten.keys()) if overwritten else set()
+        mode_min_read_len = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][0]
+        mode_max_read_len = READ_LENGTH_DICT[config[KEY_ANALYSIS_MODE]][1]
 
-    print(green(f"Default read length filter for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}\n***\n")
+        # Only apply analysis-mode read-length defaults when values were not
+        # explicitly supplied in YAML. CLI values are applied later and still win.
+        if KEY_MIN_READ_LENGTH not in overwritten_keys:
+            config[KEY_MIN_READ_LENGTH] = mode_min_read_len
+        if KEY_MAX_READ_LENGTH not in overwritten_keys:
+            config[KEY_MAX_READ_LENGTH] = mode_max_read_len
+
+    print(green(f"Read length filter applied for {config[KEY_ANALYSIS_MODE]}:") + f" {config[KEY_MIN_READ_LENGTH]}-{config[KEY_MAX_READ_LENGTH]}\n***\n")
     # if config[KEY_ANALYSIS_MODE] != "vp1":
     #     sys.stderr.write(cyan(f"Only `vp1` analysis mode currently implemented.\n"))
     #     sys.exit(-1)

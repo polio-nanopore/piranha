@@ -119,7 +119,7 @@ def main(sysargs = sys.argv[1:]):
     dependency_checks.check_dependencies(DEPENDENCY_LIST, MODULE_LIST)
 
     # Initialise config dict
-    config = init.setup_config_dict(cwd,args.config)
+    config, overwritten = init.setup_config_dict(cwd,args.config)
     
     # Check if valid sample_type
     analysis_arg_parsing.sample_type(args.sample_type,config)
@@ -127,7 +127,7 @@ def main(sysargs = sys.argv[1:]):
     # Checks access to package data
     data_install_checks.check_install(args.language,config)
 
-    analysis_arg_parsing.analysis_mode(args.analysis_mode,config)
+    analysis_arg_parsing.analysis_mode(args.analysis_mode,config,overwritten)
 
     # orientation for pcr plate (for report figure)
     misc.add_check_valid_arg(KEY_ORIENTATION,args.orientation,VALID_ORIENTATION,config)
@@ -192,6 +192,7 @@ def main(sysargs = sys.argv[1:]):
                                 args.runname,
                                 args.notes,
                                 config)
+    misc.add_arg_to_config(KEY_SAVE_CONFIG,args.save_config,config)
 
     init.out_fasta_name_setup(config[KEY_RUNNAME],config)
 
@@ -220,7 +221,7 @@ def main(sysargs = sys.argv[1:]):
     haplo_snakefile = data_install_checks.get_snakefile(thisdir,"haplotype")
 
     # output an optional config file with post processing info
-    if args.save_config:
+    if config[KEY_SAVE_CONFIG]:
         out_config = os.path.join(config[KEY_OUTDIR], OUTPUT_CONFIG)
     else:
         out_config = os.path.join(config[KEY_TEMPDIR], OUTPUT_CONFIG)
@@ -228,13 +229,13 @@ def main(sysargs = sys.argv[1:]):
         yaml.dump(config, f)
 
     # runs the preprocessing snakemake
-    status = misc.run_snakemake(out_config,preprocessing_snakefile,args.verbose,config)
+    status = misc.run_snakemake(out_config,preprocessing_snakefile,config[KEY_VERBOSE],config)
 
     if status: # translate "success" into shell exit code of 0
 
         preprocessing_configfile = os.path.join(config[KEY_TEMPDIR],PREPROCESSING_CONFIG)
         
-        status = misc.run_snakemake(preprocessing_configfile,snakefile,args.verbose,config)
+        status = misc.run_snakemake(preprocessing_configfile,snakefile,config[KEY_VERBOSE],config)
 
         if status: 
 
@@ -267,7 +268,7 @@ def main(sysargs = sys.argv[1:]):
                     yaml.dump(config, f)
                 #run phylo snakemake
                 print(green("Initializing phylo pipeline."))
-                status = misc.run_snakemake(phylo_config,phylo_snakefile,args.verbose,config)
+                status = misc.run_snakemake(phylo_config,phylo_snakefile,config[KEY_VERBOSE],config)
                 
             # get the inputs for making the overall report
             report =os.path.join(config[KEY_OUTDIR],OUTPUT_REPORT)

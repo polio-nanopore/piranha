@@ -93,6 +93,7 @@ def get_defaults():
                     KEY_NOTES:"",
                     KEY_THREADS:1,
                     KEY_VERBOSE:False,
+                    KEY_SAVE_CONFIG:False,
                     
                     KEY_CONFIGURATION_TABLE_FIELDS: VALUE_CONFIGURATION_TABLE_FIELDS,
                     KEY_COLOUR_MAP: VALUE_COLOUR_MAP,
@@ -173,6 +174,7 @@ def parse_yaml_file(configfile,configdict):
 
     invalid_keys = []
     ignored_keys = []
+    overwritten = {}
     with open(configfile,"r") as f:
         input_config = load_yaml(f) # try load file else exit with msg
 
@@ -195,6 +197,7 @@ def parse_yaml_file(configfile,configdict):
                     value = setup_absolute_paths(path_to_file,value)
 
                 configdict[clean_key] = value
+                overwritten[clean_key] = value
                 overwriting += 1
 
     if len(ignored_keys)==1:
@@ -215,17 +218,21 @@ def parse_yaml_file(configfile,configdict):
         sys.stderr.write(cyan(f'Error: invalid keys in config file.\n') + f'{keys}')
         sys.exit(-1)
     print(green(f"Adding {overwriting} arguments to internal config."))
+    for key in overwritten:
+        print(green(f"Overwriting {key} with value:") + f" {overwritten[key]}")
+    return overwritten
 
 def setup_config_dict(cwd,config_arg):
     config = get_defaults()
     config[KEY_CWD] = cwd
+    overwritten = {}
     if config_arg:
         configfile = check_configfile(cwd,config_arg)
-        parse_yaml_file(configfile,config)
+        overwritten = parse_yaml_file(configfile,config)
 
     else:
         config[KEY_INPUT_PATH] = cwd
-    return config
+    return config, overwritten
 
 def misc_args_to_config(verbose,threads,username,institute,run_name,notes,config):
     misc.add_arg_to_config(KEY_VERBOSE,verbose,config)
