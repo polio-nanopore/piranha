@@ -11,7 +11,9 @@ from piranha.utils.config import (
     KEY_EPI_CSV,
     KEY_OUTDIR,
     KEY_RUN_PHYLO,
+    KEY_SAVE_CONFIG,
     KEY_TEMPDIR,
+    KEY_VERBOSE,
 )
 
 
@@ -56,7 +58,7 @@ def test_main_mocked_success_path_returns_zero(monkeypatch, tmp_path: Path):
     (tempdir / command.SAMPLE_COMPOSITION).write_text("sample,barcode\n")
 
     monkeypatch.setattr(command.dependency_checks, "check_dependencies", lambda *a, **k: None)
-    monkeypatch.setattr(command.init, "setup_config_dict", lambda *a, **k: config)
+    monkeypatch.setattr(command.init, "setup_config_dict", lambda *a, **k: (config, {}))
     monkeypatch.setattr(command.analysis_arg_parsing, "sample_type", lambda *a, **k: None)
     monkeypatch.setattr(command.data_install_checks, "check_install", lambda *a, **k: None)
     monkeypatch.setattr(command.analysis_arg_parsing, "analysis_mode", lambda *a, **k: None)
@@ -97,3 +99,99 @@ def test_main_mocked_success_path_returns_zero(monkeypatch, tmp_path: Path):
 
     exit_code = command.main(["-b", "barcodes.csv", "-i", "reads", "-r", "refs.fasta"])
     assert exit_code == 0
+
+
+def test_main_honors_yaml_save_config_when_cli_omits_flag(monkeypatch, tmp_path: Path):
+    outdir = tmp_path / "out"
+    outdir.mkdir()
+    tempdir = tmp_path / "temp"
+    tempdir.mkdir()
+
+    config = initialising.get_defaults()
+    config[KEY_OUTDIR] = str(outdir)
+    config[KEY_TEMPDIR] = str(tempdir)
+    config[KEY_RUN_PHYLO] = False
+    config[KEY_ARCHIVE_FASTQ] = False
+    config[KEY_BARCODES_CSV] = ""
+    config[KEY_EPI_CSV] = ""
+    config[KEY_ANNOTATIONS] = ""
+    config[KEY_SAVE_CONFIG] = True
+
+    (outdir / "published_data").mkdir(exist_ok=True)
+
+    monkeypatch.setattr(command.dependency_checks, "check_dependencies", lambda *a, **k: None)
+    monkeypatch.setattr(command.init, "setup_config_dict", lambda *a, **k: (config, {KEY_SAVE_CONFIG: True}))
+    monkeypatch.setattr(command.analysis_arg_parsing, "sample_type", lambda *a, **k: None)
+    monkeypatch.setattr(command.data_install_checks, "check_install", lambda *a, **k: None)
+    monkeypatch.setattr(command.analysis_arg_parsing, "analysis_mode", lambda *a, **k: None)
+    monkeypatch.setattr(command.misc, "add_check_valid_arg", lambda *a, **k: None)
+    monkeypatch.setattr(command.data_install_checks, "get_snakefile", lambda *a, **k: "Snakefile")
+    monkeypatch.setattr(command.analysis_arg_parsing, "analysis_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.analysis_arg_parsing, "minimap2_options_parsing", lambda *a, **k: "-x map-ont")
+    monkeypatch.setattr(command.analysis_arg_parsing, "haplo_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.input_qc, "parse_input_group", lambda *a, **k: None)
+    monkeypatch.setattr(command.input_qc, "control_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.directory_setup, "output_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.init, "misc_args_to_config", lambda *a, **k: None)
+    monkeypatch.setattr(command.input_qc, "phylo_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command, "make_output_report", lambda *a, **k: None)
+
+    captured = {"snake_configfile": None}
+
+    def fake_run_snakemake(snake_configfile, *args, **kwargs):
+        captured["snake_configfile"] = snake_configfile
+        return False
+
+    monkeypatch.setattr(command.misc, "run_snakemake", fake_run_snakemake)
+
+    exit_code = command.main(["-b", "barcodes.csv", "-i", "reads", "-r", "refs.fasta"])
+    assert exit_code == 1
+    assert captured["snake_configfile"] == str(outdir / command.OUTPUT_CONFIG)
+
+
+def test_main_honors_yaml_verbose_when_cli_omits_flag(monkeypatch, tmp_path: Path):
+    outdir = tmp_path / "out"
+    outdir.mkdir()
+    tempdir = tmp_path / "temp"
+    tempdir.mkdir()
+
+    config = initialising.get_defaults()
+    config[KEY_OUTDIR] = str(outdir)
+    config[KEY_TEMPDIR] = str(tempdir)
+    config[KEY_RUN_PHYLO] = False
+    config[KEY_ARCHIVE_FASTQ] = False
+    config[KEY_BARCODES_CSV] = ""
+    config[KEY_EPI_CSV] = ""
+    config[KEY_ANNOTATIONS] = ""
+    config[KEY_VERBOSE] = True
+
+    (outdir / "published_data").mkdir(exist_ok=True)
+
+    monkeypatch.setattr(command.dependency_checks, "check_dependencies", lambda *a, **k: None)
+    monkeypatch.setattr(command.init, "setup_config_dict", lambda *a, **k: (config, {KEY_VERBOSE: True}))
+    monkeypatch.setattr(command.analysis_arg_parsing, "sample_type", lambda *a, **k: None)
+    monkeypatch.setattr(command.data_install_checks, "check_install", lambda *a, **k: None)
+    monkeypatch.setattr(command.analysis_arg_parsing, "analysis_mode", lambda *a, **k: None)
+    monkeypatch.setattr(command.misc, "add_check_valid_arg", lambda *a, **k: None)
+    monkeypatch.setattr(command.data_install_checks, "get_snakefile", lambda *a, **k: "Snakefile")
+    monkeypatch.setattr(command.analysis_arg_parsing, "analysis_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.analysis_arg_parsing, "minimap2_options_parsing", lambda *a, **k: "-x map-ont")
+    monkeypatch.setattr(command.analysis_arg_parsing, "haplo_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.input_qc, "parse_input_group", lambda *a, **k: None)
+    monkeypatch.setattr(command.input_qc, "control_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.directory_setup, "output_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command.init, "misc_args_to_config", lambda *a, **k: None)
+    monkeypatch.setattr(command.input_qc, "phylo_group_parsing", lambda *a, **k: None)
+    monkeypatch.setattr(command, "make_output_report", lambda *a, **k: None)
+
+    captured = {"verbose": None}
+
+    def fake_run_snakemake(snake_configfile, snakefile, verbose, cfg, extra_config=None):
+        captured["verbose"] = verbose
+        return False
+
+    monkeypatch.setattr(command.misc, "run_snakemake", fake_run_snakemake)
+
+    exit_code = command.main(["-b", "barcodes.csv", "-i", "reads", "-r", "refs.fasta"])
+    assert exit_code == 1
+    assert captured["verbose"] is True

@@ -14,7 +14,9 @@ from piranha.utils.config import (
     KEY_SAMPLE_TYPE,
     KEY_HAPLOTYPE_SAMPLE_SIZE,
     KEY_MAX_HAPLOTYPES,
+    READ_LENGTH_DICT,
     VALUE_DEFAULT_MEDAKA_MODEL,
+    VALUE_ANALYSIS_MODE,
 )
 
 
@@ -99,10 +101,75 @@ def test_sample_type_environmental_sets_defaults():
 
 def test_analysis_mode_sets_read_length_defaults():
     config = {KEY_ANALYSIS_MODE: "vp1"}
-    analysis_arg_parsing.analysis_mode("wg", config)
+    analysis_arg_parsing.analysis_mode("wg", config, {})
     assert config[KEY_ANALYSIS_MODE] == "wg"
     assert config[KEY_MIN_READ_LENGTH] is not None
     assert config[KEY_MAX_READ_LENGTH] is not None
+
+
+def test_analysis_mode_preserves_yaml_custom_read_lengths_when_not_baseline():
+    config = {
+        KEY_ANALYSIS_MODE: VALUE_ANALYSIS_MODE,
+        KEY_MIN_READ_LENGTH: 900,
+        KEY_MAX_READ_LENGTH: 1600,
+    }
+
+    overwritten = {
+        KEY_MIN_READ_LENGTH: 900,
+        KEY_MAX_READ_LENGTH: 1600,
+    }
+
+    analysis_arg_parsing.analysis_mode(None, config, overwritten)
+
+    assert config[KEY_MIN_READ_LENGTH] == 900
+    assert config[KEY_MAX_READ_LENGTH] == 1600
+
+
+def test_analysis_mode_updates_untouched_baseline_read_lengths_for_mode():
+    config = {
+        KEY_ANALYSIS_MODE: "wg",
+        KEY_MIN_READ_LENGTH: READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][0],
+        KEY_MAX_READ_LENGTH: READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][1],
+    }
+
+    analysis_arg_parsing.analysis_mode(None, config, {})
+
+    assert config[KEY_MIN_READ_LENGTH] == READ_LENGTH_DICT["wg"][0]
+    assert config[KEY_MAX_READ_LENGTH] == READ_LENGTH_DICT["wg"][1]
+
+
+def test_analysis_mode_updates_only_untouched_read_length_field():
+    config = {
+        KEY_ANALYSIS_MODE: "wg",
+        KEY_MIN_READ_LENGTH: 3100,
+        KEY_MAX_READ_LENGTH: READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][1],
+    }
+
+    overwritten = {
+        KEY_MIN_READ_LENGTH: 3100,
+    }
+
+    analysis_arg_parsing.analysis_mode(None, config, overwritten)
+
+    assert config[KEY_MIN_READ_LENGTH] == 3100
+    assert config[KEY_MAX_READ_LENGTH] == READ_LENGTH_DICT["wg"][1]
+
+
+def test_analysis_mode_preserves_only_yaml_supplied_max_read_length():
+    config = {
+        KEY_ANALYSIS_MODE: "wg",
+        KEY_MIN_READ_LENGTH: READ_LENGTH_DICT[VALUE_ANALYSIS_MODE][0],
+        KEY_MAX_READ_LENGTH: 6000,
+    }
+
+    overwritten = {
+        KEY_MAX_READ_LENGTH: 6000,
+    }
+
+    analysis_arg_parsing.analysis_mode(None, config, overwritten)
+
+    assert config[KEY_MIN_READ_LENGTH] == READ_LENGTH_DICT["wg"][0]
+    assert config[KEY_MAX_READ_LENGTH] == 6000
 
 
 def test_haplo_group_parsing_converts_numeric_fields():

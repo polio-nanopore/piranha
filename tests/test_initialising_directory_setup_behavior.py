@@ -35,10 +35,12 @@ def test_parse_yaml_file_sets_absolute_paths(tmp_path: Path):
     cfg.write_text("readdir: reads\nreference_sequences: refs.fasta\n")
 
     config = initialising.get_defaults()
-    initialising.parse_yaml_file(str(cfg), config)
+    overwritten = initialising.parse_yaml_file(str(cfg), config)
 
     assert config[KEY_READDIR] == str(tmp_path / "reads")
     assert config[KEY_REFERENCE_SEQUENCES] == str(tmp_path / "refs.fasta")
+    assert KEY_READDIR in overwritten
+    assert KEY_REFERENCE_SEQUENCES in overwritten
 
 
 # def test_set_up_verbosity_sets_quiet_and_log_string():
