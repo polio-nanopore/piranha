@@ -182,6 +182,7 @@ KEY_REPORT_TEMPLATE = "report_template"
 KEY_BARCODE_REPORT_TEMPLATE = "barcode_report_template"
 
 KEY_LANGUAGE = "language"
+KEY_SAVE_CONFIG = "save_config"
 
 RESOURCE_KEY_FILENAME="filename"
 RESOURCE_KEY_DIRECTORY="directory"
