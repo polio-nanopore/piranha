@@ -123,9 +123,10 @@ def set_up_tempdir(config):
             sys.stderr.write(cyan(f'Error: cannot write to temp directory {tempdir}.\n'))
             sys.exit(-1)
 
-def output_group_parsing(outdir,output_prefix,overwrite,datestamp,tempdir,no_temp,archive_fastq,archivedir,config):
+def output_group_parsing(outdir,publishdir,output_prefix,overwrite,datestamp,tempdir,no_temp,archive_fastq,archivedir,config):
     
     misc.add_path_to_config(KEY_OUTDIR,outdir,config)
+    misc.add_path_to_config(KEY_PUBLISHDIR,publishdir,config)
     misc.add_arg_to_config(KEY_OUTPUT_PREFIX,output_prefix,config)
     misc.add_arg_to_config(KEY_OVERWRITE,overwrite,config)
     misc.add_arg_to_config(KEY_DATESTAMP,datestamp,config)

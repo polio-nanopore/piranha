@@ -141,10 +141,10 @@ def analysis_group_parsing(min_read_length,max_read_length,min_read_depth,min_re
 
 def minimap2_options_parsing(minimap2_options,config):
     to_parse = ""
-    if KEY_MINIMAP2_OPTIONS in config:
-        to_parse = config[KEY_MINIMAP2_OPTIONS]
-    elif minimap2_options:
+    if minimap2_options:
         to_parse = minimap2_options
+    elif KEY_MINIMAP2_OPTIONS in config:
+        to_parse = config[KEY_MINIMAP2_OPTIONS]
 
     if to_parse:
         options = {}
