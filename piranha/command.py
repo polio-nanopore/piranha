@@ -47,8 +47,8 @@ def main(sysargs = sys.argv[1:]):
     analysis_group = parser.add_argument_group('Analysis options')
     analysis_group.add_argument("-s","--sample-type",action="store",help=f"Specify sample type. Options: `stool`, `environmental`, `isolate`. Default: `{VALUE_SAMPLE_TYPE}`")
     analysis_group.add_argument("-m","--analysis-mode",action="store",help=f"Specify analysis mode to run, for preconfigured defaults. Options: `vp1`, `wg`. Default: `{VALUE_ANALYSIS_MODE}`")
-    analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
-    analysis_group.add_argument("--medaka-list-models",action="store_true",help="List available medaka models and exit.")
+    # analysis_group.add_argument("--medaka-model",action="store",help=f"Medaka model to run analysis using. Default: {VALUE_DEFAULT_MEDAKA_MODEL}")
+    # analysis_group.add_argument("--medaka-list-models",action="store_true",default=None,help="List available medaka models and exit.")
     analysis_group.add_argument("-q","--min-map-quality",action="store",type=int,help=f"Minimum mapping quality. Range 0 to 60, however 0 can imply a multimapper. Default: {VALUE_MIN_MAP_QUALITY}")
     analysis_group.add_argument("-mbq","--min-high-quality-base",action="store",type=float,help=f"Minimum number of bases with high quality. Default: {VALUE_MIN_HIGH_QUALITY_BASE}")
     analysis_group.add_argument("-bq","--min-base-quality",action="store",type=int,help=f"Minimum base quality. Range 0 to 13. Default: {VALUE_MIN_BASE_QUALITY}")
@@ -62,7 +62,7 @@ def main(sysargs = sys.argv[1:]):
                                 help=f"Specify any number of minimap2 options to overwrite the default mapping settings. The options take the form `flag=value` and can be any number of space-delimited options. Default: {VALUE_DEFAULT_MINIMAP2}. Example: For short reads of a sample diverged from the reference, we suggest using `-mo k=5 w=4`, which overwrites the minimap2 option `-x asm20`.")
 
     haplo_group = parser.add_argument_group('Haplotyping options')
-    haplo_group.add_argument("-rh","--run-haplotyping",action="store_true",help=f"Trigger the optional haplotyping module. Additional dependencies may need to be installed.")
+    haplo_group.add_argument("-rh","--run-haplotyping",action="store_true",default=None,help=f"Trigger the optional haplotyping module. Additional dependencies may need to be installed.")
     haplo_group.add_argument("-hs","--haplotype-sample-size",action="store",type=int,help=f"Number of reads to downsample to for haplotype calling. Default: {VALUE_HAPLOTYPE_SAMPLE_SIZE}")
     haplo_group.add_argument("-hf","--min-allele-frequency",action="store",type=float,help=f"Minimum allele frequency to call. Note: setting this below 0.07 may significantly increase run time. Default: {VALUE_MIN_ALLELE_FREQUENCY}")
     haplo_group.add_argument("-hx","--max-haplotypes",action="store",type=int,help=f"Maximum number of haplotypes callable within reference group. Default: {VALUE_MAX_HAPLOTYPES}")
@@ -70,26 +70,26 @@ def main(sysargs = sys.argv[1:]):
     haplo_group.add_argument("-hd","--min-haplotype-depth",action="store",type=int,help=f"Minimum number of reads in a given haplotype. Default: {VALUE_MIN_HAPLOTYPE_DEPTH}")
 
     phylo_group = parser.add_argument_group('Phylogenetics options')
-    phylo_group.add_argument("-rp","--run-phylo",action="store_true",help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
+    phylo_group.add_argument("-rp","--run-phylo",action="store_true",default=None,help=f"Trigger the optional phylogenetics module. Additional dependencies may need to be installed.")
     phylo_group.add_argument("-sd","--supplementary-datadir",action="store",help=f"Path to directory containing supplementary sequence FASTA file and optional metadata to be incorporated into phylogenetic analysis.")
     phylo_group.add_argument("-pcol","--phylo-metadata-columns",action="store",help=f"Columns in the barcodes.csv file to annotate the phylogeny with. Default: {VALUE_PHYLO_METADATA_COLUMNS}")
     phylo_group.add_argument("-smcol","--supplementary-metadata-columns",action="store",help=f"Columns in the supplementary metadata to annotate the phylogeny with. Default: {VALUE_SUPPLEMENTARY_METADATA_COLUMNS}")
     phylo_group.add_argument("-smid","--supplementary-metadata-id-column",action="store",help=f"Column in the supplementary metadata files to match with the supplementary sequences. Default: {VALUE_SUPPLEMENTARY_METADATA_ID_COLUMN}")
-    phylo_group.add_argument("-ud","--update-local-database",action="store_true",help=f"Add newly generated consensus sequences (with a distance greater than a threshold (--local-database-threshold) away from Sabin, if Sabin-related) and associated metadata to the supplementary data directory.")
+    phylo_group.add_argument("-ud","--update-local-database",action="store_true",default=None,help=f"Add newly generated consensus sequences (with a distance greater than a threshold (--local-database-threshold) away from Sabin, if Sabin-related) and associated metadata to the supplementary data directory.")
     phylo_group.add_argument("-dt","--local-database-threshold",action="store",type=float,help=f"The threshold beyond which Sabin-related sequences are added to the supplementary data directory if update local database flag used. Default: {VALUE_LOCAL_DATABASE_THRESHOLD}")
 
     o_group = parser.add_argument_group('Output options')
     o_group.add_argument('-o','--outdir', action="store",help=f"Output directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
     o_group.add_argument('-pub','--publishdir', action="store",help=f"Output publish directory. Default: `{VALUE_OUTPUT_PREFIX}-2022-XX-YY`")
     o_group.add_argument('-pre','--output-prefix',action="store",help=f"Prefix of output directory & report name: Default: `{VALUE_OUTPUT_PREFIX}`",dest="output_prefix")
-    o_group.add_argument('--datestamp', action="store_true",help="Append datestamp to directory name when using <-o/--outdir>. Default: <-o/--outdir> without a datestamp")
-    o_group.add_argument('--overwrite', action="store_true",help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
+    o_group.add_argument('--datestamp', action="store_true",default=None,help="Append datestamp to directory name when using <-o/--outdir>. Default: <-o/--outdir> without a datestamp")
+    o_group.add_argument('--overwrite', action="store_true",default=None,help="Overwrite output directory. Default: append an incrementing number if <-o/--outdir> already exists")
     o_group.add_argument('-temp','--tempdir',action="store",help="Specify where you want the temp stuff to go. Default: `$TMPDIR`")
-    o_group.add_argument("--no-temp",action="store_true",help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
-    o_group.add_argument('--all-metadata-to-header',action="store_true",dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
+    o_group.add_argument("--no-temp",action="store_true",default=None,help="Output all intermediate files. For development/ debugging purposes",dest="no_temp")
+    o_group.add_argument('--all-metadata-to-header',action="store_true",default=None,dest=KEY_ALL_METADATA,help="Parse all fields from input barcode.csv file and include in the output fasta headers. Be aware spaces in metadata will disrupt the record id, so avoid these.")
     o_group.add_argument('--language',action="store",help=f"Output report language. Options: English, French. Default: {VALUE_LANGUAGE}")
-    o_group.add_argument('--save-config',action="store_true",help=f"Output the config file with all parameters used")
-    o_group.add_argument('--archive-fastq',action="store_true",help=f"Write the supplied fastq_pass directory to the output directory.")
+    o_group.add_argument('--save-config',action="store_true",default=None,help=f"Output the config file with all parameters used")
+    o_group.add_argument('--archive-fastq',action="store_true",default=None,help=f"Write the supplied fastq_pass directory to the output directory.")
     o_group.add_argument('--archivedir',action="store",help=f"Configure where to put the fastq_pass files, default in the output directory.")
 
     misc_group = parser.add_argument_group('Misc options')
@@ -99,7 +99,7 @@ def main(sysargs = sys.argv[1:]):
     misc_group.add_argument('--notes',action="store",help="Miscellaneous notes to appear at top of report. Default: no notes")
     misc_group.add_argument('--orientation',action="store",help="Orientation of barcodes in wells on a 96-well plate. If `well` is supplied as a column in the barcode.csv, this default orientation will be overwritten. Default: `vertical`. Options: `vertical` or `horizontal`.")
     misc_group.add_argument('-t', '--threads', action='store',dest="threads",type=int,help="Number of threads. Default: 1")
-    misc_group.add_argument("--verbose",action="store_true",help="Print lots of stuff to screen")
+    misc_group.add_argument("--verbose",action="store_true",default=None,help="Print lots of stuff to screen")
     misc_group.add_argument("-v","--version", action='version', version=f"piranha {__version__}")
     misc_group.add_argument("-h","--help",action="store_true",dest="help")
 
@@ -172,7 +172,7 @@ def main(sysargs = sys.argv[1:]):
                                     args.positive_references,
                                     config)
     # Checks medaka options if non default values used.
-    analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config[KEY_READDIR],config)
+    # analysis_arg_parsing.medaka_options_parsing(args.medaka_model,args.medaka_list_models,config[KEY_READDIR],config)
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir,

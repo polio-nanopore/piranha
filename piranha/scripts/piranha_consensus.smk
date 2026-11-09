@@ -30,7 +30,7 @@ rule medaka_haploid_variant:
         reads=rules.files.params.reads,
         ref=rules.files.params.ref
     params:
-        model = config[KEY_MEDAKA_MODEL],
+        # model = config[KEY_MEDAKA_MODEL],
         outdir =  os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant")
     output:
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant","consensus_probs.hdf"),
@@ -46,7 +46,6 @@ rule medaka_haploid_variant:
             medaka_variant -i {input.reads:q} \
                                 -r {input.ref:q} \
                                 -o {params.outdir:q} \
-                                -m {params.model:q} \
                                 -f -x && \
             medaka sequence {output.probs:q} {input.ref:q} {output.cns:q}
         else
@@ -63,7 +62,7 @@ rule medaka_haploid_variant_cns:
         ref=rules.medaka_haploid_variant.output.cns
     params:
         reference = "{reference}",
-        model = config[KEY_MEDAKA_MODEL],
+        # model = config[KEY_MEDAKA_MODEL],
         outdir = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns")
     output:
         probs = os.path.join(config[KEY_TEMPDIR],"reference_analysis","{reference}","medaka_haploid_variant_cns","consensus_probs.hdf"),
@@ -79,7 +78,6 @@ rule medaka_haploid_variant_cns:
                 medaka_variant -i {input.reads:q} \
                                     -r {input.ref:q} \
                                     -o {params.outdir:q} \
-                                    -m {params.model:q} \
                                     -f -x && \
                 medaka sequence {output.probs:q} {input.ref:q} {output.cns:q}
             else
