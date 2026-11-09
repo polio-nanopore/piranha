@@ -176,6 +176,7 @@ def main(sysargs = sys.argv[1:]):
 
     # sets up the output dir, temp dir, and data output desination
     directory_setup.output_group_parsing(args.outdir,
+                                        args.publishdir,
                                         args.output_prefix,
                                         args.overwrite,
                                         args.datestamp,
