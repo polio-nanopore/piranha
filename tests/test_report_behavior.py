@@ -368,4 +368,107 @@ def test_make_output_report_end_to_end_minimal(tmp_path: Path):
 
     assert report_out.exists()
     assert detailed_csv_out.exists()
-    assert "Run: testrun" in report_out.read_text()
+    rendered = report_out.read_text()
+    assert "Run: testrun" in rendered
+    assert "Samples: 1" in rendered
+
+
+def test_make_output_report_haplotype_visibility_across_outputs(tmp_path: Path):
+    outdir = tmp_path / "out"
+    outdir.mkdir()
+
+    barcodes_csv = tmp_path / "barcodes.csv"
+    preprocessing_summary = tmp_path / "preprocessing_summary.csv"
+    sample_composition = tmp_path / "sample_composition.csv"
+    consensus = tmp_path / "consensus.fasta"
+    consensus_info = tmp_path / "consensus_info.json"
+    detailed_csv_out = tmp_path / "detailed.csv"
+    annotations = tmp_path / "annotations.csv"
+    template = tmp_path / "report_template.mako"
+    report_out = tmp_path / "report.html"
+
+    barcodes_csv.write_text("sample,barcode,EPID,institute\nS1,barcode01,E1,Inst\n")
+    preprocessing_summary.write_text(
+        "sample,barcode,Sabin2-related,NonPolioEV,unmapped\nS1,barcode01,120,10,0\n"
+    )
+    sample_composition.write_text("sample,barcode\nS1,barcode01\n")
+    consensus.write_text(
+        ">S1|Sabin2-related|h1|E1|2026-03-26 barcode=barcode01 variant_count=1 variants=3:CT reference=RefA\nATGC\n"
+        ">S1|Sabin2-related|h2|E1|2026-03-26 barcode=barcode01 variant_count=6 variants=3:CT;8:GA reference=RefA\nATGA\n"
+    )
+    consensus_info.write_text(
+        json.dumps(
+            {
+                "S1|Sabin2-related|h1|E1|2026-03-26": {
+                    KEY_BARCODE: "barcode01",
+                    KEY_VARIANT_COUNT: "1",
+                    KEY_VARIANTS: "3:CT",
+                    KEY_REFERENCE: "RefA.h1",
+                },
+                "S1|Sabin2-related|h2|E1|2026-03-26": {
+                    KEY_BARCODE: "barcode01",
+                    KEY_VARIANT_COUNT: "6",
+                    KEY_VARIANTS: "3:CT;8:GA",
+                    KEY_REFERENCE: "RefA.h2",
+                },
+            }
+        )
+    )
+    annotations.write_text("name,country\nseqA,UK\n")
+    template.write_text(
+        "SummaryRows:${len(data_for_report['summary_table'])} CompositionRows:${len(data_for_report['composition_table'])}"
+    )
+
+    config = {
+        KEY_NEGATIVE: [],
+        KEY_POSITIVE: [],
+        KEY_MIN_READS: 5,
+        KEY_MIN_PCENT: 10,
+        KEY_ORIENTATION: "vertical",
+        KEY_BARCODES: ["barcode01"],
+        KEY_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS: ["sample", "barcode", "Sabin2-related", "NonPolioEV", "unmapped"],
+        KEY_DETAILED_SAMPLE_COMPOSITION_TABLE_HEADER_FIELDS: [
+            "Sabin2-related|closest_reference",
+            "Sabin2-related|num_reads",
+            "Sabin2-related|nt_diff_from_reference",
+            "Sabin2-related|pcent_match",
+            "Sabin2-related|classification",
+            "NonPolioEV|num_reads",
+            "comments",
+        ],
+        KEY_REFERENCE_GROUP_FIELD: "reference_group",
+        KEY_REPORT_TEMPLATE: str(template),
+        KEY_BARCODE_REPORT_TEMPLATE: str(template),
+        KEY_LANGUAGE: "English",
+        KEY_OUTPUT_PREFIX: "analysis",
+        KEY_RUNNAME: "run1",
+        KEY_DATE: "2026-03-26",
+        KEY_NOTES: "",
+        KEY_INSTITUTE: "",
+        KEY_RUN_PHYLO: False,
+        KEY_OUTDIR: str(outdir),
+    }
+
+    make_report.make_output_report(
+        report_to_generate=str(report_out),
+        barcodes_csv=str(barcodes_csv),
+        epi_csv="",
+        preprocessing_summary=str(preprocessing_summary),
+        sample_composition=str(sample_composition),
+        consensus_seqs=str(consensus),
+        consensus_info=str(consensus_info),
+        detailed_csv_out=str(detailed_csv_out),
+        annotations_file=str(annotations),
+        config=config,
+    )
+
+    rendered = report_out.read_text()
+    assert "SummaryRows:2" in rendered
+    assert "CompositionRows:1" in rendered
+
+    with detailed_csv_out.open() as handle:
+        detailed_rows = list(csv.DictReader(handle))
+
+    assert len(detailed_rows) == 2
+    assert detailed_rows[0]["Sabin2-related|closest_reference"] == "RefA.h1"
+    assert detailed_rows[1]["Sabin2-related|closest_reference"] == "RefA.h2"
