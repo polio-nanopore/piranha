@@ -1,5 +1,5 @@
 # start with an image with conda installed
-FROM condaforge/mambaforge AS compile-image
+FROM condaforge/miniforge3 AS compile-image
 
 # set working directory
 WORKDIR /data
@@ -18,6 +18,7 @@ RUN git clone https://github.com/polio-nanopore/piranha.git && \
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "piranha", "/bin/bash", "-c"]
 RUN mamba install -c conda-forge -n piranha python=3.12 conda-pack && \
+  python -m pip install --upgrade pip && \
   cd /data/piranha && \
   pip install .
 
@@ -41,7 +42,7 @@ RUN source /venv/bin/activate && pip install --user --no-cache-dir .
 RUN source /venv/bin/activate && piranha -h && piranha -i /data/piranha/test_data/demultiplexed -b /data/piranha/test_data/barcodes.csv
 
 # build image
-FROM debian:bullseye-slim AS runtime-image
+FROM debian:bookworm-slim AS runtime-image
 
 COPY --from=compile-image /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
@@ -56,7 +57,7 @@ RUN mkdir -p /data/run_data/basecalled && mkdir -p /data/run_data/output
 RUN apt-get update -y && \
   apt-get upgrade -y && \
   apt install build-essential -y --no-install-recommends && \
-  apt install -y procps && \
+  apt install -y procps ca-certificates && \
   apt-get clean && apt-get autoclean
 
 WORKDIR /data/run_data/analysis

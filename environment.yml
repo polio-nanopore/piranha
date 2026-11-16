@@ -8,6 +8,7 @@ channels:
 dependencies:
   - python
   - pip
+  - certifi>=2026.10.19
   - biopython
   - bcftools=1.23
   - coreutils=9.5
