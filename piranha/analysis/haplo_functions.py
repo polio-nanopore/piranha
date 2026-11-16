@@ -28,10 +28,14 @@ def parse_partition_file(partition_file):
 
 
 def collapse_close(flopp_file,distance_cutoff,vcf_file):
-    haplo_pos = 0
-    collapsed = []
-    output = []
-    final_haplos = []
+    """
+    Group flopp haplotypes that are within distance_cutoff SNPs of each other.
+    Grouping is by chaining (single linkage): if A~B and B~C are each within the
+    cutoff, A, B and C form one group even if A and C are further apart. This makes
+    the result independent of the order flopp lists the haplotypes in.
+    Returns a list of groups of haplotype indices, each group sorted, groups
+    ordered by their lowest index, e.g. [[0, 1, 3], [2]].
+    """
     vcf = parse_VCF(vcf_file)
     parsed_flopp = parse_flopp_reads(flopp_file)
     #if flopp wasn't run then the file is empty, parsing gives empty list
@@ -39,58 +43,45 @@ def collapse_close(flopp_file,distance_cutoff,vcf_file):
     if parsed_flopp == []:
         return [[0]]
 
-    for h in parsed_flopp:
-        collapse_into_current = [haplo_pos]
-        if haplo_pos in collapsed:
-            #don't consider haplotypes already merged into another
-            haplo_pos += 1
-            continue
-        new_h = {}
-        found_others = False
-        
-        #for each haplo, check if any others are identical/within distance cutoff, collapse in and combine reads if so, remove collapsed haplo from further consideration
-        haplo_pos2 = haplo_pos +1
-        for h2 in parsed_flopp[haplo_pos2:]:
-            if haplo_pos2 in collapsed:
-                #already assigned to a merge group
-                continue
-            distance = get_haplo_dist(h,h2,vcf)
-            if distance <= distance_cutoff and new_h == {}:
-                #collapse values and create new haplo 
-                for pos in h:
-                    #combine
-                    new_h[pos] = {}
-                    new_h[pos]['total assigned'] = h[pos]['total assigned'] + h2[pos]['total assigned']
-                    new_h[pos]['base support counts'] = sum_base_support(h[pos]['base support counts'],h2[pos]['base support counts'])
-                    #check if allele assignment is different now that reads are collapsed
-                    new_h[pos]['assigned allele'] = max(new_h[pos]['base support counts'],key=lambda x:new_h[pos]['base support counts'][x])
-                    
-            
-                collapsed.append(haplo_pos2)
-                collapse_into_current.append(haplo_pos2)
-                found_others = True
+    #union-find: each haplotype starts in its own group, link any pair within the cutoff
+    parent = list(range(len(parsed_flopp)))
 
-            elif distance <= distance_cutoff:
-                for pos in h:
-                    new_h[pos]['total assigned'] = new_h[pos]['total assigned'] + h2[pos]['total assigned']
-                    new_h[pos]['base support counts'] = sum_base_support(new_h[pos]['base support counts'],h2[pos]['base support counts'])
-                    #check if allele assignment is different now that reads are collapsed
-                    new_h[pos]['assigned allele'] = max(new_h[pos]['base support counts'],key=lambda x:new_h[pos]['base support counts'][x])
-                        
-                collapsed.append(haplo_pos2)
-                collapse_into_current.append(haplo_pos2)
-                
-            haplo_pos2 += 1
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
 
-        if not found_others:
-            new_h = h
-        
-        #need these merged versions of parsed flopp output to generate even-ness, maybe make one do-all function
-        final_haplos.append(new_h)
-        haplo_pos += 1
-        output.append(collapse_into_current)
-        
-    return output
+    for i in range(len(parsed_flopp)):
+        for j in range(i + 1, len(parsed_flopp)):
+            if get_haplo_dist(parsed_flopp[i],parsed_flopp[j],vcf) <= distance_cutoff:
+                root_i, root_j = find(i), find(j)
+                if root_i != root_j:
+                    #keep the lowest index as the root so group order is stable
+                    parent[max(root_i,root_j)] = min(root_i,root_j)
+
+    groups = collections.defaultdict(list)
+    for i in range(len(parsed_flopp)):
+        groups[find(i)].append(i)
+
+    return [groups[root] for root in sorted(groups)]
+
+def merge_haplotype_reads(merge_info, partitions, all_reads):
+    """
+    Pool the reads for each merged haplotype group returned by collapse_close.
+    Returns a list of read-id sets, one per merged haplotype, in merge_info order.
+    If flopp wasn't run (merge_info == [[0]]), a single haplotype gets all reads.
+    """
+    if merge_info == [[0]]:
+        return [set(all_reads)]
+
+    merged_reads = []
+    for subset in merge_info:
+        reads = set()
+        for part in subset:
+            reads = reads.union(partitions[part])
+        merged_reads.append(reads)
+    return merged_reads
 
 def parse_VCF(vcf_file):
     vcf_info = {}
