@@ -1,8 +1,11 @@
 import csv
+import itertools
 import json
 from pathlib import Path
 
-from piranha.analysis import haplo_functions, haplotyping_functions, phylo_functions
+import pytest
+
+from piranha.analysis import haplo_functions, phylo_functions
 from piranha.utils.config import (
     KEY_BARCODE,
     KEY_LOCAL_DATABASE_THRESHOLD,
@@ -80,32 +83,155 @@ def test_haplo_collapse_close_empty_flopp_returns_single_partition(tmp_path: Pat
 
 
 
-def test_haplotyping_parse_vcf_calls_and_support(tmp_path: Path):
-    v1 = tmp_path / "h1.vcf"
-    v1.write_text(
+def test_haplo_collapse_close_merges_identical_and_keeps_distant(tmp_path: Path):
+    # 3 sites at 50/50 in the full read set. Haplotypes 0 and 1 both carry the
+    # alt allele at every site (distance 0), haplotype 2 is ref at every site
+    # (distance 3 from the others), so only 0 and 1 should merge.
+    vcf = tmp_path / "vars.vcf"
+    flopp = tmp_path / "flopp.txt"
+    vcf.write_text(
         "##fileformat=VCFv4.2\n"
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n"
-        "Ref\t5\t.\tC\tT\t50\tPASS\tRO=8;AO=2\n"
-        "Ref\t8\t.\tAA\tTT\t50\tPASS\tRO=8;AO=2\n"
+        "Ref\t5\t.\tC\tT\t50\tPASS\tRO=20;AO=20\n"
+        "Ref\t10\t.\tG\tA\t50\tPASS\tRO=20;AO=20\n"
+        "Ref\t15\t.\tA\tG\t50\tPASS\tRO=20;AO=20\n"
+    )
+    alt, ref = "0:0|1:20", "0:20|1:0"
+    flopp.write_text(
+        "header\n"
+        + "".join(f"{i}:{pos}\t1\t1\t0\t{alt}\t{alt}\t{ref}\n" for i, pos in enumerate([5, 10, 15], start=1))
+        + "*****\n"
     )
 
-    calls = haplotyping_functions.parseVCFCalls([str(v1)])
-    assert len(calls) == 1
-    assert (5, "T") in calls[0]
-
-    total, support = haplotyping_functions.parseSupportCol("0:2|1:3")
-    assert total == 5
-    assert support == {"0": 2, "1": 3}
+    assert haplo_functions.collapse_close(str(flopp), 2, str(vcf)) == [[0, 1], [2]]
 
 
 
-def test_haplotyping_sum_and_sd():
-    merged = haplotyping_functions.sumBaseSupport({"0": 1}, {"0": 2})
-    assert merged == {"0": 3}
+def test_haplo_collapse_close_compares_past_already_merged_haplotypes(monkeypatch):
+    # Regression: once the inner loop hit an already-merged haplotype it stopped
+    # advancing its index, so later haplotypes were never compared.
+    # Here 0~2 and 1~3 are close; everything else is far apart.
+    haps = [{} for _ in range(4)]
+    index = {id(h): i for i, h in enumerate(haps)}
+    close_pairs = {(0, 2), (1, 3)}
 
-    haps = [{1: {"assigned allele": "1", "base support counts": {"1": 10}}}]
-    even = haplotyping_functions.calcSD(haps)
-    assert even[1] == 0.0
+    monkeypatch.setattr(haplo_functions, "parse_VCF", lambda _: {})
+    monkeypatch.setattr(haplo_functions, "parse_flopp_reads", lambda _: haps)
+    monkeypatch.setattr(
+        haplo_functions,
+        "get_haplo_dist",
+        lambda a, b, _: 0 if (index[id(a)], index[id(b)]) in close_pairs else 10,
+    )
+
+    assert haplo_functions.collapse_close("flopp", 2, "vcf") == [[0, 2], [1, 3]]
+
+
+
+def _write_haplotype_curation_inputs(tmp_path: Path):
+    """
+    Four flopp haplotypes over five 50/50 sites. Alt alleles carried:
+        HAP0: {1,2}        HAP1: {1,2,3}      HAP2: {1,2,3,4}      HAP3: {5}
+    SNP distances: 0-1=1, 0-2=2, 1-2=1, 0-3=3, 1-3=4, 2-3=5
+    Each haplotype has 3 reads in the flopp partition file.
+    """
+    alt_sets = [{1, 2}, {1, 2, 3}, {1, 2, 3, 4}, {5}]
+    sites = [1, 2, 3, 4, 5]
+    alt, ref = "0:0|1:10", "0:10|1:0"
+
+    vcf = tmp_path / "freebayes.vcf"
+    vcf.write_text(
+        "##fileformat=VCFv4.2\n"
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n"
+        + "".join(f"Ref\t{pos}\t.\tC\tT\t50\tPASS\tRO=20;AO=20\n" for pos in sites)
+    )
+
+    flopp_lines = ["header\n"]
+    for i, pos in enumerate(sites, start=1):
+        hap_cols = ["1" if pos in s else "0" for s in alt_sets]
+        support_cols = [alt if pos in s else ref for s in alt_sets]
+        flopp_lines.append(f"{i}:{pos}\t" + "\t".join(hap_cols + support_cols) + "\n")
+    flopp_lines.append("*****\n")
+    flopp = tmp_path / "flopp_out.txt"
+    flopp.write_text("".join(flopp_lines))
+
+    partition = tmp_path / "part.txt"
+    partition.write_text(
+        "".join(f"#{h}\n" + "".join(f"h{h}_r{r}\tX\n" for r in range(3)) for h in range(4))
+    )
+    return flopp, vcf, partition
+
+
+
+def test_haplotype_curation_merges_close_haplotypes_reads(tmp_path: Path):
+    # Default cutoff of 2: HAP1 (1 SNP) and HAP2 (2 SNPs, on the boundary) merge
+    # into HAP0. HAP3 (3+ SNPs from all) stays separate. 4 flopp haplotypes -> 2 reported.
+    flopp, vcf, partition = _write_haplotype_curation_inputs(tmp_path)
+
+    merge_info = haplo_functions.collapse_close(str(flopp), 2, str(vcf))
+    assert merge_info == [[0, 1, 2], [3]]
+
+    partitions = haplo_functions.parse_partition_file(str(partition))
+    all_reads = set().union(*partitions.values())
+    merged_reads = haplo_functions.merge_haplotype_reads(merge_info, partitions, all_reads)
+
+    assert merged_reads == [
+        partitions[0] | partitions[1] | partitions[2],
+        partitions[3],
+    ]
+    # no read lost, and no read reported in more than one haplotype
+    assert set().union(*merged_reads) == all_reads
+    assert sum(len(r) for r in merged_reads) == len(all_reads)
+
+
+
+def test_haplotype_curation_respects_distance_cutoff(tmp_path: Path):
+    # Cutoff of 1: HAP2 is 2 SNPs from HAP0 but 1 from HAP1, and HAP1 is 1 from HAP0,
+    # so the chain HAP0-HAP1-HAP2 merges into one group. HAP3 is 3+ from all.
+    flopp, vcf, _ = _write_haplotype_curation_inputs(tmp_path)
+
+    assert haplo_functions.collapse_close(str(flopp), 1, str(vcf)) == [[0, 1, 2], [3]]
+    assert haplo_functions.collapse_close(str(flopp), 0, str(vcf)) == [[0], [1], [2], [3]]
+
+
+
+@pytest.mark.parametrize("cutoff", [0, 1, 2, 3])
+def test_haplotype_curation_is_independent_of_flopp_order(monkeypatch, cutoff):
+    # Same four haplotypes as above (alt SNP sets {1,2}, {1,2,3}, {1,2,3,4}, {5}),
+    # fed to collapse_close in every possible order. The groups of haplotypes that
+    # get merged must be the same whichever order flopp lists them in.
+    alt_sets = {"HAP0": {1, 2}, "HAP1": {1, 2, 3}, "HAP2": {1, 2, 3, 4}, "HAP3": {5}}
+    sites = range(1, 6)
+
+    def make_haplotype(alts):
+        return {
+            pos: {
+                "assigned allele": "1" if pos in alts else "0",
+                "total assigned": 10,
+                "base support counts": {"0": 0, "1": 10} if pos in alts else {"0": 10, "1": 0},
+            }
+            for pos in sites
+        }
+
+    monkeypatch.setattr(
+        haplo_functions,
+        "parse_VCF",
+        lambda _: {pos: {"frequencies": {"0": 0.5, "1": 0.5}} for pos in sites},
+    )
+
+    outcomes = set()
+    for order in itertools.permutations(alt_sets):
+        haps = [make_haplotype(alt_sets[name]) for name in order]
+        monkeypatch.setattr(haplo_functions, "parse_flopp_reads", lambda _, haps=haps: haps)
+        groups = haplo_functions.collapse_close("flopp", cutoff, "vcf")
+        outcomes.add(frozenset(frozenset(order[i] for i in group) for group in groups))
+
+    assert len(outcomes) == 1
+
+
+
+def test_haplotype_curation_no_flopp_uses_all_reads():
+    all_reads = ["r1", "r2", "r3"]
+    assert haplo_functions.merge_haplotype_reads([[0]], {}, all_reads) == [set(all_reads)]
 
 
 
